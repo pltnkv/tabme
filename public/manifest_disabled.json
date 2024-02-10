@@ -1,0 +1,37 @@
+{
+  "manifest_version": 2,
+
+  "name": "Tabme",
+  "description": "Efficient way to work with sites",
+  "version": "1.0",
+
+  "options_ui": {
+    "page": "options.html",
+    "chrome_style": true
+  },
+
+  "browser_action": {
+    "default_icon": "icon.png",
+    "default_popup": "popup.html"
+  },
+
+  "content_scripts": [
+      {
+          "matches": ["<all_urls>"],
+          "js": ["js/vendor.js", "js/content_script.js"]
+      }
+  ],
+
+  "background": {
+    "scripts": ["js/vendor.js", "js/background.js"]
+  },
+  "chrome_url_overrides" : {
+    "newtab": "newtab.html"
+  },
+  "permissions": [
+    "storage",
+    "history",
+    "tabs",
+    "<all_urls>"
+  ]
+}

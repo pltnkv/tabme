@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "Tabme",
+  "description": "Organize Bookmarks and Tabs, Done Right",
+  "version": "1.5",
+  "author": "pltnkv0+tabme@gmail.com",
+  "icons": {
+    "16": "icon_16.png",
+    "32": "icon_32.png",
+    "48": "icon_48.png",
+    "128": "icon_128.png"
+  },
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAj0vsHVuIis9Th9O60t8jw0O+Y64l5kyMEefHj40pnl6pVAAX7+/bembk3QDBsEb1YrgaiKA4ZCeJaNL5zYNXmlIHbOZCV3+MTcXLQfyem4dUW1uhm7VPZWjd4KFx6aM+X7qgq467wMUPvrcbJRN1jFL6UA8mr/qYCBFqxxlnYjNLHtViPFXCUcdgSazXhLbs5bq0vYCtVSkecPEap0HES11QM0kbZO+xS3PXQCC6NzeXUoZ/yylaYzYOuNI0DI3v2aFb8vDDE4enp8kzF0I0B1VN+KDtKM0ov/651t7cKy/SgxQF0paxi7JVPXVL8KaoaFk6aQSYMISrzxHzjG/ihwIDAQAB",
+  "background": {
+    "service_worker": "service-worker.js"
+  },
+  "action": {
+    "default_icon": "icon_48.png",
+    "default_title": "Open Tabme"
+  },
+  "chrome_url_overrides" : {
+    "newtab": "newtab.html"
+  },
+  "permissions": [
+    "bookmarks",
+    "storage",
+    "history",
+    "tabs",
+    "<all_urls>"
+  ]
+}
