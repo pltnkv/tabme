@@ -1,16 +1,11 @@
-# Chrome Extension TypeScript Starter
-
+# Tabme — [Chrome Extension](https://chromewebstore.google.com/detail/tabme/jnhiookaaldadiimlgncedhkpmhlmmip)
 ![build](https://github.com/chibat/chrome-extension-typescript-starter/workflows/build/badge.svg)
 
-Chrome Extension, TypeScript and Visual Studio Code
+###Organize Bookmarks and Tabs, Done Right
+- [Install in Chrome Store](https://chromewebstore.google.com/detail/tabme/jnhiookaaldadiimlgncedhkpmhlmmip)
+- [gettabme.com](https://gettabme.com)
+- [Release changelog](https://gettabme.com)
 
-## Prerequisites
-
-* [node + npm](https://nodejs.org/) (Current Version)
-
-## Option
-
-* [Visual Studio Code](https://code.visualstudio.com/)
 
 ## Includes the following
 
@@ -18,19 +13,6 @@ Chrome Extension, TypeScript and Visual Studio Code
 * Webpack
 * React
 * Jest
-* Example Code
-    * Chrome Storage
-    * Options Version 2
-    * content script
-    * count up badge number
-    * background
-
-## Project Structure
-
-* src/typescript: TypeScript source files
-* src/assets: static files
-* dist: Chrome Extension directory
-* dist/js: Generated JavaScript files
 
 ## Setup
 
@@ -38,9 +20,6 @@ Chrome Extension, TypeScript and Visual Studio Code
 npm install
 ```
 
-## Import as Visual Studio Code project
-
-...
 
 ## Build
 
@@ -50,17 +29,9 @@ npm run build
 
 ## Build in watch mode
 
-### terminal
-
 ```
 npm run watch
 ```
-
-### Visual Studio Code
-
-Run watch mode.
-
-type `Ctrl + Shift + B`
 
 ## Load extension to chrome
 
