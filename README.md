@@ -1,6 +1,8 @@
 # Tabme — [Chrome Extension](https://chromewebstore.google.com/detail/tabme/jnhiookaaldadiimlgncedhkpmhlmmip)
-![build](https://github.com/chibat/chrome-extension-typescript-starter/workflows/build/badge.svg)
 
+![Preview](ghpages/small_promo.png)
+<br>
+<br>
 ### Organize Bookmarks and Tabs, Done Right
 - [Install in Chrome Store](https://chromewebstore.google.com/detail/tabme/jnhiookaaldadiimlgncedhkpmhlmmip)
 - [gettabme.com](https://gettabme.com)
