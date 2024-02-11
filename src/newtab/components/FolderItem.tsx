@@ -115,6 +115,7 @@ export function FolderItem(props: {
       </button>
       <div className="folder-item__inner draggable-item"
            data-id={props.item.id}
+           title={props.item.url}
            onContextMenu={onContextMenu}>
         <img src={props.item.favIconUrl}/>
         <div className={className}

@@ -1,7 +1,7 @@
 import Tab = chrome.tabs.Tab
 import HistoryItem = chrome.history.HistoryItem
 import { IFolder, IFolderItem } from "../helpers/types"
-import { IAppState } from "../state"
+import { Action, ActionDispatcher, IAppState } from "../state"
 import React from "react"
 
 export const DEFAULT_FOLDER_COLOR = "#f0f0f0"
@@ -77,11 +77,11 @@ export function createNewFolderItem(url?: string, title?: string, favIconUrl?: s
 
 export const SECTION_ICON_BASE64 = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIj4KICA8cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2ZmZiIgLz4KPC9zdmc+Cg==`
 
-export function createNewSection(): IFolderItem {
+export function createNewSection(title = "Section title"): IFolderItem {
   return {
     id: genUniqId(),
     favIconUrl: SECTION_ICON_BASE64,
-    title: "Section title",
+    title,
     url: "",
     isSection: true
   }
@@ -327,4 +327,31 @@ export function getTopVisitedFromHistory(history: HistoryItem[], limit = 20) {
   const sortedHistory = Array.from(history)
   sortedHistory.sort((a, b) => (b.visitCount || 0) - (a.visitCount || 0))
   return sortedHistory.slice(0, limit)
+}
+
+export function getFavIconUrl(val?: string): string {
+  if (val) {
+    return (new URL(val)).origin + "/favicon.ico"
+  } else {
+    return ""
+  }
+}
+
+export function tryToCreateWelcomeFolder(appState: IAppState, history: HistoryItem[], dispatch: ActionDispatcher) {
+  if (appState.stat?.sessionNumber === 1 && appState.folders.length === 0) {
+    const items: IFolderItem[] = []
+    const favIconUrl = chrome.runtime.getURL("icon_32.png")
+    items.push(createNewFolderItem("tabme://import-bookmarks", "Import existing bookmarks", favIconUrl))
+    items.push(createNewFolderItem("https://gettabme.com/guide.html", "Tabme guide", favIconUrl))
+    items.push(createNewSection("Top 5 visited sites"))
+
+    items.push(...getTopVisitedFromHistory(history, 5).map(i => createNewFolderItem(i.url, i.title, getFavIconUrl(i.url))))
+
+    const newFolderId = genUniqId()
+    dispatch({ type: Action.CreateFolder, newFolderId, title: "Welcome to Tabme", items, color: "#c4ffbd" })
+  }
+}
+
+export function isCustomActionItem(item: IFolderItem | undefined): boolean {
+  return item?.url.includes("tabme://") ?? false
 }

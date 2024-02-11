@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react"
 import { Action, DispatchContext, IAppState } from "../state"
 import { showMessage } from "../helpers/actions"
-import { createNewFolderItem, genUniqId, getTopVisitedFromHistory } from "../helpers/utils"
+import { createNewFolderItem, genUniqId, getFavIconUrl, getTopVisitedFromHistory } from "../helpers/utils"
 import HistoryItem = chrome.history.HistoryItem
 
 // copy-paste Chrome types
@@ -43,14 +43,6 @@ type BookmarksAsPlainList = PlainListRecord[]
 const recordToTitle = (rec: PlainListRecord) => {
   const res = rec.breadcrumbs.map(r => r.title).join(" / ")
   return res.length > 0 ? `${res} / ` : ""
-}
-
-const getFavUrl = (val?: string) => {
-  if (val) {
-    return (new URL(val)).origin + "/favicon.ico"
-  } else {
-    return ""
-  }
 }
 
 const BookmarkList = (props: {
@@ -151,7 +143,7 @@ const BookmarkList = (props: {
 
         const items = rec.folder.children
           ?.filter(item => item.checked)
-          .map(item => createNewFolderItem(item.url, item.title, getFavUrl(item.url)))
+          .map(item => createNewFolderItem(item.url, item.title, getFavIconUrl(item.url)))
 
         const newFolderId = genUniqId()
         dispatch({ type: Action.CreateFolder, newFolderId, title: rec.folder.title, items })
@@ -218,7 +210,7 @@ function traverseTree(nodes: CustomBookmarkTreeNode[], plainList: BookmarksAsPla
 export function BookmarkImporter(props: {
   appState: IAppState;
 }) {
-  
+
   const { dispatch } = useContext(DispatchContext)
   const onClose = () => {
     dispatch({ type: Action.UpdateAppState, newState: { page: "default" } })
@@ -227,13 +219,12 @@ export function BookmarkImporter(props: {
   return (
     <div className="importing-bookmarks">
       <div onClick={onClose} className="importing-bookmarks__close">⨉</div>
-      <h1>Importing existing bookmarks</h1>
+      <h1>Import existing bookmarks</h1>
 
       <p style={{fontSize: '18px', lineHeight: '26px'}}>Tabme streamlines your workflow by keeping project links accessible.<br/>
         Simplify by limiting folders and links.<br/>
-        Prioritize importing often-used links for easy access</p>
-      <br/>
-      <h1>Select bookmarks to import</h1>
+        Prioritize importing often-used links for easy access
+      </p><br/>
       <BookmarkList historyItems={props.appState.historyItems} onClose={onClose}/>
     </div>
   )

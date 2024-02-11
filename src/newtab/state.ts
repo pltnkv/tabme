@@ -9,6 +9,7 @@ export const DispatchContext = createContext<{ dispatch: ActionDispatcher }>(nul
 export type IAppStat = {
   sessionNumber: number
   firstSessionDate: number
+  lastVersion: string // need to update
 }
 
 export type IAppAchievements = {
@@ -50,7 +51,6 @@ export type IAppState = {
     button?: { onClick?: () => void; text: string };
   };
   search: string;
-  loaded: boolean;
   showArchived: boolean;
   showNotUsed: boolean;
   sidebarCollapsed: boolean; // stored
@@ -58,55 +58,61 @@ export type IAppState = {
   sidebarItemDragging: boolean // this flag is not used. But decided to not delete it in case need it in the future
   devMode: boolean
   page: "default" | "import",
-  stat: IAppStat
+  stat: IAppStat | undefined
   achievements: IAppAchievements
 };
 
-export function getInitAppState(): IAppState {
-  return {
-    folders: [],
-    historyItems: [],
-    tabs: [],
-    notification: { visible: false, message: "" },
-    search: "",
-    loaded: false,
-    showArchived: false,
-    showNotUsed: false,
-    sidebarCollapsed: false, //should be named "sidebarCollapsable"
-    sidebarHovered: false,
-    sidebarItemDragging: false,
-    devMode: process.env.NODE_ENV === "development",
-    page: "default",
-    stat: {
-      sessionNumber: 0,
-      firstSessionDate: 0
-    },
-    achievements: {
-      folderCreated: 0,
-      folderRenamed: 0,
-      folderColorChanged: 0,
-      folderDeleted: 0,
-      folderDragged: 0,
+export function setInitAppState(savedState: ISavingAppState): void {
+  initState = { ...initState, ...savedState }
+}
 
-      // bookmark items
-      itemDraggedFromSidebar: 0,
-      itemRenamed: 0,
-      itemCopiedUrl: 0,
-      itemEditedUrl: 0,
-      itemArchived: 0,
-      itemUnarchived: 0,
+let initState: IAppState = {
+  folders: [],
+  historyItems: [],
+  tabs: [],
+  notification: { visible: false, message: "" },
+  search: "",
+  showArchived: false,
+  showNotUsed: false,
+  sidebarCollapsed: false, //should be named "sidebarCollapsable"
+  sidebarHovered: false,
+  sidebarItemDragging: false,
+  devMode: false, //process.env.NODE_ENV === "development",
+  page: "default",
+  stat: {
+    sessionNumber: 0,
+    firstSessionDate: 0,
+    lastVersion: ""
+  },
+  achievements: {
+    folderCreated: 0,
+    folderRenamed: 0,
+    folderColorChanged: 0,
+    folderDeleted: 0,
+    folderDragged: 0,
 
-      // sections
-      sectionAddedFromSidebar: 0,
-      sectionAddedFromFolder: 0,
+    // bookmark items
+    itemDraggedFromSidebar: 0,
+    itemRenamed: 0,
+    itemCopiedUrl: 0,
+    itemEditedUrl: 0,
+    itemArchived: 0,
+    itemUnarchived: 0,
 
-      // cleanup
-      cleanupUsed: 0,
+    // sections
+    sectionAddedFromSidebar: 0,
+    sectionAddedFromFolder: 0,
 
-      // showArchived
-      archivedItemsShowed: 0
-    }
+    // cleanup
+    cleanupUsed: 0,
+
+    // showArchived
+    archivedItemsShowed: 0
   }
+}
+
+export function getInitAppState(): IAppState {
+  return initState
 }
 
 export enum Action {
@@ -154,7 +160,7 @@ export type FoldersAction =
   | { type: Action.Reset }
   | { type: Action.UpdateShowArchivedItems; value: boolean }
   | { type: Action.UpdateShowNotUsedItems; value: boolean }
-  | { type: Action.CreateFolder; newFolderId?: number, title?: string, items?: IFolderItem[] }
+  | { type: Action.CreateFolder; newFolderId?: number, title?: string, items?: IFolderItem[], color?: string }
   | { type: Action.DeleteFolder; folderId: number }
   | { type: Action.MoveFolder; folderId: number; insertBeforeFolderId: number }
   | { type: Action.UpdateFolderTitle; folderId: number; }
@@ -189,10 +195,12 @@ let prevState: IAppState | undefined
 export function stateReducer(state: IAppState, action: FoldersAction): IAppState {
   const newState = stateReducer0(state, action)
   console.log("action and newState:", action, newState)
-  if (state.folders !== newState.folders || state.sidebarCollapsed !== newState.sidebarCollapsed) {
+  if (state.folders !== newState.folders
+    || state.sidebarCollapsed !== newState.sidebarCollapsed
+    || state.stat != newState.stat) {
     prevState = state
-    if (!(action.type === Action.InitFolders && action.ignoreSaving)) {
-      saveFoldersAndSidebarThrottled(newState)
+    if (action.type !== Action.InitFolders || !action.ignoreSaving) {
+      saveStateThrottled(newState)
     }
   }
   return newState
@@ -204,7 +212,7 @@ export function getBC() {
   return bc
 }
 
-function saveFoldersAndSidebar(appState: IAppState): void {
+function saveState(appState: IAppState): void {
   const savingState: any = {}
   savingStateKeys.forEach(key => {
     savingState[key] = appState[key as SavingStateKeys]
@@ -217,16 +225,17 @@ function saveFoldersAndSidebar(appState: IAppState): void {
 }
 
 let notificationTimeout: number | undefined
-const saveFoldersAndSidebarThrottled = throttle(saveFoldersAndSidebar, 1000)
+export const saveStateThrottled = throttle(saveState, 1000)
 
 const savingStateDefaultValues = {
   "folders": [],
-  "sidebarCollapsed": false
+  "sidebarCollapsed": false,
+  "stat": undefined
 }
 type SavingStateKeys = keyof typeof savingStateDefaultValues
 const savingStateKeys = Object.keys(savingStateDefaultValues)
 
-type ISavingAppState = {
+export type ISavingAppState = {
   [key in SavingStateKeys]: IAppState[key]
 }
 
@@ -296,20 +305,19 @@ function stateReducer0(state: IAppState, action: FoldersAction): IAppState {
     case Action.InitFolders: {
       console.log("Action.InitFolders  ... ", state)
 
-      let stat = state.stat
-      if (action.init) {
-        stat = {
-          sessionNumber: state.stat.sessionNumber,
-          firstSessionDate: state.stat.firstSessionDate // todo set value first time
-        }
-      }
+      // let stat = state.stat
+      // if (action.init) {
+      //   stat = {
+      //     sessionNumber: state.stat.sessionNumber,
+      //     firstSessionDate: state.stat.firstSessionDate // todo set value first time
+      //   }
+      // }
 
       return {
         ...state,
-        loaded: true,
         folders: action.folders || state.folders,
-        sidebarCollapsed: typeof action.sidebarCollapsed !== "undefined" ? action.sidebarCollapsed : state.sidebarCollapsed,
-        stat
+        sidebarCollapsed: typeof action.sidebarCollapsed !== "undefined" ? action.sidebarCollapsed : state.sidebarCollapsed
+        // stat
       }
     }
 
@@ -343,7 +351,10 @@ function stateReducer0(state: IAppState, action: FoldersAction): IAppState {
 
     case Action.CloseTab: {
       chrome.tabs.remove(action.tabId)
-      return state
+      return {
+        ...state,
+        tabs: state.tabs.filter(t => t.id !== action.tabId)
+      }
     }
 
     case Action.SetTabsAndHistory: {
@@ -359,7 +370,7 @@ function stateReducer0(state: IAppState, action: FoldersAction): IAppState {
             id: action.newFolderId ?? genUniqId(),
             title: action.title ?? "New folder",
             items: action.items ?? [],
-            color: getRandomHEXColor()
+            color: action.color ?? getRandomHEXColor()
           }
         ]
       }
@@ -538,4 +549,12 @@ export function getFolderById(state: IAppState, folderId: number): IFolder | und
 
 export function canShowArchived(appState: IAppState) {
   return appState.showArchived || appState.search.length > 0
+}
+
+export function executeCustomAction(actionUrl: string, dispatch: ActionDispatcher): void {
+  const cAction: string = actionUrl.split("//")[1] || ""
+  if (cAction === "import-bookmarks") {
+    // open bookmarks importing
+    dispatch({ type: Action.UpdateAppState, newState: { page: "import" } })
+  }
 }

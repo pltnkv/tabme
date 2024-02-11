@@ -108,7 +108,10 @@ export function SidebarOpenTabs(props: {
   }
 
   function onCloseTab(e: React.MouseEvent) {
-    chrome.tabs.remove(getTabIdFromCloseButton(e.target as HTMLElement))
+    dispatch({
+      type: Action.CloseTab,
+      tabId: getTabIdFromCloseButton(e.target as HTMLElement)
+    })
     showMessage("Tab has been closed", dispatch)
   }
 

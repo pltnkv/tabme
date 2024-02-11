@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react"
 import { IFolderItem } from "../helpers/types"
-import { blurSearch, findFolderByItemId, findItemById, hasArchivedItems, hasItemsToHighlight } from "../helpers/utils"
-import { Action, DispatchContext, IAppState } from "../state"
+import { blurSearch, findFolderByItemId, findItemById, hasArchivedItems, hasItemsToHighlight, isCustomActionItem } from "../helpers/utils"
+import { Action, DispatchContext, executeCustomAction, IAppState } from "../state"
 import { bindDADItemEffect } from "../helpers/dragAndDropItem"
 import { createFolder, getCanDragChecker, showMessage } from "../helpers/actions"
 import { clearPressedKeys } from "../helpers/keyboardManager"
@@ -58,6 +58,8 @@ export function Bookmarks(props: {
         const targetItem = findItemById(props.appState, targetId)
         if (targetItem?.isSection) {
           onRenameSection(targetItem)
+        } else if (isCustomActionItem(targetItem) && targetItem?.url) {
+          executeCustomAction(targetItem.url, dispatch)
         } else if (targetItem) {
           if (mouseDownEvent.metaKey || mouseDownEvent.ctrlKey) {
             // open in new tab
@@ -200,15 +202,18 @@ export function Bookmarks(props: {
             value={props.appState.search}
             onChange={onSearchChange}
           />
-          {/*<div className="tabme-caption">tabme app</div>*/}
         </div>
         {
           props.appState.search !== ""
             ? <button className={"btn__clear-search"} onClick={onClearSearch}>✕</button>
             : null
         }
+        {/*<div className="toolbar-buttons" style={{marginRight: "auto"}}>*/}
+        {/*  <button className={"btn__setting"}>+ folder</button>*/}
+        {/*  <button className={"btn__setting"}>+ note </button>*/}
+        {/*</div>*/}
 
-        <div className={"menu-buttons"}>
+        <div className="menu-buttons">
           {
             props.appState.devMode ?
               <>
