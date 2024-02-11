@@ -1,0 +1,65 @@
+body {
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: start;
+  height: 100vh;
+  background-color: #f4f4f4;
+}
+
+.content {
+  background-color: #fff;
+  padding: 0 60px;
+  min-height: 100%;
+  max-width: 800px;
+  min-width: 600px;
+  border-left: 1px solid #bbb;
+  border-right: 1px solid #bbb;
+}
+
+h1 {
+  font-size: 3.8em;
+  font-weight: 200;
+  margin-bottom: 20px;
+}
+
+h2 {
+  font-size: 2em;
+  font-weight: normal;
+}
+
+.goal-text {
+  font-size: 2em;
+  font-weight: 200;
+  margin-top: 0;
+  font-style: italic;
+}
+
+h3.goal-text {
+  font-size: 1.5em;
+  margin-bottom: 40px;
+}
+
+
+p {
+  margin-top: 0.2em;
+}
+
+.install-button {
+  display: inline-block;
+  border: 1px solid #999;
+  border-radius: 4px;
+  padding: 12px;
+  font-size: 2em;
+  text-decoration: none;
+}
+
+.footer {
+  padding: 40px 0;
+}
+
+.footer hr {
+  margin-bottom: 26px;
+}
