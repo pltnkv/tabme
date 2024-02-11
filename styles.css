@@ -63,3 +63,26 @@ p {
 .footer hr {
   margin-bottom: 26px;
 }
+
+/** START guide.html */
+
+.guide-block {
+  display: flex;
+  margin: 0 -60px;
+  padding: 80px 60px;
+  background-color: beige;
+}
+
+.guide-block video {
+  border: 1px solid #bbb;
+}
+
+.guide-block .text {
+  margin-left: 20px;
+  margin-right: 20px;
+  font-size: 22px;
+  font-weight: 200;
+}
+
+/** END guide.html */
+
