@@ -183,7 +183,11 @@ export function Bookmarks(props: {
   }
 
   function onReportBug() {
-    prompt("Share feedback or encountered issues to the email: pltnkv0+tabme@gmail.com \n\nThank you for using Tabme", "pltnkv0+tabme@gmail.com")
+    prompt("Share feedback or encountered issues to the email: gettabme@gmail.com \n\nThank you for using Tabme", "gettabme@gmail.com")
+  }
+
+  function onHowToUse() {
+    chrome.tabs.create({ url: "https://gettabme.com/guide.html", active: true })
   }
 
   function onImportExistingBookmarks() {
@@ -234,6 +238,7 @@ export function Bookmarks(props: {
               <button className="dropdown-menu__button"
                       onClick={onToggleNotUsed}>{props.appState.showNotUsed ? "Unhighlight not used" : "Highlight not used"}</button>
               <button className="dropdown-menu__button" onClick={onImportExistingBookmarks}>Import bookmarks</button>
+              <button className="dropdown-menu__button" onClick={onHowToUse}>Guide: How to use</button>
               <button className="dropdown-menu__button" onClick={onReportBug}>Report issue</button>
             </DropdownMenu>
           ) : null}
@@ -247,7 +252,7 @@ export function Bookmarks(props: {
             appState={props.appState}
             key={folder.id}
             folder={folder}
-          ></Folder>
+          />
         ))}
 
         {
@@ -255,7 +260,7 @@ export function Bookmarks(props: {
             ? (
               <div className="folder folder--new">
                 <h2 onClick={onCreateFolder}>New folder <span>+ Click to add</span></h2>
-                <div className="folder-items-box" data-folder-id="-1"></div>
+                <div className="folder-items-box" data-folder-id="-1"/>
               </div>
             )
             : null

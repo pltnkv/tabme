@@ -1,6 +1,6 @@
 # Tabme — [Chrome Extension](https://chromewebstore.google.com/detail/tabme/jnhiookaaldadiimlgncedhkpmhlmmip)
 
-![Preview](ghpages/small_promo.png)
+![Preview](small_promo.png)
 <br>
 <br>
 ### Organize Bookmarks and Tabs, Done Right
