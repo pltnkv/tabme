@@ -41,3 +41,8 @@ Load `dist` directory
 
 ## Test
 `npx jest` or `npm run test`
+
+## publish
+go `/dist`
+
+run `zip -r dist.zip *`
