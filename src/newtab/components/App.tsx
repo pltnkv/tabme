@@ -28,6 +28,7 @@ export function App() {
       })
 
       chrome.history.search({ text: "", maxResults: 10000, startTime }, function(data) {
+        console.log(data.slice(0, 3))
         const historyItems = filterIrrelevantHistory(data)
         dispatch({
           type: Action.SetTabsAndHistory,
@@ -60,8 +61,14 @@ export function App() {
     chrome.tabs.onRemoved.addListener(() => updateTabsAndHistory()) // can do it more efficiently (don't update history)
     chrome.tabs.onUpdated.addListener(onTabUpdated)
 
+    chrome.runtime.sendMessage({ type: "get-last-active-tabs" }, function(response) {
+      console.log('init', response)
+      dispatch({ type: Action.UpdateAppState, newState: { lastActiveTabIds: response.tabs } })
+    })
+
     getBC().onmessage = function(ev: MessageEvent) {
-      if (ev.data === "folders-updated") {
+      console.log(ev)
+      if (ev.data?.type === "folders-updated") {
         getStateFromLS((res) => {
           if (globalAppState.sidebarCollapsed !== res.sidebarCollapsed) {
             dispatch({ type: Action.InitFolders, sidebarCollapsed: res.sidebarCollapsed, ignoreSaving: true })
@@ -70,6 +77,10 @@ export function App() {
             dispatch({ type: Action.InitFolders, folders: res.folders, ignoreSaving: true })
           }
         })
+      }
+
+      if (ev.data?.type === "last-active-tabs-updated") {
+        dispatch({ type: Action.UpdateAppState, newState: { lastActiveTabIds: ev.data.tabs } })
       }
     }
 

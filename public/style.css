@@ -160,7 +160,7 @@ input.search {
   border-radius: 50%;
   font-size: 16px;
   line-height: 16px;
-  padding: 0px 0 2px 0px;
+  padding: 0 0 2px 0;
 
   transition: opacity 100ms;
   transition-delay: 200ms;
@@ -187,12 +187,14 @@ h1 .btn__cleanup {
 
 .inbox-box {
   margin-left: -8px;
+  margin-right: -8px;
 }
 
 .inbox-item {
   cursor: pointer;
   padding: 8px;
   white-space: nowrap;
+  border-radius: 8px;
 }
 
 .inbox-item:hover .inbox-item__title {
@@ -414,7 +416,7 @@ h1 .btn__cleanup {
   font-size: 12px;
   box-sizing: border-box;
   line-height: 14px;
-  padding: 0px 0px 0px 0px;
+  padding: 0;
   cursor: pointer;
   text-align: center;
 }
@@ -551,6 +553,19 @@ h1 .btn__cleanup {
   display: flex;
   padding: 6px 0;
   cursor: pointer;
+
+  textarea {
+    height: 0;
+    width: 290px;
+    box-sizing: border-box;
+    resize: none;
+    border: 1px solid var(--colors-blue-300);
+    font-family: system-ui, sans-serif;
+    font-size: 14px;
+    padding: 2px;
+    margin: -2px;
+    margin-bottom: -3px;
+  }
 }
 
 .folder-item__inner img {
@@ -674,7 +689,7 @@ body.dragging * {
   margin-top: 24px;
   background-color: #fff;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0px 4px 12px 0px rgba(5, 0, 56, 0.2);
+  box-shadow: 0 4px 12px 0 rgba(5, 0, 56, 0.2);
   border-radius: 8px;
   padding: 8px;
   z-index: 10;

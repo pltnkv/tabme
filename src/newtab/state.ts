@@ -50,7 +50,9 @@ export type IAppState = {
     message: string;
     button?: { onClick?: () => void; text: string };
   };
+  lastActiveTabIds: number[]
   search: string;
+  itemInEdit: undefined | number,
   showArchived: boolean;
   showNotUsed: boolean;
   sidebarCollapsed: boolean; // stored
@@ -71,7 +73,9 @@ let initState: IAppState = {
   historyItems: [],
   tabs: [],
   notification: { visible: false, message: "" },
+  lastActiveTabIds: [],
   search: "",
+  itemInEdit: undefined,
   showArchived: false,
   showNotUsed: false,
   sidebarCollapsed: false, //should be named "sidebarCollapsable"
@@ -206,7 +210,7 @@ export function stateReducer(state: IAppState, action: FoldersAction): IAppState
   return newState
 }
 
-const bc = new BroadcastChannel("sync-folders-channel")
+const bc = new BroadcastChannel("sync-state-channel")
 
 export function getBC() {
   return bc
@@ -220,7 +224,7 @@ function saveState(appState: IAppState): void {
 
   chrome.storage.local.set(savingState, () => {
     console.log("SAVED")
-    bc.postMessage("folders-updated")
+    bc.postMessage({ type: "folders-updated" })
   })
 }
 

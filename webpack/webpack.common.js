@@ -1,4 +1,3 @@
-const webpack = require("webpack");
 const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
 const srcDir = path.join(__dirname, "..", "src");
@@ -8,7 +7,7 @@ module.exports = {
 		// popup: path.join(srcDir, "popup.tsx"),
 		newtab: path.join(srcDir, "newtab/newtab.tsx"),
 		// options: path.join(srcDir, "options.tsx"),
-		// background: path.join(srcDir, "background.ts"),
+		background: path.join(srcDir, "background.ts"),
 		// content_script: path.join(srcDir, "content_script.tsx"),
 	},
 	output: {

@@ -1,17 +1,8 @@
 import React, { useContext, useEffect, useState } from "react"
-import {
-  blurSearch,
-  convertTabToItem,
-  createNewSection,
-  extractHostname,
-  filterTabsBySearch,
-  hlSearch,
-  removeUselessProductName,
-  SECTION_ICON_BASE64
-} from "../helpers/utils"
+import { blurSearch, convertTabToItem, createNewSection, extractHostname, filterTabsBySearch, hlSearch, removeUselessProductName, SECTION_ICON_BASE64 } from "../helpers/utils"
 import { bindDADItemEffect, getDraggedItemId } from "../helpers/dragAndDropItem"
 import { Action, DispatchContext, IAppState } from "../state"
-import { createFolder, getCanDragChecker, showMessage, showMessageWithUndo } from "../helpers/actions"
+import { createFolder, getCanDragChecker, showMessage } from "../helpers/actions"
 import { IFolder, IFolderItem } from "../helpers/types"
 import Tab = chrome.tabs.Tab
 
@@ -41,11 +32,19 @@ export function SidebarOpenTabs(props: {
         }
 
         if (tab && tab.id) { // Add existing Tab
+          const item = convertTabToItem(tab)
           dispatch({
             type: Action.AddBookmarkToFolder,
             folderId,
             itemIdInsertAfter,
-            item: convertTabToItem(tab)
+            item
+          })
+
+          dispatch({
+            type: Action.UpdateAppState,
+            newState: {
+              itemInEdit: item.id
+            }
           })
 
           // TODO: ask confirmation before closing the current tab
@@ -131,20 +130,35 @@ export function SidebarOpenTabs(props: {
     //     + '    display: inline-block;">★</span>'
     // }
 
+    function getBgColor(tabId?: number): string {
+      const index = props.appState.lastActiveTabIds.indexOf(tabId!)
+      switch (index) {
+        case 0:
+          return "#b5c0eb"
+        // case 1:
+        //   return "#d3dcfd"
+        // case 2:
+        //   return "#e7ebff"
+        default:
+          return "transparent"
+      }
+    }
+
     return (
       <div
         key={t.id}
+        style={{ backgroundColor: getBgColor(t.id) }}
         className="inbox-item draggable-item"
         data-id={t.id}
       >
-        <img src={t.favIconUrl}/>
+        <img src={t.favIconUrl} alt=""/>
         <div className="inbox-item__text">
           <div className="inbox-item__title"
                title={t.title}
-               dangerouslySetInnerHTML={hlSearch(titleHTML, props.search)}></div>
+               dangerouslySetInnerHTML={hlSearch(titleHTML, props.search)}/>
           <div className="inbox-item__url"
                title={t.url}
-               dangerouslySetInnerHTML={hlSearch(domain, props.search)}></div>
+               dangerouslySetInnerHTML={hlSearch(domain, props.search)}/>
         </div>
         <div onClick={onCloseTab} className="inbox-item__close">⨉</div>
       </div>
@@ -155,7 +169,7 @@ export function SidebarOpenTabs(props: {
     className="inbox-item draggable-item"
     data-id={0}
   >
-    <img src={SECTION_ICON_BASE64}/>
+    <img src={SECTION_ICON_BASE64} alt="" />
     <div className="inbox-item__text">
       <div className="inbox-item__title">Section</div>
       <div className="inbox-item__url">Drag to create new one</div>

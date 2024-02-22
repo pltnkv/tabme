@@ -7,6 +7,8 @@ import React from "react"
 export const DEFAULT_FOLDER_COLOR = "#f0f0f0"
 export const EMPTY_FOLDER_COLOR = "transparent"
 
+export const MAX_LAST_ACTIVE_TABS_COUNT = 3
+
 const uselessWords = [
   "| Greenhouse",
   " - Google Sheets",
@@ -129,39 +131,38 @@ export function isContainsSearch<T extends { title?: string, url?: string }>(
     || item.url!.toLowerCase().includes(searchValue)
 }
 
-const irrelecantHosts = [
-  "translate.google.ru",
-  "zoom.us",
-  "miro.zoom.us",
-  "9gag.com",
-  "calendar.google.com",
-  "www.facebook.com",
-  "www.google.com",
-  "accounts.google.com",
-  "vk.com",
-  "coub.com",
-  "mail.google.com",
-  "twitter.com",
-  "code.devrtb.com",
-  "www.youtube.com",
-  "yandex.ru",
-  "www.instagram.com",
-  "2gis.ru"
-]
-
-const hostWithIgnoredSearchAndHash = [
-  "miro.com",
-  "docs.google.com",
-  "www.figma.com"
-]
-
-function isRelevantURL(url: URL): boolean {
-  return !irrelecantHosts.some(h => h === url.host)
-}
-
-function isDistinctURL(url: URL): boolean {
-  return hostWithIgnoredSearchAndHash.some(h => h === url.host)
-}
+// const irrelecantHosts = [
+//   "translate.google.ru",
+//   "zoom.us",
+//   "miro.zoom.us",
+//   "9gag.com",
+//   "calendar.google.com",
+//   "www.facebook.com",
+//   "www.google.com",
+//   "accounts.google.com",
+//   "vk.com",
+//   "coub.com",
+//   "mail.google.com",
+//   "twitter.com",
+//   "code.devrtb.com",
+//   "www.youtube.com",
+//   "yandex.ru",
+//   "www.instagram.com",
+//   "2gis.ru"
+// ]
+//
+// const hostWithIgnoredSearchAndHash = [
+//   "miro.com",
+//   "docs.google.com",
+//   "www.figma.com"
+// ]
+// function isRelevantURL(url: URL): boolean {
+//   return !irrelecantHosts.some(h => h === url.host)
+// }
+//
+// function isDistinctURL(url: URL): boolean {
+//   return hostWithIgnoredSearchAndHash.some(h => h === url.host)
+// }
 
 export function filterIrrelevantHistory(
   list: HistoryItem[]
@@ -220,7 +221,11 @@ export function filterOpenedTabsFromHistory(
 }
 
 export function canDisplayTabInSidebar(t: Tab): boolean {
-  return t.url !== "chrome://newtab/" // && t.pendingUrl !== "chrome://newtab/"
+  return !isTabme(t)
+}
+
+function isTabme(tab:Tab):boolean {
+  return tab.pendingUrl?.includes("://newtab/") || tab.url?.includes("://newtab/") || false
 }
 
 export function isFolderItemOpened(url: string, tabs: Tab[]): boolean {

@@ -45,14 +45,14 @@ export function Folder(props: {
     })
   }
 
-  /*TODO восстановить двух-колоночный режим*/
-  function onToggleColumnMode() {
-    dispatch({
-      type: Action.UpdateFolderColumnMode,
-      folderId: props.folder.id,
-      twoColumn: !props.folder.twoColumn
-    })
-  }
+  /* восстановить двух-колоночный режим*/
+  // function onToggleColumnMode() {
+  //   dispatch({
+  //     type: Action.UpdateFolderColumnMode,
+  //     folderId: props.folder.id,
+  //     twoColumn: !props.folder.twoColumn
+  //   })
+  // }
 
   /*TODO избавиться от двойной фильтрации*/
   const folderItems = filterItemsBySearch(props.folder.items, props.appState.search)
@@ -105,7 +105,8 @@ export function Folder(props: {
                 item={item}
                 appState={props.appState}
                 folder={props.folder}
-              ></FolderItem>
+                inEdit={item.id === props.appState.itemInEdit}
+              />
             )
           )}
       </div>

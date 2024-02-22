@@ -111,8 +111,10 @@ export function Bookmarks(props: {
   }
 
   function onMouseDown(e: React.MouseEvent) {
-    setMouseDownEvent(e)
-    blurSearch(e)
+    if (props.appState.itemInEdit === undefined) {
+      setMouseDownEvent(e)
+      blurSearch(e)
+    }
   }
 
   function onCreateFolder() {
