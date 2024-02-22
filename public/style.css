@@ -226,6 +226,7 @@ h1 .btn__cleanup {
   height: 30px;
   vertical-align: top;
   margin-top: -4px;
+  margin-left: -6px;
   text-align: center;
   visibility: hidden;
   color: #999;
@@ -637,7 +638,7 @@ body.dragging * {
   left: 0;
   box-sizing: content-box;
   background-color: #f5f5f5;
-  border-radius: 4px;
+  border-radius: 8px;
   pointer-events: none;
   border: 1px solid #999;
   opacity: 0.8;
