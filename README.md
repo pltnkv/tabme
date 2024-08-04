@@ -43,7 +43,8 @@ Load `dist` directory
 `npx jest` or `npm run test`
 
 ## publish
-1) build using `npm run build`
+1) Update "version" in `manifest.json` file
+2) build using `npm run build`
 2) go `/dist` 
 3) run `zip -r dist.zip *`
 4) Add archive with correct version into "builds" folder and commit it
