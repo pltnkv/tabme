@@ -43,6 +43,9 @@ Load `dist` directory
 `npx jest` or `npm run test`
 
 ## publish
-go `/dist`
-
-run `zip -r dist.zip *`
+1) build using `npm run build`
+2) go `/dist` 
+3) run `zip -r dist.zip *`
+4) Add archive with correct version into "builds" folder and commit it
+5) Upload update in the ChromeStore admin panel
+NOTE: Dont forget update "What's new"
