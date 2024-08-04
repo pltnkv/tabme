@@ -99,16 +99,10 @@ export function Bookmarks(props: {
   }, [mouseDownEvent])
 
   function onRenameSection(targetItem: IFolderItem) {
-    const newTitle = prompt("Enter item new title", targetItem.title)
-    const folder = findFolderByItemId(props.appState, targetItem.id)
-    if (newTitle && folder?.id) {
-      dispatch({
-        type: Action.UpdateFolderItem,
-        folderId: folder?.id,
-        itemId: targetItem.id,
-        newTitle
-      })
-    }
+    dispatch({
+      type: Action.UpdateAppState,
+      newState: { itemInEdit: targetItem.id }
+    })
   }
 
   function onMouseDown(e: React.MouseEvent) {

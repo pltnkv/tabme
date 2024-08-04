@@ -26,15 +26,24 @@ export function Folder(props: {
       type: Action.UpdateFolderTitle,
       folderId: props.folder.id
     })
+    setShowMenu(false)
   }
 
   function onAddSection() {
+    const newSection = createNewSection()
     dispatch({
       type: Action.AddBookmarkToFolder,
       folderId: props.folder.id,
       itemIdInsertAfter: undefined,
-      item: createNewSection()
+      item: newSection
     })
+
+    dispatch({
+      type: Action.UpdateAppState,
+      newState: { itemInEdit: newSection.id }
+    })
+
+    setShowMenu(false)
   }
 
   function onColorChange(e: any) {
