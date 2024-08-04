@@ -56,6 +56,7 @@ export type IAppState = {
   showArchived: boolean;
   showNotUsed: boolean;
   sidebarCollapsed: boolean; // stored
+  useDarkMode?: boolean; // stored
   sidebarHovered: boolean; // for hover effects
   sidebarItemDragging: boolean // this flag is not used. But decided to not delete it in case need it in the future
   devMode: boolean
@@ -129,6 +130,7 @@ export enum Action {
   CloseTab = "close-tab",
   SetTabsAndHistory = "set-tab-and-history",
   Reset = "reset",
+  ToggleDarkMode = "toggle-dark-mode",
   UpdateShowArchivedItems = "update-show-hidden-items",
   UpdateShowNotUsedItems = "update-show-not-used-items",
   CreateFolder = "create-folder",
@@ -163,6 +165,7 @@ export type FoldersAction =
   | { type: Action.CloseTab; tabId: number }
   | { type: Action.SetTabsAndHistory; tabs: Tab[]; history: HistoryItem[] }
   | { type: Action.Reset }
+  | { type: Action.ToggleDarkMode, useDarkMode: boolean }
   | { type: Action.UpdateShowArchivedItems; value: boolean }
   | { type: Action.UpdateShowNotUsedItems; value: boolean }
   | { type: Action.CreateFolder; newFolderId?: number, title?: string, items?: IFolderItem[], color?: string }
@@ -203,6 +206,7 @@ export function stateReducer(state: IAppState, action: FoldersAction): IAppState
   console.log("action and newState:", action, newState)
   if (state.folders !== newState.folders
     || state.sidebarCollapsed !== newState.sidebarCollapsed
+    || state.useDarkMode !== newState.useDarkMode
     || state.stat != newState.stat) {
     prevState = state
     if (action.type !== Action.InitFolders || !action.ignoreSaving) {
@@ -236,6 +240,7 @@ export const saveStateThrottled = throttle(saveState, 1000)
 const savingStateDefaultValues = {
   "folders": [],
   "sidebarCollapsed": false,
+  "useDarkMode": false,
   "stat": undefined
 }
 type SavingStateKeys = keyof typeof savingStateDefaultValues
@@ -329,6 +334,15 @@ function stateReducer0(state: IAppState, action: FoldersAction): IAppState {
 
     case Action.Reset: {
       return { ...state, folders: [] }
+    }
+
+    case Action.ToggleDarkMode: {
+      if (action.useDarkMode) {
+        document.body.classList.add("dark-theme")
+      } else {
+        document.body.classList.remove("dark-theme")
+      }
+      return { ...state, useDarkMode: action.useDarkMode }
     }
 
     case Action.UpdateShowArchivedItems: {

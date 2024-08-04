@@ -93,7 +93,7 @@ export function Folder(props: {
     <div className={folderClassName} data-folder-id={props.folder.id}>
       <h2 style={{ backgroundColor: folderBackgroundColor }} className="draggable-folder">
         <span className="folder-title">
-          <span className="folder-title__text" onClick={onEditTitle}>{props.folder.title}</span>
+          <span className="folder-title__text" onClick={onEditTitle}>{props.folder.title}{props.folder.archived ? ' [archived]' : ''}</span>
           <span className="folder-title__button" onClick={() => setShowMenu(!showMenu)}>☰</span>
         </span>
 

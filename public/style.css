@@ -1,5 +1,18 @@
 :root {
+  /* Light Theme Variables */
   --main-text-color: rgb(5, 0, 56);
+  --background-color: #ffffff;
+  --border-color: #e2e2e2;
+  --sidebar-background-color: #f5f5f5;
+  --input-background-color: #fafafa;
+  --input-border-color: #666;
+  --button-background-color: #FAFBFC;
+  --button-border-color: rgba(27, 31, 35, 0.15);
+  --button-hover-background-color: #F3F4F6;
+  --button-active-background-color: #EDEFF2;
+  --button-text-color: #24292E;
+  --notification-background-color: #000;
+  --notification-text-color: #fff;
 
   --colors-gray-100: #fafafa;
   --colors-gray-200: #f2f2f2;
@@ -42,6 +55,65 @@
   --colors-green-900: #153000;
 }
 
+body.dark-theme {
+  /* Dark Theme Variables */
+  --main-text-color: rgb(220, 220, 220);
+  --background-color: #181818;
+  --popup-background-color: #181818;
+  --border-color: #333;
+  --sidebar-background-color: #242424;
+  --input-background-color: #333;
+  --input-border-color: #555;
+  --button-background-color: #333;
+  --button-border-color: #444;
+  --button-hover-background-color: #444;
+  --button-active-background-color: #555;
+  --button-text-color: #ddd;
+  --notification-background-color: #444;
+  --notification-text-color: #ddd;
+
+  --colors-gray-100: #303030;
+  --colors-gray-200: #3c3c3c;
+  --colors-gray-300: #484848;
+  --colors-gray-400: #545454;
+  --colors-gray-500: #606060;
+  --colors-gray-600: #6c6c6c;
+  --colors-gray-700: #787878;
+  --colors-gray-800: #848484;
+  --colors-gray-900: #909090;
+
+  --colors-blue-100: #223344;
+  --colors-blue-200: #334455;
+  --colors-blue-300: #445566;
+  --colors-blue-400: #556677;
+  --colors-blue-500: #667788;
+  --colors-blue-600: #778899;
+  --colors-blue-700: #8899aa;
+  --colors-blue-800: #99aabb;
+  --colors-blue-900: #aabbee;
+
+  --colors-red-100: #442222;
+  --colors-red-200: #553333;
+  --colors-red-300: #664444;
+  --colors-red-400: #775555;
+  --colors-red-500: #886666;
+  --colors-red-600: #997777;
+  --colors-red-700: #aa8888;
+  --colors-red-800: #bb9999;
+  --colors-red-900: #ccaaaa;
+
+  --colors-green-100: #224422;
+  --colors-green-200: #335533;
+  --colors-green-300: #446644;
+  --colors-green-400: #557755;
+  --colors-green-500: #668866;
+  --colors-green-600: #779977;
+  --colors-green-700: #88aa88;
+  --colors-green-800: #99bb99;
+  --colors-green-900: #aacccc;
+}
+
+/* General styles */
 html,
 body,
 .app,
@@ -50,6 +122,11 @@ body,
   margin: 0;
   height: 100%;
   color: var(--main-text-color);
+  background-color: var(--background-color);
+}
+
+button {
+  color: var(--main-text-color);
 }
 
 .app {
@@ -57,14 +134,14 @@ body,
   display: flex;
 }
 
-
 input.search {
   width: 296px;
   height: 24px;
   padding: 8px;
   font-size: 16px;
   border-radius: 8px;
-  border: 1px solid #666;
+  border: 1px solid var(--input-border-color);
+  background-color: var(--input-background-color);
   margin: 0;
 }
 
@@ -72,21 +149,13 @@ input.search {
   background-color: #f0f000;
 }
 
-/***********************************
-   collapsing overrides
-************************************/
-
-.collapsible-sidebar {
-  /** global conditions here */
-}
-
-
+/* Sidebar styles */
 .collapsible-sidebar .app-sidebar {
   position: absolute;
   width: 360px;
   z-index: 1;
   border-radius: 0 8px 8px 0;
-  border: 1px solid #e2e2e2;
+  border: 1px solid var(--border-color);
   filter: drop-shadow(2px 2px 8px rgba(0, 0, 0, 0.1));
 }
 
@@ -98,17 +167,13 @@ input.search {
   padding-left: 24px;
 }
 
-
-/***********************************
-   Sidebar
-************************************/
 .app-sidebar {
   position: relative;
   box-sizing: border-box;
   flex-shrink: 0;
   width: 360px;
-  background-color: #f5f5f5;
-  border-right: 1px solid #e2e2e2;
+  background-color: var(--sidebar-background-color);
+  border-right: 1px solid var(--border-color);
   padding: 0 16px 16px 16px;
   max-height: 100%;
   overflow-y: auto;
@@ -146,22 +211,20 @@ input.search {
   right: 8px;
   top: 16px;
   cursor: pointer;
-
   appearance: none;
-  background-color: #FAFBFC;
-  border: 1px solid rgba(27, 31, 35, 0.15);
+  background-color: var(--button-background-color);
+  border: 1px solid var(--button-border-color);
   box-shadow: rgba(27, 31, 35, 0.04) 0 1px 0, rgba(255, 255, 255, 0.25) 0 1px 0 inset;
   box-sizing: border-box;
   width: 32px;
   height: 32px;
-  color: #24292E;
+  color: var(--button-text-color);
   user-select: none;
   touch-action: manipulation;
   border-radius: 50%;
   font-size: 16px;
   line-height: 16px;
   padding: 0 0 2px 0;
-
   transition: opacity 100ms;
   transition-delay: 200ms;
 }
@@ -173,12 +236,12 @@ h1 .btn__cleanup {
   text-align: center;
   padding: 0;
   &[disabled] {
-    background-color: #f5f5f5;
+    background-color: var(--input-background-color);
   }
 }
 
 .btn__collapse-sidebar:hover {
-  background-color: #F3F4F6;
+  background-color: var(--button-hover-background-color);
 }
 
 .app-sidebar.collapsed .btn__collapse-sidebar {
@@ -229,7 +292,7 @@ h1 .btn__cleanup {
   margin-left: -6px;
   text-align: center;
   visibility: hidden;
-  color: #999;
+  color: var(--colors-gray-600);
   padding-top: 2px;
   box-sizing: border-box;
 }
@@ -239,7 +302,7 @@ h1 .btn__cleanup {
 }
 
 .inbox-item__close:hover {
-  color: #000;
+  color: var(--main-text-color);
 }
 
 .inbox-item__title {
@@ -257,7 +320,7 @@ h1 .btn__cleanup {
 }
 
 .inbox-item__url {
-  color: #999;
+  color: var(--colors-gray-600);
 }
 
 .history-item {
@@ -275,7 +338,7 @@ h1 .btn__cleanup {
 }
 
 .history-item__url {
-  color: #999;
+  color: var(--colors-gray-600);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -283,19 +346,15 @@ h1 .btn__cleanup {
 
 .no-opened-tabs {
   padding-left: 30px;
-  color: #999;
+  color: var(--colors-gray-600);
 }
 
-/***********************************
-   Bookmarks
-************************************/
-
+/* Bookmarks styles */
 .bookmarks {
   position: relative;
   flex-grow: 1;
-  max-height: calc(100% - 68px); /* 68px is height of .bookmarks-menu*/
+  max-height: calc(100% - 68px); /* 68px is height of .bookmarks-menu */
   overflow-y: auto;
-
   display: flex;
   flex-wrap: wrap;
   align-content: flex-start;
@@ -310,7 +369,7 @@ h1 .btn__cleanup {
   height: 68px;
   box-sizing: border-box;
   padding: 12px 0 16px 52px;
-  border-bottom: 1px solid #e2e2e2;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .dropdown-menu--settings {
@@ -321,12 +380,12 @@ h1 .btn__cleanup {
 .btn__setting {
   margin-left: 8px;
   appearance: none;
-  background-color: #FAFBFC;
-  border: 1px solid rgba(27, 31, 35, 0.15);
+  background-color: var(--button-background-color);
+  border: 1px solid var(--button-border-color);
   box-shadow: rgba(27, 31, 35, 0.04) 0 1px 0, rgba(255, 255, 255, 0.25) 0 1px 0 inset;
   box-sizing: border-box;
   height: 42px;
-  color: #24292E;
+  color: var(--button-text-color);
   display: inline-block;
   font-family: -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
   font-size: 16px;
@@ -344,12 +403,12 @@ h1 .btn__cleanup {
   cursor: pointer;
 
   &:hover {
-    background-color: #F3F4F6;
+    background-color: var(--button-hover-background-color);
     text-decoration: none;
   }
 
   &:active {
-    background-color: #EDEFF2;
+    background-color: var(--button-active-background-color);
   }
 
   &.btn__setting--active {
@@ -382,8 +441,6 @@ h1 .btn__cleanup {
     pointer-events: none;
   }
 }
-
-
 
 .bookmarks-menu .file-input-container {
   position: relative;
@@ -455,7 +512,7 @@ h1 .btn__cleanup {
 
 .folder-empty-tip {
   padding: 0 0 0 32px;
-  color: #999;
+  color: var(--colors-gray-600);
 }
 
 .folder-items-box {
@@ -475,8 +532,8 @@ h1 .btn__cleanup {
 }
 
 .folder.folder--new h2 {
-  background-color: #efefef;
-  color: #bbb;
+  background-color: var(--input-background-color);
+  color: var(--colors-gray-600);
   cursor: pointer;
 }
 
@@ -528,13 +585,12 @@ h1 .btn__cleanup {
   margin-top: 4px;
   margin-right: 4px;
   visibility: hidden;
-
   appearance: none;
-  background-color: #FAFBFC;
-  border: 1px solid rgba(27, 31, 35, 0.15);
+  background-color: var(--button-background-color);
+  border: 1px solid var(--button-border-color);
   box-shadow: rgba(27, 31, 35, 0.04) 0 1px 0, rgba(255, 255, 255, 0.25) 0 1px 0 inset;
   box-sizing: border-box;
-  color: #24292E;
+  color: var(--button-text-color);
   font-size: 14px;
   font-weight: bold;
   user-select: none;
@@ -606,7 +662,6 @@ h1 .btn__cleanup {
   visibility: visible;
 }
 
-
 .folder-item.section {
   padding-top: 8px;
 }
@@ -624,10 +679,7 @@ h1 .btn__cleanup {
   text-decoration: none;
 }
 
-/***********************************
-  DAD
-  ************************************/
-
+/* DAD styles */
 body.dragging * {
   pointer-events: none;
 }
@@ -637,10 +689,10 @@ body.dragging * {
   top: 0;
   left: 0;
   box-sizing: content-box;
-  background-color: #f5f5f5;
+  background-color: var(--sidebar-background-color);
   border-radius: 8px;
   pointer-events: none;
-  border: 1px solid #999;
+  border: 1px solid var(--colors-gray-600);
   opacity: 0.8;
 }
 
@@ -661,7 +713,6 @@ body.dragging * {
   margin-left: 24px;
 }
 
-
 .bm-folder-placeholder {
   position: absolute;
   z-index: 1;
@@ -677,18 +728,15 @@ body.dragging * {
   font-family: sans-serif;
   font-weight: 100;
   font-style: italic;
-  color: #999;
+  color: var(--colors-gray-600);
 }
 
-/***********************************
-  dropdown-menu
-  ************************************/
-
+/* Dropdown menu styles */
 .dropdown-menu {
   position: absolute;
   min-width: 140px;
   margin-top: 24px;
-  background-color: #fff;
+  background-color: var(--sidebar-background-color);
   border: 1px solid rgba(0, 0, 0, 0.1);
   box-shadow: 0 4px 12px 0 rgba(5, 0, 56, 0.2);
   border-radius: 8px;
@@ -713,11 +761,11 @@ body.dragging * {
 }
 
 .dropdown-menu__button:hover {
-  background-color: #F0F2F4;
+  background-color: rgba(200, 227, 255, 0.55);
 }
 
 .dropdown-menu__button:active {
-  background-color: #dfe1e3;
+  background-color: rgba(195, 225, 255, 0.7);
 }
 
 .dropdown-menu__button--dander {
@@ -725,11 +773,11 @@ body.dragging * {
 }
 
 .dropdown-menu__button--dander:hover {
-  background-color: #fdeaeb;
+  background-color: #f2d5d7;
 }
 
 .dropdown-menu__button--dander:active {
-  background-color: #fde4e7;
+  background-color: #f1c6c8;
 }
 
 .dropdown-menu--folder {
@@ -745,9 +793,7 @@ body.dragging * {
   top: 11px;
 }
 
-/***********************************
-  Notification
-  ************************************/
+/* Notification styles */
 .notification-box {
   position: absolute;
   display: flex;
@@ -760,8 +806,8 @@ body.dragging * {
 
 .notification {
   padding: 20px;
-  background-color: #000;
-  color: #fff;
+  background-color: var(--notification-background-color);
+  color: var(--notification-text-color);
   min-width: 80px;
   margin-top: 5px;
   border-radius: 8px;
@@ -799,10 +845,7 @@ body.dragging * {
   transition: opacity 300ms, transform 300ms;
 }
 
-/***********************************
-  importing bookmarks
-************************************/
-
+/* Importing bookmarks styles */
 .welcome {
   width: 100%;
   max-width: 1000px;
@@ -832,7 +875,7 @@ body.dragging * {
     display: block;
     font-size: 36px;
     font-weight: 200;
-    color: #999999;
+    color: var(--colors-gray-600);
     margin-bottom: 8px;
     margin-top: 18px;
     padding: 2px 8px;

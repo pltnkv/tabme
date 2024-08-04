@@ -40,6 +40,10 @@ function preprocessLoadedState(state: ISavingAppState): void {
     }
   }
 
+  if (state.useDarkMode) {
+    document.body.classList.add("dark-theme")
+  }
+
   // save updated stat in state
   saveStateThrottled(state)
 }
