@@ -4,6 +4,7 @@ export interface IFolder {
   items: IFolderItem[]
   color?: string
   twoColumn?: boolean
+  archived?: boolean
 }
 
 export interface IFolderItem {

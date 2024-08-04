@@ -29,6 +29,19 @@ export function Folder(props: {
     setShowMenu(false)
   }
 
+  function onArchiveOrRestore() {
+    const newArchiveState = !props.folder.archived
+    dispatch({
+      type: Action.UpdateFolderArchived,
+      folderId: props.folder.id,
+      archived: newArchiveState
+    })
+
+    const message = `Folder has been ${newArchiveState ? "archived" : "restored"}`
+    showMessageWithUndo(message, dispatch)
+    setShowMenu(false)
+  }
+
   function onAddSection() {
     const newSection = createNewSection()
     dispatch({
@@ -72,6 +85,7 @@ export function Folder(props: {
   const folderClassName = `folder 
   ${props.folder.twoColumn ? "two-column" : ""}
   ${folderIsEmptyDuringSearch ? "folder--empty" : ""}
+  ${props.folder.archived ? "archived" : ""}
   `
   const folderBackgroundColor = folderIsEmptyDuringSearch ? EMPTY_FOLDER_COLOR : props.folder.color || DEFAULT_FOLDER_COLOR
 
@@ -92,6 +106,7 @@ export function Folder(props: {
             />
             <button className="dropdown-menu__button" onClick={onEditTitle}>Rename</button>
             <button className="dropdown-menu__button" onClick={onAddSection}>Add section</button>
+            <button className="dropdown-menu__button" onClick={onArchiveOrRestore}>{props.folder.archived ? "Restore" : "Archive"}</button>
             {/*<button className="dropdown-menu__button" onClick={onToggleColumnMode}>{props.folder.twoColumn ? "Disable two column" : "Enable two column"}</button>*/}
             <button className="dropdown-menu__button dropdown-menu__button--dander" onClick={onDelete}>Delete</button>
           </DropdownMenu>

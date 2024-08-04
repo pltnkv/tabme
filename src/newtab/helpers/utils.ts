@@ -104,7 +104,7 @@ export function filterTabsBySearch(
 }
 
 export function hasArchivedItems(folders: IFolder[]): boolean {
-  return folders.some(f => f.items.some(i => i.archived))
+  return folders.some(f => f.archived || f.items.some(i => i.archived))
 }
 
 export function hasItemsToHighlight(folders: IFolder[], historyItems: HistoryItem[]): boolean {
@@ -224,7 +224,7 @@ export function canDisplayTabInSidebar(t: Tab): boolean {
   return !isTabme(t)
 }
 
-function isTabme(tab:Tab):boolean {
+function isTabme(tab: Tab): boolean {
   return tab.pendingUrl?.includes("://newtab/") || tab.url?.includes("://newtab/") || false
 }
 

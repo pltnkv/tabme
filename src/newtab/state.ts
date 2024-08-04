@@ -137,6 +137,7 @@ export enum Action {
   UpdateFolderTitle = "update-folder-title",
   UpdateFolderColumnMode = "update-folder-column-mode",
   UpdateFolderColor = "update-folder-color",
+  UpdateFolderArchived = "update-folder-archived",
   UpdateFolderItem = "update-folder-item",
   DeleteFolderItem = "delete-folder-item",
   AddBookmarkToFolder = "add-bookmark-to-folder",
@@ -169,6 +170,7 @@ export type FoldersAction =
   | { type: Action.MoveFolder; folderId: number; insertBeforeFolderId: number }
   | { type: Action.UpdateFolderTitle; folderId: number; }
   | { type: Action.UpdateFolderColor; folderId: number; color: string }
+  | { type: Action.UpdateFolderArchived; folderId: number; archived: boolean }
   | {
   type: Action.UpdateFolderColumnMode;
   folderId: number;
@@ -425,6 +427,15 @@ function stateReducer0(state: IAppState, action: FoldersAction): IAppState {
         ...state,
         folders: updateFolder(state.folders, action.folderId, {
           color: action.color
+        })
+      }
+    }
+
+    case Action.UpdateFolderArchived: {
+      return {
+        ...state,
+        folders: updateFolder(state.folders, action.folderId, {
+          archived: action.archived
         })
       }
     }

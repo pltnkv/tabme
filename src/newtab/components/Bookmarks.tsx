@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from "react"
 import { IFolderItem } from "../helpers/types"
-import { blurSearch, findFolderByItemId, findItemById, hasArchivedItems, hasItemsToHighlight, isCustomActionItem } from "../helpers/utils"
+import { blurSearch, findItemById, hasArchivedItems, hasItemsToHighlight, isCustomActionItem } from "../helpers/utils"
 import { Action, DispatchContext, executeCustomAction, IAppState } from "../state"
 import { bindDADItemEffect } from "../helpers/dragAndDropItem"
 import { createFolder, getCanDragChecker, showMessage } from "../helpers/actions"
@@ -70,7 +70,7 @@ export function Bookmarks(props: {
             const tab = props.appState.tabs.find(t => t.url === targetItem.url)
             if (tab && tab.id) {
               chrome.tabs.update(tab.id, { active: true })
-              chrome.windows.update(tab.windowId, {focused: true})
+              chrome.windows.update(tab.windowId, { focused: true })
             } else {
               chrome.tabs.getCurrent(t => {
                 chrome.tabs.update(t?.id!, { url: targetItem.url })
@@ -191,6 +191,8 @@ export function Bookmarks(props: {
     dispatch({ type: Action.UpdateAppState, newState: { page: "import" } })
   }
 
+  const folders = props.appState.showArchived ? props.appState.folders : props.appState.folders.filter(f => !f.archived)
+
   return (
     <div className="bookmarks-box">
       <div className="bookmarks-menu">
@@ -244,7 +246,7 @@ export function Bookmarks(props: {
 
       <div className="bookmarks" onMouseDown={onMouseDown}>
 
-        {props.appState.folders.map((folder) => (
+        {folders.map((folder) => (
           <Folder
             appState={props.appState}
             key={folder.id}
