@@ -70,6 +70,7 @@ export function Bookmarks(props: {
             const tab = props.appState.tabs.find(t => t.url === targetItem.url)
             if (tab && tab.id) {
               chrome.tabs.update(tab.id, { active: true })
+              chrome.windows.update(tab.windowId, {focused: true})
             } else {
               chrome.tabs.getCurrent(t => {
                 chrome.tabs.update(t?.id!, { url: targetItem.url })
