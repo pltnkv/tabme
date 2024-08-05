@@ -18,14 +18,17 @@
     "default_icon": "icon_48.png",
     "default_title": "Open Tabme"
   },
-  "chrome_url_overrides" : {
+  "chrome_url_overrides": {
     "newtab": "newtab.html"
   },
   "permissions": [
     "bookmarks",
     "storage",
     "history",
-    "tabs",
-    "<all_urls>"
+    "tabs"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
   ]
 }
