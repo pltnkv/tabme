@@ -16,3 +16,6 @@ export interface IFolderItem {
   isSection?: boolean
   inEdit?:boolean
 }
+
+// undefined === 'system'
+export type ColorTheme = 'system' | 'light' | 'dark' | undefined

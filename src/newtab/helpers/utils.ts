@@ -1,6 +1,6 @@
 import Tab = chrome.tabs.Tab
 import HistoryItem = chrome.history.HistoryItem
-import { IFolder, IFolderItem } from "../helpers/types"
+import { ColorTheme, IFolder, IFolderItem } from "./types"
 import { Action, ActionDispatcher, IAppState } from "../state"
 import React from "react"
 
@@ -359,4 +359,38 @@ export function tryToCreateWelcomeFolder(appState: IAppState, history: HistoryIt
 
 export function isCustomActionItem(item: IFolderItem | undefined): boolean {
   return item?.url.includes("tabme://") ?? false
+}
+
+
+const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)")
+let canUseSystemTheme = false
+
+darkThemeMq.addEventListener("change", () => {
+  if (canUseSystemTheme) {
+    setThemeStyle(darkThemeMq.matches)
+  }
+})
+
+export function applyTheme(theme: ColorTheme) {
+  canUseSystemTheme = false
+  switch (theme) {
+    case "light":
+      setThemeStyle(false)
+      break
+    case "dark":
+      setThemeStyle(true)
+      break
+    default:
+      canUseSystemTheme = true
+      setThemeStyle(darkThemeMq.matches)
+      break
+  }
+}
+
+function setThemeStyle(useDarkMode: boolean) {
+  if (useDarkMode) {
+    document.body.classList.add("dark-theme")
+  } else {
+    document.body.classList.remove("dark-theme")
+  }
 }

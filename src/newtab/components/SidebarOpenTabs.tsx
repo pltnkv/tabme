@@ -134,7 +134,7 @@ export function SidebarOpenTabs(props: {
       const index = props.appState.lastActiveTabIds.indexOf(tabId!)
       switch (index) {
         case 0:
-          return "#b5c0eb"
+          return "rgba(181, 192, 235, 0.6)"
         // case 1:
         //   return "#d3dcfd"
         // case 2:

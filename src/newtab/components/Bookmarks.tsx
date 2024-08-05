@@ -192,7 +192,14 @@ export function Bookmarks(props: {
   }
 
   function onToggleMode() {
-    dispatch({ type: Action.ToggleDarkMode, useDarkMode: !props.appState.useDarkMode })
+    dispatch({ type: Action.ToggleDarkMode })
+  }
+
+  let toggleModeText = "System Color Theme"
+  if (props.appState.colorTheme === "dark") {
+    toggleModeText = "Dark Color Theme"
+  } else if (props.appState.colorTheme === "light") {
+    toggleModeText = "Light Color Theme"
   }
 
   const folders = props.appState.showArchived ? props.appState.folders : props.appState.folders.filter(f => !f.archived)
@@ -241,9 +248,7 @@ export function Bookmarks(props: {
               <button className="dropdown-menu__button" onClick={onToggleNotUsed}>
                 {props.appState.showNotUsed ? "Unhighlight not used" : "Highlight not used"}
               </button>
-              <button className="dropdown-menu__button" onClick={onToggleMode}>
-                {props.appState.useDarkMode ? "Use Light Mode" : "Use Dark Mode"}
-              </button>
+              <button className="dropdown-menu__button" onClick={onToggleMode}>{toggleModeText}</button>
               <button className="dropdown-menu__button" onClick={onImportExistingBookmarks}>Import bookmarks</button>
               <button className="dropdown-menu__button" onClick={onHowToUse}>Guide: How to use</button>
               <button className="dropdown-menu__button" onClick={onReportBug}>Report issue</button>

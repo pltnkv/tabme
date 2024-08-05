@@ -149,6 +149,10 @@ input.search {
   background-color: #f0f000;
 }
 
+body.dark-theme .searched {
+  color: var(--background-color);
+}
+
 /* Sidebar styles */
 .collapsible-sidebar .app-sidebar {
   position: absolute;

@@ -3,6 +3,7 @@ import ReactDOM from "react-dom"
 import { initKeyboardManager } from "./helpers/keyboardManager"
 import { getStateFromLS, ISavingAppState, saveStateThrottled, setInitAppState } from "./state"
 import { App } from "./components/App"
+import { applyTheme } from "./helpers/utils"
 
 /**
  * TODOs
@@ -40,9 +41,7 @@ function preprocessLoadedState(state: ISavingAppState): void {
     }
   }
 
-  if (state.useDarkMode) {
-    document.body.classList.add("dark-theme")
-  }
+  applyTheme(state.colorTheme)
 
   // save updated stat in state
   saveStateThrottled(state)
