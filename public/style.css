@@ -125,7 +125,7 @@ body,
   background-color: var(--background-color);
 }
 
-button {
+button, input {
   color: var(--main-text-color);
 }
 
@@ -497,6 +497,7 @@ h1 .btn__cleanup {
 }
 
 .folder h2 {
+  color: rgb(5, 0, 56); /** var(--main-text-color); */
   margin-left: 24px;
   padding: 8px;
   border-radius: 8px;
