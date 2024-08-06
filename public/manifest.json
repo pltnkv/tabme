@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Tabme",
   "description": "Organize Bookmarks and Tabs, Done Right",
-  "version": "1.9.1",
+  "version": "1.9.2",
   "author": "pltnkv0+tabme@gmail.com",
   "icons": {
     "16": "icon_16.png",
@@ -26,9 +26,5 @@
     "storage",
     "history",
     "tabs"
-  ],
-  "host_permissions": [
-    "http://*/*",
-    "https://*/*"
   ]
 }
