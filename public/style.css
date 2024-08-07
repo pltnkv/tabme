@@ -58,10 +58,10 @@
 body.dark-theme {
   /* Dark Theme Variables */
   --main-text-color: rgb(220, 220, 220);
-  --background-color: #181818;
+  --background-color: #242424;
   --popup-background-color: #181818;
   --border-color: #333;
-  --sidebar-background-color: #242424;
+  --sidebar-background-color: #1e1e1e;
   --input-background-color: #333;
   --input-border-color: #555;
   --button-background-color: #333;
@@ -742,8 +742,8 @@ body.dragging * {
   min-width: 140px;
   margin-top: 24px;
   background-color: var(--sidebar-background-color);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 4px 12px 0 rgba(5, 0, 56, 0.2);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 12px 0 rgba(30, 30, 30, 0.2);
   border-radius: 8px;
   padding: 8px;
   z-index: 10;
