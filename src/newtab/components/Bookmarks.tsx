@@ -195,6 +195,10 @@ export function Bookmarks(props: {
     dispatch({ type: Action.ToggleDarkMode })
   }
 
+  function onAdvanced() {
+    dispatch({ type: Action.UpdateAppState, newState: { devMode: !props.appState.devMode } })
+  }
+
   let toggleModeText = "System Color Theme"
   if (props.appState.colorTheme === "dark") {
     toggleModeText = "Dark Color Theme"
@@ -250,6 +254,7 @@ export function Bookmarks(props: {
               </button>
               <button className="dropdown-menu__button" onClick={onToggleMode}>{toggleModeText}</button>
               <button className="dropdown-menu__button" onClick={onImportExistingBookmarks}>Import bookmarks</button>
+              <button className="dropdown-menu__button" onClick={onAdvanced}>Advanced mode</button>
               <button className="dropdown-menu__button" onClick={onHowToUse}>Guide: How to use</button>
               <button className="dropdown-menu__button" onClick={onReportBug}>Report issue</button>
             </DropdownMenu>
