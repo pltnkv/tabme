@@ -67,7 +67,17 @@ export function Folder(props: {
     })
   }
 
-  /* восстановить двух-колоночный режим*/
+  function onOpenAll() {
+    props.folder.items.forEach(item => {
+      if (!item.archived) {
+        chrome.tabs.create({ url: item.url, active: false })
+      }
+    })
+
+    setShowMenu(false)
+  }
+
+  /* restore -column mode*/
   // function onToggleColumnMode() {
   //   dispatch({
   //     type: Action.UpdateFolderColumnMode,
@@ -76,7 +86,7 @@ export function Folder(props: {
   //   })
   // }
 
-  /*TODO избавиться от двойной фильтрации*/
+  /*TODO  get rid of double filtration*/
   const folderItems = filterItemsBySearch(props.folder.items, props.appState.search)
     .filter(i => canShowArchived(props.appState) || !i.archived)
 
@@ -93,7 +103,7 @@ export function Folder(props: {
     <div className={folderClassName} data-folder-id={props.folder.id}>
       <h2 style={{ backgroundColor: folderBackgroundColor }} className="draggable-folder">
         <span className="folder-title">
-          <span className="folder-title__text" onClick={onEditTitle}>{props.folder.title}{props.folder.archived ? ' [archived]' : ''}</span>
+          <span className="folder-title__text" onClick={onEditTitle}>{props.folder.title}{props.folder.archived ? " [archived]" : ""}</span>
           <span className="folder-title__button" onClick={() => setShowMenu(!showMenu)}>☰</span>
         </span>
 
@@ -104,8 +114,9 @@ export function Folder(props: {
                    onChange={onColorChange}
                    value={props.folder.color || DEFAULT_FOLDER_COLOR}
             />
+            <button className="dropdown-menu__button" onClick={onOpenAll}>Open All Tabs</button>
             <button className="dropdown-menu__button" onClick={onEditTitle}>Rename</button>
-            <button className="dropdown-menu__button" onClick={onAddSection}>Add section</button>
+            <button className="dropdown-menu__button" onClick={onAddSection}>Add Section</button>
             <button className="dropdown-menu__button" onClick={onArchiveOrRestore}>{props.folder.archived ? "Restore" : "Archive"}</button>
             {/*<button className="dropdown-menu__button" onClick={onToggleColumnMode}>{props.folder.twoColumn ? "Disable two column" : "Enable two column"}</button>*/}
             <button className="dropdown-menu__button dropdown-menu__button--dander" onClick={onDelete}>Delete</button>

@@ -3,6 +3,7 @@ import HistoryItem = chrome.history.HistoryItem
 import { ColorTheme, IFolder, IFolderItem } from "./types"
 import { Action, ActionDispatcher, IAppState } from "../state"
 import React from "react"
+import { isTabmeTab } from "./isTabmeTab"
 
 export const DEFAULT_FOLDER_COLOR = "#f0f0f0"
 export const EMPTY_FOLDER_COLOR = "transparent"
@@ -221,11 +222,7 @@ export function filterOpenedTabsFromHistory(
 }
 
 export function canDisplayTabInSidebar(t: Tab): boolean {
-  return !isTabme(t)
-}
-
-function isTabme(tab: Tab): boolean {
-  return tab.pendingUrl?.includes("://newtab/") || tab.url?.includes("://newtab/") || false
+  return !isTabmeTab(t)
 }
 
 export function isFolderItemOpened(url: string, tabs: Tab[]): boolean {
@@ -361,7 +358,6 @@ export function isCustomActionItem(item: IFolderItem | undefined): boolean {
   return item?.url.includes("tabme://") ?? false
 }
 
-
 const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)")
 let canUseSystemTheme = false
 
@@ -393,4 +389,13 @@ function setThemeStyle(useDarkMode: boolean) {
   } else {
     document.body.classList.remove("dark-theme")
   }
+}
+
+export function getCurrentData() {
+  var today = new Date();
+  var dd = String(today.getDate()).padStart(2, '0');
+  var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+  // var yyyy = today.getFullYear();
+
+  return mm + '/' + dd
 }

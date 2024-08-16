@@ -39,9 +39,9 @@ export function getCanDragChecker(search: string, dispatch: ActionDispatcher): (
   }
 }
 
-export function createFolder(dispatch: ActionDispatcher): number {
+export function createFolder(dispatch: ActionDispatcher, title?:string, successMessage?:string): number {
   const newFolderId = genUniqId()
-  dispatch({ type: Action.CreateFolder, newFolderId })
-  showMessageWithUndo("Folder has been created", dispatch)
+  dispatch({ type: Action.CreateFolder, newFolderId, title })
+  showMessage(successMessage || "Folder has been created", dispatch)
   return newFolderId
 }

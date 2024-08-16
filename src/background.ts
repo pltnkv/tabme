@@ -1,4 +1,4 @@
-import Tab = chrome.tabs.Tab
+import { isTabmeTab } from "./newtab/helpers/isTabmeTab"
 
 const MAX_LAST_ACTIVE_TABS_COUNT = 3
 
@@ -24,14 +24,10 @@ function addLastActiveTabId(tabId: number) {
   lastActiveTabIds = newLastActiveTabs
 }
 
-function isTabme(tab:Tab):boolean {
-  return tab.pendingUrl?.includes("://newtab/") || tab.url?.includes("://newtab/") || false
-}
-
 let i = 1
 chrome.tabs.onActivated.addListener((activeInfo => {
   chrome.tabs.get(activeInfo.tabId, (t) => {
-    if (t.id !== undefined && !isTabme(t)) {
+    if (t.id !== undefined && !isTabmeTab(t)) {
       addLastActiveTabId(t.id)
       bc.postMessage({ type: "last-active-tabs-updated", tabs: lastActiveTabIds })
     }

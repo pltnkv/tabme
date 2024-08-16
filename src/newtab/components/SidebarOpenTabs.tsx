@@ -169,7 +169,7 @@ export function SidebarOpenTabs(props: {
     className="inbox-item draggable-item"
     data-id={0}
   >
-    <img src={SECTION_ICON_BASE64} alt="" />
+    <img src={SECTION_ICON_BASE64} alt=""/>
     <div className="inbox-item__text">
       <div className="inbox-item__title">Section</div>
       <div className="inbox-item__url">Drag to create new one</div>
@@ -180,7 +180,7 @@ export function SidebarOpenTabs(props: {
     <div className="inbox-box" onMouseDown={onMouseDown}>
       {items}
       {items.length === 0 && props.search === "" ? <p className="no-opened-tabs">...will display here</p> : null}
-      {props.appState.search.length === 0 ? SectionItem : null}
+      {props.search === "" ? SectionItem : null}
     </div>
   )
 }

@@ -19,6 +19,11 @@ export function FolderItem(props: {
     setEditing(true)
   }
 
+  function onOpenNewTab() {
+    chrome.tabs.create({ url: props.item.url })
+    setShowMenu(false)
+  }
+
   function setEditing(val: boolean) {
     dispatch({
       type: Action.UpdateAppState,
@@ -104,6 +109,7 @@ export function FolderItem(props: {
     }>
       {showMenu && !props.item.isSection ? (
         <DropdownMenu onClose={() => setShowMenu(false)} className={"dropdown-menu--folder-item"}>
+          <button className="dropdown-menu__button" onClick={onOpenNewTab}>Open in New Tab</button>
           <button className="dropdown-menu__button" onClick={onRenameItem}>Rename</button>
           <button className="dropdown-menu__button" onClick={onCopyUrl}>Copy url</button>
           <button className="dropdown-menu__button" onClick={onEditUrl}>Edit url</button>
@@ -195,6 +201,7 @@ function EditableTitle(p: {
     {
       p.inEdit ?
         <textarea
+          className='editable-title__txt'
           ref={textareaRef}
           onKeyDown={handleKeyDown}
           onChange={handleTitleChange}

@@ -1,9 +1,11 @@
 import React, { useContext, useEffect, useState } from "react"
 import { Action, ActionDispatcher, DispatchContext, IAppState } from "../state"
-import { showMessage } from "../helpers/actions"
+import { createFolder, showMessage } from "../helpers/actions"
 import { SidebarHistory } from "./SidebarHistory"
 import { SidebarOpenTabs } from "./SidebarOpenTabs"
 import Tab = chrome.tabs.Tab
+import { isTabmeTab } from "../helpers/isTabmeTab"
+import { convertTabToItem, getCurrentData } from "../helpers/utils"
 
 export function Sidebar(props: {
   appState: IAppState;
@@ -48,7 +50,7 @@ export function Sidebar(props: {
 
   return (
     <div className={"app-sidebar " + sidebarClassName} onMouseEnter={onSidebarMouseEnter} onMouseLeave={onSidebarMouseLeave}>
-      <h1>Open tabs <CleanupButton tabs={props.appState.tabs} dispatch={dispatch}/></h1>
+      <h1>Open tabs <CleanupButton tabs={props.appState.tabs}/><ShelveButton tabs={props.appState.tabs}/></h1>
       <button id="toggle-sidebar-btn"
               className={"btn__collapse-sidebar"}
               onClick={onToggleSidebar}
@@ -64,8 +66,50 @@ export function Sidebar(props: {
   )
 }
 
-const CleanupButton = React.memo((props: { tabs: Tab[], dispatch: ActionDispatcher }) => {
+const ShelveButton = (props: { tabs: Tab[] }) => {
+  const { dispatch } = useContext(DispatchContext)
+
+  const onClick = () => {
+    chrome.tabs.query({ currentWindow: true }, (tabs) => {
+      const tabsToShelve: Tab[] = []
+      tabs.forEach(t => {
+        if (t.id) {
+          if (!isTabmeTab(t)) {
+            tabsToShelve.push(t)
+          }
+          if (!t.active) {
+            chrome.tabs.remove(t.id)
+          }
+        }
+      })
+
+      const folderTitle = `Shelved Tabs on ${getCurrentData()}`
+      const folderId = createFolder(dispatch, folderTitle, "All Tabs has been shelved")
+      tabsToShelve.forEach((tab) => {
+        const item = convertTabToItem(tab)
+        dispatch({
+          type: Action.AddBookmarkToFolder,
+          folderId,
+          itemIdInsertAfter: undefined,
+          item
+        })
+      })
+    })
+  }
+
+  return <button className="btn__setting btn__shelve-tabs"
+                 disabled={props.tabs.length === 1}
+                 title="Shelve all tabs"
+                 onClick={onClick}>
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M8.5 9L12 12M12 12L15.5 9M12 12V4.5M4 19V12.75H7.07692L8.92308 15.25H15.6923L16.9231 12.75H20V19H4Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square"/>
+    </svg>
+  </button>
+}
+
+const CleanupButton = React.memo((props: { tabs: Tab[] }) => {
   const [duplicateTabsCount, setDuplicateTabsCount] = useState(0)
+  const { dispatch } = useContext(DispatchContext)
 
   function onCleanupTabs() {
     getDuplicatedTabs((duplicatedTabs) => {
@@ -75,7 +119,7 @@ const CleanupButton = React.memo((props: { tabs: Tab[], dispatch: ActionDispatch
         }
       }))
       const message = duplicatedTabs.length > 0 ? `${duplicatedTabs.length} duplicate tabs was closed` : "There are no duplicate tabs"
-      showMessage(message, props.dispatch)
+      showMessage(message, dispatch)
     })
   }
 
@@ -88,7 +132,7 @@ const CleanupButton = React.memo((props: { tabs: Tab[], dispatch: ActionDispatch
   return <button className="btn__setting btn__cleanup"
                  title="Close duplicate tabs"
                  disabled={duplicateTabsCount === 0}
-                 onClick={onCleanupTabs}>Cleanup {duplicateTabsCount ? duplicateTabsCount : '' }</button>
+                 onClick={onCleanupTabs}>Dedup {duplicateTabsCount ? duplicateTabsCount : ""}</button>
 })
 
 function getDuplicatedTabs(cb: (value: Tab[]) => void): void {
@@ -105,7 +149,7 @@ function getDuplicatedTabs(cb: (value: Tab[]) => void): void {
         const groupedTabsByUrl = tabsByUrl.get(t.url)!
 
         //special condition to now close current tab with Tabme but close all others
-        if (t.url.includes(`://newtab/`) && t.active) {
+        if (isTabmeTab(t) && t.active) {
           groupedTabsByUrl.unshift(t)
         } else {
           groupedTabsByUrl.push(t)
