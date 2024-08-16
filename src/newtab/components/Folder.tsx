@@ -14,6 +14,15 @@ export function Folder(props: {
   const [showMenu, setShowMenu] = useState<boolean>(false)
 
   function onDelete() {
+    const archivedItemsCount = props.folder.items.filter(item => item.archived).length
+    if (archivedItemsCount > 0) {
+      const itemsText = archivedItemsCount > 1 ? "items" : "item"
+      const res = confirm(`Folder contains ${archivedItemsCount} hidden ${itemsText}. Do you still want to delete it?`)
+      if (!res) {
+        return
+      }
+    }
+
     dispatch({
       type: Action.DeleteFolder,
       folderId: props.folder.id
@@ -101,7 +110,7 @@ export function Folder(props: {
 
   return (
     <div className={folderClassName} data-folder-id={props.folder.id}>
-      <h2 style={{ backgroundColor: folderBackgroundColor }} className="draggable-folder">
+      <h2 style={{ backgroundColor: folderBackgroundColor }} className="draggable-folder" onContextMenu={e => {setShowMenu(!showMenu), e.preventDefault()}}>
         <span className="folder-title">
           <span className="folder-title__text" onClick={onEditTitle}>{props.folder.title}{props.folder.archived ? " [archived]" : ""}</span>
           <span className="folder-title__button" onClick={() => setShowMenu(!showMenu)}>☰</span>
