@@ -46,12 +46,6 @@ export function SidebarOpenTabs(props: {
               itemInEdit: item.id
             }
           })
-
-          // TODO: ask confirmation before closing the current tab
-          dispatch({
-            type: Action.CloseTab,
-            tabId: tab.id
-          })
         } else { // Add section
           dispatch({
             type: Action.AddBookmarkToFolder,

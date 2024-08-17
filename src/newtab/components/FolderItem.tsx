@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from "react"
 import { IFolder, IFolderItem } from "../helpers/types"
-import { hlSearch, isFolderItemNotUsed, isFolderItemOpened } from "../helpers/utils"
+import { hlSearch, isFolderItemNotUsed, findTabByURL } from "../helpers/utils"
 import { Action, DispatchContext, IAppState } from "../state"
 import { DropdownMenu } from "./DropdownMenu"
 import { showMessage, showMessageWithUndo } from "../helpers/actions"
@@ -96,8 +96,19 @@ export function FolderItem(props: {
     e.preventDefault()
   }
 
-  const className = "folder-item__inner__title "
-    + (isFolderItemOpened(props.item.url, props.appState.tabs) ? "opened " : "")
+  function onCloseTab(e: React.MouseEvent) {
+    const tab = findTabByURL(props.item.url, props.appState.tabs)
+    if (tab?.id) {
+      dispatch({
+        type: Action.CloseTab,
+        tabId: tab.id
+      })
+    }
+  }
+
+  const folderItemOpened = !!findTabByURL(props.item.url, props.appState.tabs)
+  const titleClassName = "folder-item__inner__title "
+    + (folderItemOpened ? "opened " : "")
     + (props.appState.showNotUsed && isFolderItemNotUsed(props.item, props.appState.historyItems) ? "not-used " : "")
 
   return (
@@ -136,15 +147,20 @@ export function FolderItem(props: {
            data-id={props.item.id}
            title={props.item.url}
            onContextMenu={onContextMenu}>
-        <img src={props.item.favIconUrl} alt="" />
-        <EditableTitle className={className}
+        <img src={props.item.favIconUrl} alt=""/>
+        <EditableTitle className={titleClassName}
                        inEdit={props.inEdit}
                        setEditing={setEditing}
                        initTitle={props.item.title}
                        search={props.appState.search}
                        saveTitle={trySaveTitle}
         />
-
+        {
+          folderItemOpened ? <button className="btn__close-tab stop-dad-propagation"
+                                     title="Close the Tab"
+                                     onClick={e => onCloseTab(e)}
+          ><span>✕</span></button> : null
+        }
       </div>
     </div>
   )
@@ -201,7 +217,7 @@ function EditableTitle(p: {
     {
       p.inEdit ?
         <textarea
-          className='editable-title__txt'
+          className="editable-title__txt"
           ref={textareaRef}
           onKeyDown={handleKeyDown}
           onChange={handleTitleChange}

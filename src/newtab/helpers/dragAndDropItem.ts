@@ -305,6 +305,10 @@ function findRootOfDraggableFolder(targetElement: HTMLElement): HTMLElement | nu
 }
 
 function findRootOfDraggableItem(targetElement: HTMLElement): HTMLElement | null {
+  if (doStopPropagation(targetElement)) {
+    return null
+  }
+
   if (isDraggableItemRoot(targetElement)) {
     return targetElement
   }
@@ -326,6 +330,10 @@ function isDraggableItemRoot(targetElement: HTMLElement | null): boolean {
 
 function isDraggableFolderHeader(targetElement: HTMLElement | null): boolean {
   return targetElement ? targetElement.classList.contains("draggable-folder") : false
+}
+
+function doStopPropagation(targetElement: HTMLElement | null): boolean {
+  return targetElement ? targetElement.classList.contains("stop-dad-propagation") : false
 }
 
 function getFolderId(dropAreaElement: HTMLElement): number {

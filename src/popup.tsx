@@ -23,12 +23,10 @@ function Popup() {
 	const [sitesList, setSitesList] = useState<Tab[]>([])
 
 	useEffect(() => {
-		console.log('useEffect1')
 		chrome.browserAction.setBadgeText({text: count.toString()})
 	}, [count])
 
 	useEffect(() => {
-		console.log('useEffect2')
 		chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
 			setCurrentURL(tabs[0].url)
 		})

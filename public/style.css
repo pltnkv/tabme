@@ -630,12 +630,19 @@ h1 {
     padding: 6px 0;
     padding-left: 4px;
     cursor: pointer;
+    border-radius: 4px;
+    background-color: #fff;
+}
+
+.folder-item__inner__selected {
+    background-color: rgba(126, 201, 255, 0.4);
 }
 
 .folder-item {
     textarea {
+        /*max-width: 264px;*/
+        flex-grow: 1;
         height: 0;
-        width: 290px;
         box-sizing: border-box;
         resize: none;
         border: 1px solid var(--colors-blue-300);
@@ -665,6 +672,8 @@ h1 {
 }
 
 .folder-item__inner__title {
+    flex-grow: 1;
+    /*max-width: 264px;*/
     vertical-align: top;
     font-size: 14px;
     display: -webkit-box;
@@ -705,6 +714,39 @@ h1 {
 
 .folder-item.section:hover .folder-item__inner__title {
     text-decoration: none;
+}
+
+.btn__close-tab {
+    width: 24px;
+    min-width: 24px;
+    height: 24px;
+    cursor: pointer;
+    display: inline-flex;
+    border: 0;
+    padding: 3px;
+    margin: -3px;
+    margin-left: 4px;
+    background: transparent;
+
+    span {
+        pointer-events: none;
+        display: block;
+        width: 18px;
+        height: 18px;
+        background-color: rgba(0, 0, 0, 0.1);
+        border: none;
+        border-radius: 50%;
+        font-size: 11px;
+        box-sizing: border-box;
+        line-height: 19px;
+        padding: 0;
+        cursor: pointer;
+        text-align: center;
+    }
+}
+
+.btn__close-tab:hover span {
+    background-color: rgba(0, 0, 0, 0.2);
 }
 
 /* DAD styles */
@@ -820,6 +862,13 @@ body.dragging * {
 
 .dropdown-menu--folder-section {
     top: 11px;
+}
+
+/* confirmation-popup */
+.confirmation-popup {
+    flex-direction: row;
+    left: 24px;
+    right: 0;
 }
 
 /* Notification styles */

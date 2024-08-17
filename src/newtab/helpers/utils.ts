@@ -225,8 +225,11 @@ export function canDisplayTabInSidebar(t: Tab): boolean {
   return !isTabmeTab(t)
 }
 
-export function isFolderItemOpened(url: string, tabs: Tab[]): boolean {
-  return tabs.some(t => t.url === url)
+export function findTabByURL(url: string | undefined, tabs: Tab[]): Tab | undefined {
+  if (!url || url === "") {
+    return undefined
+  }
+  return tabs.find(t => t.url === url)
 }
 
 export function isFolderItemNotUsed(item: IFolderItem, historyItems: HistoryItem[]): boolean {
@@ -392,10 +395,11 @@ function setThemeStyle(useDarkMode: boolean) {
 }
 
 export function getCurrentData() {
-  var today = new Date();
-  var dd = String(today.getDate()).padStart(2, '0');
-  var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-  // var yyyy = today.getFullYear();
-
-  return mm + '/' + dd
+  const today = new Date()
+  const dd = String(today.getDate()).padStart(2, "0")
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+  const mm = months[today.getMonth()]
+  const min = String(today.getMinutes()).padStart(2, "0")
+  const hours = String(today.getHours()).padStart(2, "0")
+  return `${dd} ${mm} at ${hours}:${min}`
 }

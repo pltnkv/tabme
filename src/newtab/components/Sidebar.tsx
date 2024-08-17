@@ -83,7 +83,7 @@ const ShelveButton = (props: { tabs: Tab[] }) => {
         }
       })
 
-      const folderTitle = `Shelved Tabs on ${getCurrentData()}`
+      const folderTitle = `Shelved on ${getCurrentData()}`
       const folderId = createFolder(dispatch, folderTitle, "All Tabs has been shelved")
       tabsToShelve.forEach((tab) => {
         const item = convertTabToItem(tab)
