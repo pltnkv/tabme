@@ -61,7 +61,7 @@ export function Bookmarks(props: {
         } else if (isCustomActionItem(targetItem) && targetItem?.url) {
           executeCustomAction(targetItem.url, dispatch)
         } else if (targetItem) {
-          if (mouseDownEvent.metaKey || mouseDownEvent.ctrlKey) {
+          if (mouseDownEvent.metaKey || mouseDownEvent.ctrlKey || mouseDownEvent.button === 1) {
             // open in new tab
             chrome.tabs.create({ url: targetItem.url })
             //TODO fix bug of not updating bold items when move to new tab in new window
