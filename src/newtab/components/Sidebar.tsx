@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react"
-import { Action, ActionDispatcher, DispatchContext, IAppState } from "../state"
+import { Action, DispatchContext, IAppState } from "../state"
 import { createFolder, showMessage } from "../helpers/actions"
 import { SidebarHistory } from "./SidebarHistory"
 import { SidebarOpenTabs } from "./SidebarOpenTabs"

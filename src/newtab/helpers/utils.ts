@@ -229,7 +229,7 @@ export function findTabByURL(url: string | undefined, tabs: Tab[]): Tab | undefi
   if (!url || url === "") {
     return undefined
   }
-  return tabs.find(t => t.url === url)
+  return tabs.find(t => t.url === url || t.pendingUrl === url)
 }
 
 export function isFolderItemNotUsed(item: IFolderItem, historyItems: HistoryItem[]): boolean {

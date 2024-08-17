@@ -128,7 +128,7 @@ function runItemDragAndDrop(
       }
     }
   }
-  const onMouseUp = (e: MouseEvent) => {
+  const onMouseUp = () => {
     scrollDown = false
     scrollUp = false
 

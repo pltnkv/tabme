@@ -96,7 +96,7 @@ export function FolderItem(props: {
     e.preventDefault()
   }
 
-  function onCloseTab(e: React.MouseEvent) {
+  function onCloseTab() {
     const tab = findTabByURL(props.item.url, props.appState.tabs)
     if (tab?.id) {
       dispatch({
@@ -158,7 +158,7 @@ export function FolderItem(props: {
         {
           folderItemOpened ? <button className="btn__close-tab stop-dad-propagation"
                                      title="Close the Tab"
-                                     onClick={e => onCloseTab(e)}
+                                     onClick={onCloseTab}
           ><span>✕</span></button> : null
         }
       </div>
