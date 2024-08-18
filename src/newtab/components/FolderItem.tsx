@@ -120,23 +120,23 @@ export function FolderItem(props: {
     }>
       {showMenu && !props.item.isSection ? (
         <DropdownMenu onClose={() => setShowMenu(false)} className={"dropdown-menu--folder-item"}>
-          <button className="dropdown-menu__button" onClick={onOpenNewTab}>Open in New Tab</button>
-          <button className="dropdown-menu__button" onClick={onRenameItem}>Rename</button>
-          <button className="dropdown-menu__button" onClick={onCopyUrl}>Copy url</button>
-          <button className="dropdown-menu__button" onClick={onEditUrl}>Edit url</button>
+          <button className="dropdown-menu__button focusable" onClick={onOpenNewTab}>Open in New Tab</button>
+          <button className="dropdown-menu__button focusable" onClick={onRenameItem}>Rename</button>
+          <button className="dropdown-menu__button focusable" onClick={onCopyUrl}>Copy url</button>
+          <button className="dropdown-menu__button focusable" onClick={onEditUrl}>Edit url</button>
           {
             props.item.archived
-              ? <button className="dropdown-menu__button" onClick={onRestore}>Restore</button>
-              : <button className="dropdown-menu__button" onClick={onArchive}>Archive</button>
+              ? <button className="dropdown-menu__button focusable" onClick={onRestore}>Restore</button>
+              : <button className="dropdown-menu__button focusable" onClick={onArchive}>Archive</button>
           }
-          <button className="dropdown-menu__button dropdown-menu__button--dander" onClick={onDeleteItem}>Delete</button>
+          <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onDeleteItem}>Delete</button>
         </DropdownMenu>
       ) : null}
 
       {showMenu && props.item.isSection ? (
         <DropdownMenu onClose={() => setShowMenu(false)} className={"dropdown-menu--folder-section"}>
-          <button className="dropdown-menu__button" onClick={onRenameItem}>Rename</button>
-          <button className="dropdown-menu__button dropdown-menu__button--dander" onClick={onDeleteItem}>Delete</button>
+          <button className="dropdown-menu__button focusable" onClick={onRenameItem}>Rename</button>
+          <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onDeleteItem}>Delete</button>
         </DropdownMenu>
       ) : null}
 

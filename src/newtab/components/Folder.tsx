@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react"
 import { IFolder } from "../helpers/types"
-import { createNewSection, DEFAULT_FOLDER_COLOR, EMPTY_FOLDER_COLOR, filterItemsBySearch } from "../helpers/utils"
+import { colors, createNewSection, DEFAULT_FOLDER_COLOR, EMPTY_FOLDER_COLOR, filterItemsBySearch } from "../helpers/utils"
 import { Action, canShowArchived, DispatchContext, IAppState } from "../state"
 import { DropdownMenu } from "./DropdownMenu"
 import { showMessageWithUndo } from "../helpers/actions"
@@ -68,11 +68,11 @@ export function Folder(props: {
     setShowMenu(false)
   }
 
-  function onColorChange(e: any) {
+  function setColor(color: string) {
     dispatch({
       type: Action.UpdateFolderColor,
       folderId: props.folder.id,
-      color: e.target.value
+      color: color
     })
   }
 
@@ -108,9 +108,14 @@ export function Folder(props: {
   `
   const folderBackgroundColor = folderIsEmptyDuringSearch ? EMPTY_FOLDER_COLOR : props.folder.color || DEFAULT_FOLDER_COLOR
 
+  const onHeaderContextMenu = (e: React.MouseEvent) => {
+    setShowMenu(!showMenu)
+    e.preventDefault()
+  }
+
   return (
     <div className={folderClassName} data-folder-id={props.folder.id}>
-      <h2 style={{ backgroundColor: folderBackgroundColor }} className="draggable-folder" onContextMenu={e => {setShowMenu(!showMenu), e.preventDefault()}}>
+      <h2 style={{ backgroundColor: folderBackgroundColor }} className="draggable-folder" onContextMenu={onHeaderContextMenu}>
         <span className="folder-title">
           <span className="folder-title__text" onClick={onEditTitle}>{props.folder.title}{props.folder.archived ? " [archived]" : ""}</span>
           <span className="folder-title__button" onClick={() => setShowMenu(!showMenu)}>☰</span>
@@ -118,17 +123,23 @@ export function Folder(props: {
 
         {showMenu ? (
           <DropdownMenu onClose={() => setShowMenu(false)} className={"dropdown-menu--folder"}>
-            <input className="dropdown-menu__button"
-                   type="color"
-                   onChange={onColorChange}
-                   value={props.folder.color || DEFAULT_FOLDER_COLOR}
-            />
-            <button className="dropdown-menu__button" onClick={onOpenAll}>Open All Tabs</button>
-            <button className="dropdown-menu__button" onClick={onEditTitle}>Rename</button>
-            <button className="dropdown-menu__button" onClick={onAddSection}>Add Section</button>
-            <button className="dropdown-menu__button" onClick={onArchiveOrRestore}>{props.folder.archived ? "Restore" : "Archive"}</button>
-            {/*<button className="dropdown-menu__button" onClick={onToggleColumnMode}>{props.folder.twoColumn ? "Disable two column" : "Enable two column"}</button>*/}
-            <button className="dropdown-menu__button dropdown-menu__button--dander" onClick={onDelete}>Delete</button>
+            <div className="dropdown-menu__colors-row" style={{ marginTop: "4px" }}>
+              <PresetColor color={PRESET_COLORS[0]} onClick={setColor} currentColor={props.folder.color}/>
+              <PresetColor color={PRESET_COLORS[1]} onClick={setColor} currentColor={props.folder.color}/>
+              <PresetColor color={PRESET_COLORS[2]} onClick={setColor} currentColor={props.folder.color}/>
+              <PresetColor color={PRESET_COLORS[3]} onClick={setColor} currentColor={props.folder.color}/>
+            </div>
+            <div className="dropdown-menu__colors-row" style={{ marginBottom: "4px" }}>
+              <PresetColor color={PRESET_COLORS[4]} onClick={setColor} currentColor={props.folder.color}/>
+              <PresetColor color={PRESET_COLORS[5]} onClick={setColor} currentColor={props.folder.color}/>
+              <PresetColor color={PRESET_COLORS[6]} onClick={setColor} currentColor={props.folder.color}/>
+              <CustomColorInput onChange={setColor} currentColor={props.folder.color}/>
+            </div>
+            <button className="dropdown-menu__button focusable" onClick={onOpenAll}>Open All Tabs</button>
+            <button className="dropdown-menu__button focusable" onClick={onEditTitle}>Rename</button>
+            <button className="dropdown-menu__button focusable" onClick={onAddSection}>Add Section</button>
+            <button className="dropdown-menu__button focusable" onClick={onArchiveOrRestore}>{props.folder.archived ? "Restore" : "Archive"}</button>
+            <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onDelete}>Delete</button>
           </DropdownMenu>
         ) : null}
       </h2>
@@ -156,4 +167,37 @@ export function Folder(props: {
       </div>
     </div>
   )
+}
+
+declare global {
+  interface Window {
+    pSBC: any
+  }
+}
+
+const PRESET_COLORS = [colors[0], colors[2], colors[4], colors[6], colors[8], colors[9], colors[13]]
+
+function PresetColor(p: { onClick: (color: string) => void; color: string, currentColor?: string }) {
+  const borderColor = window.pSBC(-0.5, p.color)
+  const onClick = () => {
+    p.onClick(p.color)
+  }
+  const active = p.color === p.currentColor
+  return <button className={"dropdown-menu__preset_color " + (active ? "selected" : "")}
+                 tabIndex={0}
+                 onClick={onClick}>
+    <span style={{ backgroundColor: p.color, borderColor }}></span>
+  </button>
+}
+
+function CustomColorInput(p: { onChange: (color: string) => void; currentColor?: string }) {
+  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    p.onChange(e.target.value)
+  }
+
+  const active = !PRESET_COLORS.includes(p.currentColor!)
+  return <div className={"color-picker-container " + (active ? "selected" : "")}>
+    <input type="color" id="colorInput" value={p.currentColor} onChange={e => onChange(e)}/>
+    <label htmlFor="colorInput" className="custom-color-picker"></label>
+  </div>
 }

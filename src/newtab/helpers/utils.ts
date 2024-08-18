@@ -184,7 +184,7 @@ export function filterIrrelevantHistory(
   return res
 }
 
-const colors = [
+export const colors = [
   "#ffcdd2",
   "#f8bbd0",
   "#e1bee7",

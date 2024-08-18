@@ -249,14 +249,14 @@ export function Bookmarks(props: {
                   onClick={onToggleMore}>{moreButtonsVisibility ? "Hide settings" : "Settings"}</button>
           {moreButtonsVisibility ? (
             <DropdownMenu onClose={onToggleMore} className={"dropdown-menu--settings"}>
-              <button className="dropdown-menu__button" onClick={onToggleNotUsed}>
+              <button className="dropdown-menu__button focusable" onClick={onToggleNotUsed}>
                 {props.appState.showNotUsed ? "Unhighlight not used" : "Highlight not used"}
               </button>
-              <button className="dropdown-menu__button" onClick={onToggleMode}>{toggleModeText}</button>
-              <button className="dropdown-menu__button" onClick={onImportExistingBookmarks}>Import bookmarks</button>
-              <button className="dropdown-menu__button" onClick={onAdvanced}>Advanced mode</button>
-              <button className="dropdown-menu__button" onClick={onHowToUse}>Guide: How to use</button>
-              <button className="dropdown-menu__button" onClick={onReportBug}>Report issue</button>
+              <button className="dropdown-menu__button focusable" onClick={onToggleMode}>{toggleModeText}</button>
+              <button className="dropdown-menu__button focusable" onClick={onImportExistingBookmarks}>Import bookmarks</button>
+              <button className="dropdown-menu__button focusable" onClick={onAdvanced}>Advanced mode</button>
+              <button className="dropdown-menu__button focusable" onClick={onHowToUse}>Guide: How to use</button>
+              <button className="dropdown-menu__button focusable" onClick={onReportBug}>Report issue</button>
             </DropdownMenu>
           ) : null}
         </div>
