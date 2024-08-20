@@ -154,6 +154,7 @@ export function FolderItem(props: {
                        initTitle={props.item.title}
                        search={props.appState.search}
                        saveTitle={trySaveTitle}
+                       url={props.item.url}
         />
         {
           folderItemOpened ? <button className="btn__close-tab stop-dad-propagation"
@@ -173,6 +174,7 @@ function EditableTitle(p: {
   initTitle: string,
   search: string
   saveTitle: (val: string) => void,
+  url: string,
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [title, setTitle] = useState(p.initTitle)
@@ -226,7 +228,7 @@ function EditableTitle(p: {
           autoFocus
         />
         :
-        <div className={p.className} dangerouslySetInnerHTML={hlSearch(title, p.search)}/>
+        <a href={p.url} target="_blank" className={p.className} dangerouslySetInnerHTML={hlSearch(title, p.search)}/>
     }
   </>
 }
