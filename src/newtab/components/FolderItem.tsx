@@ -228,7 +228,7 @@ function EditableTitle(p: {
           autoFocus
         />
         :
-        <a href={p.url} target="_blank" className={p.className} dangerouslySetInnerHTML={hlSearch(title, p.search)}/>
+        <a href={p.url} className={p.className} dangerouslySetInnerHTML={hlSearch(title, p.search)}/>
     }
   </>
 }
