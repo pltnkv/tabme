@@ -619,11 +619,16 @@ h1 {
 
 .folder-item__inner {
     display: flex;
+    text-decoration: none;
     width: 100%;
     padding: 6px 0;
     padding-left: 4px;
     cursor: pointer;
     border-radius: 4px;
+
+    img[src=""] {
+        visibility: hidden;
+    }
 }
 
 .folder-item__inner__selected {
@@ -664,6 +669,8 @@ h1 {
 }
 
 .folder-item__inner__title {
+    text-decoration: none;
+    color: var(--main-text-color);
     flex-grow: 1;
     /*max-width: 264px;*/
     vertical-align: top;

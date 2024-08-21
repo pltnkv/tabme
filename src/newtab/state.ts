@@ -127,7 +127,7 @@ export enum Action {
   HideNotification = "hide-notification",
   UpdateSearch = "update-search",
   UpdateTab = "tab-update",
-  CloseTab = "close-tab",
+  CloseTabs = "close-tab",
   SetTabsAndHistory = "set-tab-and-history",
   Reset = "reset",
   ToggleDarkMode = "toggle-dark-mode",
@@ -162,7 +162,7 @@ export type FoldersAction =
   tabId: number;
   opt: { url?: string; favIconUrl?: string; title?: string };
 }
-  | { type: Action.CloseTab; tabId: number }
+  | { type: Action.CloseTabs; tabIds: number[] }
   | { type: Action.SetTabsAndHistory; tabs: Tab[]; history: HistoryItem[] }
   | { type: Action.Reset }
   | { type: Action.ToggleDarkMode }
@@ -240,7 +240,7 @@ export const saveStateThrottled = throttle(saveState, 1000)
 const savingStateDefaultValues = {
   "folders": [],
   "sidebarCollapsed": false,
-  "colorTheme": 'system',
+  "colorTheme": "system",
   "stat": undefined
 }
 type SavingStateKeys = keyof typeof savingStateDefaultValues
@@ -370,11 +370,11 @@ function stateReducer0(state: IAppState, action: FoldersAction): IAppState {
       }
     }
 
-    case Action.CloseTab: {
-      chrome.tabs.remove(action.tabId)
+    case Action.CloseTabs: {
+      chrome.tabs.remove(action.tabIds)
       return {
         ...state,
-        tabs: state.tabs.filter(t => t.id !== action.tabId)
+        tabs: state.tabs.filter(t => !action.tabIds.includes(t.id!))
       }
     }
 

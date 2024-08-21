@@ -213,8 +213,8 @@ export function Bookmarks(props: {
       <div className="bookmarks-menu">
         <div style={{ display: "flex" }}>
           <input
+            tabIndex={2}
             className="search"
-            autoFocus={true}
             type="text"
             placeholder="Search in Tabme"
             value={props.appState.search}

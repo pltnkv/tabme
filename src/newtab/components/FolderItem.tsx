@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from "react"
 import { IFolder, IFolderItem } from "../helpers/types"
-import { hlSearch, isFolderItemNotUsed, findTabByURL } from "../helpers/utils"
+import { hlSearch, isFolderItemNotUsed, findTabsByURL } from "../helpers/utils"
 import { Action, DispatchContext, IAppState } from "../state"
 import { DropdownMenu } from "./DropdownMenu"
 import { showMessage, showMessageWithUndo } from "../helpers/actions"
@@ -97,16 +97,15 @@ export function FolderItem(props: {
   }
 
   function onCloseTab() {
-    const tab = findTabByURL(props.item.url, props.appState.tabs)
-    if (tab?.id) {
-      dispatch({
-        type: Action.CloseTab,
-        tabId: tab.id
-      })
-    }
+    const tabs = findTabsByURL(props.item.url, props.appState.tabs)
+    const tabIds = tabs.filter(t => t.id).map(t => t.id!)
+    dispatch({
+      type: Action.CloseTabs,
+      tabIds: tabIds
+    })
   }
 
-  const folderItemOpened = !!findTabByURL(props.item.url, props.appState.tabs)
+  const folderItemOpened = findTabsByURL(props.item.url, props.appState.tabs).length !== 0
   const titleClassName = "folder-item__inner__title "
     + (folderItemOpened ? "opened " : "")
     + (props.appState.showNotUsed && isFolderItemNotUsed(props.item, props.appState.historyItems) ? "not-used " : "")
@@ -141,12 +140,16 @@ export function FolderItem(props: {
       ) : null}
 
       <button className="folder-item__menu"
+              onContextMenu={onContextMenu}
               onClick={() => setShowMenu(!showMenu)}>⋯
       </button>
-      <div className="folder-item__inner draggable-item"
-           data-id={props.item.id}
-           title={props.item.url}
-           onContextMenu={onContextMenu}>
+      <a className="folder-item__inner draggable-item"
+         tabIndex={1}
+         data-id={props.item.id}
+         onClick={e => e.preventDefault()}
+         title={props.item.url}
+         href={props.item.url}
+         onContextMenu={onContextMenu}>
         <img src={props.item.favIconUrl} alt=""/>
         <EditableTitle className={titleClassName}
                        inEdit={props.inEdit}
@@ -161,7 +164,7 @@ export function FolderItem(props: {
                                      onClick={onCloseTab}
           ><span>✕</span></button> : null
         }
-      </div>
+      </a>
     </div>
   )
 }

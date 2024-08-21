@@ -225,11 +225,11 @@ export function canDisplayTabInSidebar(t: Tab): boolean {
   return !isTabmeTab(t)
 }
 
-export function findTabByURL(url: string | undefined, tabs: Tab[]): Tab | undefined {
+export function findTabsByURL(url: string | undefined, tabs: Tab[]): Tab[] {
   if (!url || url === "") {
-    return undefined
+    return []
   }
-  return tabs.find(t => t.url === url || t.pendingUrl === url)
+  return tabs.filter(t => t.url === url || t.pendingUrl === url)
 }
 
 export function isFolderItemNotUsed(item: IFolderItem, historyItems: HistoryItem[]): boolean {
