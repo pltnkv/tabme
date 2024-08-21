@@ -1,12 +1,11 @@
 import React, { useContext, useEffect, useRef, useState } from "react"
-import { IFolderItem } from "../helpers/types"
-import { blurSearch, findItemById, hasArchivedItems, hasItemsToHighlight, isCustomActionItem } from "../helpers/utils"
-import { Action, DispatchContext, executeCustomAction, IAppState } from "../state"
+import { blurSearch, findItemById, hasArchivedItems, hasItemsToHighlight } from "../helpers/utils"
+import { Action, DispatchContext, IAppState } from "../state"
 import { bindDADItemEffect } from "../helpers/dragAndDropItem"
-import { createFolder, getCanDragChecker, showMessage } from "../helpers/actions"
-import { clearPressedKeys } from "../helpers/keyboardManager"
+import { clickFolderItem, createFolder, getCanDragChecker, showMessage } from "../helpers/actions"
 import { Folder } from "./Folder"
 import { DropdownMenu } from "./DropdownMenu"
+import { handleBookmarksKeyDown, handleSearchKeyDown } from "../helpers/handleBookmarksKeyDown"
 
 export function Bookmarks(props: {
   appState: IAppState;
@@ -55,30 +54,8 @@ export function Bookmarks(props: {
         setMouseDownEvent(undefined)
       }
       const onClick = (targetId: number) => {
-        const targetItem = findItemById(props.appState, targetId)
-        if (targetItem?.isSection) {
-          onRenameSection(targetItem)
-        } else if (isCustomActionItem(targetItem) && targetItem?.url) {
-          executeCustomAction(targetItem.url, dispatch)
-        } else if (targetItem) {
-          if (mouseDownEvent.metaKey || mouseDownEvent.ctrlKey || mouseDownEvent.button === 1) {
-            // open in new tab
-            chrome.tabs.create({ url: targetItem.url })
-            //TODO fix bug of not updating bold items when move to new tab in new window
-          } else {
-            // open in the same tab or switch to already opened
-            const tab = props.appState.tabs.find(t => t.url === targetItem.url)
-            if (tab && tab.id) {
-              chrome.tabs.update(tab.id, { active: true })
-              chrome.windows.update(tab.windowId, { focused: true })
-            } else {
-              chrome.tabs.getCurrent(t => {
-                chrome.tabs.update(t?.id!, { url: targetItem.url })
-              })
-            }
-          }
-          clearPressedKeys()
-        }
+        const meta = mouseDownEvent.metaKey || mouseDownEvent.ctrlKey || mouseDownEvent.button === 1
+        clickFolderItem(targetId, props.appState, dispatch, meta)
       }
 
       const canDrag = getCanDragChecker(props.appState.search, dispatch)
@@ -97,13 +74,6 @@ export function Bookmarks(props: {
       )
     }
   }, [mouseDownEvent])
-
-  function onRenameSection(targetItem: IFolderItem) {
-    dispatch({
-      type: Action.UpdateAppState,
-      newState: { itemInEdit: targetItem.id }
-    })
-  }
 
   function onMouseDown(e: React.MouseEvent) {
     if (props.appState.itemInEdit === undefined) {
@@ -213,17 +183,18 @@ export function Bookmarks(props: {
       <div className="bookmarks-menu">
         <div style={{ display: "flex" }}>
           <input
-            tabIndex={2}
+            tabIndex={1}
             className="search"
             type="text"
             placeholder="Search in Tabme"
             value={props.appState.search}
             onChange={onSearchChange}
+            onKeyDown={handleSearchKeyDown}
           />
         </div>
         {
           props.appState.search !== ""
-            ? <button className={"btn__clear-search"} onClick={onClearSearch}>✕</button>
+            ? <button tabIndex={1} className={"btn__clear-search"} onClick={onClearSearch}>✕</button>
             : null
         }
         {/*<div className="toolbar-buttons" style={{marginRight: "auto"}}>*/}
@@ -262,7 +233,7 @@ export function Bookmarks(props: {
         </div>
       </div>
 
-      <div className="bookmarks" onMouseDown={onMouseDown}>
+      <div className="bookmarks" onMouseDown={onMouseDown} onKeyDown={(e) => handleBookmarksKeyDown(e, props.appState, dispatch)}>
 
         {folders.map((folder) => (
           <Folder

@@ -144,7 +144,7 @@ export function FolderItem(props: {
               onClick={() => setShowMenu(!showMenu)}>⋯
       </button>
       <a className="folder-item__inner draggable-item"
-         tabIndex={1}
+         tabIndex={2}
          data-id={props.item.id}
          onClick={e => e.preventDefault()}
          title={props.item.url}
@@ -160,6 +160,7 @@ export function FolderItem(props: {
         />
         {
           folderItemOpened ? <button className="btn__close-tab stop-dad-propagation"
+                                     tabIndex={2}
                                      title="Close the Tab"
                                      onClick={onCloseTab}
           ><span>✕</span></button> : null
@@ -220,6 +221,7 @@ function EditableTitle(p: {
     {
       p.inEdit ?
         <textarea
+          tabIndex={2}
           className="editable-title__txt"
           ref={textareaRef}
           onKeyDown={handleKeyDown}

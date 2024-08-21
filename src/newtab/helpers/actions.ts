@@ -1,5 +1,7 @@
-import { Action, ActionDispatcher } from "../state"
-import { genUniqId } from "./utils"
+import { Action, ActionDispatcher, executeCustomAction, IAppState } from "../state"
+import { findItemById, genUniqId, isCustomActionItem } from "./utils"
+import { clearPressedKeys } from "./keyboardManager"
+import { IFolderItem } from "./types"
 
 export function showMessage(message: string, dispatch: ActionDispatcher): void {
   dispatch({
@@ -39,9 +41,43 @@ export function getCanDragChecker(search: string, dispatch: ActionDispatcher): (
   }
 }
 
-export function createFolder(dispatch: ActionDispatcher, title?:string, successMessage?:string): number {
+export function createFolder(dispatch: ActionDispatcher, title?: string, successMessage?: string): number {
   const newFolderId = genUniqId()
   dispatch({ type: Action.CreateFolder, newFolderId, title })
   showMessage(successMessage || "Folder has been created", dispatch)
   return newFolderId
+}
+
+export function clickFolderItem(targetId: number, appState: IAppState, dispatch: ActionDispatcher, openInNewTab: boolean) {
+  const targetItem = findItemById(appState, targetId)
+  if (targetItem?.isSection) {
+    onRenameSection(targetItem)
+  } else if (isCustomActionItem(targetItem) && targetItem?.url) {
+    executeCustomAction(targetItem.url, dispatch)
+  } else if (targetItem) {
+    if (openInNewTab) {
+      // open in new tab
+      chrome.tabs.create({ url: targetItem.url })
+      //TODO fix bug of not updating bold items when move to new tab in new window
+    } else {
+      // open in the same tab or switch to already opened
+      const tab = appState.tabs.find(t => t.url === targetItem.url)
+      if (tab && tab.id) {
+        chrome.tabs.update(tab.id, { active: true })
+        chrome.windows.update(tab.windowId, { focused: true })
+      } else {
+        chrome.tabs.getCurrent(t => {
+          chrome.tabs.update(t?.id!, { url: targetItem.url })
+        })
+      }
+    }
+    clearPressedKeys()
+  }
+
+  function onRenameSection(targetItem: IFolderItem) {
+    dispatch({
+      type: Action.UpdateAppState,
+      newState: { itemInEdit: targetItem.id }
+    })
+  }
 }
