@@ -236,9 +236,11 @@ function stateReducer0(state: IAppState, action: FoldersAction): IAppState {
 
     case Action.Undo: {
       if (prevState) {
-        return prevState
+        let _prevState = prevState
+        prevState = undefined
+        return _prevState
       } else {
-        alert("Undo not available yet")
+        alert("Nothing to undo")
         return state
       }
     }

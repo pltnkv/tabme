@@ -18,23 +18,30 @@ export function KeyboardManager(props: {
             type: Action.DeleteFolderItem,
             itemIds: getSelectedItemsIds()
           })
+          return
         }
+      }
+
+      if (e.code === "KeyZ" && (e.metaKey || e.ctrlKey)) {
+        dispatch({
+          type: Action.Undo
+        })
         return
       }
 
       const isLetterOrNumber = !!(e.key.length === 1 && e.key.match(/[a-z]|[а-я]|[0-9]/i))
       if (isLetterOrNumber) {
-        dispatch({
-          type: Action.UpdateSearch,
-          value: props.search + e.key
-        })
+        // dispatch({
+        //   type: Action.UpdateSearch,
+        //   value: props.search + e.key
+        // })
         ;(document.querySelector("input.search") as HTMLElement).focus()
       }
     }
-    document.addEventListener("keyup", onKeyUp)
+    document.addEventListener("keydown", onKeyUp)
 
     return () => {
-      document.removeEventListener("keyup", onKeyUp)
+      document.removeEventListener("keydown", onKeyUp)
     }
   })
   return null
