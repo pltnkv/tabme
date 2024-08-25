@@ -1,6 +1,5 @@
 import React from "react"
 import ReactDOM from "react-dom"
-import { initKeyboardManager } from "./helpers/keyboardManager"
 import { getStateFromLS, ISavingAppState, saveStateThrottled, setInitAppState } from "./state"
 import { App } from "./components/App"
 import { applyTheme } from "./helpers/utils"
@@ -19,7 +18,6 @@ getStateFromLS((res) => {
 })
 
 function mountApp() {
-  initKeyboardManager()
   ReactDOM.render(
     <React.StrictMode>
       <App/>

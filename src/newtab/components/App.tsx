@@ -2,7 +2,7 @@ import React, { useEffect, useReducer } from "react"
 import { Bookmarks } from "./Bookmarks"
 import { Sidebar } from "./Sidebar"
 import { Notification } from "./Notification"
-import { KeyboardSearch } from "./KeyboardSearch"
+import { KeyboardManager } from "./KeyboardManager"
 import { filterIrrelevantHistory, tryToCreateWelcomeFolder } from "../helpers/utils"
 import { showMessage } from "../helpers/actions"
 import { Welcome } from "./Welcome"
@@ -101,7 +101,7 @@ export function App() {
             : <>
               <Sidebar appState={appState}/>
               <Bookmarks appState={appState}/>
-              <KeyboardSearch search={appState.search}/>
+              <KeyboardManager search={appState.search}/>
             </>
         }
       </div>

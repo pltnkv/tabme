@@ -1,3 +1,5 @@
+import { selectItem, unselectAll } from "./selectionUtils"
+
 const DAD_THRESHOLD = 4
 type DropArea = { element: HTMLElement, rect: DOMRect, itemRects: { thresholdY: number, itemTop: number, itemHeight: number }[] }
 
@@ -16,18 +18,138 @@ export function bindDADItemEffect(
   folderConfig?: {
     onDrop: (draggedFolderId: number, insertBeforeFolderId: number) => void,
     onCancel: () => void,
-  }
+  },
+  canvasEl?: HTMLCanvasElement
 ) {
   const targetRoot = findRootOfDraggableItem(mouseDownEvent.target as HTMLElement)
+  const targetFolderHeader = findRootOfDraggableFolder(mouseDownEvent.target as HTMLElement)
 
   if (targetRoot && mouseDownEvent.button === 0) {
     return runItemDragAndDrop(mouseDownEvent, targetRoot, itemConfig.isFolderItem, itemConfig.onDrop, itemConfig.onCancel, itemConfig.onClick, itemConfig.onDragStarted)
-  } else if (folderConfig) {
-    const targetFolderHeader = findRootOfDraggableFolder(mouseDownEvent.target as HTMLElement)
-    if (targetFolderHeader && mouseDownEvent.button === 0) {
-      return runFolderDragAndDrop(mouseDownEvent, targetFolderHeader.parentElement!, folderConfig.onDrop, folderConfig.onCancel)
+  } else if (folderConfig && targetFolderHeader && mouseDownEvent.button === 0) {
+    unselectAll()
+    return runFolderDragAndDrop(mouseDownEvent, targetFolderHeader.parentElement!, folderConfig.onDrop, folderConfig.onCancel)
+  } else {
+    if (canvasEl && mouseDownEvent.button === 0) {
+      return runMultiselection(mouseDownEvent, canvasEl)
     }
   }
+}
+
+const startPos = {
+  x: 0,
+  y: 0
+}
+
+function runMultiselection(mouseDownEvent: React.MouseEvent, canvas: HTMLCanvasElement) {
+  let mouseMoved = false
+  const rect = canvas.getBoundingClientRect()
+  startPos.x = mouseDownEvent.clientX - rect.left
+  startPos.y = mouseDownEvent.clientY - rect.top
+
+  const dpr = window.devicePixelRatio || 1
+  canvas.width = canvas.clientWidth * dpr
+  canvas.height = canvas.clientHeight * dpr
+  const context = canvas.getContext("2d")!
+  context.scale(dpr, dpr)
+  if (!context) {
+    return
+  }
+
+  const itemElements = Array.from(document.querySelectorAll(".bookmarks .folder-item__inner")) as HTMLElement[]
+  const itemsByRect = itemElements.map(el => ({
+    rect: el.getBoundingClientRect(),
+    element: el
+  }))
+
+  const onMouseMove = (e: MouseEvent) => {
+    mouseMoved = true
+    canvas.style.pointerEvents = "auto"
+
+    const currentX = e.clientX - rect.left
+    const currentY = e.clientY - rect.top
+
+    // Clear the canvas before drawing the new rectangle
+    context.clearRect(0, 0, canvas.width * dpr, canvas.height * dpr)
+
+    // Draw the rectangle
+    context.strokeStyle = "rgba(56, 89, 255, 1)"
+    context.lineWidth = 2
+    context.strokeRect(startPos.x, startPos.y, currentX - startPos.x, currentY - startPos.y)
+
+    const selectionRect: Rect = normalizeRect({
+      x: mouseDownEvent.clientX,
+      y: mouseDownEvent.clientY,
+      width: e.clientX - mouseDownEvent.clientX,
+      height: e.clientY - mouseDownEvent.clientY
+    })
+
+    unselectAll()
+    itemsByRect.forEach(i => {
+      if (areRectsOverlapping(selectionRect, i.rect)) {
+        selectItem(i.element)
+      }
+    })
+  }
+
+  const onMouseUp = (e: MouseEvent) => {
+    if (!mouseMoved) {
+      unselectAll()
+    }
+    context.clearRect(0, 0, canvas.width * dpr, canvas.height * dpr)
+    canvas.style.pointerEvents = "none"
+    unsubscribeEvents()
+  }
+
+  document.body.addEventListener("mousemove", onMouseMove)
+  document.body.addEventListener("mouseup", onMouseUp)
+
+  const unsubscribeEvents = () => {
+    document.body.removeEventListener("mousemove", onMouseMove)
+    document.body.removeEventListener("mouseup", onMouseUp)
+  }
+
+  return unsubscribeEvents
+}
+
+interface Rect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+function areRectsOverlapping(rect1: Rect, rect2: Rect): boolean {
+  // Check if one rectangle is to the left of the other
+  if (rect1.x + rect1.width <= rect2.x || rect2.x + rect2.width <= rect1.x) {
+    return false
+  }
+
+  // Check if one rectangle is above the other
+  if (rect1.y + rect1.height <= rect2.y || rect2.y + rect2.height <= rect1.y) {
+    return false
+  }
+
+  // If neither condition is true, the rectangles must overlap
+  return true
+}
+
+function normalizeRect(rect: Rect): Rect {
+  let normalizedRect = { ...rect }
+
+  // If width is negative, adjust the x coordinate and make width positive
+  if (normalizedRect.width < 0) {
+    normalizedRect.x += normalizedRect.width
+    normalizedRect.width = Math.abs(normalizedRect.width)
+  }
+
+  // If height is negative, adjust the y coordinate and make height positive
+  if (normalizedRect.height < 0) {
+    normalizedRect.y += normalizedRect.height
+    normalizedRect.height = Math.abs(normalizedRect.height)
+  }
+
+  return normalizedRect
 }
 
 function runItemDragAndDrop(

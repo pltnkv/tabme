@@ -88,7 +88,7 @@ const ShelveButton = (props: { tabs: Tab[] }) => {
       tabsToShelve.forEach((tab) => {
         const item = convertTabToItem(tab)
         dispatch({
-          type: Action.AddBookmarkToFolder,
+          type: Action.AddNewBookmarkToFolder,
           folderId,
           itemIdInsertAfter: undefined,
           item

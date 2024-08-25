@@ -1,6 +1,5 @@
 import { Action, ActionDispatcher, executeCustomAction, IAppState } from "../state"
 import { findItemById, genUniqId, isCustomActionItem } from "./utils"
-import { clearPressedKeys } from "./keyboardManager"
 import { IFolderItem } from "./types"
 
 export function showMessage(message: string, dispatch: ActionDispatcher): void {
@@ -71,7 +70,6 @@ export function clickFolderItem(targetId: number, appState: IAppState, dispatch:
         })
       }
     }
-    clearPressedKeys()
   }
 
   function onRenameSection(targetItem: IFolderItem) {

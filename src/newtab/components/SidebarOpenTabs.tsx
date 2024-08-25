@@ -34,7 +34,7 @@ export function SidebarOpenTabs(props: {
         if (tab && tab.id) { // Add existing Tab
           const item = convertTabToItem(tab)
           dispatch({
-            type: Action.AddBookmarkToFolder,
+            type: Action.AddNewBookmarkToFolder,
             folderId,
             itemIdInsertAfter,
             item
@@ -48,7 +48,7 @@ export function SidebarOpenTabs(props: {
           })
         } else { // Add section
           dispatch({
-            type: Action.AddBookmarkToFolder,
+            type: Action.AddNewBookmarkToFolder,
             folderId,
             itemIdInsertAfter,
             item: createNewSection()

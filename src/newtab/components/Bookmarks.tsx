@@ -16,29 +16,23 @@ export function Bookmarks(props: {
   const [mouseDownEvent, setMouseDownEvent] = useState<React.MouseEvent | undefined>(undefined)
 
   const fileInput = useRef(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
     if (mouseDownEvent) {
       const onDropItem = (folderId: number, itemIdInsertAfter: number | undefined, targetId: number) => {
-        const targetItem = findItemById(props.appState, targetId)
-        if (targetItem) {
 
-          if (folderId === -1) { // we need to create new folder first
-            folderId = createFolder(dispatch)
-          }
-
-          dispatch({
-            type: Action.DeleteFolderItem,
-            itemId: targetId
-          })
-
-          dispatch({
-            type: Action.AddBookmarkToFolder,
-            folderId,
-            itemIdInsertAfter,
-            item: targetItem
-          })
+        if (folderId === -1) { // we need to create new folder first
+          folderId = createFolder(dispatch)
         }
+
+        dispatch({
+          type: Action.MoveBookmarkToFolder,
+          targetItemId: targetId,
+          targetFolderId: folderId,
+          itemIdInsertAfter
+        })
+
         setMouseDownEvent(undefined)
       }
       const onDropFolder = (folderId: number, insertBeforeFolderId: number) => {
@@ -70,7 +64,8 @@ export function Bookmarks(props: {
         {
           onDrop: onDropFolder,
           onCancel
-        }
+        },
+        canvasRef.current!
       )
     }
   }, [mouseDownEvent])
@@ -234,6 +229,7 @@ export function Bookmarks(props: {
       </div>
 
       <div className="bookmarks" onMouseDown={onMouseDown} onKeyDown={(e) => handleBookmarksKeyDown(e, props.appState, dispatch)}>
+        <canvas id="canvas-selection" ref={canvasRef}></canvas>
 
         {folders.map((folder) => (
           <Folder
@@ -258,4 +254,3 @@ export function Bookmarks(props: {
     </div>
   )
 }
-

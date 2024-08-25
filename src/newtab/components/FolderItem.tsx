@@ -39,16 +39,16 @@ export function FolderItem(props: {
         itemId: props.item.id,
         newTitle
       })
-      showMessageWithUndo("Item has been renamed", dispatch)
+      showMessageWithUndo("Bookmark has been renamed", dispatch)
     }
   }
 
   function onDeleteItem() {
     dispatch({
       type: Action.DeleteFolderItem,
-      itemId: props.item.id
+      itemIds: [props.item.id]
     })
-    showMessageWithUndo("Link has been deleted", dispatch)
+    showMessageWithUndo("Bookmark has been deleted", dispatch)
   }
 
   function onCopyUrl() {
@@ -78,7 +78,7 @@ export function FolderItem(props: {
       itemId: props.item.id,
       archived: true
     })
-    showMessageWithUndo("Item has been archived", dispatch)
+    showMessageWithUndo("Bookmark has been archived", dispatch)
   }
 
   function onRestore() {
@@ -88,7 +88,7 @@ export function FolderItem(props: {
       itemId: props.item.id,
       archived: false
     })
-    showMessage("Item has been restored", dispatch)
+    showMessage("Bookmark has been restored", dispatch)
   }
 
   function onContextMenu(e: React.MouseEvent) {

@@ -54,7 +54,7 @@ export function Folder(props: {
   function onAddSection() {
     const newSection = createNewSection()
     dispatch({
-      type: Action.AddBookmarkToFolder,
+      type: Action.AddNewBookmarkToFolder,
       folderId: props.folder.id,
       itemIdInsertAfter: undefined,
       item: newSection

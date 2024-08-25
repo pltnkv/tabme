@@ -1,8 +1,9 @@
 import { ColorTheme, IFolder, IFolderItem } from "./helpers/types"
-import { applyTheme, findFolderByItemId, genUniqId, getRandomHEXColor, throttle } from "./helpers/utils"
+import { applyTheme, findFolderByItemId, findItemById, genUniqId, getRandomHEXColor, throttle } from "./helpers/utils"
 import HistoryItem = chrome.history.HistoryItem
 import Tab = chrome.tabs.Tab
 import { createContext } from "react"
+import { unselectAll } from "./helpers/selectionUtils"
 
 export const DispatchContext = createContext<{ dispatch: ActionDispatcher }>(null!)
 
@@ -65,10 +66,6 @@ export type IAppState = {
   achievements: IAppAchievements
 };
 
-export function setInitAppState(savedState: ISavingAppState): void {
-  initState = { ...initState, ...savedState }
-}
-
 let initState: IAppState = {
   folders: [],
   historyItems: [],
@@ -116,6 +113,10 @@ let initState: IAppState = {
   }
 }
 
+export function setInitAppState(savedState: ISavingAppState): void {
+  initState = { ...initState, ...savedState }
+}
+
 export function getInitAppState(): IAppState {
   return initState
 }
@@ -142,7 +143,8 @@ export enum Action {
   UpdateFolderArchived = "update-folder-archived",
   UpdateFolderItem = "update-folder-item",
   DeleteFolderItem = "delete-folder-item",
-  AddBookmarkToFolder = "add-bookmark-to-folder",
+  AddNewBookmarkToFolder = "add-new-bookmark-to-folder",
+  MoveBookmarkToFolder = "move-bookmark-to-folder",
   UpdateAppState = "update-app-state", // generic way to set simple value into AppState
 }
 
@@ -186,12 +188,17 @@ export type FoldersAction =
   archived?: boolean;
   url?: string
 }
-  | { type: Action.DeleteFolderItem; itemId: number }
+  | { type: Action.DeleteFolderItem; itemIds: number[] }
   | {
-  type: Action.AddBookmarkToFolder;
+  type: Action.AddNewBookmarkToFolder;
   folderId: number;
   itemIdInsertAfter: number | undefined;
   item: IFolderItem;
+} | {
+  type: Action.MoveBookmarkToFolder;
+  targetItemId: number;
+  targetFolderId: number;
+  itemIdInsertAfter: number | undefined;
 } | {
   type: Action.UpdateAppState
   newState: Partial<IAppState>
@@ -202,8 +209,9 @@ export type ActionDispatcher = (action: FoldersAction) => void;
 let prevState: IAppState | undefined
 
 export function stateReducer(state: IAppState, action: FoldersAction): IAppState {
+  unselectAll()
   const newState = stateReducer0(state, action)
-  console.log("action and newState:", action, newState)
+  console.log("[action]:", action, " [new state]:", newState)
   if (state.folders !== newState.folders
     || state.sidebarCollapsed !== newState.sidebarCollapsed
     || state.colorTheme !== newState.colorTheme
@@ -214,51 +222,6 @@ export function stateReducer(state: IAppState, action: FoldersAction): IAppState
     }
   }
   return newState
-}
-
-const bc = new BroadcastChannel("sync-state-channel")
-
-export function getBC() {
-  return bc
-}
-
-function saveState(appState: IAppState): void {
-  const savingState: any = {}
-  savingStateKeys.forEach(key => {
-    savingState[key] = appState[key as SavingStateKeys]
-  })
-
-  chrome.storage.local.set(savingState, () => {
-    console.log("SAVED")
-    bc.postMessage({ type: "folders-updated" })
-  })
-}
-
-let notificationTimeout: number | undefined
-export const saveStateThrottled = throttle(saveState, 1000)
-
-const savingStateDefaultValues = {
-  "folders": [],
-  "sidebarCollapsed": false,
-  "colorTheme": "system",
-  "stat": undefined
-}
-type SavingStateKeys = keyof typeof savingStateDefaultValues
-const savingStateKeys = Object.keys(savingStateDefaultValues)
-
-export type ISavingAppState = {
-  [key in SavingStateKeys]: IAppState[key]
-}
-
-export function getStateFromLS(callback: (state: ISavingAppState) => void): void {
-  chrome.storage.local.get(savingStateKeys, (res) => {
-    for (const resKey in res) {
-      if (typeof res[resKey] === "undefined" && savingStateKeys.includes(resKey)) {
-        res[resKey] = savingStateDefaultValues[resKey as SavingStateKeys]
-      }
-    }
-    callback(res as ISavingAppState)
-  })
 }
 
 function stateReducer0(state: IAppState, action: FoldersAction): IAppState {
@@ -487,23 +450,27 @@ function stateReducer0(state: IAppState, action: FoldersAction): IAppState {
     }
 
     case Action.DeleteFolderItem: {
-      const folder = findFolderByItemId(state, action.itemId)
-      if (folder) {
-        return {
-          ...state,
-          folders: updateFolder(state.folders, folder.id, (folder) => {
-            return {
-              ...folder,
-              items: folder.items.filter((i) => i.id !== action.itemId)
-            }
-          })
+      const deleteItemsFromFolders = (_state: IAppState, itemId: number) => {
+        const folder = findFolderByItemId(_state, itemId)
+        if (folder) {
+          return {
+            ..._state,
+            folders: updateFolder(_state.folders, folder.id, (folder) => {
+              return {
+                ...folder,
+                items: folder.items.filter((i) => i.id !== itemId)
+              }
+            })
+          }
+        } else {
+          return _state
         }
-      } else {
-        return state
       }
+
+      return action.itemIds.reduce(deleteItemsFromFolders, state)
     }
 
-    case Action.AddBookmarkToFolder: {
+    case Action.AddNewBookmarkToFolder: {
       return {
         ...state,
         folders: updateFolder(state.folders, action.folderId, (folder) => {
@@ -529,9 +496,36 @@ function stateReducer0(state: IAppState, action: FoldersAction): IAppState {
       }
     }
 
+    case Action.MoveBookmarkToFolder: {
+      const targetItem = findItemById(state, action.targetItemId)
+      if (targetItem) {
+        return pipeActions(state,
+          {
+            type: Action.DeleteFolderItem,
+            itemIds: [action.targetItemId]
+          },
+          {
+            type: Action.AddNewBookmarkToFolder,
+            folderId: action.targetFolderId,
+            itemIdInsertAfter: action.itemIdInsertAfter,
+            item: targetItem
+          })
+      } else {
+        return state
+      }
+    }
+
     default:
       throw new Error("Unknown action")
   }
+}
+
+//////////////////////////////////////////////////////////////////////
+// UTILS
+//////////////////////////////////////////////////////////////////////
+
+function pipeActions(state: IAppState, ...actions: FoldersAction[]): IAppState {
+  return actions.reduce(stateReducer0, state)
 }
 
 function updateFolder(
@@ -571,8 +565,6 @@ function updateFolderItem(
   })
 }
 
-// UTILS
-
 export function getFolderById(state: IAppState, folderId: number): IFolder | undefined {
   return state.folders.find(f => f.id === folderId)
 }
@@ -587,4 +579,53 @@ export function executeCustomAction(actionUrl: string, dispatch: ActionDispatche
     // open bookmarks importing
     dispatch({ type: Action.UpdateAppState, newState: { page: "import" } })
   }
+}
+
+//////////////////////////////////////////////////////////////////////
+// SAVING STATE AND BROADCASTING CHANGES
+//////////////////////////////////////////////////////////////////////
+
+const bc = new BroadcastChannel("sync-state-channel")
+
+export function getBC() {
+  return bc
+}
+
+function saveState(appState: IAppState): void {
+  const savingState: any = {}
+  savingStateKeys.forEach(key => {
+    savingState[key] = appState[key as SavingStateKeys]
+  })
+
+  chrome.storage.local.set(savingState, () => {
+    console.log("SAVED")
+    bc.postMessage({ type: "folders-updated" })
+  })
+}
+
+let notificationTimeout: number | undefined
+export const saveStateThrottled = throttle(saveState, 1000)
+
+const savingStateDefaultValues = {
+  "folders": [],
+  "sidebarCollapsed": false,
+  "colorTheme": "system",
+  "stat": undefined
+}
+type SavingStateKeys = keyof typeof savingStateDefaultValues
+const savingStateKeys = Object.keys(savingStateDefaultValues)
+
+export type ISavingAppState = {
+  [key in SavingStateKeys]: IAppState[key]
+}
+
+export function getStateFromLS(callback: (state: ISavingAppState) => void): void {
+  chrome.storage.local.get(savingStateKeys, (res) => {
+    for (const resKey in res) {
+      if (typeof res[resKey] === "undefined" && savingStateKeys.includes(resKey)) {
+        res[resKey] = savingStateDefaultValues[resKey as SavingStateKeys]
+      }
+    }
+    callback(res as ISavingAppState)
+  })
 }
