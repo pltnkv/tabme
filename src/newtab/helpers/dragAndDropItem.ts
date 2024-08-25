@@ -30,23 +30,19 @@ export function bindDADItemEffect(
     unselectAll()
     return runFolderDragAndDrop(mouseDownEvent, targetFolderHeader.parentElement!, folderConfig.onDrop, folderConfig.onCancel)
   } else {
-    if (canvasEl && mouseDownEvent.button === 0) {
-      return runMultiselection(mouseDownEvent, canvasEl)
-    }
+    // if (canvasEl && mouseDownEvent.button === 0) {
+    //   return runMultiselection(mouseDownEvent, canvasEl)
+    // }
   }
-}
-
-const startPos = {
-  x: 0,
-  y: 0
 }
 
 function runMultiselection(mouseDownEvent: React.MouseEvent, canvas: HTMLCanvasElement) {
   let mouseMoved = false
   const rect = canvas.getBoundingClientRect()
-  startPos.x = mouseDownEvent.clientX - rect.left
-  startPos.y = mouseDownEvent.clientY - rect.top
-
+  const startPos = {
+    x: mouseDownEvent.clientX - rect.left,
+    y: mouseDownEvent.clientY - rect.top
+  }
   const dpr = window.devicePixelRatio || 1
   canvas.width = canvas.clientWidth * dpr
   canvas.height = canvas.clientHeight * dpr
@@ -63,6 +59,13 @@ function runMultiselection(mouseDownEvent: React.MouseEvent, canvas: HTMLCanvasE
   }))
 
   const onMouseMove = (e: MouseEvent) => {
+    if (!mouseMoved) {
+      const maxDelta = Math.max(Math.abs(mouseDownEvent.clientX - e.clientX), Math.abs(mouseDownEvent.clientY - e.clientY))
+      if (maxDelta < 3) {
+        return
+      }
+    }
+
     mouseMoved = true
     canvas.style.pointerEvents = "auto"
 
@@ -101,12 +104,12 @@ function runMultiselection(mouseDownEvent: React.MouseEvent, canvas: HTMLCanvasE
     unsubscribeEvents()
   }
 
-  document.body.addEventListener("mousemove", onMouseMove)
-  document.body.addEventListener("mouseup", onMouseUp)
+  document.addEventListener("mousemove", onMouseMove)
+  document.addEventListener("mouseup", onMouseUp)
 
   const unsubscribeEvents = () => {
-    document.body.removeEventListener("mousemove", onMouseMove)
-    document.body.removeEventListener("mouseup", onMouseUp)
+    document.removeEventListener("mousemove", onMouseMove)
+    document.removeEventListener("mouseup", onMouseUp)
   }
 
   return unsubscribeEvents

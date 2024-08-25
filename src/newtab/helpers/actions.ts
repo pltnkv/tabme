@@ -56,7 +56,7 @@ export function clickFolderItem(targetId: number, appState: IAppState, dispatch:
   } else if (targetItem) {
     if (openInNewTab) {
       // open in new tab
-      chrome.tabs.create({ url: targetItem.url })
+      chrome.tabs.create({ url: targetItem.url, active: false})
       //TODO fix bug of not updating bold items when move to new tab in new window
     } else {
       // open in the same tab or switch to already opened
