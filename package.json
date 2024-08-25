@@ -8,6 +8,7 @@
     "build": "webpack --config webpack/webpack.prod.js",
     "clean": "rimraf dist",
     "test": "npx jest",
+    "publish": "node ./publish.js",
     "style": "prettier --write \"src/**/*.{ts,tsx}\""
   },
   "author": "",
