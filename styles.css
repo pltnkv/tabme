@@ -1,87 +1,118 @@
 body {
-  font-family: system-ui, sans-serif;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: start;
-  height: 100vh;
-  background-color: #f4f4f4;
+    font-family: system-ui, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: start;
+    height: 100vh;
+    background-color: #f4f4f4;
 }
 
 .content {
-  background-color: #fff;
-  padding: 0 60px;
-  min-height: 100%;
-  max-width: 800px;
-  min-width: 600px;
-  border-left: 1px solid #bbb;
-  border-right: 1px solid #bbb;
+    background-color: #fff;
+    padding: 0 60px;
+    min-height: 100%;
+    max-width: 800px;
+    min-width: 300px;
+    border-left: 1px solid #bbb;
+    border-right: 1px solid #bbb;
+}
+
+.header {
+    width: calc(100% + 120px);
+    box-sizing: border-box;
+    padding: 20px 60px 0px 60px;
+    background-color: #3C405B;
+    margin-left: -60px;
+    margin-bottom: 40px;
+
+    h1 {
+        margin-top: 0;
+        margin-bottom: 4px;
+    }
+
+    img {
+        display: block;
+        margin: 0;
+    }
+
+    h1, h2 {
+        color: #e4f4ff;
+    }
+}
+
+.header img {
+    width: 100%;
 }
 
 h1 {
-  font-size: 3.8em;
-  font-weight: 200;
-  margin-bottom: 20px;
+    font-size: 3.8em;
+    font-weight: 200;
+    margin-bottom: 20px;
 }
 
 h2 {
-  font-size: 2em;
-  font-weight: normal;
+    font-size: 2em;
+    font-weight: normal;
 }
 
 .goal-text {
-  font-size: 2em;
-  font-weight: 200;
-  margin-top: 0;
-  font-style: italic;
+    font-size: 2em;
+    font-weight: 200;
+    margin-top: 0;
+    font-style: italic;
 }
 
 h3.goal-text {
-  font-size: 1.5em;
-  margin-bottom: 40px;
+    font-size: 1.5em;
+    margin-bottom: 40px;
 }
 
 
 p {
-  margin-top: 0.2em;
+    margin-top: 0.2em;
 }
 
 .install-button {
-  display: inline-block;
-  border: 1px solid #999;
-  border-radius: 4px;
-  padding: 12px;
-  font-size: 2em;
-  text-decoration: none;
+    display: inline-block;
+    border: 1px solid #999;
+    border-radius: 4px;
+    padding: 12px;
+    font-size: 2em;
+    text-decoration: none;
+}
+
+.install-button:hover {
+    background-color: #e3f9ff;
 }
 
 .footer {
-  padding: 40px 0;
+    padding: 40px 0;
 }
 
 .footer hr {
-  margin-bottom: 26px;
+    margin-bottom: 26px;
 }
 
 /** START guide.html */
 
 .guide-block {
-  display: flex;
-  margin: 0 -60px;
-  padding: 80px 60px;
-  background-color: beige;
+    display: flex;
+    margin: 0 -60px;
+    padding: 80px 60px;
+    background-color: beige;
 }
 
 .guide-block video {
-  border: 1px solid #bbb;
+    border: 1px solid #bbb;
 }
 
 .guide-block .text {
-  margin-left: 20px;
-  margin-right: 20px;
-  font-size: 22px;
-  font-weight: 200;
+    margin-left: 20px;
+    margin-right: 20px;
+    font-size: 22px;
+    font-weight: 200;
 }
 
 /** END guide.html */
