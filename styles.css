@@ -58,6 +58,10 @@ h2 {
     font-weight: normal;
 }
 
+.key-features p {
+    margin-top: 1.4em;
+}
+
 .goal-text {
     font-size: 2em;
     font-weight: 200;
