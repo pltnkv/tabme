@@ -117,7 +117,7 @@ export function FolderItem(props: {
       + (props.item.isSection ? "section " : "")
     }>
       {showMenu && !props.item.isSection ? (
-        <DropdownMenu onClose={() => setShowMenu(false)} className={"dropdown-menu--folder-item"}>
+        <DropdownMenu onClose={() => setShowMenu(false)} className={"dropdown-menu--folder-item"} topOffset={4}>
           <button className="dropdown-menu__button focusable" onClick={onOpenNewTab}>Open in New Tab</button>
           <button className="dropdown-menu__button focusable" onClick={onRenameItem}>Rename</button>
           <button className="dropdown-menu__button focusable" onClick={onCopyUrl}>Copy url</button>

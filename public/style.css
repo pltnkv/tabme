@@ -428,7 +428,6 @@ h1 {
 
 .dropdown-menu--settings {
     right: 8px;
-    top: 30px;
 }
 
 .btn__setting {
@@ -918,11 +917,9 @@ body.dragging * {
 
 .dropdown-menu--folder {
     left: 159px;
-    top: 15px;
 }
 
 .dropdown-menu--folder-item {
-    top: 4px;
     margin-left: -3px;
 }
 

@@ -139,7 +139,7 @@ export function Folder(props: {
               onClick={() => setShowMenu(!showMenu)}>☰</span>
 
         {showMenu ? (
-          <DropdownMenu onClose={() => setShowMenu(false)} className={"dropdown-menu--folder"}>
+          <DropdownMenu onClose={() => setShowMenu(false)} className={"dropdown-menu--folder"} topOffset={15}>
             <div className="dropdown-menu__colors-row" style={{ marginTop: "4px" }}>
               <PresetColor color={PRESET_COLORS[0]} onClick={setColor} currentColor={props.folder.color}/>
               <PresetColor color={PRESET_COLORS[1]} onClick={setColor} currentColor={props.folder.color}/>

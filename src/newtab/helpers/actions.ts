@@ -18,7 +18,7 @@ export function showMessageWithUndo(message: string, dispatch: ActionDispatcher)
     button: {
       text: "Undo",
       onClick: () => {
-        dispatch({ type: Action.Undo })
+        dispatch({ type: Action.Undo, dispatch })
         dispatch({ type: Action.HideNotification })
       }
     }

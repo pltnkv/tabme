@@ -2,11 +2,13 @@ import React, { useEffect, useRef, useState } from "react"
 
 export function DropdownMenu(props: {
   className?: string;
+  topOffset?: number
   children: React.ReactChild[];
   onClose: () => void;
 }) {
   const formEl = useRef<HTMLDivElement>(null)
   const [focusedButtonIndex, setFocusedButtonIndex] = useState(-1)
+  const [menuStyles, setMenuStyles] = useState<{ top?: string, bottom?: string, left?: string }>({}) // State to hold dynamic styles
 
   useEffect(() => {
     function onClick(e: MouseEvent) {
@@ -56,18 +58,40 @@ export function DropdownMenu(props: {
     setFocusedButtonIndex(index)
   }
 
+  // Adjust menu position based on available space when it opens
+  useEffect(() => {
+    if (formEl.current) {
+      const rect = formEl.current.getBoundingClientRect()
+      const viewportHeight = window.document.body.clientHeight
+      const bufferSpace = 10 // Buffer space between dropdown and viewport edges
+
+      // Check if there is enough space below
+      if (rect.bottom + bufferSpace > viewportHeight) {
+        // If not enough space below, position it above
+        formEl.current.style.top = "auto"
+        formEl.current.style.bottom = `${30}px`
+      } else {
+        // Otherwise, keep it below
+        formEl.current.style.top = props.topOffset ? `${props.topOffset}px` : "auto"
+        formEl.current.style.bottom = "initial"
+      }
+    }
+  }, [])
+
   return (
-    <div className={"dropdown-menu " + (props.className || "")} ref={formEl}>
+    <div
+      className={"dropdown-menu " + (props.className || "")}
+      ref={formEl}
+      style={menuStyles}
+    >
       {React.Children.map(props.children, (child) => {
-          return React.cloneElement(child as React.ReactElement, {
-            // Clone each child and modify it to be focusable
-            tabIndex: 0,
-            // Adding onFocus to manage focused item index
-            onFocus: (e: React.FocusEvent) => onFocus(e.target)
-          })
-        }
-      )}
+        return React.cloneElement(child as React.ReactElement, {
+          // Clone each child and modify it to be focusable
+          tabIndex: 0,
+          // Adding onFocus to manage focused item index
+          onFocus: (e: React.FocusEvent) => onFocus(e.target)
+        })
+      })}
     </div>
   )
 }
-

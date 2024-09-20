@@ -214,7 +214,7 @@ export function Bookmarks(props: {
           <button className={`btn__setting ${moreButtonsVisibility ? "btn__setting--active" : ""}`}
                   onClick={onToggleMore}>{moreButtonsVisibility ? "Hide settings" : "Settings"}</button>
           {moreButtonsVisibility ? (
-            <DropdownMenu onClose={onToggleMore} className={"dropdown-menu--settings"}>
+            <DropdownMenu onClose={onToggleMore} className={"dropdown-menu--settings"} topOffset={30}>
               <button className="dropdown-menu__button focusable" onClick={onToggleNotUsed}>
                 {props.appState.showNotUsed ? "Unhighlight not used" : "Highlight not used"}
               </button>
