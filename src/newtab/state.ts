@@ -149,7 +149,7 @@ export enum Action {
 }
 
 export type FoldersAction =
-  | { type: Action.Undo }
+  | { type: Action.Undo, dispatch: ActionDispatcher }
   | {
   type: Action.ShowNotification;
   message: string;
@@ -238,11 +238,12 @@ function stateReducer0(state: IAppState, action: FoldersAction): IAppState {
       if (prevState) {
         let _prevState = prevState
         prevState = undefined
+        requestAnimationFrame(() => {
+          action.dispatch({ type: Action.ShowNotification, message: "Undo", dispatch: action.dispatch })
+        })
         return _prevState
       } else {
-        alert("Nothing to undo")
-        // return stateReducer0(state, { type: Action.ShowNotification, message: "dfs"  })
-        return state
+        return stateReducer0(state, { type: Action.ShowNotification, message: "Nothing to undo", dispatch: action.dispatch })
       }
     }
 
@@ -253,7 +254,7 @@ function stateReducer0(state: IAppState, action: FoldersAction): IAppState {
       }
       notificationTimeout = window.setTimeout(() => {
         action.dispatch({ type: Action.HideNotification })
-      }, 4000)
+      }, 3500)
       return {
         ...state,
         notification: {

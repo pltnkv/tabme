@@ -24,7 +24,8 @@ export function KeyboardManager(props: {
 
       if (e.code === "KeyZ" && (e.metaKey || e.ctrlKey)) {
         dispatch({
-          type: Action.Undo
+          type: Action.Undo,
+          dispatch
         })
         return
       }

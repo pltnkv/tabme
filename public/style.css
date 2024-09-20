@@ -1017,6 +1017,7 @@ body.dragging * {
 .notification-box {
     position: absolute;
     display: flex;
+    text-align: center;
     justify-content: center;
     z-index: 1;
     top: 0;
