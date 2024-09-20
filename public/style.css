@@ -890,7 +890,7 @@ body.dragging * {
     appearance: none;
     border: none;
     background-color: transparent;
-    font-size: 16px;
+    font-size: 14px;
     text-align: left;
     cursor: pointer;
 }
