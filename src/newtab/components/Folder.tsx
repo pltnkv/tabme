@@ -5,6 +5,8 @@ import { Action, canShowArchived, DispatchContext, IAppState } from "../state"
 import { DropdownMenu } from "./DropdownMenu"
 import { showMessageWithUndo } from "../helpers/actions"
 import { FolderItem } from "./FolderItem"
+import { EditableTitle } from "./EditableTitle"
+import { CL } from "../helpers/classNameHelper"
 
 export function Folder(props: {
   appState: IAppState;
@@ -30,12 +32,15 @@ export function Folder(props: {
     showMessageWithUndo("Folder has been deleted", dispatch)
   }
 
-  function onEditTitle() {
-    dispatch({
-      type: Action.UpdateFolderTitle,
-      folderId: props.folder.id
-    })
-    setShowMenu(false)
+  function saveFolderTitle(newTitle: string) {
+    if (props.folder.title !== newTitle) {
+      dispatch({
+        type: Action.UpdateFolderTitle,
+        folderId: props.folder.id,
+        title: newTitle
+      })
+    }
+    setEditing(false)
   }
 
   function onArchiveOrRestore() {
@@ -86,16 +91,18 @@ export function Folder(props: {
     setShowMenu(false)
   }
 
-  /* restore -column mode*/
-  // function onToggleColumnMode() {
-  //   dispatch({
-  //     type: Action.UpdateFolderColumnMode,
-  //     folderId: props.folder.id,
-  //     twoColumn: !props.folder.twoColumn
-  //   })
-  // }
+  function onRename() {
+    setEditing(true)
+    setShowMenu(false)
+  }
 
-  /*TODO  get rid of double filtration*/
+  function setEditing(val: boolean) {
+    dispatch({
+      type: Action.UpdateAppState,
+      newState: { itemInEdit: val ? props.folder.id : undefined }
+    })
+  }
+
   const folderItems = filterItemsBySearch(props.folder.items, props.appState.search)
     .filter(i => canShowArchived(props.appState) || !i.archived)
 
@@ -116,10 +123,20 @@ export function Folder(props: {
   return (
     <div className={folderClassName} data-folder-id={props.folder.id}>
       <h2 style={{ backgroundColor: folderBackgroundColor }} className="draggable-folder" onContextMenu={onHeaderContextMenu}>
-        <span className="folder-title">
-          <span className="folder-title__text" onClick={onEditTitle}>{props.folder.title}{props.folder.archived ? " [archived]" : ""}</span>
-          <span className="folder-title__button" onClick={() => setShowMenu(!showMenu)}>☰</span>
-        </span>
+        {
+          <EditableTitle
+            className="folder-title__text"
+            inEdit={props.folder.id === props.appState.itemInEdit}
+            initTitle={props.folder.title}
+            search=""
+            onSaveTitle={saveFolderTitle} // Save the new title
+            onClick={() => setEditing(true)}
+          />
+        }
+        <span className={CL("folder-title__button", {
+          "folder-title__button--visible": showMenu
+        })}
+              onClick={() => setShowMenu(!showMenu)}>☰</span>
 
         {showMenu ? (
           <DropdownMenu onClose={() => setShowMenu(false)} className={"dropdown-menu--folder"}>
@@ -136,8 +153,8 @@ export function Folder(props: {
               <CustomColorInput onChange={setColor} currentColor={props.folder.color}/>
             </div>
             <button className="dropdown-menu__button focusable" onClick={onOpenAll}>Open All Tabs</button>
-            <button className="dropdown-menu__button focusable" onClick={onEditTitle}>Rename</button>
-            <button className="dropdown-menu__button focusable" onClick={onAddSection}>Add Section</button>
+            <button className="dropdown-menu__button focusable" onClick={onRename}>Rename</button>
+            <button className="dropdown-menu__button focusable" onClick={onAddSection}>Add Header</button>
             <button className="dropdown-menu__button focusable" onClick={onArchiveOrRestore}>{props.folder.archived ? "Restore" : "Archive"}</button>
             <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onDelete}>Delete</button>
           </DropdownMenu>

@@ -55,6 +55,8 @@
     --colors-green-900: #153000;
 
     --scrollbar-width: 12px;
+
+    --font: -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
 }
 
 body.dark-theme {
@@ -439,7 +441,7 @@ h1 {
     height: 42px;
     color: var(--button-text-color);
     display: inline-block;
-    font-family: -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    font-family: var(--font), sans-serif;
     font-size: 16px;
     font-weight: 500;
     line-height: 20px;
@@ -562,6 +564,27 @@ h1 {
     padding: 8px;
     border-radius: 8px;
     position: relative;
+    font-size: 18px;
+
+    .folder-title__text {
+        cursor: text;
+    }
+
+    textarea {
+        font-weight: bold;
+        background: none;
+        flex-grow: 1;
+        height: 0;
+        width: calc(100% - 28px);
+        box-sizing: border-box;
+        resize: none;
+        border: 1px solid var(--colors-blue-300);
+        font-family: var(--font), sans-serif;
+        font-size: 18px;
+        padding: 2px;
+        margin: -2px;
+        margin-bottom: -7px;
+    }
 }
 
 .folder-empty-tip {
@@ -610,14 +633,15 @@ h1 {
     cursor: pointer;
 }
 
-.folder .folder-title__text:hover {
-    text-decoration: underline;
-}
-
 .folder .folder-title__button {
+    cursor: pointer;
     padding: 0 6px;
     float: right;
     visibility: hidden;
+}
+
+.folder .folder-title__button--visible {
+    visibility: visible;
 }
 
 .folder:hover .folder-title__button {
@@ -686,7 +710,7 @@ h1 {
         box-sizing: border-box;
         resize: none;
         border: 1px solid var(--colors-blue-300);
-        font-family: system-ui, sans-serif;
+        font-family: var(--font), sans-serif;
         font-size: 14px;
         padding: 2px;
         margin: -2px;
@@ -715,7 +739,7 @@ h1 {
     text-decoration: none;
     color: var(--main-text-color);
     flex-grow: 1;
-    /*max-width: 264px;*/
+    max-width: 264px;
     vertical-align: top;
     font-size: 14px;
     display: -webkit-box;
@@ -837,7 +861,7 @@ body.dragging * {
     font-size: 22px;
     padding-top: 6px;;
     padding-left: 12px;
-    font-family: sans-serif;
+    font-family: var(--font), sans-serif;
     font-weight: 100;
     font-style: italic;
     color: var(--colors-gray-600);

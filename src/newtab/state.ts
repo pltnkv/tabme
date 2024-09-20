@@ -53,7 +53,7 @@ export type IAppState = {
   };
   lastActiveTabIds: number[]
   search: string;
-  itemInEdit: undefined | number,
+  itemInEdit: undefined | number, //can be item or folder
   showArchived: boolean;
   showNotUsed: boolean;
   sidebarCollapsed: boolean; // stored
@@ -173,7 +173,7 @@ export type FoldersAction =
   | { type: Action.CreateFolder; newFolderId?: number, title?: string, items?: IFolderItem[], color?: string }
   | { type: Action.DeleteFolder; folderId: number }
   | { type: Action.MoveFolder; folderId: number; insertBeforeFolderId: number }
-  | { type: Action.UpdateFolderTitle; folderId: number; }
+  | { type: Action.UpdateFolderTitle; folderId: number; title: string }
   | { type: Action.UpdateFolderColor; folderId: number; color: string }
   | { type: Action.UpdateFolderArchived; folderId: number; archived: boolean }
   | {
@@ -241,6 +241,7 @@ function stateReducer0(state: IAppState, action: FoldersAction): IAppState {
         return _prevState
       } else {
         alert("Nothing to undo")
+        // return stateReducer0(state, { type: Action.ShowNotification, message: "dfs"  })
         return state
       }
     }
@@ -388,17 +389,11 @@ function stateReducer0(state: IAppState, action: FoldersAction): IAppState {
     }
 
     case Action.UpdateFolderTitle: {
-      const currentFolderTitle = state.folders.find(f => f.id === action.folderId)?.title
-      const newTitle = prompt("Enter new title", currentFolderTitle)
-      if (newTitle) {
-        return {
-          ...state,
-          folders: updateFolder(state.folders, action.folderId, {
-            title: newTitle
-          })
-        }
-      } else {
-        return state
+      return {
+        ...state,
+        folders: updateFolder(state.folders, action.folderId, {
+          title: action.title
+        })
       }
     }
 

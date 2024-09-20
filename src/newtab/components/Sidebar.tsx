@@ -83,8 +83,11 @@ const ShelveButton = (props: { tabs: Tab[] }) => {
         }
       })
 
-      const folderTitle = `Shelved on ${getCurrentData()}`
-      const folderId = createFolder(dispatch, folderTitle, "All Tabs has been shelved")
+      const folderTitle = `Saved on ${getCurrentData()}`
+      const folderId = createFolder(dispatch, folderTitle, "All Tabs has been saved")
+
+      // todo scroll to new folder
+
       tabsToShelve.forEach((tab) => {
         const item = convertTabToItem(tab)
         dispatch({
@@ -99,7 +102,7 @@ const ShelveButton = (props: { tabs: Tab[] }) => {
 
   return <button className="btn__setting btn__shelve-tabs"
                  disabled={props.tabs.length === 1}
-                 title="Shelve all tabs"
+                 title="Save All Tabs in the new Folder"
                  onClick={onClick}>
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M8.5 9L12 12M12 12L15.5 9M12 12V4.5M4 19V12.75H7.07692L8.92308 15.25H15.6923L16.9231 12.75H20V19H4Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square"/>

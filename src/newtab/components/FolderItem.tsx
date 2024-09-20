@@ -1,9 +1,10 @@
-import React, { useContext, useEffect, useRef, useState } from "react"
+import React, { useContext, useState } from "react"
 import { IFolder, IFolderItem } from "../helpers/types"
-import { hlSearch, isFolderItemNotUsed, findTabsByURL } from "../helpers/utils"
+import { isFolderItemNotUsed, findTabsByURL } from "../helpers/utils"
 import { Action, DispatchContext, IAppState } from "../state"
 import { DropdownMenu } from "./DropdownMenu"
 import { showMessage, showMessageWithUndo } from "../helpers/actions"
+import { EditableTitle } from "./EditableTitle"
 
 export function FolderItem(props: {
   item: IFolderItem;
@@ -39,7 +40,6 @@ export function FolderItem(props: {
         itemId: props.item.id,
         newTitle
       })
-      showMessageWithUndo("Bookmark has been renamed", dispatch)
     }
   }
 
@@ -67,7 +67,6 @@ export function FolderItem(props: {
         itemId: props.item.id,
         url: newUrl
       })
-      showMessageWithUndo("URL has been updated", dispatch)
     }
   }
 
@@ -156,7 +155,7 @@ export function FolderItem(props: {
                        setEditing={setEditing}
                        initTitle={props.item.title}
                        search={props.appState.search}
-                       saveTitle={trySaveTitle}
+                       onSaveTitle={trySaveTitle}
         />
         {
           folderItemOpened ? <button className="btn__close-tab stop-dad-propagation"
@@ -168,70 +167,4 @@ export function FolderItem(props: {
       </a>
     </div>
   )
-}
-
-function EditableTitle(p: {
-  className: string,
-  inEdit: boolean,
-  setEditing: (value: boolean) => void,
-  initTitle: string,
-  search: string
-  saveTitle: (val: string) => void,
-}) {
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const [title, setTitle] = useState(p.initTitle)
-
-  useEffect(() => {
-    // to support UNDO operation
-    setTitle(p.initTitle)
-  }, [p.initTitle])
-
-  useEffect(() => {
-    if (p.inEdit && textareaRef.current) {
-      textareaRef.current.style.height = "0px" // Reset height to recalculate
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight + 2}px`
-    }
-  }, [p.inEdit, title])
-
-  function handleTitleChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
-    setTitle(event.target.value)
-  }
-
-  function trySaveChange() {
-    p.setEditing(false)
-    p.saveTitle(title)
-  }
-
-  const handleKeyDown = (event: React.KeyboardEvent) => {
-    const isCmdEnter = event.metaKey && event.key === "Enter"
-    const isCtrlEnter = event.ctrlKey && event.key === "Enter"
-    const isEnter = event.key === "Enter" && !event.shiftKey
-    const isEscape = event.key === "Escape"
-
-    if (isEscape) {
-      p.setEditing(false)
-      setTitle(p.initTitle)
-    } else if (isEnter || isCmdEnter || isCtrlEnter) {
-      event.preventDefault() // Prevent the default action to avoid inserting a newline
-      trySaveChange()
-    }
-  }
-
-  return <>
-    {
-      p.inEdit ?
-        <textarea
-          tabIndex={2}
-          className="editable-title__txt"
-          ref={textareaRef}
-          onKeyDown={handleKeyDown}
-          onChange={handleTitleChange}
-          onBlur={trySaveChange}
-          value={title}
-          autoFocus
-        />
-        :
-        <div className={p.className} dangerouslySetInnerHTML={hlSearch(title, p.search)}/>
-    }
-  </>
 }

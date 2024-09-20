@@ -47,11 +47,16 @@ export function SidebarOpenTabs(props: {
             }
           })
         } else { // Add section
+          const newSection = createNewSection()
           dispatch({
             type: Action.AddNewBookmarkToFolder,
             folderId,
             itemIdInsertAfter,
-            item: createNewSection()
+            item: newSection
+          })
+          dispatch({
+            type: Action.UpdateAppState,
+            newState: { itemInEdit: newSection.id }
           })
         }
         setMouseDownEvent(undefined)
@@ -165,7 +170,7 @@ export function SidebarOpenTabs(props: {
   >
     <img src={SECTION_ICON_BASE64} alt=""/>
     <div className="inbox-item__text">
-      <div className="inbox-item__title">Section</div>
+      <div className="inbox-item__title">Header</div>
       <div className="inbox-item__url">Drag to create new one</div>
     </div>
   </div>

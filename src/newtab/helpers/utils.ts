@@ -80,7 +80,7 @@ export function createNewFolderItem(url?: string, title?: string, favIconUrl?: s
 
 export const SECTION_ICON_BASE64 = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIj4KICA8cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2ZmZiIgLz4KPC9zdmc+Cg==`
 
-export function createNewSection(title = "Section title"): IFolderItem {
+export function createNewSection(title = "Header"): IFolderItem {
   return {
     id: genUniqId(),
     favIconUrl: SECTION_ICON_BASE64,

@@ -80,8 +80,8 @@ export function Bookmarks(props: {
   function onCreateFolder() {
     const folderId = createFolder(dispatch)
     dispatch({
-      type: Action.UpdateFolderTitle,
-      folderId: folderId
+      type: Action.UpdateAppState,
+      newState: { itemInEdit: folderId }
     })
   }
 
