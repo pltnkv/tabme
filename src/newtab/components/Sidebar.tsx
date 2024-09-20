@@ -73,7 +73,7 @@ const ShelveButton = (props: { tabs: Tab[] }) => {
     chrome.tabs.query({ currentWindow: true }, (tabs) => {
       const tabsToShelve: Tab[] = []
       tabs.forEach(t => {
-        if (t.id) {
+        if (t.id && !t.pinned) {
           if (!isTabmeTab(t)) {
             tabsToShelve.push(t)
           }
@@ -82,6 +82,11 @@ const ShelveButton = (props: { tabs: Tab[] }) => {
           }
         }
       })
+
+      if (tabsToShelve.length === 0) {
+        // probably all the tabs where pinned
+        return
+      }
 
       const folderTitle = `Saved on ${getCurrentData()}`
       const folderId = createFolder(dispatch, folderTitle, "All Tabs has been saved")
