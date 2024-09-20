@@ -86,8 +86,6 @@ const ShelveButton = (props: { tabs: Tab[] }) => {
       const folderTitle = `Saved on ${getCurrentData()}`
       const folderId = createFolder(dispatch, folderTitle, "All Tabs has been saved")
 
-      // todo scroll to new folder
-
       tabsToShelve.forEach((tab) => {
         const item = convertTabToItem(tab)
         dispatch({
@@ -96,6 +94,13 @@ const ShelveButton = (props: { tabs: Tab[] }) => {
           itemIdInsertAfter: undefined,
           item
         })
+      })
+
+      requestAnimationFrame(() => {
+        const folderElement = document.querySelector(`[data-folder-id="${folderId}"]`)
+        if (folderElement) {
+          folderElement.scrollIntoView()
+        }
       })
     })
   }
