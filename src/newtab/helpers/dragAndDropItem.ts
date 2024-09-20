@@ -304,7 +304,7 @@ function runFolderDragAndDrop(mouseDownEvent: React.MouseEvent,
   let dropAreas = calculateDropAreas()
   let prevBoxToDrop: HTMLElement | undefined = undefined
   const draggingFolderId = getFolderId(targetRoot)
-  let targetInsertBeforeFolderId: number
+  let targetInsertBeforeFolderId: number | undefined
   const SCROLL_THRESHOLD = 20
 
   const onMouseMove = (e: MouseEvent) => {
@@ -329,6 +329,7 @@ function runFolderDragAndDrop(mouseDownEvent: React.MouseEvent,
           targetInsertBeforeFolderId = targetInsertBeforeFolderId0
           dropArea?.element.parentElement?.appendChild(placeholder)
         } else {
+          targetInsertBeforeFolderId = undefined
           placeholder.remove()
         }
         prevBoxToDrop = curBoxToDrop
