@@ -222,7 +222,7 @@ export function filterOpenedTabsFromHistory(
 }
 
 export function canDisplayTabInSidebar(t: Tab): boolean {
-  return !isTabmeTab(t)
+  return !isTabmeTab(t) && !t.pinned
 }
 
 export function findTabsByURL(url: string | undefined, tabs: Tab[]): Tab[] {

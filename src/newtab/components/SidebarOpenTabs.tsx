@@ -178,7 +178,7 @@ export function SidebarOpenTabs(props: {
   return (
     <div className="inbox-box" onMouseDown={onMouseDown}>
       {items}
-      {items.length === 0 && props.search === "" ? <p className="no-opened-tabs">...will display here</p> : null}
+      {items.length === 0 && props.search === "" ? <p className="no-opened-tabs">...will be displayed here.<br/> Pinned tabs are filtered out.</p> : null}
       {props.search === "" ? SectionItem : null}
     </div>
   )
