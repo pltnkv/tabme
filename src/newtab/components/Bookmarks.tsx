@@ -144,8 +144,8 @@ export function Bookmarks(props: {
     dispatch({ type: Action.UpdateSearch, value: "" })
   }
 
-  function onReportBug() {
-    prompt("Share feedback or encountered issues to the email: gettabme@gmail.com \n\nThank you for using Tabme", "gettabme@gmail.com")
+  function onSendFeedback() {
+    chrome.tabs.create({ url: "https://chromewebstore.google.com/detail/tabme/jnhiookaaldadiimlgncedhkpmhlmmip/reviews", active: true })
   }
 
   function onHowToUse() {
@@ -215,14 +215,14 @@ export function Bookmarks(props: {
                   onClick={onToggleMore}>{moreButtonsVisibility ? "Hide settings" : "Settings"}</button>
           {moreButtonsVisibility ? (
             <DropdownMenu onClose={onToggleMore} className={"dropdown-menu--settings"} topOffset={30}>
-              <button className="dropdown-menu__button focusable" onClick={onToggleNotUsed}>
+              <button className="dropdown-menu__button focusable" onClick={onToggleNotUsed} title="Highlight not used in past 60 days to archive them. It helps to keep workspace clean. ">
                 {props.appState.showNotUsed ? "Unhighlight not used" : "Highlight not used"}
               </button>
-              <button className="dropdown-menu__button focusable" onClick={onToggleMode}>{toggleModeText}</button>
-              <button className="dropdown-menu__button focusable" onClick={onImportExistingBookmarks}>Import bookmarks</button>
-              <button className="dropdown-menu__button focusable" onClick={onAdvanced}>Advanced mode</button>
-              <button className="dropdown-menu__button focusable" onClick={onHowToUse}>Guide: How to use</button>
-              <button className="dropdown-menu__button focusable" onClick={onReportBug}>Report issue</button>
+              <button className="dropdown-menu__button focusable" onClick={onToggleMode} title="Change your Color Schema">{toggleModeText}</button>
+              <button className="dropdown-menu__button focusable" onClick={onImportExistingBookmarks} title="Import existing Chrome bookmarks into Tabme">Import bookmarks</button>
+              <button className="dropdown-menu__button focusable" onClick={onAdvanced} title="Shows Import and Export into JSON file buttons">Advanced mode</button>
+              <button className="dropdown-menu__button focusable" onClick={onHowToUse} title="Learn more about the Tabme. There are a lot hidden functionality">Guide: How to use</button>
+              <button className="dropdown-menu__button focusable" onClick={onSendFeedback} title="I would appreciate honest feedback on what needs to be improved. Thanks you for using Tabme 🖤">Send feedback 😅</button>
             </DropdownMenu>
           ) : null}
         </div>

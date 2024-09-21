@@ -71,6 +71,18 @@ export function Folder(props: {
     })
 
     setShowMenu(false)
+
+    requestAnimationFrame(() => {
+      const element = document.querySelector(`[data-id="${newSection.id}"]`)
+      if (element) {
+        const rect = element.getBoundingClientRect()
+        const viewportHeight = window.document.body.clientHeight
+        if (rect.bottom > viewportHeight) {
+          element.scrollIntoView({ block: "center" })
+        }
+      }
+    })
+
   }
 
   function setColor(color: string) {
