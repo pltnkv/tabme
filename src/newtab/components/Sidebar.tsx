@@ -66,7 +66,7 @@ export function Sidebar(props: {
   )
 }
 
-const ShelveButton = (props: { tabs: Tab[] }) => {
+const ShelveButton = React.memo((props: { tabs: Tab[] }) => {
   const { dispatch } = useContext(DispatchContext)
 
   const onClick = () => {
@@ -110,15 +110,17 @@ const ShelveButton = (props: { tabs: Tab[] }) => {
     })
   }
 
+  const filteredTabs = props.tabs.filter(t => !t.pinned && !isTabmeTab(t))
+
   return <button className="btn__setting btn__shelve-tabs"
-                 disabled={props.tabs.length === 1}
+                 disabled={filteredTabs.length < 1}
                  title="Save All Tabs in the new Folder"
                  onClick={onClick}>
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M8.5 9L12 12M12 12L15.5 9M12 12V4.5M4 19V12.75H7.07692L8.92308 15.25H15.6923L16.9231 12.75H20V19H4Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square"/>
     </svg>
   </button>
-}
+})
 
 const CleanupButton = React.memo((props: { tabs: Tab[] }) => {
   const [duplicateTabsCount, setDuplicateTabsCount] = useState(0)
