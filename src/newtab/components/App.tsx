@@ -24,7 +24,6 @@ export function App() {
       dispatch({
         type: Action.SetTabsAndHistory,
         tabs: openedTabs,
-        history: []
       })
 
       chrome.history.search({ text: "", maxResults: 10000, startTime }, function(data) {
@@ -32,7 +31,6 @@ export function App() {
         const historyItems = filterIrrelevantHistory(data)
         dispatch({
           type: Action.SetTabsAndHistory,
-          tabs: openedTabs,
           history: historyItems //filterOpenedTabsFromHistory(tabs, data)
         })
 
@@ -43,10 +41,8 @@ export function App() {
     })
   }
 
-  function onTabUpdated(tabId: number, info: Partial<Tab>) {
-    if (info.url || info.title || info.favIconUrl) {
-      dispatch({ type: Action.UpdateTab, tabId, opt: info })
-    }
+  function onTabUpdated(tabId: number, info: Partial<Tab>, tab: Tab) {
+    dispatch({ type: Action.UpdateTab, tabId, opt: tab })
   }
 
   useEffect(() => {

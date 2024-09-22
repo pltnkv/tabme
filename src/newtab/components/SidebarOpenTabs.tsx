@@ -115,10 +115,7 @@ export function SidebarOpenTabs(props: {
 
   // const items = props.tabs.filter(filterNonImportant).map((t) => {
   const items = filterTabsBySearch(props.appState.tabs, props.search).map(t => {
-    let titleHTML = removeUselessProductName(t.title) + (
-      isTabSavedInBookmarks(t, props.appState.folders)
-        ? " <b> [ ★ ]</b>"
-        : "")
+    let shortenedTitle = removeUselessProductName(t.title)
 
     //TODO experiment later
     let domain = extractHostname(t.url)
@@ -129,24 +126,25 @@ export function SidebarOpenTabs(props: {
     //     + '    display: inline-block;">★</span>'
     // }
 
-    function getBgColor(tabId?: number): string {
-      const index = props.appState.lastActiveTabIds.indexOf(tabId!)
-      switch (index) {
-        case 0:
-          return "rgba(181, 192, 235, 0.6)"
-        // case 1:
-        //   return "#d3dcfd"
-        // case 2:
-        //   return "#e7ebff"
-        default:
-          return "transparent"
-      }
-    }
+    // Disabled last opened tab as useless and non clear functionality
+    // function getBgColor(tabId?: number): string {
+    //   const index = props.appState.lastActiveTabIds.indexOf(tabId!)
+    //   switch (index) {
+    //     case 0:
+    //       return "rgba(181, 192, 235, 0.6)"
+    //     // case 1:
+    //     //   return "#d3dcfd"
+    //     // case 2:
+    //     //   return "#e7ebff"
+    //     default:
+    //       return "transparent"
+    //   }
+    // }
 
     return (
       <div
         key={t.id}
-        style={{ backgroundColor: getBgColor(t.id) }}
+        // style={{ backgroundColor: getBgColor(t.id) }}
         className="inbox-item draggable-item"
         data-id={t.id}
       >
@@ -154,7 +152,7 @@ export function SidebarOpenTabs(props: {
         <div className="inbox-item__text">
           <div className="inbox-item__title"
                title={t.title}
-               dangerouslySetInnerHTML={hlSearch(titleHTML, props.search)}/>
+               dangerouslySetInnerHTML={hlSearch(shortenedTitle, props.search)}/>
           <div className="inbox-item__url"
                title={t.url}
                dangerouslySetInnerHTML={hlSearch(domain, props.search)}/>

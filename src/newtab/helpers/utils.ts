@@ -244,10 +244,17 @@ export function isFolderItemNotUsed(item: IFolderItem, historyItems: HistoryItem
 export function hlSearch(str: string, search: string): { __html: string } {
   if (search) {
     const searchRE = new RegExp(escapeRegex(search), "i")
-    return { __html: str.replace(searchRE, `<span class="searched">${search}</span>`) }
+    return { __html: sanitizeHTML(str.replace(searchRE, `<span class="searched">${search}</span>`)) }
   } else {
-    return { __html: str }
+    return { __html: sanitizeHTML(str) }
   }
+}
+
+export function sanitizeHTML(html: string): string {
+  return html
+    .replace(/<script.*?>.*?<\/script>/gi, "")
+    .replace(/on\w+=".*?"/gi, "")
+    .replace(/javascript:/gi, "")
 }
 
 function escapeRegex(s: string): string {
@@ -402,4 +409,21 @@ export function getCurrentData() {
   const min = String(today.getMinutes()).padStart(2, "0")
   const hours = String(today.getHours()).padStart(2, "0")
   return `${dd} ${mm} at ${hours}:${min}`
+}
+
+/**
+ * o1: original object
+ * o2: object to merge with — undefined values as ignored
+ * Return new objects
+ */
+export function mergeObjects<T>(o1: T, o2: Partial<T>): T {
+  const merged = { ...o1 } as T
+  for (let key in o2) {
+    if (o2[key] !== undefined) {
+      // @ts-ignore
+      merged[key] = o2[key]
+    }
+  }
+
+  return merged
 }
