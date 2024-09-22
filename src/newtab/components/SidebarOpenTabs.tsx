@@ -1,14 +1,15 @@
 import React, { useContext, useEffect, useState } from "react"
 import { blurSearch, convertTabToItem, createNewSection, extractHostname, filterTabsBySearch, hlSearch, removeUselessProductName, SECTION_ICON_BASE64 } from "../helpers/utils"
 import { bindDADItemEffect, getDraggedItemId } from "../helpers/dragAndDropItem"
-import { Action, DispatchContext, IAppState } from "../state"
+import { Action, DispatchContext } from "../state"
 import { createFolder, getCanDragChecker, showMessage } from "../helpers/actions"
 import { IFolder, IFolderItem } from "../helpers/types"
 import Tab = chrome.tabs.Tab
 
 export function SidebarOpenTabs(props: {
   search: string;
-  appState: IAppState;
+  tabs: Tab[]
+  folders: IFolder[];
 }) {
   const { dispatch } = useContext(DispatchContext)
   const [mouseDownEvent, setMouseDownEvent] = useState<React.MouseEvent | undefined>(undefined)
@@ -25,7 +26,7 @@ export function SidebarOpenTabs(props: {
       }
 
       const onDrop = (folderId: number, itemIdInsertAfter: number | undefined, targetTabId: number) => {
-        const tab = props.appState.tabs.find((t) => t.id === targetTabId)
+        const tab = props.tabs.find((t) => t.id === targetTabId)
 
         if (folderId === -1) { // we need to create new folder first
           folderId = createFolder(dispatch)
@@ -113,18 +114,11 @@ export function SidebarOpenTabs(props: {
     showMessage("Tab has been closed", dispatch)
   }
 
-  // const items = props.tabs.filter(filterNonImportant).map((t) => {
-  const items = filterTabsBySearch(props.appState.tabs, props.search).map(t => {
+  // const openTabs = props.tabs.filter(filterNonImportant).map((t) => {
+  const openTabs = filterTabsBySearch(props.tabs, props.search).map(t => {
     let shortenedTitle = removeUselessProductName(t.title)
-
-    //TODO experiment later
     let domain = extractHostname(t.url)
-    // if(isTabSavedInBookmarks(t, props.appState.folders)) {
-    //   domain = domain + ' <span style="font-size: 11px;\n'
-    //     + '    vertical-align: top;\n'
-    //     + '    margin-top: 1px;\n'
-    //     + '    display: inline-block;">★</span>'
-    // }
+    const folderTitles = findFoldersTitlesWhereTabSaved(t, props.folders)
 
     // Disabled last opened tab as useless and non clear functionality
     // function getBgColor(tabId?: number): string {
@@ -156,6 +150,11 @@ export function SidebarOpenTabs(props: {
           <div className="inbox-item__url"
                title={t.url}
                dangerouslySetInnerHTML={hlSearch(domain, props.search)}/>
+          {
+            folderTitles
+              ? <div className="inbox-item__already-saved">Already saved in {folderTitles}</div>
+              : null
+          }
         </div>
         <div onClick={onCloseTab} className="inbox-item__close">⨉</div>
       </div>
@@ -175,15 +174,16 @@ export function SidebarOpenTabs(props: {
 
   return (
     <div className="inbox-box" onMouseDown={onMouseDown}>
-      {items}
-      {items.length === 0 && props.search === "" ? <p className="no-opened-tabs">...will be displayed here.<br/> Pinned tabs are filtered out.</p> : null}
+      {openTabs}
+      {openTabs.length === 0 && props.search === "" ? <p className="no-opened-tabs">...will be displayed here.<br/> Pinned tabs are filtered out.</p> : null}
       {props.search === "" ? SectionItem : null}
     </div>
   )
 }
 
-function isTabSavedInBookmarks(curTab: Tab, folders: IFolder[]): boolean {
-  return folders.some(folder => {
-    return folder.items.some((item: IFolderItem) => item.url === curTab.url)
-  })
+function findFoldersTitlesWhereTabSaved(curTab: Tab, folders: IFolder[]): string {
+  return folders
+    .filter(folder => folder.items.some((item: IFolderItem) => item.url === curTab.url))
+    .map(folder => `«${folder.title}»`)
+    .join(", ")
 }

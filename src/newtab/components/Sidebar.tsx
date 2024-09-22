@@ -58,7 +58,8 @@ export function Sidebar(props: {
         {props.appState.sidebarCollapsed ? "»" : "«"}
       </button>
       <SidebarOpenTabs
-        appState={props.appState}
+        tabs={props.appState.tabs}
+        folders={props.appState.folders}
         search={props.appState.search}
       />
       <SidebarHistory appState={props.appState}/>

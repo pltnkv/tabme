@@ -377,6 +377,18 @@ h1 {
     color: var(--colors-gray-600);
 }
 
+.inbox-item__already-saved {
+    vertical-align: top;
+    max-width: 100%;
+    display: none;
+    white-space: normal;
+    color: var(--colors-blue-600);
+}
+
+.dad-dummy .inbox-item__already-saved {
+    display: block;
+}
+
 .history-item {
     cursor: pointer;
     margin-bottom: 12px;
