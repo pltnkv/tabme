@@ -308,7 +308,6 @@ function stateReducer0(state: IAppState, action: FoldersAction): IAppState {
       const options: ColorTheme[] = ["light", "dark", "system"]
       const curModeIndex = options.indexOf(curMode)
       const nextMode = options[curModeIndex + 1 === 3 ? 0 : curModeIndex + 1]
-      console.log("nextMode", nextMode)
       applyTheme(nextMode)
       return { ...state, colorTheme: nextMode }
     }
@@ -604,7 +603,7 @@ export const saveStateThrottled = throttle(saveState, 1000)
 const savingStateDefaultValues = {
   "folders": [],
   "sidebarCollapsed": false,
-  "colorTheme": "system",
+  "colorTheme": "light", // todo I don't use system because it's not ready to used by default
   "stat": undefined
 }
 type SavingStateKeys = keyof typeof savingStateDefaultValues

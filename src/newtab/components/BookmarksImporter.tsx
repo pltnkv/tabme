@@ -155,7 +155,26 @@ const BookmarkList = (props: {
     props.onClose()
   }
 
+  const onQuickImport = () => {
+    let mostVisitedNum = 0
+    records.forEach(rec => {
+      rec.folder.children?.forEach(item => {
+        if (item.mostVisited) {
+          mostVisitedNum++
+          rec.folder.checked = true
+          item.checked = true
+        }
+      })
+    })
+    if (mostVisitedNum === 0) {
+      showMessage("Sorry, \"Recently visited\" bookmarks not found", dispatch)
+    } else {
+      onImport()
+    }
+  }
+
   return <>
+    <button className="btn__setting primary" style={{ marginLeft: 0 }} onClick={onQuickImport}>Quick import only "Recently visited"</button>
     <div className="importing-bookmarks-list">
       {records.map((rec, recIndex) => (
         <div key={rec.folder.id}>
@@ -221,9 +240,10 @@ export function BookmarkImporter(props: {
       <div onClick={onClose} className="importing-bookmarks__close">⨉</div>
       <h1>Import existing bookmarks</h1>
 
-      <p style={{fontSize: '18px', lineHeight: '26px'}}>Tabme streamlines your workflow by keeping project links accessible.<br/>
-        Simplify by limiting folders and links.<br/>
-        Prioritize importing often-used links for easy access
+      <p style={{ fontSize: "18px", lineHeight: "26px" }}>
+        Tabme helps to keep your important links, just one-click away. <br/>
+        Boost your productivity by creating a central hub for your most-used project links.<br/>
+        Import only the bookmarks you use frequently to keep your workspace clean and efficient.<br/>
       </p><br/>
       <BookmarkList historyItems={props.appState.historyItems} onClose={onClose}/>
     </div>

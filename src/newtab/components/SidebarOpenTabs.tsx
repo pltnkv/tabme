@@ -10,6 +10,7 @@ export function SidebarOpenTabs(props: {
   search: string;
   tabs: Tab[]
   folders: IFolder[];
+  lastActiveTabIds: number[]
 }) {
   const { dispatch } = useContext(DispatchContext)
   const [mouseDownEvent, setMouseDownEvent] = useState<React.MouseEvent | undefined>(undefined)
@@ -120,25 +121,29 @@ export function SidebarOpenTabs(props: {
     let domain = extractHostname(t.url)
     const folderTitles = findFoldersTitlesWhereTabSaved(t, props.folders)
 
-    // Disabled last opened tab as useless and non clear functionality
-    // function getBgColor(tabId?: number): string {
-    //   const index = props.appState.lastActiveTabIds.indexOf(tabId!)
-    //   switch (index) {
-    //     case 0:
-    //       return "rgba(181, 192, 235, 0.6)"
-    //     // case 1:
-    //     //   return "#d3dcfd"
-    //     // case 2:
-    //     //   return "#e7ebff"
-    //     default:
-    //       return "transparent"
-    //   }
-    // }
+    function getBgColor(tabId?: number): string {
+      if (tabId && props.lastActiveTabIds[0] === tabId) {
+        return "rgba(181, 192, 235, 0.6)"
+      } else {
+        return "transparent"
+      }
+      // const index = props.lastActiveTabIds.indexOf(tabId!)
+      // switch (index) {
+      //   case 0:
+      //     return "rgba(181, 192, 235, 0.6)"
+      // case 1:
+      //   return "#d3dcfd"
+      // case 2:
+      //   return "#e7ebff"
+      // default:
+      //   return "transparent"
+      // }
+    }
 
     return (
       <div
         key={t.id}
-        // style={{ backgroundColor: getBgColor(t.id) }}
+        style={{ backgroundColor: getBgColor(t.id) }}
         className="inbox-item draggable-item"
         data-id={t.id}
       >

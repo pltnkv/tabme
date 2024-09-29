@@ -61,6 +61,7 @@ export function Sidebar(props: {
         tabs={props.appState.tabs}
         folders={props.appState.folders}
         search={props.appState.search}
+        lastActiveTabIds={props.appState.lastActiveTabIds}
       />
       <SidebarHistory appState={props.appState}/>
     </div>
