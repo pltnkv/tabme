@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react"
 import { IFolder } from "../helpers/types"
 import { colors, createNewSection, DEFAULT_FOLDER_COLOR, EMPTY_FOLDER_COLOR, filterItemsBySearch } from "../helpers/utils"
-import { Action, canShowArchived, DispatchContext, IAppState } from "../state"
+import { Action, canShowArchived, DispatchContext, IAppState, wrapIntoTransaction } from "../state"
 import { DropdownMenu } from "./DropdownMenu"
 import { showMessageWithUndo } from "../helpers/actions"
 import { FolderItem } from "./FolderItem"
@@ -25,19 +25,23 @@ export function Folder(props: {
       }
     }
 
-    dispatch({
-      type: Action.DeleteFolder,
-      folderId: props.folder.id
+    wrapIntoTransaction(() => {
+      dispatch({
+        type: Action.DeleteFolder,
+        folderId: props.folder.id
+      })
     })
     showMessageWithUndo("Folder has been deleted", dispatch)
   }
 
   function saveFolderTitle(newTitle: string) {
     if (props.folder.title !== newTitle) {
-      dispatch({
-        type: Action.UpdateFolderTitle,
-        folderId: props.folder.id,
-        title: newTitle
+      wrapIntoTransaction(() => {
+        dispatch({
+          type: Action.UpdateFolderTitle,
+          folderId: props.folder.id,
+          title: newTitle
+        })
       })
     }
     setEditing(false)
@@ -45,10 +49,12 @@ export function Folder(props: {
 
   function onArchiveOrRestore() {
     const newArchiveState = !props.folder.archived
-    dispatch({
-      type: Action.UpdateFolderArchived,
-      folderId: props.folder.id,
-      archived: newArchiveState
+    wrapIntoTransaction(() => {
+      dispatch({
+        type: Action.UpdateFolderArchived,
+        folderId: props.folder.id,
+        archived: newArchiveState
+      })
     })
 
     const message = `Folder has been ${newArchiveState ? "archived" : "restored"}`
@@ -58,11 +64,13 @@ export function Folder(props: {
 
   function onAddSection() {
     const newSection = createNewSection()
-    dispatch({
-      type: Action.AddNewBookmarkToFolder,
-      folderId: props.folder.id,
-      itemIdInsertAfter: undefined,
-      item: newSection
+    wrapIntoTransaction(() => {
+      dispatch({
+        type: Action.AddNewBookmarkToFolder,
+        folderId: props.folder.id,
+        itemIdInsertAfter: undefined,
+        item: newSection
+      })
     })
 
     dispatch({
@@ -86,10 +94,12 @@ export function Folder(props: {
   }
 
   function setColor(color: string) {
+    wrapIntoTransaction(() => {
     dispatch({
       type: Action.UpdateFolderColor,
       folderId: props.folder.id,
       color: color
+    })
     })
   }
 

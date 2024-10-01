@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react"
 import { IFolder, IFolderItem } from "../helpers/types"
 import { isFolderItemNotUsed, findTabsByURL } from "../helpers/utils"
-import { Action, DispatchContext, IAppState } from "../state"
+import { Action, DispatchContext, IAppState, wrapIntoTransaction } from "../state"
 import { DropdownMenu } from "./DropdownMenu"
 import { showMessage, showMessageWithUndo } from "../helpers/actions"
 import { EditableTitle } from "./EditableTitle"
@@ -34,19 +34,23 @@ export function FolderItem(props: {
 
   function trySaveTitle(newTitle: string) {
     if (props.item.title !== newTitle) {
+      wrapIntoTransaction(() => {
       dispatch({
         type: Action.UpdateFolderItem,
         folderId: props.folder.id,
         itemId: props.item.id,
         newTitle
       })
+      })
     }
   }
 
   function onDeleteItem() {
+    wrapIntoTransaction(() => {
     dispatch({
       type: Action.DeleteFolderItem,
       itemIds: [props.item.id]
+    })
     })
     showMessageWithUndo("Bookmark has been deleted", dispatch)
   }
@@ -61,31 +65,37 @@ export function FolderItem(props: {
     const newUrl = prompt("Edit URL", props.item.url)
 
     if (newUrl) {
+      wrapIntoTransaction(() => {
       dispatch({
         type: Action.UpdateFolderItem,
         folderId: props.folder.id,
         itemId: props.item.id,
         url: newUrl
       })
+      })
     }
   }
 
   function onArchive() {
+    wrapIntoTransaction(() => {
     dispatch({
       type: Action.UpdateFolderItem,
       folderId: props.folder.id,
       itemId: props.item.id,
       archived: true
     })
+    })
     showMessageWithUndo("Bookmark has been archived", dispatch)
   }
 
   function onRestore() {
+    wrapIntoTransaction(() => {
     dispatch({
       type: Action.UpdateFolderItem,
       folderId: props.folder.id,
       itemId: props.item.id,
       archived: false
+    })
     })
     showMessage("Bookmark has been restored", dispatch)
   }
@@ -114,7 +124,6 @@ export function FolderItem(props: {
       "folder-item "
       + (showMenu ? "selected " : "")
       + (props.item.archived ? "archived " : "")
-      + (props.item.isSection ? "section " : "")
     }>
       {showMenu && !props.item.isSection ? (
         <DropdownMenu onClose={() => setShowMenu(false)} className={"dropdown-menu--folder-item"} topOffset={4}>
@@ -142,7 +151,10 @@ export function FolderItem(props: {
               onContextMenu={onContextMenu}
               onClick={() => setShowMenu(!showMenu)}>⋯
       </button>
-      <a className="folder-item__inner draggable-item"
+      <a className={
+           "folder-item__inner draggable-item "
+           + (props.item.isSection ? "section " : "")
+         }
          tabIndex={2}
          data-id={props.item.id}
          onClick={e => e.preventDefault()}

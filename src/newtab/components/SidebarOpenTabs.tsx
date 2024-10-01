@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react"
 import { blurSearch, convertTabToItem, createNewSection, extractHostname, filterTabsBySearch, hlSearch, removeUselessProductName, SECTION_ICON_BASE64 } from "../helpers/utils"
 import { bindDADItemEffect, getDraggedItemId } from "../helpers/dragAndDropItem"
-import { Action, DispatchContext } from "../state"
+import { Action, DispatchContext, wrapIntoTransaction } from "../state"
 import { createFolder, getCanDragChecker, showMessage } from "../helpers/actions"
 import { IFolder, IFolderItem } from "../helpers/types"
 import Tab = chrome.tabs.Tab
@@ -35,31 +35,36 @@ export function SidebarOpenTabs(props: {
         }
 
         if (tab && tab.id) { // Add existing Tab
-          const item = convertTabToItem(tab)
-          dispatch({
-            type: Action.AddNewBookmarkToFolder,
-            folderId,
-            itemIdInsertAfter,
-            item
-          })
+          wrapIntoTransaction(() => {
+            const item = convertTabToItem(tab)
+            dispatch({
+              type: Action.AddNewBookmarkToFolder,
+              folderId,
+              itemIdInsertAfter,
+              item
+            })
 
-          dispatch({
-            type: Action.UpdateAppState,
-            newState: {
-              itemInEdit: item.id
-            }
+            dispatch({
+              type: Action.UpdateAppState,
+              newState: {
+                itemInEdit: item.id
+              }
+            })
           })
         } else { // Add section
-          const newSection = createNewSection()
-          dispatch({
-            type: Action.AddNewBookmarkToFolder,
-            folderId,
-            itemIdInsertAfter,
-            item: newSection
-          })
-          dispatch({
-            type: Action.UpdateAppState,
-            newState: { itemInEdit: newSection.id }
+          wrapIntoTransaction(() => {
+
+            const newSection = createNewSection()
+            dispatch({
+              type: Action.AddNewBookmarkToFolder,
+              folderId,
+              itemIdInsertAfter,
+              item: newSection
+            })
+            dispatch({
+              type: Action.UpdateAppState,
+              newState: { itemInEdit: newSection.id }
+            })
           })
         }
         setMouseDownEvent(undefined)
@@ -181,7 +186,7 @@ export function SidebarOpenTabs(props: {
   return (
     <div className="inbox-box" onMouseDown={onMouseDown}>
       {openTabs}
-      {openTabs.length === 0 && props.search === "" ? <p className="no-opened-tabs">...will be displayed here.<br/> Pinned tabs are filtered out.</p> : null}
+      {openTabs.length === 0 && props.search === "" ? <p className="no-opened-tabs">...are displayed here.<br/> Pinned tabs are filtered out.</p> : null}
       {props.search === "" ? SectionItem : null}
     </div>
   )

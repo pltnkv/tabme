@@ -215,7 +215,6 @@ export function wrapIntoTransaction(callback:() => void): void {
   prevState = _prevState
 }
 
-
 export function stateReducer(state: IAppState, action: FoldersAction): IAppState {
   unselectAll()
   const newState = stateReducer0(state, action)
@@ -243,6 +242,7 @@ function stateReducer0(state: IAppState, action: FoldersAction): IAppState {
 
     case Action.Undo: {
       if (prevState) {
+        console.log('!! undo prevState', prevState)
         let _prevState = prevState
         prevState = undefined
         requestAnimationFrame(() => {

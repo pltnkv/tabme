@@ -270,7 +270,7 @@ function runItemDragAndDrop(
       document.body.classList.remove("dragging")
       dummy.remove()
       placeholder.remove()
-      targetRoots.forEach(el => el.style.opacity = "1")
+      targetRoots.forEach(el => el.style.removeProperty("opacity"))
       const tryAddToOriginalPos = targetFolderId === originalFolderId && inRange(indexToDrop, originalIndex, originalIndex + targetRoots.length)
       if (prevBoxToDrop && !tryAddToOriginalPos) {
         const folderId = getFolderId(prevBoxToDrop)
@@ -381,7 +381,7 @@ function runFolderDragAndDrop(mouseDownEvent: React.MouseEvent,
       document.body.classList.remove("dragging")
       dummy.remove()
       placeholder.remove()
-      targetRoot.style.opacity = "1"
+      targetRoot.style.removeProperty("opacity")
       if (prevBoxToDrop && targetInsertBeforeFolderId && draggingFolderId !== targetInsertBeforeFolderId) {
         onDrop(draggingFolderId, targetInsertBeforeFolderId)
       } else {
@@ -499,7 +499,7 @@ function createTabDummy(targetRoots: HTMLElement[], mouseDownEvent: React.MouseE
   const dummy = document.createElement("div")
   targetRoots.forEach(selectedEl => {
     const clonedNode = selectedEl.cloneNode(true) as HTMLElement
-    clonedNode.classList.add("folder-item__inner__selected")
+    clonedNode.classList.add("folder-item__inner--selected")
     dummy.append(clonedNode)
     selectedEl.style.opacity = "0"
   })

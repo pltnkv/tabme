@@ -55,8 +55,6 @@
     --colors-green-900: #153000;
 
     --scrollbar-width: 12px;
-
-    --font: -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
 }
 
 body.dark-theme {
@@ -127,6 +125,7 @@ body,
     height: 100%;
     color: var(--main-text-color);
     background-color: var(--background-color);
+    font-family: 'OpenSans', sans-serif;
 }
 
 button, input {
@@ -228,6 +227,7 @@ body.dark-theme .searched {
     white-space: nowrap;
     transition: opacity 50ms;
     transition-delay: 100ms;
+    font-size: 20px;
 }
 
 .app-sidebar.collapsed h1 {
@@ -246,7 +246,7 @@ body.dark-theme .searched {
 .btn__collapse-sidebar {
     position: absolute;
     right: 8px;
-    top: 16px;
+    top: 14px;
     cursor: pointer;
     appearance: none;
     background-color: var(--button-background-color);
@@ -270,7 +270,7 @@ h1 {
     .btn__cleanup, .btn__shelve-tabs {
         height: 32px;
         line-height: 1px;
-        width: 88px;
+        width: 76px;
         text-align: center;
         padding: 0;
 
@@ -453,7 +453,7 @@ h1 {
     height: 42px;
     color: var(--button-text-color);
     display: inline-block;
-    font-family: var(--font), sans-serif;
+    font-family: 'OpenSans', sans-serif;
     font-size: 16px;
     font-weight: 500;
     line-height: 20px;
@@ -591,11 +591,11 @@ h1 {
         box-sizing: border-box;
         resize: none;
         border: 1px solid var(--colors-blue-300);
-        font-family: var(--font), sans-serif;
+        font-family: 'OpenSans', sans-serif;
         font-size: 18px;
         padding: 2px;
-        margin: -2px;
-        margin-bottom: -7px;
+        margin: -3px;
+        margin-bottom: -9px;
     }
 }
 
@@ -630,7 +630,7 @@ h1 {
     display: inline-block;
     vertical-align: top;
     font-weight: 200;
-    margin-left: 90px;
+    margin-left: 76px;
 }
 
 .draggable-folder {
@@ -672,7 +672,7 @@ h1 {
 
 .folder-item .folder-item__menu {
     cursor: pointer;
-    margin-top: 4px;
+    margin-top: 7px;
     margin-left: -3px;
     visibility: hidden;
     appearance: none;
@@ -710,13 +710,13 @@ h1 {
     }
 }
 
-.folder-item__inner__selected {
-    background-color: rgb(209 224 255 / 85%);
+.folder-item__inner--selected {
+    background-color: rgb(209 224 255 / 80%);
 }
 
-.folder-item__inner__unselected {
-    transition: background-color 0.4s ease-in-out;
-    background-color: rgb(209 224 255 / 0%)
+.dad-dummy .folder-item__inner--selected {
+    background-color: rgb(209 224 255);
+    opacity: 0.7;
 }
 
 .folder-item {
@@ -727,16 +727,17 @@ h1 {
         box-sizing: border-box;
         resize: none;
         border: 1px solid var(--colors-blue-300);
-        font-family: var(--font), sans-serif;
+        font-family: 'OpenSans', sans-serif;
         font-size: 14px;
         padding: 2px;
         margin: -2px;
         margin-bottom: -3px;
     }
 
-    &.section textarea {
-        font-weight: bold;
-        font-size: 1.5em;
+    .section textarea {
+        font-weight: 200;
+        font-size: 20px;
+        color: var(--colors-gray-700);
         padding: 1px;
     }
 }
@@ -774,29 +775,31 @@ h1 {
     color: salmon;
 }
 
+.folder-item__inner.section {
+    padding-top: 8px;
+
+    &:hover .folder-item__inner__title {
+        text-decoration: none;
+    }
+
+    img {
+        display: none;
+    }
+
+    .folder-item__inner__title {
+        font-weight: 200;
+        font-size: 20px;
+        color: var(--colors-gray-700);
+    }
+}
+
+
 .folder-item:hover .folder-item__inner__title {
     text-decoration: underline;
 }
 
 .folder-item:hover .folder-item__menu {
     visibility: visible;
-}
-
-.folder-item.section {
-    padding-top: 8px;
-}
-
-.folder-item.section .folder-item__inner__title {
-    font-weight: bold;
-    font-size: 1.5em;
-}
-
-.folder-item.section img {
-    display: none;
-}
-
-.folder-item.section:hover .folder-item__inner__title {
-    text-decoration: none;
 }
 
 .btn__close-tab {
@@ -878,7 +881,7 @@ body.dragging * {
     font-size: 22px;
     padding-top: 6px;;
     padding-left: 12px;
-    font-family: var(--font), sans-serif;
+    font-family: 'OpenSans', sans-serif;
     font-weight: 100;
     font-style: italic;
     color: var(--colors-gray-600);

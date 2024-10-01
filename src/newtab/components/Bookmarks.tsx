@@ -22,11 +22,12 @@ export function Bookmarks(props: {
     if (mouseDownEvent) {
       const onDropItems = (folderId: number, itemIdInsertAfter: number | undefined, targetsIds: number[]) => {
 
-        if (folderId === -1) { // we need to create new folder first
-          folderId = createFolder(dispatch)
-        }
-
         wrapIntoTransaction(() => {
+
+          if (folderId === -1) { // we need to create new folder first
+            folderId = createFolder(dispatch)
+          }
+
           targetsIds.forEach(targetId => {
             dispatch({
               type: Action.MoveBookmarkToFolder,
@@ -40,10 +41,12 @@ export function Bookmarks(props: {
         setMouseDownEvent(undefined)
       }
       const onDropFolder = (folderId: number, insertBeforeFolderId: number) => {
-        dispatch({
-          type: Action.MoveFolder,
-          folderId,
-          insertBeforeFolderId
+        wrapIntoTransaction(() => {
+          dispatch({
+            type: Action.MoveFolder,
+            folderId,
+            insertBeforeFolderId
+          })
         })
 
         setMouseDownEvent(undefined)
@@ -82,10 +85,13 @@ export function Bookmarks(props: {
   }
 
   function onCreateFolder() {
-    const folderId = createFolder(dispatch)
-    dispatch({
-      type: Action.UpdateAppState,
-      newState: { itemInEdit: folderId }
+    wrapIntoTransaction(() => {
+      const folderId = createFolder(dispatch)
+
+      dispatch({
+        type: Action.UpdateAppState,
+        newState: { itemInEdit: folderId }
+      })
     })
   }
 

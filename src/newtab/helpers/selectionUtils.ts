@@ -1,12 +1,12 @@
 let selectedItems: HTMLElement[] = []
 
 export function selectItem(el: HTMLElement) {
-  el.classList.add("folder-item__inner__selected")
+  el.classList.add("folder-item__inner--selected")
   selectedItems.push(el)
 }
 
 export function unselectItemForced(el: HTMLElement) {
-  el.classList.remove("folder-item__inner__selected")
+  el.classList.remove("folder-item__inner--selected")
 }
 
 export function unselectAll() {

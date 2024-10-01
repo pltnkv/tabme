@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react"
-import { Action, DispatchContext, IAppState } from "../state"
+import { Action, DispatchContext, IAppState, wrapIntoTransaction } from "../state"
 import { createFolder, showMessage } from "../helpers/actions"
 import { SidebarHistory } from "./SidebarHistory"
 import { SidebarOpenTabs } from "./SidebarOpenTabs"
@@ -90,24 +90,26 @@ const ShelveButton = React.memo((props: { tabs: Tab[] }) => {
         return
       }
 
-      const folderTitle = `Saved on ${getCurrentData()}`
-      const folderId = createFolder(dispatch, folderTitle, "All Tabs has been saved")
+      wrapIntoTransaction(() => {
+        const folderTitle = `Saved on ${getCurrentData()}`
+        const folderId = createFolder(dispatch, folderTitle, "All Tabs has been saved")
 
-      tabsToShelve.forEach((tab) => {
-        const item = convertTabToItem(tab)
-        dispatch({
-          type: Action.AddNewBookmarkToFolder,
-          folderId,
-          itemIdInsertAfter: undefined,
-          item
+        tabsToShelve.forEach((tab) => {
+          const item = convertTabToItem(tab)
+          dispatch({
+            type: Action.AddNewBookmarkToFolder,
+            folderId,
+            itemIdInsertAfter: undefined,
+            item
+          })
         })
-      })
 
-      requestAnimationFrame(() => {
-        const folderElement = document.querySelector(`[data-folder-id="${folderId}"]`)
-        if (folderElement) {
-          folderElement.scrollIntoView()
-        }
+        requestAnimationFrame(() => {
+          const folderElement = document.querySelector(`[data-folder-id="${folderId}"]`)
+          if (folderElement) {
+            folderElement.scrollIntoView()
+          }
+        })
       })
     })
   }

@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react"
-import { Action, DispatchContext, IAppState } from "../state"
+import { Action, DispatchContext, IAppState, wrapIntoTransaction } from "../state"
 import { showMessage } from "../helpers/actions"
 import { createNewFolderItem, genUniqId, getFavIconUrl, getTopVisitedFromHistory } from "../helpers/utils"
 import HistoryItem = chrome.history.HistoryItem
@@ -146,7 +146,9 @@ const BookmarkList = (props: {
           .map(item => createNewFolderItem(item.url, item.title, getFavIconUrl(item.url)))
 
         const newFolderId = genUniqId()
-        dispatch({ type: Action.CreateFolder, newFolderId, title: rec.folder.title, items })
+        wrapIntoTransaction(() => {
+          dispatch({ type: Action.CreateFolder, newFolderId, title: rec.folder.title, items })
+        })
       }
       selectedBookmarksCount += rec.folder.children?.reduce<number>((acc, item) => item.checked ? acc + 1 : acc, 0) ?? 0
     })

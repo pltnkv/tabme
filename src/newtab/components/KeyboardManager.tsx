@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from "react"
-import { Action, DispatchContext } from "../state"
+import { Action, DispatchContext, wrapIntoTransaction } from "../state"
 import { getSelectedItemsElements, getSelectedItemsIds } from "../helpers/selectionUtils"
 
 export function KeyboardManager(props: {
@@ -14,9 +14,11 @@ export function KeyboardManager(props: {
 
       if (getSelectedItemsElements().length > 0) {
         if (e.code === "Backspace" || e.code === "Delete") {
-          dispatch({
-            type: Action.DeleteFolderItem,
-            itemIds: getSelectedItemsIds()
+          wrapIntoTransaction(() => {
+            dispatch({
+              type: Action.DeleteFolderItem,
+              itemIds: getSelectedItemsIds()
+            })
           })
           return
         }
