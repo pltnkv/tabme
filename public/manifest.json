@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Tabme",
   "description": "Organize Bookmarks and Tabs, Done Right",
-  "version": "1.15.0",
+  "version": "1.16.0",
   "author": "pltnkv0+tabme@gmail.com",
   "icons": {
     "16": "icon_16.png",
