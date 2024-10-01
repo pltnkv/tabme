@@ -242,13 +242,12 @@ function stateReducer0(state: IAppState, action: FoldersAction): IAppState {
 
     case Action.Undo: {
       if (prevState) {
-        console.log('!! undo prevState', prevState)
         let _prevState = prevState
         prevState = undefined
         requestAnimationFrame(() => {
           action.dispatch({ type: Action.ShowNotification, message: "Undo", dispatch: action.dispatch })
         })
-        return _prevState
+        return {..._prevState}
       } else {
         return stateReducer0(state, { type: Action.ShowNotification, message: "Nothing to undo", dispatch: action.dispatch })
       }
