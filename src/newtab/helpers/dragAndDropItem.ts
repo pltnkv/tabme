@@ -1,4 +1,4 @@
-import { selectItem, unselectAll } from "./selectionUtils"
+import { getSelectedItemsElements, selectItem, unselectAll } from "./selectionUtils"
 
 const DAD_THRESHOLD = 4
 type DropArea = { element: HTMLElement, rect: DOMRect, itemRects: { thresholdY: number, itemTop: number, itemHeight: number }[] }
@@ -9,8 +9,8 @@ let scrollUp = false
 export function bindDADItemEffect(
   mouseDownEvent: React.MouseEvent,
   itemConfig: {
-    isFolderItem: boolean,
-    onDrop: (folderId: number, itemIdInsertAfter: number | undefined, targetId: number) => void,
+    isFolderItem: boolean, // otherwise we drag-and-drop from sidebar
+    onDrop: (folderId: number, itemIdInsertAfter: number | undefined, targetsIds: number[]) => void,
     onCancel: () => void,
     onClick: (targetId: number) => void,
     onDragStarted: () => boolean // return false to prevent action. Previously was named canDrag()
@@ -25,14 +25,20 @@ export function bindDADItemEffect(
   const targetFolderHeader = findRootOfDraggableFolder(mouseDownEvent.target as HTMLElement)
 
   if (targetRoot && mouseDownEvent.button === 0) {
-    return runItemDragAndDrop(mouseDownEvent, targetRoot, itemConfig.isFolderItem, itemConfig.onDrop, itemConfig.onCancel, itemConfig.onClick, itemConfig.onDragStarted)
+    // checking if we start d&d one of selected item
+    let targetRoots = [targetRoot]
+    console.log([...getSelectedItemsElements()])
+    if (getSelectedItemsElements().includes(targetRoot)) {
+      targetRoots = getSelectedItemsElements()
+    }
+    return runItemDragAndDrop(mouseDownEvent, targetRoots, itemConfig.isFolderItem, itemConfig.onDrop, itemConfig.onCancel, itemConfig.onClick, itemConfig.onDragStarted)
   } else if (folderConfig && targetFolderHeader && mouseDownEvent.button === 0) {
     unselectAll()
     return runFolderDragAndDrop(mouseDownEvent, targetFolderHeader.parentElement!, folderConfig.onDrop, folderConfig.onCancel)
   } else {
-    // if (canvasEl && mouseDownEvent.button === 0) {
-    //   return runMultiselection(mouseDownEvent, canvasEl)
-    // }
+    if (canvasEl && mouseDownEvent.button === 0) {
+      return runMultiselection(mouseDownEvent, canvasEl)
+    }
   }
 }
 
@@ -157,9 +163,9 @@ function normalizeRect(rect: Rect): Rect {
 
 function runItemDragAndDrop(
   mouseDownEvent: React.MouseEvent,
-  targetRoot: HTMLElement,
+  targetRoots: HTMLElement[],
   isFolderItem: boolean,
-  onDrop: (folderId: number, itemIdInsertAfter: number | undefined, targetId: number) => void,
+  onDrop: (folderId: number, itemIdInsertAfter: number | undefined, targetIds: number[]) => void,
   onCancel: () => void,
   onClick: (targetId: number) => void,
   onDragStarted: () => boolean) {
@@ -216,7 +222,8 @@ function runItemDragAndDrop(
       if (curBoxToDrop && dropArea) {
         const res = getNewPlacementForItem(dropArea, e)
         targetFolderId = getFolderId(curBoxToDrop)
-        if (targetFolderId === originalFolderId && res.index === originalIndex + 1) { //actual only for isFolderItem
+        const tryAddToOriginalPos = targetFolderId === originalFolderId && inRange(res.index, originalIndex, originalIndex + targetRoots.length)
+        if (tryAddToOriginalPos) { //actual only for isFolderItem
           placeholder.style.top = `${dropArea.itemRects[originalIndex].itemTop}px`
           indexToDrop = originalIndex
         } else {
@@ -242,11 +249,13 @@ function runItemDragAndDrop(
           return
         }
         //create dummy
-        dummy = createTabDummy(targetRoot, mouseDownEvent, isFolderItem)
-        targetRoot.style.opacity = "0"
+        dummy = createTabDummy(targetRoots, mouseDownEvent, isFolderItem)
         document.body.classList.add("dragging")
         document.body.append(dummy)
         if (isFolderItem) {
+          // currently we support drag-and-drop of single folder only
+          const targetRoot = targetRoots[0]
+          // here we remember only first index from all selected elements
           originalIndex = Array.from(targetRoot.parentElement!.parentElement!.children).indexOf(targetRoot.parentElement!)
           originalFolderId = getFolderId(targetRoot.parentElement!.parentElement!)
         }
@@ -261,19 +270,21 @@ function runItemDragAndDrop(
       document.body.classList.remove("dragging")
       dummy.remove()
       placeholder.remove()
-      targetRoot.style.opacity = "1"
-      if (prevBoxToDrop
-        && !(targetFolderId === originalFolderId && originalIndex === indexToDrop)) {
+      targetRoots.forEach(el => el.style.opacity = "1")
+      const tryAddToOriginalPos = targetFolderId === originalFolderId && inRange(indexToDrop, originalIndex, originalIndex + targetRoots.length)
+      if (prevBoxToDrop && !tryAddToOriginalPos) {
         const folderId = getFolderId(prevBoxToDrop)
         const itemIdInsertAfter = getItemIdByIndex(prevBoxToDrop, indexToDrop)
-        onDrop(folderId, itemIdInsertAfter, getDraggedItemId(targetRoot))
+        onDrop(folderId, itemIdInsertAfter, getDraggedItemsIds(targetRoots))
       } else {
         onCancel()
       }
     } else {
-      onClick(getDraggedItemId(targetRoot))
+      // we can click only by single element
+      onClick(getDraggedItemsIds(targetRoots)[0])
     }
 
+    unselectAll()
     unsubscribeEvents()
   }
   document.body.addEventListener("mousemove", onMouseMove)
@@ -466,6 +477,10 @@ function getFolderId(dropAreaElement: HTMLElement): number {
   return parseInt(dropAreaElement.dataset.folderId!)
 }
 
+export function getDraggedItemsIds(targets: HTMLElement[]): number[] {
+  return targets.map(getDraggedItemId)
+}
+
 export function getDraggedItemId(target: HTMLElement): number {
   return parseInt(target.dataset.id!, 10)
 }
@@ -480,10 +495,15 @@ function getItemIdByIndex(currentBoxToDrop: HTMLElement, index: number): number 
   }
 }
 
-function createTabDummy(targetRoot: HTMLElement, mouseDownEvent: React.MouseEvent, isFolderItem: boolean): HTMLElement {
+function createTabDummy(targetRoots: HTMLElement[], mouseDownEvent: React.MouseEvent, isFolderItem: boolean): HTMLElement {
   const dummy = document.createElement("div")
-  dummy.append(targetRoot.cloneNode(true))
-  const rect = targetRoot.getBoundingClientRect()
+  targetRoots.forEach(selectedEl => {
+    const clonedNode = selectedEl.cloneNode(true) as HTMLElement
+    clonedNode.classList.add("folder-item__inner__selected")
+    dummy.append(clonedNode)
+    selectedEl.style.opacity = "0"
+  })
+  const rect = targetRoots[0].getBoundingClientRect()
   dummy.style.width = `${rect.width + 4}px`
   dummy.style.marginTop = `${rect.top - mouseDownEvent.clientY}px`
   dummy.style.marginLeft = `${rect.left - mouseDownEvent.clientX}px`
@@ -491,6 +511,7 @@ function createTabDummy(targetRoot: HTMLElement, mouseDownEvent: React.MouseEven
   if (isFolderItem) {
     dummy.classList.add("dad-dummy--folder-item")
   }
+
   return dummy
 }
 
@@ -527,6 +548,10 @@ function tryToScrollViewport() {
   }
 
   requestAnimationFrame(tryToScrollViewport)
+}
+
+function inRange(index: number, min: number, max: number) {
+  return index >= min && index <= max
 }
 
 requestAnimationFrame(tryToScrollViewport)

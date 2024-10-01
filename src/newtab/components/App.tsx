@@ -10,6 +10,9 @@ import { Action, DispatchContext, getBC, getInitAppState, getStateFromLS, IAppSt
 import Tab = chrome.tabs.Tab
 
 let globalAppState: IAppState
+export function getGlobalAppState(): IAppState {
+  return  globalAppState
+}
 
 export function App() {
   const [appState, dispatch] = useReducer(stateReducer, getInitAppState())

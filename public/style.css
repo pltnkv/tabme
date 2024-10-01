@@ -420,7 +420,7 @@ h1 {
 .bookmarks {
     position: relative;
     flex-grow: 1;
-    max-height: calc(100% - 68px); /* 68px is height of .bookmarks-menu */
+    height: calc(100% - 68px); /* 68px is height of .bookmarks-menu */
     overflow-y: auto;
     display: flex;
     flex-wrap: wrap;
@@ -711,7 +711,12 @@ h1 {
 }
 
 .folder-item__inner__selected {
-    background-color: rgba(126, 201, 255, 0.4);
+    background-color: rgb(209 224 255 / 85%);
+}
+
+.folder-item__inner__unselected {
+    transition: background-color 0.4s ease-in-out;
+    background-color: rgb(209 224 255 / 0%)
 }
 
 .folder-item {
@@ -837,11 +842,11 @@ body.dragging * {
     top: 0;
     left: 0;
     box-sizing: content-box;
-    background-color: var(--sidebar-background-color);
+    /*background-color: var(--sidebar-background-color);*/
     border-radius: 8px;
     pointer-events: none;
-    border: 1px solid var(--colors-gray-600);
-    opacity: 0.8;
+    /*border: 1px solid var(--colors-gray-600);*/
+    /*opacity: 0.8;*/
 }
 
 .dad-dummy--folder-item {

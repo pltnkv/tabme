@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from "react"
 import { blurSearch, findItemById, hasArchivedItems, hasItemsToHighlight } from "../helpers/utils"
-import { Action, DispatchContext, IAppState } from "../state"
+import { Action, DispatchContext, IAppState, wrapIntoTransaction } from "../state"
 import { bindDADItemEffect } from "../helpers/dragAndDropItem"
 import { clickFolderItem, createFolder, getCanDragChecker, showMessage } from "../helpers/actions"
 import { Folder } from "./Folder"
@@ -20,17 +20,21 @@ export function Bookmarks(props: {
 
   useEffect(() => {
     if (mouseDownEvent) {
-      const onDropItem = (folderId: number, itemIdInsertAfter: number | undefined, targetId: number) => {
+      const onDropItems = (folderId: number, itemIdInsertAfter: number | undefined, targetsIds: number[]) => {
 
         if (folderId === -1) { // we need to create new folder first
           folderId = createFolder(dispatch)
         }
 
-        dispatch({
-          type: Action.MoveBookmarkToFolder,
-          targetItemId: targetId,
-          targetFolderId: folderId,
-          itemIdInsertAfter
+        wrapIntoTransaction(() => {
+          targetsIds.forEach(targetId => {
+            dispatch({
+              type: Action.MoveBookmarkToFolder,
+              targetItemId: targetId,
+              targetFolderId: folderId,
+              itemIdInsertAfter
+            })
+          })
         })
 
         setMouseDownEvent(undefined)
@@ -56,7 +60,7 @@ export function Bookmarks(props: {
       return bindDADItemEffect(mouseDownEvent,
         {
           isFolderItem: true,
-          onDrop: onDropItem,
+          onDrop: onDropItems,
           onCancel,
           onClick,
           onDragStarted: canDrag
@@ -215,14 +219,18 @@ export function Bookmarks(props: {
                   onClick={onToggleMore}>{moreButtonsVisibility ? "Hide settings" : "Settings"}</button>
           {moreButtonsVisibility ? (
             <DropdownMenu onClose={onToggleMore} className={"dropdown-menu--settings"} topOffset={30}>
-              <button className="dropdown-menu__button focusable" onClick={onToggleNotUsed} title="Highlight not used in past 60 days to archive them. It helps to keep workspace clean. ">
+              <button className="dropdown-menu__button focusable" onClick={onToggleNotUsed}
+                      title="Highlight not used in past 60 days to archive them. It helps to keep workspace clean. ">
                 {props.appState.showNotUsed ? "Unhighlight not used" : "Highlight not used"}
               </button>
               <button className="dropdown-menu__button focusable" onClick={onToggleMode} title="Change your Color Schema">{toggleModeText}</button>
               <button className="dropdown-menu__button focusable" onClick={onImportExistingBookmarks} title="Import existing Chrome bookmarks into Tabme">Import bookmarks</button>
               <button className="dropdown-menu__button focusable" onClick={onAdvanced} title="Shows Import and Export into JSON file buttons">Advanced mode</button>
-              <button className="dropdown-menu__button focusable" onClick={onHowToUse} title="Learn more about the Tabme. There are a lot hidden functionality">Guide: How to use</button>
-              <button className="dropdown-menu__button focusable" onClick={onSendFeedback} title="I would appreciate honest feedback on what needs to be improved. Thanks you for using Tabme 🖤">Send feedback 😅</button>
+              <button className="dropdown-menu__button focusable" onClick={onHowToUse} title="Learn more about the Tabme. There are a lot hidden functionality">Guide: How to use
+              </button>
+              <button className="dropdown-menu__button focusable" onClick={onSendFeedback}
+                      title="I would appreciate honest feedback on what needs to be improved. Thanks you for using Tabme 🖤">Send feedback 😅
+              </button>
             </DropdownMenu>
           ) : null}
         </div>

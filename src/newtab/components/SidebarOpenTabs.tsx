@@ -26,7 +26,8 @@ export function SidebarOpenTabs(props: {
         })
       }
 
-      const onDrop = (folderId: number, itemIdInsertAfter: number | undefined, targetTabId: number) => {
+      const onDrop = (folderId: number, itemIdInsertAfter: number | undefined, targetTabsIds: number[]) => {
+        const targetTabId = targetTabsIds[0] // we support D&D only single element from sidebar
         const tab = props.tabs.find((t) => t.id === targetTabId)
 
         if (folderId === -1) { // we need to create new folder first
@@ -73,12 +74,12 @@ export function SidebarOpenTabs(props: {
         dispatchDraggingStop()
       }
       const onDragStarted = () => {
-        dispatch({
-          type: Action.UpdateAppState,
-          newState: {
-            sidebarItemDragging: true
-          }
-        })
+        // dispatch({
+        //   type: Action.UpdateAppState,
+        //   newState: {
+        //     sidebarItemDragging: true
+        //   }
+        // })
         return getCanDragChecker(props.search, dispatch)()
       }
 
@@ -125,7 +126,7 @@ export function SidebarOpenTabs(props: {
       if (tabId && props.lastActiveTabIds[0] === tabId) {
         return "rgba(181, 192, 235, 0.6)"
       } else {
-        return "transparent"
+        return ""
       }
       // const index = props.lastActiveTabIds.indexOf(tabId!)
       // switch (index) {

@@ -4,6 +4,7 @@ import HistoryItem = chrome.history.HistoryItem
 import Tab = chrome.tabs.Tab
 import { createContext } from "react"
 import { unselectAll } from "./helpers/selectionUtils"
+import { getGlobalAppState } from "./components/App"
 
 export const DispatchContext = createContext<{ dispatch: ActionDispatcher }>(null!)
 
@@ -208,6 +209,13 @@ export type ActionDispatcher = (action: FoldersAction) => void;
 
 let prevState: IAppState | undefined
 
+export function wrapIntoTransaction(callback:() => void): void {
+  let _prevState = {...getGlobalAppState()}
+  callback()
+  prevState = _prevState
+}
+
+
 export function stateReducer(state: IAppState, action: FoldersAction): IAppState {
   unselectAll()
   const newState = stateReducer0(state, action)
@@ -216,7 +224,6 @@ export function stateReducer(state: IAppState, action: FoldersAction): IAppState
     || state.sidebarCollapsed !== newState.sidebarCollapsed
     || state.colorTheme !== newState.colorTheme
     || state.stat != newState.stat) {
-    prevState = state
     if (action.type !== Action.InitFolders || !action.ignoreSaving) {
       saveStateThrottled(newState)
     }
