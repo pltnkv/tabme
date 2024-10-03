@@ -198,7 +198,6 @@ export function Folder(props: {
                 key={item.id}
                 item={item}
                 appState={props.appState}
-                folder={props.folder}
                 inEdit={item.id === props.appState.itemInEdit}
               />
             )

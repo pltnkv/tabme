@@ -1,7 +1,7 @@
 import Tab = chrome.tabs.Tab
 import HistoryItem = chrome.history.HistoryItem
 import { ColorTheme, IFolder, IFolderItem } from "./types"
-import { Action, ActionDispatcher, IAppState, wrapIntoTransaction } from "../state"
+import { Action, ActionDispatcher, IAppState } from "../state"
 import React from "react"
 import { isTabmeTab } from "./isTabmeTab"
 
@@ -269,6 +269,10 @@ export function findItemById(appState: IAppState, itemId: number): IFolderItem |
     return !!item
   })
   return res
+}
+
+export function findItemsByIds(appState: IAppState, itemsIds: number[]): IFolderItem[] {
+  return itemsIds.map(id => findItemById(appState, id)!).filter(item => !!item)
 }
 
 export function findFolderByItemId(appState: IAppState, itemId: number): IFolder | undefined {

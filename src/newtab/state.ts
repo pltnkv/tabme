@@ -1,10 +1,10 @@
 import { ColorTheme, IFolder, IFolderItem } from "./helpers/types"
 import { applyTheme, findFolderByItemId, findItemById, genUniqId, getRandomHEXColor, mergeObjects, throttle } from "./helpers/utils"
-import HistoryItem = chrome.history.HistoryItem
-import Tab = chrome.tabs.Tab
 import { createContext } from "react"
 import { unselectAll } from "./helpers/selectionUtils"
 import { getGlobalAppState } from "./components/App"
+import HistoryItem = chrome.history.HistoryItem
+import Tab = chrome.tabs.Tab
 
 export const DispatchContext = createContext<{ dispatch: ActionDispatcher }>(null!)
 
@@ -183,7 +183,6 @@ export type FoldersAction =
   twoColumn: boolean;
 } | {
   type: Action.UpdateFolderItem;
-  folderId: number;
   itemId: number;
   newTitle?: string;
   archived?: boolean;
@@ -209,8 +208,8 @@ export type ActionDispatcher = (action: FoldersAction) => void;
 
 let prevState: IAppState | undefined
 
-export function wrapIntoTransaction(callback:() => void): void {
-  let _prevState = {...getGlobalAppState()}
+export function wrapIntoTransaction(callback: () => void): void {
+  let _prevState = { ...getGlobalAppState() }
   callback()
   prevState = _prevState
 }
@@ -247,7 +246,7 @@ function stateReducer0(state: IAppState, action: FoldersAction): IAppState {
         requestAnimationFrame(() => {
           action.dispatch({ type: Action.ShowNotification, message: "Undo", dispatch: action.dispatch })
         })
-        return {..._prevState}
+        return { ..._prevState }
       } else {
         return stateReducer0(state, { type: Action.ShowNotification, message: "Nothing to undo", dispatch: action.dispatch })
       }
@@ -438,11 +437,18 @@ function stateReducer0(state: IAppState, action: FoldersAction): IAppState {
       if (typeof action.url !== "undefined") {
         newProps.url = action.url
       }
+
+      const folderId = findFolderByItemId(state, action.itemId)?.id
+      if (!folderId) {
+        console.error("Folder was not found for item:", action.itemId)
+        return state
+      }
+
       return {
         ...state,
         folders: updateFolderItem(
           state.folders,
-          action.folderId,
+          folderId,
           action.itemId,
           newProps
         )
