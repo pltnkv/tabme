@@ -1,5 +1,5 @@
 import { ColorTheme, IFolder, IFolderItem } from "./helpers/types"
-import { applyTheme, findFolderByItemId, findItemById, genUniqId, getRandomHEXColor, mergeObjects, throttle } from "./helpers/utils"
+import { applyTheme, findFolderByItemId, findItemById, genUniqId, getRandomHEXColor, throttle } from "./helpers/utils"
 import { createContext } from "react"
 import { unselectAll } from "./helpers/selectionUtils"
 import { getGlobalAppState } from "./components/App"
@@ -163,7 +163,7 @@ export type FoldersAction =
   | {
   type: Action.UpdateTab;
   tabId: number;
-  opt: { url?: string; favIconUrl?: string; title?: string };
+  opt: Tab;
 }
   | { type: Action.CloseTabs; tabIds: number[] }
   | { type: Action.SetTabsAndHistory; tabs?: Tab[]; history?: HistoryItem[] }
@@ -330,7 +330,7 @@ function stateReducer0(state: IAppState, action: FoldersAction): IAppState {
         ...state,
         tabs: state.tabs.map((t) => {
           if (t.id === action.tabId) {
-            return mergeObjects(t, action.opt)
+            return action.opt
           } else {
             return t
           }
@@ -347,7 +347,11 @@ function stateReducer0(state: IAppState, action: FoldersAction): IAppState {
     }
 
     case Action.SetTabsAndHistory: {
-      return mergeObjects(state, { tabs: action.tabs, historyItems: action.history })
+      return {
+        ...state,
+        tabs: action.tabs ?? state.tabs,
+        historyItems: action.history ?? state.historyItems
+      }
     }
 
     case Action.CreateFolder: {
