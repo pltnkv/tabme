@@ -501,7 +501,9 @@ function createTabDummy(targetRoots: HTMLElement[], mouseDownEvent: React.MouseE
     const clonedNode = selectedEl.cloneNode(true) as HTMLElement
     clonedNode.classList.add("folder-item__inner--selected")
     dummy.append(clonedNode)
-    selectedEl.style.opacity = "0"
+    if (isFolderItem) {
+      selectedEl.style.opacity = "0"
+    }
   })
   const rect = targetRoots[0].getBoundingClientRect()
   dummy.style.width = `${rect.width + 4}px`
