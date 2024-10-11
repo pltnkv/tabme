@@ -6,6 +6,8 @@ import { SidebarOpenTabs } from "./SidebarOpenTabs"
 import Tab = chrome.tabs.Tab
 import { isTabmeTab } from "../helpers/isTabmeTab"
 import { convertTabToItem, getCurrentData } from "../helpers/utils"
+import { DropdownMenu } from "./DropdownMenu"
+import { CL } from "../helpers/classNameHelper"
 
 export function Sidebar(props: {
   appState: IAppState;
@@ -50,7 +52,11 @@ export function Sidebar(props: {
 
   return (
     <div className={"app-sidebar " + sidebarClassName} onMouseEnter={onSidebarMouseEnter} onMouseLeave={onSidebarMouseLeave}>
-      <h1>Open tabs <CleanupButton tabs={props.appState.tabs}/><ShelveButton tabs={props.appState.tabs}/></h1>
+      <div className="app-sidebar__header">
+        <span  className="app-sidebar__header__text">Open tabs</span>
+        <CleanupButton tabs={props.appState.tabs}/>
+        <StashButton tabs={props.appState.tabs}/>
+      </div>
       <button id="toggle-sidebar-btn"
               className={"btn__collapse-sidebar"}
               onClick={onToggleSidebar}
@@ -68,10 +74,16 @@ export function Sidebar(props: {
   )
 }
 
-const ShelveButton = React.memo((props: { tabs: Tab[] }) => {
+const StashButton = React.memo((props: { tabs: Tab[] }) => {
+  const [confirmationOpened, setConfirmationOpened] = useState(false)
   const { dispatch } = useContext(DispatchContext)
 
-  const onClick = () => {
+  const onStashClick = () => {
+    setConfirmationOpened(!confirmationOpened)
+  }
+
+  const shelveTabs = () => {
+    setConfirmationOpened(false)
     chrome.tabs.query({ currentWindow: true }, (tabs) => {
       const tabsToShelve: Tab[] = []
       tabs.forEach(t => {
@@ -116,14 +128,35 @@ const ShelveButton = React.memo((props: { tabs: Tab[] }) => {
 
   const filteredTabs = props.tabs.filter(t => !t.pinned && !isTabmeTab(t))
 
-  return <button className="btn__setting btn__shelve-tabs"
-                 disabled={filteredTabs.length < 1}
-                 title="Save All Tabs in the new Folder"
-                 onClick={onClick}>
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M8.5 9L12 12M12 12L15.5 9M12 12V4.5M4 19V12.75H7.07692L8.92308 15.25H15.6923L16.9231 12.75H20V19H4Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square"/>
-    </svg>
-  </button>
+  return <div style={{display: 'inline-block', position: 'relative'}}>
+    <button className={CL("btn__setting btn__shelve-tabs", { "btn__setting--active": confirmationOpened })}
+            disabled={filteredTabs.length < 1}
+            title="Stash open Tabs in the new Folder"
+            onClick={onStashClick}>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8.5 9L12 12M12 12L15.5 9M12 12V4.5M4 19V12.75H7.07692L8.92308 15.25H15.6923L16.9231 12.75H20V19H4Z" stroke="currentColor" strokeWidth="1.5"
+              strokeLinecap="square"/>
+      </svg>
+    </button>
+    {
+      confirmationOpened ?
+        <DropdownMenu onClose={() => setConfirmationOpened(false)}
+                      className="stash-confirmation-popup"
+                      width={232}
+                      leftOffset={-200}
+                      topOffset={10}>
+          <div style={{ width: "100%" }}>
+            <p><b>Stash open Tabs to a new Folder</b></p>
+            <p>It will close all non-pinned Tabs. Click "Open All" in the Folder menu to restore them.</p>
+          </div>
+          <div style={{ width: "100%", display: "flex", justifyContent: "right" }}>
+            <button className="focusable btn__setting">Cancel</button>
+            <button className="focusable btn__setting primary" onClick={shelveTabs}>Stash</button>
+          </div>
+        </DropdownMenu>
+        : null
+    }
+  </div>
 })
 
 const CleanupButton = React.memo((props: { tabs: Tab[] }) => {

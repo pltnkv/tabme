@@ -1,7 +1,7 @@
 import Tab = chrome.tabs.Tab
 import HistoryItem = chrome.history.HistoryItem
 import { ColorTheme, IFolder, IFolderItem } from "./types"
-import { Action, ActionDispatcher, IAppState } from "../state"
+import {IAppState } from "../state"
 import React from "react"
 import { isTabmeTab } from "./isTabmeTab"
 
@@ -352,23 +352,6 @@ export function getFavIconUrl(val?: string): string {
     return ""
   }
 }
-
-export function tryToCreateWelcomeFolder(appState: IAppState, history: HistoryItem[], dispatch: ActionDispatcher) {
-  if (appState.stat?.sessionNumber === 1 && appState.folders.length === 0) {
-    const items: IFolderItem[] = []
-    const favIconUrl = chrome.runtime.getURL("icon_32.png")
-    items.push(createNewFolderItem("tabme://import-bookmarks", "Quick Import Existing Bookmarks", favIconUrl))
-    items.push(createNewFolderItem("https://gettabme.com/guide.html?utm_source=extention", "How to Use Tabme", favIconUrl))
-
-    // @NOTE: disabled adding Top 5 most visiting site as misleading UX
-    // items.push(createNewSection("Top 5 visited sites"))
-    // items.push(...getTopVisitedFromHistory(history, 5).map(i => createNewFolderItem(i.url, i.title, getFavIconUrl(i.url))))
-
-    const newFolderId = genUniqId()
-    dispatch({ type: Action.CreateFolder, newFolderId, title: "Welcome to Tabme", items, color: "#c4ffbd" })
-  }
-}
-
 export function isCustomActionItem(item: IFolderItem | undefined): boolean {
   return item?.url.includes("tabme://") ?? false
 }

@@ -174,7 +174,7 @@ export function Folder(props: {
               <PresetColor color={PRESET_COLORS[6]} onClick={setColor} currentColor={props.folder.color}/>
               <CustomColorInput onChange={setColor} currentColor={props.folder.color}/>
             </div>
-            <button className="dropdown-menu__button focusable" onClick={onOpenAll}>Open All Tabs</button>
+            <button className="dropdown-menu__button focusable" onClick={onOpenAll}>Open All</button>
             <button className="dropdown-menu__button focusable" onClick={onRename}>Rename</button>
             <button className="dropdown-menu__button focusable" onClick={onAddSection}>Add Header</button>
             <button className="dropdown-menu__button focusable" onClick={onArchiveOrRestore}>{props.folder.archived ? "Restore" : "Archive"}</button>

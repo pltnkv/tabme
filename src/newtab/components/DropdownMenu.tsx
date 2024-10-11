@@ -3,12 +3,13 @@ import React, { useEffect, useRef, useState } from "react"
 export function DropdownMenu(props: {
   className?: string;
   topOffset?: number
+  leftOffset?: number
+  width?: number
   children: React.ReactChild[];
   onClose: () => void;
 }) {
   const formEl = useRef<HTMLDivElement>(null)
   const [focusedButtonIndex, setFocusedButtonIndex] = useState(-1)
-  const [menuStyles, setMenuStyles] = useState<{ top?: string, bottom?: string, left?: string }>({}) // State to hold dynamic styles
 
   useEffect(() => {
     function onClick(e: MouseEvent) {
@@ -81,8 +82,11 @@ export function DropdownMenu(props: {
   return (
     <div
       className={"dropdown-menu " + (props.className || "")}
+      style={{
+        left: props.leftOffset ? `${props.leftOffset}px` : "auto",
+        width: props.width ? `${props.width}px` : "auto"
+      }}
       ref={formEl}
-      style={menuStyles}
     >
       {React.Children.map(props.children, (child) => {
         return React.cloneElement(child as React.ReactElement, {

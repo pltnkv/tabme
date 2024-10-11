@@ -48,6 +48,11 @@ export function FolderItem(p: {
     })
   }
 
+  function handleImageError(e: React.SyntheticEvent) {
+    const imgElement = e.target as HTMLImageElement
+    imgElement.src = getBrokenImgSVG()
+  }
+
   const folderItemOpened = findTabsByURL(p.item.url, p.appState.tabs).length !== 0
   const titleClassName = "folder-item__inner__title "
     + (folderItemOpened ? "opened " : "")
@@ -82,7 +87,7 @@ export function FolderItem(p: {
          title={p.item.url}
          href={p.item.url}
          onContextMenu={onContextMenu}>
-        <img src={p.item.favIconUrl} alt=""/>
+        <img src={p.item.favIconUrl} alt="" onError={handleImageError}/>
         <EditableTitle className={titleClassName}
                        inEdit={p.inEdit}
                        setEditing={setEditing}
@@ -229,4 +234,16 @@ function FolderItemMenu(p: {
         </>
     }
   </>
+}
+
+let brokenImgSVG: string | undefined = undefined
+
+function getBrokenImgSVG() {
+  if (!brokenImgSVG) {
+    const svg = document.querySelector("#non-loaded-icon")!
+    const xml = (new XMLSerializer).serializeToString(svg)
+    brokenImgSVG = "data:image/svg+xml;base64," + btoa(xml)
+  }
+
+  return brokenImgSVG
 }

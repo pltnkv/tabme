@@ -64,7 +64,9 @@ export function SidebarHistory(props: {
 }) {
   if (props.appState.search.length >= 2) {
     return <div>
-      <h1>Recent</h1>
+      <div className="app-sidebar__header">
+        <span className="app-sidebar__header__text">Recent</span>
+      </div>
       <HistoryList
         items={props.appState.historyItems}
         search={props.appState.search}

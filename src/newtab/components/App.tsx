@@ -3,11 +3,12 @@ import { Bookmarks } from "./Bookmarks"
 import { Sidebar } from "./Sidebar"
 import { Notification } from "./Notification"
 import { KeyboardManager } from "./KeyboardManager"
-import { filterIrrelevantHistory, tryToCreateWelcomeFolder } from "../helpers/utils"
+import { filterIrrelevantHistory} from "../helpers/utils"
 import { showMessage } from "../helpers/actions"
 import { Welcome } from "./Welcome"
 import { Action, DispatchContext, getBC, getInitAppState, getStateFromLS, IAppState, stateReducer } from "../state"
 import Tab = chrome.tabs.Tab
+import { tryToCreateWelcomeFolder } from "../helpers/welcomeLogic"
 
 let globalAppState: IAppState
 export function getGlobalAppState(): IAppState {
