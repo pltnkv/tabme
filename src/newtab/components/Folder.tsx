@@ -135,7 +135,8 @@ export function Folder(props: {
   ${folderIsEmptyDuringSearch ? "folder--empty" : ""}
   ${props.folder.archived ? "archived" : ""}
   `
-  const folderBackgroundColor = folderIsEmptyDuringSearch ? EMPTY_FOLDER_COLOR : props.folder.color || DEFAULT_FOLDER_COLOR
+  // const folderBackgroundColor = folderIsEmptyDuringSearch ? EMPTY_FOLDER_COLOR : props.folder.color || DEFAULT_FOLDER_COLOR
+  const folderBackgroundColor = props.folder.color || DEFAULT_FOLDER_COLOR
 
   const onHeaderContextMenu = (e: React.MouseEvent) => {
     setShowMenu(!showMenu)
@@ -161,7 +162,7 @@ export function Folder(props: {
               onClick={() => setShowMenu(!showMenu)}>☰</span>
 
         {showMenu ? (
-          <DropdownMenu onClose={() => setShowMenu(false)} className={"dropdown-menu--folder"} topOffset={15}>
+          <DropdownMenu onClose={() => setShowMenu(false)} className={"dropdown-menu--folder"} topOffset={15} leftOffset={159}>
             <div className="dropdown-menu__colors-row" style={{ marginTop: "4px" }}>
               <PresetColor color={PRESET_COLORS[0]} onClick={setColor} currentColor={props.folder.color}/>
               <PresetColor color={PRESET_COLORS[1]} onClick={setColor} currentColor={props.folder.color}/>
