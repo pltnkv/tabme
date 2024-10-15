@@ -52,24 +52,32 @@ export function Sidebar(props: {
 
   return (
     <div className={"app-sidebar " + sidebarClassName} onMouseEnter={onSidebarMouseEnter} onMouseLeave={onSidebarMouseLeave}>
-      <div className="app-sidebar__header">
-        <span  className="app-sidebar__header__text">Open tabs</span>
-        <CleanupButton tabs={props.appState.tabs}/>
-        <StashButton tabs={props.appState.tabs}/>
-      </div>
-      <button id="toggle-sidebar-btn"
-              className={"btn__collapse-sidebar"}
-              onClick={onToggleSidebar}
-              title={props.appState.sidebarCollapsed ? "Pin" : "Collapse"}>
-        {props.appState.sidebarCollapsed ? "»" : "«"}
-      </button>
-      <SidebarOpenTabs
-        tabs={props.appState.tabs}
-        folders={props.appState.folders}
-        search={props.appState.search}
-        lastActiveTabIds={props.appState.lastActiveTabIds}
-      />
-      <SidebarHistory appState={props.appState}/>
+      {
+        props.appState.appLoaded ?
+          <>
+            <div className="app-sidebar__header">
+              <span className="app-sidebar__header__text">Open tabs</span>
+              <CleanupButton tabs={props.appState.tabs}/>
+              <StashButton tabs={props.appState.tabs}/>
+            </div>
+            <button id="toggle-sidebar-btn"
+                    className={"btn__collapse-sidebar"}
+                    onClick={onToggleSidebar}
+                    title={props.appState.sidebarCollapsed ? "Pin" : "Collapse"}>
+              {props.appState.sidebarCollapsed ? "»" : "«"}
+            </button>
+
+            <SidebarOpenTabs
+              tabs={props.appState.tabs}
+              folders={props.appState.folders}
+              search={props.appState.search}
+              lastActiveTabIds={props.appState.lastActiveTabIds}
+              currentWindowId={props.appState.currentWindowId}
+            />
+            <SidebarHistory appState={props.appState}/>
+          </>
+          : null
+      }
     </div>
   )
 }
@@ -128,7 +136,7 @@ const StashButton = React.memo((props: { tabs: Tab[] }) => {
 
   const filteredTabs = props.tabs.filter(t => !t.pinned && !isTabmeTab(t))
 
-  return <div style={{display: 'inline-block', position: 'relative'}}>
+  return <div style={{ display: "inline-block", position: "relative" }}>
     <button className={CL("btn__setting btn__shelve-tabs", { "btn__setting--active": confirmationOpened })}
             disabled={filteredTabs.length < 1}
             title="Stash open Tabs in the new Folder"
@@ -147,7 +155,7 @@ const StashButton = React.memo((props: { tabs: Tab[] }) => {
                       topOffset={10}>
           <div style={{ width: "100%" }}>
             <p><b>Stash open Tabs to a new Folder</b></p>
-            <p>It will close all non-pinned Tabs. Click "Open All" in the Folder menu to restore them.</p>
+            <p>It will close all non-pinned tabs <br/>of the current window. <br/><br/>Use "Open All" in the folder menu to restore stashed tabs.</p>
           </div>
           <div style={{ width: "100%", display: "flex", justifyContent: "right" }}>
             <button className="focusable btn__setting">Cancel</button>

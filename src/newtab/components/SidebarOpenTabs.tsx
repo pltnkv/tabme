@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react"
+import React, { memo, useContext, useEffect, useState } from "react"
 import { blurSearch, convertTabToItem, createNewSection, extractHostname, filterTabsBySearch, hlSearch, removeUselessProductName, SECTION_ICON_BASE64 } from "../helpers/utils"
 import { bindDADItemEffect, getDraggedItemId } from "../helpers/dragAndDropItem"
 import { Action, DispatchContext, wrapIntoTransaction } from "../state"
@@ -6,12 +6,13 @@ import { createFolder, getCanDragChecker, showMessage } from "../helpers/actions
 import { IFolder, IFolderItem } from "../helpers/types"
 import Tab = chrome.tabs.Tab
 
-export function SidebarOpenTabs(props: {
+export const SidebarOpenTabs = memo((props: {
   search: string;
   tabs: Tab[]
   folders: IFolder[];
   lastActiveTabIds: number[]
-}) {
+  currentWindowId: number | undefined
+}) => {
   const { dispatch } = useContext(DispatchContext)
   const [mouseDownEvent, setMouseDownEvent] = useState<React.MouseEvent | undefined>(undefined)
 
@@ -75,7 +76,11 @@ export function SidebarOpenTabs(props: {
         dispatchDraggingStop()
       }
       const onClick = (tabId: number) => {
+        const tab = props.tabs.find(t => t.id === tabId)
         chrome.tabs.update(tabId, { active: true })
+        if (tab) {
+          chrome.windows.update(tab.windowId, { focused: true })
+        }
         dispatchDraggingStop()
       }
       const onDragStarted = () => {
@@ -122,54 +127,20 @@ export function SidebarOpenTabs(props: {
   }
 
   // const openTabs = props.tabs.filter(filterNonImportant).map((t) => {
-  const openTabs = filterTabsBySearch(props.tabs, props.search).map(t => {
-    let shortenedTitle = removeUselessProductName(t.title)
-    let domain = extractHostname(t.url)
-    const folderTitles = findFoldersTitlesWhereTabSaved(t, props.folders)
-
-    function getBgColor(tabId?: number): string {
-      if (tabId && props.lastActiveTabIds[0] === tabId) {
-        return "rgba(181, 192, 235, 0.6)"
-      } else {
-        return ""
-      }
-      // const index = props.lastActiveTabIds.indexOf(tabId!)
-      // switch (index) {
-      //   case 0:
-      //     return "rgba(181, 192, 235, 0.6)"
-      // case 1:
-      //   return "#d3dcfd"
-      // case 2:
-      //   return "#e7ebff"
-      // default:
-      //   return "transparent"
-      // }
+  const tabsByWindows: Map<number, Tab[]> = new Map()
+  filterTabsBySearch(props.tabs, props.search).forEach(t => {
+    let tabsInWindow = tabsByWindows.get(t.windowId)
+    if (!tabsInWindow) {
+      tabsInWindow = []
+      tabsByWindows.set(t.windowId, tabsInWindow)
     }
+    tabsInWindow.push(t)
+  })
 
-    return (
-      <div
-        key={t.id}
-        style={{ backgroundColor: getBgColor(t.id) }}
-        className="inbox-item draggable-item"
-        data-id={t.id}
-      >
-        <img src={t.favIconUrl} alt=""/>
-        <div className="inbox-item__text">
-          <div className="inbox-item__title"
-               title={t.title}
-               dangerouslySetInnerHTML={hlSearch(shortenedTitle, props.search)}/>
-          <div className="inbox-item__url"
-               title={t.url}
-               dangerouslySetInnerHTML={hlSearch(domain, props.search)}/>
-          {
-            folderTitles
-              ? <div className="inbox-item__already-saved">Already saved in {folderTitles}</div>
-              : null
-          }
-        </div>
-        <div onClick={onCloseTab} className="inbox-item__close">⨉</div>
-      </div>
-    )
+  const sortedWindowsWithTabs = getSortedWindowsWithTabs(tabsByWindows, props.currentWindowId)
+
+  const openTabs = filterTabsBySearch(props.tabs, props.search).map(t => {
+    return
   })
 
   const SectionItem = <div
@@ -185,11 +156,71 @@ export function SidebarOpenTabs(props: {
 
   return (
     <div className="inbox-box" onMouseDown={onMouseDown}>
-      {openTabs}
+      {
+        sortedWindowsWithTabs.length === 1 ?
+          sortedWindowsWithTabs[0].tabs.map((t) => getTabView(t, props.lastActiveTabIds[0], props.folders, props.search, onCloseTab))
+          :
+          sortedWindowsWithTabs.map((window, index) => {
+            return <div key={window.windowId}>
+              <div className="window-name">{index === 0 ? "current window" : "window"}</div>
+              {window.tabs.map((t) => getTabView(t, props.lastActiveTabIds[0], props.folders, props.search, onCloseTab))}
+            </div>
+          })
+
+      }
       {openTabs.length === 0 && props.search === "" ? <p className="no-opened-tabs">...are displayed here.<br/> Pinned tabs are filtered out.</p> : null}
       {props.search === "" ? SectionItem : null}
     </div>
   )
+})
+
+function getTabView(t: Tab, lastActiveTabIds: number, folders: IFolder[], search: string, onCloseTab: (e: React.MouseEvent) => void) {
+  function getBgColor(tabId?: number): string {
+    if (tabId && lastActiveTabIds === tabId) {
+      return "rgba(181, 192, 235, 0.6)"
+    } else {
+      return ""
+    }
+    // const index = props.lastActiveTabIds.indexOf(tabId!)
+    // switch (index) {
+    //   case 0:
+    //     return "rgba(181, 192, 235, 0.6)"
+    // case 1:
+    //   return "#d3dcfd"
+    // case 2:
+    //   return "#e7ebff"
+    // default:
+    //   return "transparent"
+    // }
+  }
+
+  let shortenedTitle = removeUselessProductName(t.title)
+  let domain = extractHostname(t.url)
+  const folderTitles = findFoldersTitlesWhereTabSaved(t, folders)
+
+  return (<div
+    key={t.id}
+    style={{ backgroundColor: getBgColor(t.id) }}
+    className="inbox-item draggable-item"
+    data-id={t.id}
+  >
+    <img src={t.favIconUrl} alt=""/>
+    <div className="inbox-item__text">
+      <div className="inbox-item__title"
+           title={t.title}
+           dangerouslySetInnerHTML={hlSearch(shortenedTitle, search)}/>
+      <div className="inbox-item__url"
+           title={t.url}
+           dangerouslySetInnerHTML={hlSearch(domain, search)}/>
+      {
+        folderTitles
+          ? <div className="inbox-item__already-saved">Already saved in {folderTitles}</div>
+          : null
+      }
+    </div>
+    <div onClick={onCloseTab} className="inbox-item__close">⨉</div>
+  </div>)
+
 }
 
 function findFoldersTitlesWhereTabSaved(curTab: Tab, folders: IFolder[]): string {
@@ -197,4 +228,20 @@ function findFoldersTitlesWhereTabSaved(curTab: Tab, folders: IFolder[]): string
     .filter(folder => folder.items.some((item: IFolderItem) => item.url === curTab.url))
     .map(folder => `«${folder.title}»`)
     .join(", ")
+}
+
+function getSortedWindowsWithTabs(map: Map<number, Tab[]>, currentWindowId: number | undefined): { windowId: number, tabs: Tab[] }[] {
+  const res = Array.from(map.entries()) // Get entries to maintain access to the window ID
+  let allWindows: { windowId: number, tabs: Tab[] }[] = []
+
+  // Filter out the current window tabs and store them separately
+  res.forEach(([windowId, tabs]) => {
+    if (windowId === currentWindowId) {
+      allWindows.splice(0, 0, { windowId, tabs })
+    } else {
+      allWindows.push({ windowId, tabs })
+    }
+  })
+
+  return allWindows
 }

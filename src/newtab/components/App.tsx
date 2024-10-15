@@ -3,7 +3,7 @@ import { Bookmarks } from "./Bookmarks"
 import { Sidebar } from "./Sidebar"
 import { Notification } from "./Notification"
 import { KeyboardManager } from "./KeyboardManager"
-import { filterIrrelevantHistory} from "../helpers/utils"
+import { filterIrrelevantHistory } from "../helpers/utils"
 import { showMessage } from "../helpers/actions"
 import { Welcome } from "./Welcome"
 import { Action, DispatchContext, getBC, getInitAppState, getStateFromLS, IAppState, stateReducer } from "../state"
@@ -11,8 +11,9 @@ import Tab = chrome.tabs.Tab
 import { tryToCreateWelcomeFolder } from "../helpers/welcomeLogic"
 
 let globalAppState: IAppState
+
 export function getGlobalAppState(): IAppState {
-  return  globalAppState
+  return globalAppState
 }
 
 export function App() {
@@ -27,8 +28,12 @@ export function App() {
       const openedTabs = tabs.reverse()
       dispatch({
         type: Action.SetTabsAndHistory,
-        tabs: openedTabs,
+        tabs: openedTabs
       })
+
+      if (init) {
+        dispatch({ type: Action.UpdateAppState, newState: { appLoaded: true } })
+      }
 
       chrome.history.search({ text: "", maxResults: 10000, startTime }, function(data) {
         console.log(data.slice(0, 3))
@@ -62,7 +67,6 @@ export function App() {
     chrome.tabs.onUpdated.addListener(onTabUpdated)
 
     chrome.runtime.sendMessage({ type: "get-last-active-tabs" }, function(response) {
-      console.log('init', response)
       dispatch({ type: Action.UpdateAppState, newState: { lastActiveTabIds: response.tabs } })
     })
 
@@ -89,6 +93,11 @@ export function App() {
       dispatch({ type: Action.UpdateAppState, newState: { devMode: true } })
       showMessage("DevMode enabled", dispatch)
     }
+
+    chrome.windows.onFocusChanged.addListener((windowId) => {
+      dispatch({ type: Action.UpdateAppState, newState: { currentWindowId: windowId } })
+    })
+
   }, [])
 
   return (

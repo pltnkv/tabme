@@ -44,8 +44,10 @@ export type IAppAchievements = {
 }
 
 export type IAppState = {
+  appLoaded: boolean
   folders: IFolder[];
   tabs: Tab[];
+  currentWindowId: number|undefined
   historyItems: HistoryItem[];
   notification: {
     visible: boolean;
@@ -68,9 +70,11 @@ export type IAppState = {
 };
 
 let initState: IAppState = {
+  appLoaded: false, // prevents sidebar flickering during loading
   folders: [],
   historyItems: [],
   tabs: [],
+  currentWindowId: undefined,
   notification: { visible: false, message: "" },
   lastActiveTabIds: [],
   search: "",

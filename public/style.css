@@ -353,6 +353,18 @@ body.dark-theme .searched {
     margin-top: 2px;
 }
 
+.window-name {
+    margin-top: 12px;
+    margin-bottom: 8px;
+    margin-left: 28px;
+    white-space: nowrap;
+    transition: opacity 50ms;
+    transition-delay: 100ms;
+    font-weight: 200;
+    font-size: 20px;
+    color: var(--second-text-color);
+}
+
 .inbox-item__text {
     vertical-align: top;
     display: inline-flex;
