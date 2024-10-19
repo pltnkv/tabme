@@ -4,6 +4,12 @@ import { getStateFromLS, ISavingAppState, saveStateThrottled, setInitAppState } 
 import { App } from "./components/App"
 import { applyTheme } from "./helpers/utils"
 
+declare global {
+  const __OVERRIDE_NEWTAB: boolean
+}
+
+console.log('__OVERRIDE_NEWTAB', __OVERRIDE_NEWTAB)
+
 /**
  * TODOs
  * - implement search like in Slack by ctrl+K

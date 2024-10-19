@@ -169,7 +169,10 @@ export const SidebarOpenTabs = memo((props: {
 
       }
       {openTabs.length === 0 && props.search === "" ? <p className="no-opened-tabs">...are displayed here.<br/> Pinned tabs are filtered out.</p> : null}
-      {props.search === "" ? SectionItem : null}
+      {
+        /* disabled it because it looks wierd with several Windows */
+        /*{props.search === "" ? SectionItem : null}*/
+      }
     </div>
   )
 })

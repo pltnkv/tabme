@@ -94,8 +94,14 @@ export function App() {
       showMessage("DevMode enabled", dispatch)
     }
 
+    chrome.windows.getCurrent((window) => {
+      dispatch({ type: Action.UpdateAppState, newState: { currentWindowId: window.id } })
+    })
+
     chrome.windows.onFocusChanged.addListener((windowId) => {
-      dispatch({ type: Action.UpdateAppState, newState: { currentWindowId: windowId } })
+      if (windowId !== -1) { // to dont do useless jumps when switch between browser and other windows
+        dispatch({ type: Action.UpdateAppState, newState: { currentWindowId: windowId } })
+      }
     })
 
   }, [])

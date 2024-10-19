@@ -18,4 +18,4 @@ export interface IFolderItem {
 }
 
 // undefined === 'system'
-export type ColorTheme = 'system' | 'light' | 'dark' | undefined
+export type ColorTheme = 'light' | 'dark' | undefined

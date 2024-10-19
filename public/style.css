@@ -958,6 +958,12 @@ body.dragging * {
     cursor: default;
 }
 
+.dropdown-menu__separator {
+    height: 1px;
+    background-color: var(--border-color);
+    margin: 8px;
+}
+
 .dropdown-menu__button {
     height: 36px;
     padding: 0 8px;
@@ -1248,5 +1254,19 @@ body.dragging * {
 
     &:hover, &:active {
         background-color: var(--colors-blue-100);
+    }
+}
+
+.modal-no-override {
+    h2 {
+        margin-top: 0;
+    }
+
+    li {
+        padding-bottom: 8px;
+        span {
+            color: var(--second-text-color);
+            font-size: 14px;
+        }
     }
 }

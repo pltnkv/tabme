@@ -314,9 +314,9 @@ function stateReducer0(state: IAppState, action: FoldersAction): IAppState {
 
     case Action.ToggleDarkMode: {
       const curMode = state.colorTheme
-      const options: ColorTheme[] = ["light", "dark", "system"]
+      const options: ColorTheme[] = ["light", "dark"]
       const curModeIndex = options.indexOf(curMode)
-      const nextMode = options[curModeIndex + 1 === 3 ? 0 : curModeIndex + 1]
+      const nextMode = options[curModeIndex + 1 === 2 ? 0 : curModeIndex + 1]
       applyTheme(nextMode)
       return { ...state, colorTheme: nextMode }
     }

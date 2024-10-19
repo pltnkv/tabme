@@ -5,7 +5,7 @@ export function DropdownMenu(props: {
   topOffset?: number
   leftOffset?: number
   width?: number
-  children: React.ReactChild[];
+  children: React.ReactChild | React.ReactChild[];
   onClose: () => void;
 }) {
   const formEl = useRef<HTMLDivElement>(null)
@@ -18,14 +18,20 @@ export function DropdownMenu(props: {
       }
     }
 
-    document.addEventListener("click", onClick)
-    document.addEventListener("contextmenu", onClick)
+    let destroyed = false
+    requestAnimationFrame(() => {
+      if (!destroyed) {
+        document.addEventListener("click", onClick)
+        document.addEventListener("contextmenu", onClick)
+      }
+    })
 
     return () => {
+      destroyed = true
       document.removeEventListener("click", onClick)
       document.removeEventListener("contextmenu", onClick)
     }
-  }, [props])
+  }, [])
 
   const getButtons = () => Array.from(formEl.current?.querySelectorAll(".focusable") || [])
 

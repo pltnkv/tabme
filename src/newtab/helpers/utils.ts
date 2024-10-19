@@ -375,8 +375,10 @@ export function applyTheme(theme: ColorTheme) {
       setThemeStyle(true)
       break
     default:
-      canUseSystemTheme = true
-      setThemeStyle(darkThemeMq.matches)
+      setThemeStyle(false)
+      // who need system color?
+      // canUseSystemTheme = true
+      // setThemeStyle(darkThemeMq.matches)
       break
   }
 }
