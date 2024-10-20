@@ -122,3 +122,9 @@ p {
 
 /** END guide.html */
 
+.faq h3 {
+    margin-top: 44px;
+    font-size: 20px;
+    font-weight: normal;
+    margin-bottom: 8px;
+}
