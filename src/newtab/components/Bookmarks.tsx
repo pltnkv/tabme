@@ -358,7 +358,7 @@ const OverrideModal = ({ isOverrideModalOpen, setOverrideModalOpen }:
               <span>Settings → Advanced mode → Export</span></li>
             <li>Uninstall current "Tabme" extension. <br/>
               <span>Go to "Manage extensions" from your browser. Find the card for Tabme and click "Remove"</span></li>
-            <li>Install "<a href="https://chromewebstore.google.com/detail/tabme/jnhiookaaldadiimlgncedhkpmhlmmip">Tabme — version without newtab</a>" extension</li>
+            <li>Install "<a href="https://chromewebstore.google.com/detail/tabme-%E2%80%94-version-without-n/jjdbikbbknmhkknpfnlhgpcikbfjldee">Tabme — version without newtab</a>" extension</li>
             <li>[optional] Import saved bookmarks.<br/>
               <span>Settings → Advanced mode → Import</span></li>
           </ol>
@@ -370,7 +370,7 @@ const OverrideModal = ({ isOverrideModalOpen, setOverrideModalOpen }:
       <Modal isOpen={isOverrideModalOpen} onClose={() => setOverrideModalOpen(false)}>
         <div className="modal-no-override">
           <h2>How to open Tabme in the every new tab?</h2>
-          <p>If you want Tabme was open every new tab, try the regular <a href="https://chromewebstore.google.com/detail/tabme/jnhiookaaldadiimlgncedhkpmhlmmip">Tabme extension</a>.
+          <p>If you want Tabme was open every new tab, try the regular Tabme extension.
           </p>
           <p>It includes all the same features.</p>
           <p>Steps:</p>
