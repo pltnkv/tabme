@@ -69,8 +69,8 @@ const zipDistFolder = (version, buildType, onCompleted) => {
 // Main function to execute the steps
 const main = async () => {
   try {
-    // Check if --path flag is provided
-    const isPath = process.argv.includes("--path");
+    // Check if -- path flag is provided
+    const isPath = process.argv.includes("path");
 
     execSync(`npm run clean`);
 
