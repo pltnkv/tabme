@@ -1,32 +1,35 @@
 import React, { useRef } from "react"
-import { ActionDispatcher, IAppState } from "../state"
 import { CSSTransition } from "react-transition-group"
+import { IAppState } from "../state/state"
+import { CL } from "../helpers/classNameHelper"
 
-export function Notification(props: {
-  appState: IAppState;
-}) {
+export const Notification = React.memo((props: {
+  notification: IAppState["notification"];
+}) => {
   const refEl = useRef<HTMLDivElement>(null)
 
   return (
     <div className="notification-box">
       <CSSTransition
         nodeRef={refEl}
-        in={props.appState.notification.visible}
+        in={props.notification.visible}
         timeout={300}
         classNames="notification"
         unmountOnExit
       >
-        <div className="notification" ref={refEl}>
-          {props.appState.notification.message}
+        <div className={CL("notification", {
+          "notification__error": props.notification.isError
+        })} ref={refEl}>
+          {props.notification.message}
           {
-            props.appState.notification.button
+            props.notification.button
               ? <span className="notification__button"
-                      onClick={props.appState.notification.button.onClick}>
-                {props.appState.notification.button.text}</span>
+                      onClick={props.notification.button.onClick}>
+                {props.notification.button.text}</span>
               : null
           }
         </div>
       </CSSTransition>
     </div>
   )
-}
+})

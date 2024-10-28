@@ -1,9 +1,10 @@
 import React, { memo, useContext, useEffect, useState } from "react"
 import { blurSearch, convertTabToItem, createNewSection, extractHostname, filterTabsBySearch, hlSearch, removeUselessProductName, SECTION_ICON_BASE64 } from "../helpers/utils"
 import { bindDADItemEffect, getDraggedItemId } from "../helpers/dragAndDropItem"
-import { Action, DispatchContext, wrapIntoTransaction } from "../state"
-import { createFolder, getCanDragChecker, showMessage } from "../helpers/actions"
+import { createFolder, getCanDragChecker, showMessage } from "../helpers/actionsHelpers"
 import { IFolder, IFolderItem } from "../helpers/types"
+import { DispatchContext, wrapIntoTransaction } from "../state/actions"
+import { Action } from "../state/state"
 import Tab = chrome.tabs.Tab
 
 export const SidebarOpenTabs = memo((props: {
@@ -13,7 +14,7 @@ export const SidebarOpenTabs = memo((props: {
   lastActiveTabIds: number[]
   currentWindowId: number | undefined
 }) => {
-  const { dispatch } = useContext(DispatchContext)
+  const dispatch = useContext(DispatchContext)
   const [mouseDownEvent, setMouseDownEvent] = useState<React.MouseEvent | undefined>(undefined)
 
   useEffect(() => {
@@ -27,7 +28,7 @@ export const SidebarOpenTabs = memo((props: {
         })
       }
 
-      const onDrop = (folderId: number, itemIdInsertAfter: number | undefined, targetTabsIds: number[]) => {
+      const onDrop = (folderId: number, itemIdInsertBefore: number | undefined, targetTabsIds: number[]) => {
         const targetTabId = targetTabsIds[0] // we support D&D only single element from sidebar
         const tab = props.tabs.find((t) => t.id === targetTabId)
 
@@ -39,9 +40,9 @@ export const SidebarOpenTabs = memo((props: {
           wrapIntoTransaction(() => {
             const item = convertTabToItem(tab)
             dispatch({
-              type: Action.AddNewBookmarkToFolder,
+              type: Action.CreateFolderItem,
               folderId,
-              itemIdInsertAfter,
+              itemIdInsertBefore,
               item
             })
 
@@ -57,9 +58,9 @@ export const SidebarOpenTabs = memo((props: {
 
             const newSection = createNewSection()
             dispatch({
-              type: Action.AddNewBookmarkToFolder,
+              type: Action.CreateFolderItem,
               folderId,
-              itemIdInsertAfter,
+              itemIdInsertBefore,
               item: newSection
             })
             dispatch({

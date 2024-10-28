@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useRef, useState } from "react"
-import { Action, DispatchContext, IAppState, wrapIntoTransaction } from "../state"
-import { showMessage } from "../helpers/actions"
+import { showMessage } from "../helpers/actionsHelpers"
 import { createNewFolderItem, genUniqId, getFavIconUrl, getTopVisitedFromHistory } from "../helpers/utils"
+import { DispatchContext } from "../state/actions"
+import { Action, IAppState } from "../state/state"
 import HistoryItem = chrome.history.HistoryItem
 
 // copy-paste Chrome types
@@ -49,7 +50,7 @@ const BookmarkList = (props: {
   historyItems: HistoryItem[],
   onClose: () => void
 }) => {
-  const { dispatch } = useContext(DispatchContext)
+  const dispatch = useContext(DispatchContext)
   // Refs for folder checkboxes to manipulate the DOM for indeterminate state
   const recordsRefs = useRef<HTMLInputElement[]>([])
 
@@ -146,9 +147,7 @@ const BookmarkList = (props: {
           .map(item => createNewFolderItem(item.url, item.title, getFavIconUrl(item.url)))
 
         const newFolderId = genUniqId()
-        wrapIntoTransaction(() => {
           dispatch({ type: Action.CreateFolder, newFolderId, title: rec.folder.title, items })
-        })
       }
       selectedBookmarksCount += rec.folder.children?.reduce<number>((acc, item) => item.checked ? acc + 1 : acc, 0) ?? 0
     })
@@ -232,7 +231,7 @@ export function BookmarkImporter(props: {
   appState: IAppState;
 }) {
 
-  const { dispatch } = useContext(DispatchContext)
+  const dispatch = useContext(DispatchContext)
   const onClose = () => {
     dispatch({ type: Action.UpdateAppState, newState: { page: "default" } })
   }

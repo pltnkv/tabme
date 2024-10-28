@@ -1,11 +1,12 @@
 import React, { useContext, useEffect } from "react"
-import { Action, DispatchContext, wrapIntoTransaction } from "../state"
 import { getSelectedItemsElements, getSelectedItemsIds } from "../helpers/selectionUtils"
+import { DispatchContext } from "../state/actions"
+import { Action } from "../state/state"
 
-export function KeyboardManager(props: {
+export const KeyboardManager = React.memo((props: {
   search: string;
-}) {
-  const { dispatch } = useContext(DispatchContext)
+}) => {
+  const dispatch = useContext(DispatchContext)
   useEffect(() => {
     const onKeyUp = (e: KeyboardEvent) => {
       if (document.activeElement !== document.body) {
@@ -14,11 +15,9 @@ export function KeyboardManager(props: {
 
       if (getSelectedItemsElements().length > 0) {
         if (e.code === "Backspace" || e.code === "Delete") {
-          wrapIntoTransaction(() => {
-            dispatch({
-              type: Action.DeleteFolderItem,
-              itemIds: getSelectedItemsIds()
-            })
+          dispatch({
+            type: Action.DeleteFolderItems,
+            itemIds: getSelectedItemsIds()
           })
           return
         }
@@ -46,7 +45,7 @@ export function KeyboardManager(props: {
     return () => {
       document.removeEventListener("keydown", onKeyUp)
     }
-  })
+  }, [])
   return null
-}
+})
 

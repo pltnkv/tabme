@@ -1,9 +1,9 @@
 import Tab = chrome.tabs.Tab
 import HistoryItem = chrome.history.HistoryItem
-import { ColorTheme, IFolder, IFolderItem } from "./types"
-import {IAppState } from "../state"
+import { ColorTheme, IFolder, IFolderItem, IFolderItemToCreate } from "./types"
 import React from "react"
 import { isTabmeTab } from "./isTabmeTab"
+import { IAppState } from "../state/state"
 
 export const DEFAULT_FOLDER_COLOR = "#f0f0f0"
 export const EMPTY_FOLDER_COLOR = "transparent"
@@ -60,7 +60,7 @@ export function filterNonImportant(tab: Tab): boolean {
   )
 }
 
-export function convertTabToItem(item: Tab): IFolderItem {
+export function convertTabToItem(item: Tab): IFolderItemToCreate {
   return {
     id: genUniqId(),
     favIconUrl: item.favIconUrl || "",
@@ -69,7 +69,7 @@ export function convertTabToItem(item: Tab): IFolderItem {
   }
 }
 
-export function createNewFolderItem(url?: string, title?: string, favIconUrl?: string): IFolderItem {
+export function createNewFolderItem(url?: string, title?: string, favIconUrl?: string): IFolderItemToCreate {
   return {
     id: genUniqId(),
     favIconUrl: favIconUrl ?? "",
@@ -80,7 +80,7 @@ export function createNewFolderItem(url?: string, title?: string, favIconUrl?: s
 
 export const SECTION_ICON_BASE64 = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIj4KICA8cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2ZmZiIgLz4KPC9zdmc+Cg==`
 
-export function createNewSection(title = "Header"): IFolderItem {
+export function createNewSection(title = "Header"): IFolderItemToCreate {
   return {
     id: genUniqId(),
     favIconUrl: SECTION_ICON_BASE64,
@@ -209,9 +209,16 @@ export function getRandomHEXColor(): string {
   return colors[Math.round(Math.random() * (colors.length - 1))]
 }
 
-//does not work
+// does not work
+// todo replace later on "genNextRuntimeId" everywere
 export function genUniqId(): number {
   return (new Date()).valueOf() + Math.round(Math.random() * 10000000)
+}
+
+let runtimeIdCounter = 10000
+
+export function genNextRuntimeId(): number {
+  return ++runtimeIdCounter
 }
 
 export function filterOpenedTabsFromHistory(
@@ -261,7 +268,7 @@ function escapeRegex(s: string): string {
   return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&")
 }
 
-export function findItemById(appState: IAppState, itemId: number): IFolderItem | undefined {
+export function findItemById(appState: { folders: IFolder[] }, itemId: number): IFolderItem | undefined {
   let res: IFolderItem | undefined = undefined
   appState.folders.some(f => {
     const item = f.items.find(i => i.id === itemId)
@@ -271,11 +278,15 @@ export function findItemById(appState: IAppState, itemId: number): IFolderItem |
   return res
 }
 
-export function findItemsByIds(appState: IAppState, itemsIds: number[]): IFolderItem[] {
+export function findFolderById(state: IAppState, folderId: number): IFolder | undefined {
+  return state.folders.find(f => f.id === folderId)
+}
+
+export function findItemsByIds(appState: { folders: IFolder[] }, itemsIds: number[]): IFolderItem[] {
   return itemsIds.map(id => findItemById(appState, id)!).filter(item => !!item)
 }
 
-export function findFolderByItemId(appState: IAppState, itemId: number): IFolder | undefined {
+export function findFolderByItemId(appState: { folders: IFolder[] }, itemId: number): IFolder | undefined {
   return appState.folders.find(f => {
     return f.items.find(i => i.id === itemId)
   })
@@ -352,6 +363,7 @@ export function getFavIconUrl(val?: string): string {
     return ""
   }
 }
+
 export function isCustomActionItem(item: IFolderItem | undefined): boolean {
   return item?.url.includes("tabme://") ?? false
 }
@@ -385,9 +397,9 @@ export function applyTheme(theme: ColorTheme) {
 
 function setThemeStyle(useDarkMode: boolean) {
   if (useDarkMode) {
-    document.body.classList.add("dark-theme")
+    document.documentElement.classList.add("dark-theme")
   } else {
-    document.body.classList.remove("dark-theme")
+    document.documentElement.classList.remove("dark-theme")
   }
 }
 
@@ -398,7 +410,7 @@ export function getCurrentData() {
   const mm = months[today.getMonth()]
   const min = String(today.getMinutes()).padStart(2, "0")
   const hours = String(today.getHours()).padStart(2, "0")
-  return `${dd} ${mm} at ${hours}:${min}`
+  return `${dd} ${mm}, ${hours}:${min}`
 }
 
 /**

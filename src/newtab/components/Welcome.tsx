@@ -1,6 +1,6 @@
 import React from "react"
-import { IAppState } from "../state"
 import { BookmarkImporter } from "./BookmarksImporter"
+import { IAppState } from "../state/state"
 
 export function Welcome(props: {
   appState: IAppState;
@@ -8,7 +8,9 @@ export function Welcome(props: {
 
   return (
     <div className="welcome">
-      <BookmarkImporter appState={props.appState}/>
+      <div className="welcome-scrollable">
+        <BookmarkImporter appState={props.appState}/>
+      </div>
     </div>
   )
 }

@@ -1,12 +1,12 @@
-import { Action, ActionDispatcher, executeCustomAction, IAppState } from "../state"
 import { findItemById, genUniqId, isCustomActionItem } from "./utils"
-import { IFolderItem } from "./types"
+import { IFolderItem, IFolderItemToCreate } from "./types"
+import { ActionDispatcher, executeCustomAction } from "../state/actions"
+import { Action, IAppState } from "../state/state"
 
 export function showMessage(message: string, dispatch: ActionDispatcher): void {
   dispatch({
     type: Action.ShowNotification,
-    message: message,
-    dispatch: dispatch
+    message: message
   })
 }
 
@@ -14,7 +14,6 @@ export function showMessageWithUndo(message: string, dispatch: ActionDispatcher)
   dispatch({
     type: Action.ShowNotification,
     message: message,
-    dispatch: dispatch,
     button: {
       text: "Undo",
       onClick: () => {
@@ -30,8 +29,7 @@ export function getCanDragChecker(search: string, dispatch: ActionDispatcher): (
     if (search) {
       dispatch({
         type: Action.ShowNotification,
-        message: "Dragging is unavailable during search",
-        dispatch: dispatch
+        message: "Dragging is unavailable during search"
       })
       return false
     } else {
@@ -40,10 +38,9 @@ export function getCanDragChecker(search: string, dispatch: ActionDispatcher): (
   }
 }
 
-export function createFolder(dispatch: ActionDispatcher, title?: string, successMessage?: string): number {
+export function createFolder(dispatch: ActionDispatcher, title?: string, items?: IFolderItemToCreate[]): number {
   const newFolderId = genUniqId()
-  dispatch({ type: Action.CreateFolder, newFolderId, title })
-  showMessage(successMessage || "Folder has been created", dispatch)
+  dispatch({ type: Action.CreateFolder, newFolderId, title, items })
   return newFolderId
 }
 
@@ -56,7 +53,7 @@ export function clickFolderItem(targetId: number, appState: IAppState, dispatch:
   } else if (targetItem) {
     if (openInNewTab) {
       // open in new tab
-      chrome.tabs.create({ url: targetItem.url, active: false})
+      chrome.tabs.create({ url: targetItem.url, active: false })
       //TODO fix bug of not updating bold items when move to new tab in new window
     } else {
       // open in the same tab or switch to already opened

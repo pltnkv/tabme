@@ -1,17 +1,19 @@
 import React, { useContext, useEffect, useRef, useState } from "react"
 import { blurSearch, hasArchivedItems, hasItemsToHighlight } from "../helpers/utils"
-import { Action, DispatchContext, IAppState, wrapIntoTransaction } from "../state"
 import { bindDADItemEffect } from "../helpers/dragAndDropItem"
-import { clickFolderItem, createFolder, getCanDragChecker, showMessage } from "../helpers/actions"
+import { clickFolderItem, createFolder, getCanDragChecker, showMessage } from "../helpers/actionsHelpers"
 import { Folder } from "./Folder"
 import { DropdownMenu } from "./DropdownMenu"
 import { handleBookmarksKeyDown, handleSearchKeyDown } from "../helpers/handleBookmarksKeyDown"
 import { Modal } from "./Modal"
+import { apiGetToken } from "../../api/api"
+import { Action, IAppState } from "../state/state"
+import { DispatchContext, wrapIntoTransaction } from "../state/actions"
 
 export function Bookmarks(props: {
   appState: IAppState;
 }) {
-  const { dispatch } = useContext(DispatchContext)
+  const dispatch = useContext(DispatchContext)
   const [moreButtonsVisibility, setMoreButtonsVisibility] = useState<boolean>(false)
   const [mouseDownEvent, setMouseDownEvent] = useState<React.MouseEvent | undefined>(undefined)
 
@@ -22,33 +24,29 @@ export function Bookmarks(props: {
 
   useEffect(() => {
     if (mouseDownEvent) {
-      const onDropItems = (folderId: number, itemIdInsertAfter: number | undefined, targetsIds: number[]) => {
+      const onDropItems = (folderId: number, itemIdInsertBefore: number | undefined, targetsIds: number[]) => {
 
-        wrapIntoTransaction(() => {
+        wrapIntoTransaction(() => { // todo figure out how to wrap it into single action. pipe here??
 
           if (folderId === -1) { // we need to create new folder first
             folderId = createFolder(dispatch)
           }
 
-          targetsIds.forEach(targetId => {
-            dispatch({
-              type: Action.MoveBookmarkToFolder,
-              targetItemId: targetId,
-              targetFolderId: folderId,
-              itemIdInsertAfter
-            })
+          dispatch({
+            type: Action.MoveFolderItems,
+            itemIds: targetsIds,
+            targetFolderId: folderId,
+            itemIdInsertBefore
           })
         })
 
         setMouseDownEvent(undefined)
       }
       const onDropFolder = (folderId: number, insertBeforeFolderId: number) => {
-        wrapIntoTransaction(() => {
-          dispatch({
-            type: Action.MoveFolder,
-            folderId,
-            insertBeforeFolderId
-          })
+        dispatch({
+          type: Action.MoveFolder,
+          folderId,
+          insertBeforeFolderId
         })
 
         setMouseDownEvent(undefined)
@@ -87,13 +85,11 @@ export function Bookmarks(props: {
   }
 
   function onCreateFolder() {
-    wrapIntoTransaction(() => {
-      const folderId = createFolder(dispatch)
+    const folderId = createFolder(dispatch)
 
-      dispatch({
-        type: Action.UpdateAppState,
-        newState: { itemInEdit: folderId }
-      })
+    dispatch({
+      type: Action.UpdateAppState,
+      newState: { itemInEdit: folderId }
     })
   }
 
@@ -136,6 +132,20 @@ export function Bookmarks(props: {
     dispatch({ type: Action.UpdateSearch, value: "" })
   }
 
+  function onDeleteFolders() {
+    dispatch({ type: Action.UpdateAppState, newState: { folders: [] } })
+  }
+
+  async function onLogin() {
+    try {
+      const res = await apiGetToken()
+      localStorage.setItem("authToken", res.token)
+      alert("Login successful!")
+    } catch (e) {
+      alert("Invalid credentials. Please try again.")
+    }
+  }
+
   const folders = props.appState.showArchived ? props.appState.folders : props.appState.folders.filter(f => !f.archived)
   return (
     <div className="bookmarks-box">
@@ -174,6 +184,15 @@ export function Bookmarks(props: {
               : null
           }
 
+          {
+            props.appState.betaMode ?
+              <>
+                <button className={"btn__setting"} onClick={onLogin}>Login</button>
+                <button className={"btn__setting"} onClick={onDeleteFolders}>Delete folders</button>
+              </>
+              : null
+          }
+
           <button className={`btn__setting ${moreButtonsVisibility ? "btn__setting--active" : ""}`} onClick={onToggleMore}>Settings</button>
           {moreButtonsVisibility ? (
             <DropdownMenu onClose={() => {setMoreButtonsVisibility(false)}} className={"dropdown-menu--settings"} topOffset={30}>
@@ -188,9 +207,15 @@ export function Bookmarks(props: {
 
         {folders.map((folder) => (
           <Folder
-            appState={props.appState}
             key={folder.id}
             folder={folder}
+            folders={props.appState.folders}
+            tabs={props.appState.tabs}
+            historyItems={props.appState.historyItems}
+            showNotUsed={props.appState.showNotUsed}
+            showArchived={props.appState.showArchived}
+            search={props.appState.search}
+            itemInEdit={props.appState.itemInEdit}
           />
         ))}
 
@@ -213,7 +238,7 @@ const SettingsOptions = (props: {
   appState: IAppState;
   onOverrideNewTabMenu: () => void
 }) => {
-  const { dispatch } = useContext(DispatchContext)
+  const dispatch = useContext(DispatchContext)
 
   function onToggleNotUsed() {
     if (hasItemsToHighlight(props.appState.folders, props.appState.historyItems)) {
@@ -266,7 +291,7 @@ const SettingsOptions = (props: {
     toggleModeText = "Dark Color Theme"
   }
 
-  const settingsOptions: Array<{ onClick: () => void; title: string; text: string } | { separator: true }> = [
+  const settingsOptions: Array<{ onClick: () => void; title: string; text: string; hidden?: boolean } | { separator: true }> = [
     {
       onClick: onToggleNotUsed,
       title: "Highlight not used in past 60 days to archive them. It helps to keep workspace clean.",
@@ -275,12 +300,18 @@ const SettingsOptions = (props: {
     {
       onClick: onToggleHidden,
       title: "It shows hidden bookmarks.",
-      text: props.appState.showArchived ? "Hide archived" : "Show archived"
+      text: props.appState.showArchived ? "Hide archived" : "Show archived",
+      hidden: !props.appState.devMode
     },
     {
       onClick: onToggleMode,
       title: "Change your Color Schema",
       text: toggleModeText
+    },
+    {
+      onClick: props.onOverrideNewTabMenu,
+      title: "Manage browser new tab override by Tabme",
+      text: __OVERRIDE_NEWTAB ? "Revert to default new tab" : "Show Tabme on new tab"
     },
     {
       separator: true
@@ -289,11 +320,6 @@ const SettingsOptions = (props: {
       onClick: onImportExistingBookmarks,
       title: "Import existing Chrome bookmarks into Tabme",
       text: "Import browser bookmarks"
-    },
-    {
-      onClick: props.onOverrideNewTabMenu,
-      title: "Manage browser new tab override by Tabme",
-      text: __OVERRIDE_NEWTAB ? "Revert to default new tab" : "Show Tabme on new tab"
     },
     {
       onClick: onAdvanced,
@@ -327,8 +353,8 @@ const SettingsOptions = (props: {
   return <>
     {settingsOptions.map((option, index) => {
       if (isSeparator(option)) {
-        return <div className="dropdown-menu__separator"/>
-      } else {
+        return <div key={index} className="dropdown-menu__separator"/>
+      } else if (!option.hidden) {
         return <button
           key={index}
           className="dropdown-menu__button focusable"
@@ -358,7 +384,9 @@ const OverrideModal = ({ isOverrideModalOpen, setOverrideModalOpen }:
               <span>Settings → Advanced mode → Export</span></li>
             <li>Uninstall current "Tabme" extension. <br/>
               <span>Go to "Manage extensions" from your browser. Find the card for Tabme and click "Remove"</span></li>
-            <li>Install "<a href="https://chromewebstore.google.com/detail/tabme-%E2%80%94-version-without-n/jjdbikbbknmhkknpfnlhgpcikbfjldee">Tabme — version without newtab</a>" extension</li>
+            <li>Install "<a href="https://chromewebstore.google.com/detail/tabme-%E2%80%94-version-without-n/jjdbikbbknmhkknpfnlhgpcikbfjldee">Tabme — version without newtab</a>"
+              extension
+            </li>
             <li>[optional] Import saved bookmarks.<br/>
               <span>Settings → Advanced mode → Import</span></li>
           </ol>

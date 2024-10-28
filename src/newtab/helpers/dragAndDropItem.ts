@@ -165,7 +165,7 @@ function runItemDragAndDrop(
   mouseDownEvent: React.MouseEvent,
   targetRoots: HTMLElement[],
   isFolderItem: boolean,
-  onDrop: (folderId: number, itemIdInsertAfter: number | undefined, targetIds: number[]) => void,
+  onDrop: (folderId: number, itemIdInsertBefore: number | undefined, targetIds: number[]) => void,
   onCancel: () => void,
   onClick: (targetId: number) => void,
   onDragStarted: () => boolean) {
@@ -274,8 +274,8 @@ function runItemDragAndDrop(
       const tryAddToOriginalPos = targetFolderId === originalFolderId && inRange(indexToDrop, originalIndex, originalIndex + targetRoots.length)
       if (prevBoxToDrop && !tryAddToOriginalPos) {
         const folderId = getFolderId(prevBoxToDrop)
-        const itemIdInsertAfter = getItemIdByIndex(prevBoxToDrop, indexToDrop)
-        onDrop(folderId, itemIdInsertAfter, getDraggedItemsIds(targetRoots))
+        const itemIdInsertBefore = getItemIdByIndex(prevBoxToDrop, indexToDrop)
+        onDrop(folderId, itemIdInsertBefore, getDraggedItemsIds(targetRoots))
       } else {
         onCancel()
       }

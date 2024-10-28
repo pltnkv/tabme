@@ -1,19 +1,20 @@
 import React, { useContext, useEffect, useState } from "react"
-import { Action, DispatchContext, IAppState, wrapIntoTransaction } from "../state"
-import { createFolder, showMessage } from "../helpers/actions"
+import { createFolder, showMessage } from "../helpers/actionsHelpers"
 import { SidebarHistory } from "./SidebarHistory"
 import { SidebarOpenTabs } from "./SidebarOpenTabs"
-import Tab = chrome.tabs.Tab
 import { isTabmeTab } from "../helpers/isTabmeTab"
 import { convertTabToItem, getCurrentData } from "../helpers/utils"
 import { DropdownMenu } from "./DropdownMenu"
 import { CL } from "../helpers/classNameHelper"
+import { Action, IAppState } from "../state/state"
+import { DispatchContext } from "../state/actions"
+import Tab = chrome.tabs.Tab
 
 export function Sidebar(props: {
   appState: IAppState;
 }) {
 
-  const { dispatch } = useContext(DispatchContext)
+  const dispatch = useContext(DispatchContext)
   const keepSidebarOpened = !props.appState.sidebarCollapsed || props.appState.sidebarHovered
   const sidebarClassName = keepSidebarOpened ? "" : "collapsed"
 
@@ -74,7 +75,7 @@ export function Sidebar(props: {
               lastActiveTabIds={props.appState.lastActiveTabIds}
               currentWindowId={props.appState.currentWindowId}
             />
-            <SidebarHistory appState={props.appState}/>
+            <SidebarHistory search={props.appState.search} historyItems={props.appState.historyItems}/>
           </>
           : null
       }
@@ -84,7 +85,7 @@ export function Sidebar(props: {
 
 const StashButton = React.memo((props: { tabs: Tab[] }) => {
   const [confirmationOpened, setConfirmationOpened] = useState(false)
-  const { dispatch } = useContext(DispatchContext)
+  const dispatch = useContext(DispatchContext)
 
   const onStashClick = () => {
     setConfirmationOpened(!confirmationOpened)
@@ -110,26 +111,17 @@ const StashButton = React.memo((props: { tabs: Tab[] }) => {
         return
       }
 
-      wrapIntoTransaction(() => {
-        const folderTitle = `Saved on ${getCurrentData()}`
-        const folderId = createFolder(dispatch, folderTitle, "All Tabs has been saved")
+      const items = tabsToShelve.map(convertTabToItem)
+      const folderTitle = `Saved ${getCurrentData()}`
+      const folderId = createFolder(dispatch, folderTitle, items)
 
-        tabsToShelve.forEach((tab) => {
-          const item = convertTabToItem(tab)
-          dispatch({
-            type: Action.AddNewBookmarkToFolder,
-            folderId,
-            itemIdInsertAfter: undefined,
-            item
-          })
-        })
+      dispatch({ type: Action.ShowNotification, message: "All Tabs has been saved" })
 
-        requestAnimationFrame(() => {
-          const folderElement = document.querySelector(`[data-folder-id="${folderId}"]`)
-          if (folderElement) {
-            folderElement.scrollIntoView()
-          }
-        })
+      requestAnimationFrame(() => {
+        const folderElement = document.querySelector(`[data-folder-id="${folderId}"]`)
+        if (folderElement) {
+          folderElement.scrollIntoView()
+        }
       })
     })
   }
@@ -152,7 +144,8 @@ const StashButton = React.memo((props: { tabs: Tab[] }) => {
                       className="stash-confirmation-popup"
                       width={232}
                       leftOffset={-200}
-                      topOffset={10}>
+                      topOffset={10}
+                      skipTabIndexes={true}>
           <div style={{ width: "100%" }}>
             <p><b>Stash open Tabs to a new Folder</b></p>
             <p>It will close all non-pinned tabs <br/>of the current window. <br/><br/>Use "Open All" in the folder menu to restore stashed tabs.</p>
@@ -169,7 +162,7 @@ const StashButton = React.memo((props: { tabs: Tab[] }) => {
 
 const CleanupButton = React.memo((props: { tabs: Tab[] }) => {
   const [duplicateTabsCount, setDuplicateTabsCount] = useState(0)
-  const { dispatch } = useContext(DispatchContext)
+  const dispatch = useContext(DispatchContext)
 
   function onCleanupTabs() {
     getDuplicatedTabs((duplicatedTabs) => {

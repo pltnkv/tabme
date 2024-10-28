@@ -1,6 +1,5 @@
 import React from "react"
 import { extractHostname, hlSearch, isContainsSearch, removeUselessProductName } from "../helpers/utils"
-import { IAppState } from "../state"
 import HistoryItem = chrome.history.HistoryItem
 
 // function uniqHistory(items: HistoryItem[]): HistoryItem[] {
@@ -32,7 +31,6 @@ function HistoryList(props: { items: HistoryItem[]; search: string }) {
 
   function formatDate(d: Date): string {
     return ("0" + d.getDate()).slice(-2) + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + d.getFullYear()
-
   }
 
   const items = historyList
@@ -59,17 +57,18 @@ function HistoryList(props: { items: HistoryItem[]; search: string }) {
   return <div>{items}</div>
 }
 
-export function SidebarHistory(props: {
-  appState: IAppState;
+export function SidebarHistory(p: {
+  historyItems: HistoryItem[];
+  search: string;
 }) {
-  if (props.appState.search.length >= 2) {
+  if (p.search.length >= 2) {
     return <div>
       <div className="app-sidebar__header">
         <span className="app-sidebar__header__text">Recent</span>
       </div>
       <HistoryList
-        items={props.appState.historyItems}
-        search={props.appState.search}
+        items={p.historyItems}
+        search={p.search}
       ></HistoryList>
     </div>
   } else {

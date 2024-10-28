@@ -1,28 +1,33 @@
 import React, { useContext, useEffect, useState } from "react"
-import { IFolderItem } from "../helpers/types"
+import { IFolder, IFolderItem } from "../helpers/types"
 import { findItemsByIds, findTabsByURL, isFolderItemNotUsed } from "../helpers/utils"
-import { Action, DispatchContext, IAppState, wrapIntoTransaction } from "../state"
 import { DropdownMenu } from "./DropdownMenu"
-import { showMessage, showMessageWithUndo } from "../helpers/actions"
+import { showMessage, showMessageWithUndo } from "../helpers/actionsHelpers"
 import { EditableTitle } from "./EditableTitle"
 import { getSelectedItemsIds } from "../helpers/selectionUtils"
+import { Action } from "../state/state"
+import { DispatchContext, wrapIntoTransaction } from "../state/actions"
+import Tab = chrome.tabs.Tab
+import HistoryItem = chrome.history.HistoryItem
 
-export function FolderItem(p: {
+export const FolderItem = React.memo((p: {
   item: IFolderItem;
   inEdit: boolean
-  appState: IAppState
-}) {
-  const { dispatch } = useContext(DispatchContext)
+  folders: IFolder[];
+  tabs: Tab[];
+  historyItems: HistoryItem[];
+  showNotUsed: boolean;
+  search: string;
+}) => {
+  const dispatch = useContext(DispatchContext)
   const [showMenu, setShowMenu] = useState<boolean>(false)
 
   function trySaveTitle(newTitle: string) {
     if (p.item.title !== newTitle) {
-      wrapIntoTransaction(() => {
-        dispatch({
-          type: Action.UpdateFolderItem,
-          itemId: p.item.id,
-          newTitle
-        })
+      dispatch({
+        type: Action.UpdateFolderItem,
+        itemId: p.item.id,
+        title: newTitle
       })
     }
   }
@@ -40,7 +45,7 @@ export function FolderItem(p: {
   }
 
   function onCloseTab() {
-    const tabs = findTabsByURL(p.item.url, p.appState.tabs)
+    const tabs = findTabsByURL(p.item.url, p.tabs)
     const tabIds = tabs.filter(t => t.id).map(t => t.id!)
     dispatch({
       type: Action.CloseTabs,
@@ -53,10 +58,10 @@ export function FolderItem(p: {
     imgElement.src = getBrokenImgSVG()
   }
 
-  const folderItemOpened = findTabsByURL(p.item.url, p.appState.tabs).length !== 0
+  const folderItemOpened = findTabsByURL(p.item.url, p.tabs).length !== 0
   const titleClassName = "folder-item__inner__title "
     + (folderItemOpened ? "opened " : "")
-    + (p.appState.showNotUsed && isFolderItemNotUsed(p.item, p.appState.historyItems) ? "not-used " : "")
+    + (p.showNotUsed && isFolderItemNotUsed(p.item, p.historyItems) ? "not-used " : "")
 
   return (
     <div className={
@@ -66,7 +71,7 @@ export function FolderItem(p: {
     }>
       {showMenu
         ? <FolderItemMenu
-          appState={p.appState}
+          folders={p.folders}
           item={p.item}
           inEdit={p.inEdit}
           setEditing={setEditing}
@@ -92,7 +97,7 @@ export function FolderItem(p: {
                        inEdit={p.inEdit}
                        setEditing={setEditing}
                        initTitle={p.item.title}
-                       search={p.appState.search}
+                       search={p.search}
                        onSaveTitle={trySaveTitle}
         />
         {
@@ -105,16 +110,16 @@ export function FolderItem(p: {
       </a>
     </div>
   )
-}
+})
 
-function FolderItemMenu(p: {
+const FolderItemMenu = React.memo((p: {
   setShowMenu: (value: boolean) => void,
   setEditing: (val: boolean) => void,
   item: IFolderItem;
   inEdit: boolean
-  appState: IAppState
-}) {
-  const { dispatch } = useContext(DispatchContext)
+  folders: IFolder[]
+}) => {
+  const dispatch = useContext(DispatchContext)
   const [selectedItemsIds, setSelectedItemsIds] = useState<number[]>([])
 
   useEffect(() => {
@@ -133,7 +138,7 @@ function FolderItemMenu(p: {
 
   // support multiple
   function onOpenNewTab() {
-    let items = findItemsByIds(p.appState, selectedItemsIds)
+    let items = findItemsByIds(p, selectedItemsIds)
     items.forEach((item) => {
       if (item.url) {
         chrome.tabs.create({ url: item.url })
@@ -147,7 +152,7 @@ function FolderItemMenu(p: {
   function onDeleteItem() {
     wrapIntoTransaction(() => {
       dispatch({
-        type: Action.DeleteFolderItem,
+        type: Action.DeleteFolderItems,
         itemIds: selectedItemsIds
       })
     })
@@ -164,19 +169,17 @@ function FolderItemMenu(p: {
     const newUrl = prompt("Edit URL", p.item.url)
 
     if (newUrl) {
-      wrapIntoTransaction(() => {
-        dispatch({
-          type: Action.UpdateFolderItem,
-          itemId: p.item.id,
-          url: newUrl
-        })
+      dispatch({
+        type: Action.UpdateFolderItem,
+        itemId: p.item.id,
+        url: newUrl
       })
     }
   }
 
   // support multiple
   function onArchive() {
-    let items = findItemsByIds(p.appState, selectedItemsIds)
+    let items = findItemsByIds(p, selectedItemsIds)
 
     wrapIntoTransaction(() => {
       items.forEach((item) => {
@@ -226,7 +229,8 @@ function FolderItemMenu(p: {
               {
                 p.item.archived
                   ? <button className="dropdown-menu__button focusable" onClick={onRestore}>Restore</button>
-                  : <button className="dropdown-menu__button focusable" onClick={onArchive}>Archive</button>
+                  : <></>
+                  // : <button className="dropdown-menu__button focusable" onClick={onArchive}>Archive</button> — disabled functionality for a while
               }
               <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onDeleteItem}>Delete</button>
             </DropdownMenu>
@@ -234,7 +238,7 @@ function FolderItemMenu(p: {
         </>
     }
   </>
-}
+})
 
 let brokenImgSVG: string | undefined = undefined
 

@@ -7,6 +7,7 @@ export function DropdownMenu(props: {
   width?: number
   children: React.ReactChild | React.ReactChild[];
   onClose: () => void;
+  skipTabIndexes?: boolean
 }) {
   const formEl = useRef<HTMLDivElement>(null)
   const [focusedButtonIndex, setFocusedButtonIndex] = useState(-1)
@@ -97,7 +98,7 @@ export function DropdownMenu(props: {
       {React.Children.map(props.children, (child) => {
         return React.cloneElement(child as React.ReactElement, {
           // Clone each child and modify it to be focusable
-          tabIndex: 0,
+          tabIndex: props.skipTabIndexes ? undefined : 0,
           // Adding onFocus to manage focused item index
           onFocus: (e: React.FocusEvent) => onFocus(e.target)
         })

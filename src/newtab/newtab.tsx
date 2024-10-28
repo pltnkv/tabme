@@ -1,27 +1,36 @@
 import React from "react"
 import ReactDOM from "react-dom"
-import { getStateFromLS, ISavingAppState, saveStateThrottled, setInitAppState } from "./state"
 import { App } from "./components/App"
 import { applyTheme } from "./helpers/utils"
+import { setInitAppState } from "./state/state"
+import { getStateFromLS, ISavingAppState, saveStateThrottled } from "./state/storage"
+import { apiGetDashboard, loadFromNetwork } from "../api/api"
+import { preprocessSortedFolders } from "./helpers/dataConverters"
 
 declare global {
   const __OVERRIDE_NEWTAB: boolean
 }
 
-console.log('__OVERRIDE_NEWTAB', __OVERRIDE_NEWTAB)
+console.log("__OVERRIDE_NEWTAB", __OVERRIDE_NEWTAB)
 
-/**
- * TODOs
- * - implement search like in Slack by ctrl+K
- * - автоматом создавать папку, когда дропаешь таб над кнопкой "create new folder" (создавать на mouseUp)
- */
-
-// loading state from LS
-getStateFromLS((res) => {
-  preprocessLoadedState(res)
-  setInitAppState(res)
-  mountApp()
-})
+if (loadFromNetwork()) {
+  getStateFromLS((res) => {
+    apiGetDashboard().then(dashboard => {
+      console.log(dashboard)
+      //todo impl optimistic loading from LS first (and then later load from network)
+      res.folders = preprocessSortedFolders(dashboard.folders)
+      setInitAppState(res)
+      mountApp()
+    })
+  })
+} else {
+  // loading state from LS
+  getStateFromLS((res) => {
+    preprocessLoadedState(res)
+    setInitAppState(res)
+    mountApp()
+  })
+}
 
 function mountApp() {
   ReactDOM.render(

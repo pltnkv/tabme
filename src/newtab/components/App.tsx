@@ -4,12 +4,16 @@ import { Sidebar } from "./Sidebar"
 import { Notification } from "./Notification"
 import { KeyboardManager } from "./KeyboardManager"
 import { filterIrrelevantHistory } from "../helpers/utils"
-import { showMessage } from "../helpers/actions"
+import { showMessage } from "../helpers/actionsHelpers"
 import { Welcome } from "./Welcome"
-import { Action, DispatchContext, getBC, getInitAppState, getStateFromLS, IAppState, stateReducer } from "../state"
-import Tab = chrome.tabs.Tab
 import { tryToCreateWelcomeFolder } from "../helpers/welcomeLogic"
+import { Action, getInitAppState, IAppState } from "../state/state"
+import { DispatchContext, stateReducer } from "../state/actions"
+import { getBC, getStateFromLS } from "../state/storage"
+import { executeAPICall } from "../../api/serverCommands"
+import Tab = chrome.tabs.Tab
 
+let notificationTimeout: number | undefined
 let globalAppState: IAppState
 
 export function getGlobalAppState(): IAppState {
@@ -36,7 +40,8 @@ export function App() {
       }
 
       chrome.history.search({ text: "", maxResults: 10000, startTime }, function(data) {
-        console.log(data.slice(0, 3))
+        // logging top 3 visited sides
+        // console.log(data.slice(0, 3))
         const historyItems = filterIrrelevantHistory(data)
         dispatch({
           type: Action.SetTabsAndHistory,
@@ -99,17 +104,54 @@ export function App() {
     })
 
     chrome.windows.onFocusChanged.addListener((windowId) => {
-      if (windowId !== -1) { // to dont do useless jumps when switch between browser and other windows
+      if (windowId !== -1) { // to don't do useless jumps when switch between browser and other windows
         dispatch({ type: Action.UpdateAppState, newState: { currentWindowId: windowId } })
       }
     })
 
+    window.betaMode = () => {
+      dispatch({ type: Action.UpdateAppState, newState: { betaMode: true } })
+      showMessage("Beta Mode enabled", dispatch)
+    }
   }, [])
 
+  useEffect(() => {
+    if (notificationTimeout) {
+      clearTimeout(notificationTimeout)
+      notificationTimeout = undefined
+    }
+
+    if (appState.notification.visible) {
+      notificationTimeout = window.setTimeout(() => {
+        dispatch({ type: Action.HideNotification })
+      }, 3500)
+    }
+
+  }, [appState.notification])
+
+  useEffect(() => {
+    // here we run the next command if any
+    if (!appState.apiCommandId && appState.apiCommandsQueue.length > 0) {
+      // take the new command from queue
+      dispatch({ type: Action.UpdateAppState, newState: { apiCommandId: appState.apiCommandsQueue[0].commandId } })
+    }
+  }, [appState.apiCommandsQueue, appState.apiCommandId])
+
+  useEffect(() => {
+    if (appState.apiCommandId) {
+      const currentCommand = appState.apiCommandsQueue.find(cmd => cmd.commandId === appState.apiCommandId)
+      if (currentCommand) {
+        executeAPICall(currentCommand, dispatch)
+      } else {
+        throw new Error("Unacceptable flow, no currentCommand")
+      }
+    }
+  }, [appState.apiCommandId])
+
   return (
-    <DispatchContext.Provider value={{ dispatch }}>
+    <DispatchContext.Provider value={dispatch}>
       <div className={"app " + (appState.sidebarCollapsed ? "collapsible-sidebar" : "")}>
-        <Notification appState={appState}/>
+        <Notification notification={appState.notification}/>
         {
           appState.page === "import"
             ? <Welcome appState={appState}/>
@@ -127,5 +169,6 @@ export function App() {
 declare global {
   interface Window {
     devMode: () => void
+    betaMode: () => void
   }
 }
