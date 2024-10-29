@@ -12,6 +12,8 @@ import { DispatchContext, stateReducer } from "../state/actions"
 import { getBC, getStateFromLS } from "../state/storage"
 import { executeAPICall } from "../../api/serverCommands"
 import Tab = chrome.tabs.Tab
+import { loadFromNetwork } from "../../api/api"
+import { oldStateReducer } from "../state/oldActions"
 
 let notificationTimeout: number | undefined
 let globalAppState: IAppState
@@ -21,7 +23,8 @@ export function getGlobalAppState(): IAppState {
 }
 
 export function App() {
-  const [appState, dispatch] = useReducer(stateReducer, getInitAppState())
+  const reducer = loadFromNetwork() ? stateReducer : oldStateReducer
+  const [appState, dispatch] = useReducer(reducer, getInitAppState())
 
   function updateTabsAndHistory(init = false) {
     console.log("updateTabsAndHistory")

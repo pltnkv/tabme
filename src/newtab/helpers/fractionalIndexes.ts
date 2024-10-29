@@ -8,6 +8,8 @@
 // instead. So "insertBetween('', positions[0])" inserts at the front and
 // "insertBetween(positions[positions.length - 1], '')" inserts at the back.
 
+import { loadFromNetwork } from "../../api/api"
+
 export function insertBetween(before: string, after: string): string {
   // This demo uses "0" as the first digit and "9" as the last digit for
   // ease of understanding. However, this algorithm is best done with as
@@ -92,15 +94,21 @@ export function insertBetween(before: string, after: string): string {
   }
 }
 
-export function sortByPosition<T extends { position: string }>(folders: T[]): T[] {
-  return folders.sort((a, b) => {
-    if (a.position < b.position) {
-      return -1
-    } else if (a.position > b.position) {
-      return 1
-    }
-    return 0
-  })
+//todo fix types it later
+// export function sortByPosition<T extends { position: string }>(foldersOrItems: T[]): T[] {
+export function sortByPosition<T>(foldersOrItems: T[]): T[] {
+  if (loadFromNetwork()) {
+    return foldersOrItems.sort((a:any, b:any) => { //todo fix it also
+      if (a.position < b.position) {
+        return -1
+      } else if (a.position > b.position) {
+        return 1
+      }
+      return 0
+    })
+  } else {
+    return foldersOrItems
+  }
 }
 
 // function generatePositionForInsertionAt(i) {

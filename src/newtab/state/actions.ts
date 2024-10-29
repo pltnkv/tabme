@@ -11,11 +11,6 @@ export const DispatchContext = createContext<ActionDispatcher>(null!)
 
 export type ActionDispatcher = (action: ActionPayload) => void;
 
-//todo remove wrapIntoTransaction
-export function wrapIntoTransaction(callback: () => void): void {
-  callback()
-}
-
 export function stateReducer(state: IAppState, action: ActionPayload): IAppState {
   unselectAll()
   const newState = stateReducer0(state, action)
@@ -217,9 +212,15 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         })
       }
 
+      // const undoActions = getUndoAction(action.byUndo, state, () => ({
+      //   type: Action.CreateFolder, //todo introduce (restore Action)
+      //   ...deletingFolder
+      // }))
+
+      //TODO: Undo for deleting folders not supported yet
       const undoActions = getUndoAction(action.byUndo, state, () => ({
-        type: Action.CreateFolder, //todo introduce (restore Action)
-        ...deletingFolder
+        type: Action.UpdateAppState,
+        newState: state
       }))
 
       return {
@@ -282,7 +283,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
     case Action.MoveFolder: {
       const targetFolder = findFolderById(state, action.folderId)
       const insertBeforeFolderIndex = state.folders.findIndex(f => f.id === action.insertBeforeFolderId)
-      const insertAfterFolderIndex = insertBeforeFolderIndex - 1 // if index===-1 it means we want to put targetFolder at the first position
+      const insertAfterFolderIndex = insertBeforeFolderIndex === -1 ? state.folders.length - 1 : insertBeforeFolderIndex - 1
 
       const position = insertBetween(state.folders[insertAfterFolderIndex]?.position ?? "", state.folders[insertBeforeFolderIndex]?.position ?? "") // confusing naming detected -_-
 
@@ -388,7 +389,6 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         newState: state
       }))
 
-
       const deleteItemsFromFolders = (folders: IFolder[], itemId: number): IFolder[] => {
         const folder = findFolderByItemId({ folders }, itemId)
         if (folder) {
@@ -477,13 +477,12 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       }))
 
       const folderWithRemovedItems = movingItems.reduce((folders, movingItem) => {
-        const folder = findFolderByItemId({folders}, movingItem.id)!
+        const folder = findFolderByItemId({ folders }, movingItem.id)!
         return updateFolder(folders, folder.id, folder => ({
           ...folder,
           items: folder.items.filter(i => i.id !== movingItem.id)
         }))
       }, state.folders)
-
 
       const folders = updateFolder(folderWithRemovedItems, action.targetFolderId, folder => ({
         ...folder,
@@ -530,7 +529,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       // todo: Undo for moving items to folder not ready - fix it
       const undoActions = getUndoAction(action.byUndo, state, () => ({
         type: Action.UpdateAppState,
-        newState: {...state}
+        newState: { ...state }
       }))
 
       return {
@@ -586,7 +585,7 @@ function pipeActionsForStateOnly(state: IAppState, ...actions: ActionPayload[]):
   return actions.reduce(stateReducer0, state)
 }
 
-function updateFolder(
+export function updateFolder(
   folders: IFolder[],
   folderId: number,
   newFolder: Partial<IFolder> | ((folder: IFolder) => IFolder)
@@ -604,11 +603,11 @@ function updateFolder(
   })
 }
 
-function updateFolderItem(
+export function updateFolderItem(
   folders: IFolder[],
   itemId: number,
   newItemProps: Partial<IFolderItem>,
-  folderId?: number
+  folderId?: number //just optimization
 ): IFolder[] {
   if (!folderId) {
     const folder = findFolderByItemId({ folders }, itemId)
@@ -682,4 +681,8 @@ function insertFolderItem(newItem: IFolderItemToCreate, insertAfterItem: IFolder
     ...newItem,
     position: insertBetween(insertAfterItem?.position ?? "", insertBeforeItem?.position ?? "")
   }
+}
+
+export function insertFolderItemFake(newItems: IFolderItemToCreate[]): IFolderItem[] {
+  return newItems as IFolderItem[]
 }

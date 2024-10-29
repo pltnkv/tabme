@@ -204,7 +204,7 @@ export type ActionPayload = (
   | { type: Action.CreateFolder; newFolderId?: number; title?: string; items?: IFolderItemToCreate[]; color?: string; } // todo support items here
   | { type: Action.DeleteFolder; folderId: number; }
   | { type: Action.UpdateFolder; folderId: number; title?: string; color?: string; archived?: boolean; twoColumn?: boolean; }
-  | { type: Action.MoveFolder; folderId: number; insertBeforeFolderId: number; }
+  | { type: Action.MoveFolder; folderId: number; insertBeforeFolderId: number|undefined; }
 
   | { type: Action.CreateFolderItem; folderId: number; itemIdInsertBefore: number | undefined; item: IFolderItemToCreate; }
   | { type: Action.DeleteFolderItems; itemIds: number[] }

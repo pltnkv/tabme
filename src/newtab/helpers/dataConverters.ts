@@ -12,5 +12,6 @@ export function preprocessSortedFolders(sortedFolder: IFolder[]): IFolder[] {
     // todo items
   })
 
-  return sortByPosition(sortedFolder)
+  //todo remove anu later
+  return sortByPosition(sortedFolder as any) as any
 }

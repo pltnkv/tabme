@@ -1,7 +1,7 @@
 import { getSelectedItemsElements, selectItem, unselectAll } from "./selectionUtils"
 
 const DAD_THRESHOLD = 4
-type DropArea = { element: HTMLElement, rect: DOMRect, itemRects: { thresholdY: number, itemTop: number, itemHeight: number }[] }
+type DropArea = { folderId: number, element: HTMLElement, rect: DOMRect, itemRects: { thresholdY: number, itemTop: number, itemHeight: number }[] }
 
 let scrollDown = false
 let scrollUp = false
@@ -10,13 +10,13 @@ export function bindDADItemEffect(
   mouseDownEvent: React.MouseEvent,
   itemConfig: {
     isFolderItem: boolean, // otherwise we drag-and-drop from sidebar
-    onDrop: (folderId: number, itemIdInsertAfter: number | undefined, targetsIds: number[]) => void,
+    onDrop: (folderId: number, insertBeforeItemId: number | undefined, targetsIds: number[]) => void,
     onCancel: () => void,
     onClick: (targetId: number) => void,
     onDragStarted: () => boolean // return false to prevent action. Previously was named canDrag()
   },
   folderConfig?: {
-    onDrop: (draggedFolderId: number, insertBeforeFolderId: number) => void,
+    onDrop: (draggedFolderId: number, insertBeforeFolderId: number | undefined) => void,
     onCancel: () => void,
   },
   canvasEl?: HTMLCanvasElement
@@ -176,6 +176,7 @@ function runItemDragAndDrop(
 
   const folderEls = Array.from(document.querySelectorAll(".folder .folder-items-box"))
   const calculateDropAreas = (): DropArea[] => folderEls.map((el) => ({
+    folderId: getFolderId(el as HTMLElement),
     element: el as HTMLElement,
     rect: el.getBoundingClientRect(),
     itemRects: Array.from(el.children).map((item) => {
@@ -221,7 +222,7 @@ function runItemDragAndDrop(
       }
       if (curBoxToDrop && dropArea) {
         const res = getNewPlacementForItem(dropArea, e)
-        targetFolderId = getFolderId(curBoxToDrop)
+        targetFolderId = dropArea.folderId
         const tryAddToOriginalPos = targetFolderId === originalFolderId && inRange(res.index, originalIndex, originalIndex + targetRoots.length)
         if (tryAddToOriginalPos) { //actual only for isFolderItem
           placeholder.style.top = `${dropArea.itemRects[originalIndex].itemTop}px`
@@ -300,20 +301,21 @@ function runItemDragAndDrop(
 
 function runFolderDragAndDrop(mouseDownEvent: React.MouseEvent,
                               targetRoot: HTMLElement,
-                              onDrop: (draggedFolderId: number, insertBeforeFolderId: number) => void,
+                              onDrop: (draggedFolderId: number, insertBeforeFolderId: number | undefined) => void,
                               onCancel: () => void) {
 
   let dummy: undefined | HTMLElement = undefined
   const placeholder: HTMLElement = createPlaceholder(false)
 
-  const folderEls = Array.from(document.querySelectorAll(".folder"))
+  const folderEls = Array.from(document.querySelectorAll(".folder:not(.folder--new)"))
   const calculateDropAreas = (): DropArea[] => folderEls.map((el) => ({
+    folderId: getFolderId(el as HTMLElement),
     element: el as HTMLElement,
     rect: el.getBoundingClientRect(),
     itemRects: null! // not needed for folder
   }))
   let dropAreas = calculateDropAreas()
-  let prevBoxToDrop: HTMLElement | undefined = undefined
+  let dropArea: DropArea | undefined = undefined
   const draggingFolderId = getFolderId(targetRoot)
   let targetInsertBeforeFolderId: number | undefined
   const SCROLL_THRESHOLD = 20
@@ -332,24 +334,22 @@ function runFolderDragAndDrop(mouseDownEvent: React.MouseEvent,
       dummy.style.transform = `translateX(${e.clientX + "px"}) translateY(${e.clientY + "px"})`
 
       // find target position
-      const dropArea = getOverlappedDropArea(dropAreas, e)
-      const curBoxToDrop = dropArea ? dropArea.element : undefined
-      const targetInsertBeforeFolderId0 = curBoxToDrop && getFolderId(curBoxToDrop)
-      if (curBoxToDrop !== prevBoxToDrop) {
-        if (curBoxToDrop && targetInsertBeforeFolderId0 && targetInsertBeforeFolderId0 !== draggingFolderId) {
-          targetInsertBeforeFolderId = targetInsertBeforeFolderId0
-          dropArea?.element.parentElement?.appendChild(placeholder)
+      dropArea = getOverlappedDropArea(dropAreas, e)
+      if (dropArea) {
+        const insertBefore = e.clientX < dropArea.rect.left + dropArea.rect.width / 2
+        targetInsertBeforeFolderId = calculateTargetInsertBeforeFolderId(dropAreas, dropArea, insertBefore)
+
+        if (dropArea.folderId !== draggingFolderId) {
+          const leftShift = 10
+          dropArea.element.parentElement?.appendChild(placeholder)
+          placeholder.style.top = `${dropArea.element.offsetTop + 22}px`
+          placeholder.style.left = insertBefore ? `${dropArea.element.offsetLeft + leftShift}px` : `${dropArea.element.offsetLeft + dropArea.element.clientWidth + leftShift}px`
+          placeholder.style.height = `${dropArea.element.clientHeight - 80}px`
         } else {
-          targetInsertBeforeFolderId = undefined
           placeholder.remove()
         }
-        prevBoxToDrop = curBoxToDrop
-      }
-      if (curBoxToDrop && dropArea) {
-        // calc placeholder placement
-        placeholder.style.top = `${dropArea.element.offsetTop + 22}px`
-        placeholder.style.left = `${dropArea.element.offsetLeft + 22}px`
-        placeholder.style.height = `${dropArea.element.clientHeight - 80}px`
+      } else {
+        placeholder.remove()
       }
 
       // Check if the element is too close to the bottom edge of the viewport
@@ -382,7 +382,7 @@ function runFolderDragAndDrop(mouseDownEvent: React.MouseEvent,
       dummy.remove()
       placeholder.remove()
       targetRoot.style.removeProperty("opacity")
-      if (prevBoxToDrop && targetInsertBeforeFolderId && draggingFolderId !== targetInsertBeforeFolderId) {
+      if (dropArea && draggingFolderId !== targetInsertBeforeFolderId) {
         onDrop(draggingFolderId, targetInsertBeforeFolderId)
       } else {
         onCancel()
@@ -434,10 +434,27 @@ function getNewPlacementForItem(dropArea: DropArea, e: MouseEvent): { placeholde
   }
 }
 
+/**
+ * "undefined" result means we should insert Folder to the very end
+ */
+function calculateTargetInsertBeforeFolderId(dropAreas: DropArea[], dropArea: DropArea, insertBefore: boolean): number | undefined {
+  if (insertBefore) {
+    return dropArea.folderId
+  } else {
+    const indexOfNextDropArea = dropAreas.indexOf(dropArea) + 1
+    return indexOfNextDropArea < dropAreas.length ? dropAreas[indexOfNextDropArea].folderId : undefined
+  }
+}
+
 function findRootOfDraggableFolder(targetElement: HTMLElement): HTMLElement | null {
   if (isDraggableFolderHeader(targetElement)) {
     return targetElement
   }
+
+  if (isDraggableFolderHeader(targetElement.parentElement)) {
+    return targetElement.parentElement
+  }
+
   return null
 }
 

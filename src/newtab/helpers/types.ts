@@ -1,7 +1,7 @@
 export interface IFolder {
   id: number // local id
   remoteId?: number // server id
-  position: string
+  position?: string //todo remove optional flag later
   title: string
   items: IFolderItem[]
   color?: string

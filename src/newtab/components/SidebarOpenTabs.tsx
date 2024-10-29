@@ -3,9 +3,10 @@ import { blurSearch, convertTabToItem, createNewSection, extractHostname, filter
 import { bindDADItemEffect, getDraggedItemId } from "../helpers/dragAndDropItem"
 import { createFolder, getCanDragChecker, showMessage } from "../helpers/actionsHelpers"
 import { IFolder, IFolderItem } from "../helpers/types"
-import { DispatchContext, wrapIntoTransaction } from "../state/actions"
+import { DispatchContext } from "../state/actions"
 import { Action } from "../state/state"
 import Tab = chrome.tabs.Tab
+import { wrapIntoTransaction } from "../state/oldActions"
 
 export const SidebarOpenTabs = memo((props: {
   search: string;
@@ -127,8 +128,8 @@ export const SidebarOpenTabs = memo((props: {
     showMessage("Tab has been closed", dispatch)
   }
 
-  // const openTabs = props.tabs.filter(filterNonImportant).map((t) => {
   const tabsByWindows: Map<number, Tab[]> = new Map()
+  let tabsCount = 0
   filterTabsBySearch(props.tabs, props.search).forEach(t => {
     let tabsInWindow = tabsByWindows.get(t.windowId)
     if (!tabsInWindow) {
@@ -136,13 +137,10 @@ export const SidebarOpenTabs = memo((props: {
       tabsByWindows.set(t.windowId, tabsInWindow)
     }
     tabsInWindow.push(t)
+    tabsCount++;
   })
 
   const sortedWindowsWithTabs = getSortedWindowsWithTabs(tabsByWindows, props.currentWindowId)
-
-  const openTabs = filterTabsBySearch(props.tabs, props.search).map(t => {
-    return
-  })
 
   const SectionItem = <div
     className="inbox-item draggable-item"
@@ -169,7 +167,7 @@ export const SidebarOpenTabs = memo((props: {
           })
 
       }
-      {openTabs.length === 0 && props.search === "" ? <p className="no-opened-tabs">...are displayed here.<br/> Pinned tabs are filtered out.</p> : null}
+      {tabsCount === 0 && props.search === "" ? <p className="no-opened-tabs">No open tabs.<br/> Pinned tabs are filtered out.</p> : null}
       {
         /* disabled it because it looks wierd with several Windows */
         /*{props.search === "" ? SectionItem : null}*/

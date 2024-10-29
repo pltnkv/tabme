@@ -7,6 +7,7 @@ export function DropdownMenu(props: {
   width?: number
   children: React.ReactChild | React.ReactChild[];
   onClose: () => void;
+  noSmartPositioning?:boolean,
   skipTabIndexes?: boolean
 }) {
   const formEl = useRef<HTMLDivElement>(null)
@@ -74,14 +75,14 @@ export function DropdownMenu(props: {
       const bufferSpace = 10 // Buffer space between dropdown and viewport edges
 
       // Check if there is enough space below
-      if (rect.bottom + bufferSpace > viewportHeight) {
+      if (rect.bottom + bufferSpace < viewportHeight || props.noSmartPositioning) {
+        // Show menu below button
+        formEl.current.style.top = props.topOffset ? `${props.topOffset}px` : "auto"
+        formEl.current.style.bottom = "initial"
+      } else {
         // If not enough space below, position it above
         formEl.current.style.top = "auto"
         formEl.current.style.bottom = `${30}px`
-      } else {
-        // Otherwise, keep it below
-        formEl.current.style.top = props.topOffset ? `${props.topOffset}px` : "auto"
-        formEl.current.style.bottom = "initial"
       }
     }
   }, [])

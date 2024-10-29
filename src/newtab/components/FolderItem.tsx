@@ -6,9 +6,10 @@ import { showMessage, showMessageWithUndo } from "../helpers/actionsHelpers"
 import { EditableTitle } from "./EditableTitle"
 import { getSelectedItemsIds } from "../helpers/selectionUtils"
 import { Action } from "../state/state"
-import { DispatchContext, wrapIntoTransaction } from "../state/actions"
+import { DispatchContext } from "../state/actions"
 import Tab = chrome.tabs.Tab
 import HistoryItem = chrome.history.HistoryItem
+import { wrapIntoTransaction } from "../state/oldActions"
 
 export const FolderItem = React.memo((p: {
   item: IFolderItem;
