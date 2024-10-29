@@ -201,7 +201,7 @@ export function Folder(props: {
       {
         folderItems.length === 0 && !folderIsEmptyDuringSearch ?
           <div className="folder-empty-tip">
-            To add bookmark, drop an item form side panel here
+            To add bookmark, drop an item form the sidebar
           </div>
           : null
       }

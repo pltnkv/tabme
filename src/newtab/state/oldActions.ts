@@ -1,7 +1,7 @@
 import { getGlobalAppState } from "../components/App"
 import { Action, ActionPayload, IAppState } from "./state"
 import { unselectAll } from "../helpers/selectionUtils"
-import { saveStateThrottled } from "./storage"
+import { saveStateThrottled, savingStateKeys } from "./storage"
 import { ColorTheme, IFolder, IFolderItem } from "../helpers/types"
 import { applyTheme, findFolderById, findFolderByItemId, findItemById, genUniqId, getRandomHEXColor } from "../helpers/utils"
 import { insertFolderItemFake, updateFolder, updateFolderItem } from "./actions"
@@ -18,10 +18,9 @@ export function oldStateReducer(state: IAppState, action: ActionPayload): IAppSt
   unselectAll()
   const newState = stateReducer0(state, action)
   console.log("[old action]:", action, " [new state]:", newState)
-  if (state.folders !== newState.folders
-    || state.sidebarCollapsed !== newState.sidebarCollapsed
-    || state.colorTheme !== newState.colorTheme
-    || state.stat != newState.stat) {
+
+  const haveSomethingToSave = savingStateKeys.some(key => state[key] !== newState[key])
+  if (haveSomethingToSave) {
     if (action.type !== Action.InitFolders || !action.ignoreSaving) {
       saveStateThrottled(newState)
     }

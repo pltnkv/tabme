@@ -251,6 +251,7 @@ function runItemDragAndDrop(
         }
         //create dummy
         dummy = createTabDummy(targetRoots, mouseDownEvent, isFolderItem)
+        dummy.style.transform = `translateX(${e.clientX + "px"}) translateY(${e.clientY + "px"})`
         document.body.classList.add("dragging")
         document.body.append(dummy)
         if (isFolderItem) {

@@ -64,6 +64,7 @@ export type IAppState = {
   itemInEdit: undefined | number, //can be item or folder
   showArchived: boolean;
   showNotUsed: boolean;
+  openBookmarksInNewTab: boolean;
   sidebarCollapsed: boolean; // stored
   colorTheme?: ColorTheme; // stored
   sidebarHovered: boolean; // for hover effects
@@ -95,10 +96,11 @@ let initState: IAppState = {
   itemInEdit: undefined,
   showArchived: false,
   showNotUsed: false,
+  openBookmarksInNewTab: false,
   sidebarCollapsed: false, //should be named "sidebarCollapsable"
   sidebarHovered: false,
   sidebarItemDragging: false,
-  devMode: false, //process.env.NODE_ENV === "development",
+  devMode: true,// false, //process.env.NODE_ENV === "development",
   betaMode: loadFromNetwork(),
   page: "default",
   stat: {

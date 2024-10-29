@@ -358,7 +358,11 @@ export function getTopVisitedFromHistory(history: HistoryItem[], limit = 20) {
 
 export function getFavIconUrl(val?: string): string {
   if (val) {
-    return (new URL(val)).origin + "/favicon.ico"
+    try {
+      return (new URL(val)).origin + "/favicon.ico"
+    } catch (e) {
+      return ""
+    }
   } else {
     return ""
   }

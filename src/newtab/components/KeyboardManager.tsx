@@ -9,7 +9,8 @@ export const KeyboardManager = React.memo((props: {
 }) => {
   const dispatch = useContext(DispatchContext)
   useEffect(() => {
-    const onKeyUp = (e: KeyboardEvent) => {
+    const onKeyDown = (e: KeyboardEvent) => {
+
       if (document.activeElement !== document.body) {
         return
       }
@@ -34,6 +35,11 @@ export const KeyboardManager = React.memo((props: {
         return
       }
 
+      if(e.code === "ArrowDown") {
+        ;(document.querySelector("input.search") as HTMLElement).focus()
+        return
+      }
+
       const isLetterOrNumber = !!(e.key.length === 1 && e.key.match(/[a-z]|[а-я]|[0-9]/i))
       if (isLetterOrNumber) {
         // dispatch({
@@ -43,10 +49,10 @@ export const KeyboardManager = React.memo((props: {
         ;(document.querySelector("input.search") as HTMLElement).focus()
       }
     }
-    document.addEventListener("keydown", onKeyUp)
+    document.addEventListener("keydown", onKeyDown)
 
     return () => {
-      document.removeEventListener("keydown", onKeyUp)
+      document.removeEventListener("keydown", onKeyDown)
     }
   }, [])
   return null

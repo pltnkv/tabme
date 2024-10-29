@@ -3,7 +3,7 @@ import { Action, ActionPayload, APICommandPayload, APICommandPayloadFull, IAppSt
 import { unselectAll } from "../helpers/selectionUtils"
 import { ColorTheme, IFolder, IFolderItem, IFolderItemToCreate } from "../helpers/types"
 import { applyTheme, findFolderById, findFolderByItemId, findItemById, genNextRuntimeId, genUniqId, getRandomHEXColor } from "../helpers/utils"
-import { saveStateThrottled } from "./storage"
+import { saveStateThrottled, savingStateKeys } from "./storage"
 import { insertBetween, sortByPosition } from "../helpers/fractionalIndexes"
 import { loadFromNetwork } from "../../api/api"
 
@@ -16,10 +16,8 @@ export function stateReducer(state: IAppState, action: ActionPayload): IAppState
   const newState = stateReducer0(state, action)
   console.log("[action]:", action, " [new state]:", newState)
 
-  if (state.folders !== newState.folders
-    || state.sidebarCollapsed !== newState.sidebarCollapsed
-    || state.colorTheme !== newState.colorTheme
-    || state.stat != newState.stat) {
+  const haveSomethingToSave = savingStateKeys.some(key => state[key] !== newState[key])
+  if (haveSomethingToSave) {
     if (action.type !== Action.InitFolders || !action.ignoreSaving) {
       saveStateThrottled(newState)
     }

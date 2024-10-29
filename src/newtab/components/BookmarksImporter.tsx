@@ -178,7 +178,7 @@ const BookmarkList = (props: {
   }
 
   return <>
-    <button className="btn__setting primary" style={{ marginLeft: 0 }} onClick={onQuickImport}>Quick import only "Recently visited"</button>
+    <button className="btn__setting primary" style={{ marginLeft: 0 }} onClick={onQuickImport}>Quick import all "Recently visited"</button>
     <div className="importing-bookmarks-list">
       {records.map((rec, recIndex) => (
         <div key={rec.folder.id}>
@@ -209,7 +209,7 @@ const BookmarkList = (props: {
       {
         selectedBookmarksCount > 0
           ? <button className="btn__setting primary" onClick={onImport}>Import {selectedBookmarksCount} selected bookmarks</button>
-          : <button className="btn__setting primary" disabled={true}>Selected bookmarks to import</button>
+          : <button className="btn__setting primary" disabled={true}>Select some bookmarks to import</button>
       }
       <button className="btn__setting" onClick={props.onClose}>Cancel</button>
     </p>

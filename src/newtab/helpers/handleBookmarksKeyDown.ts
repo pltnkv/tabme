@@ -41,7 +41,7 @@ function openFocusedItem(event: React.KeyboardEvent, appState: IAppState, dispat
     const itemId = Number(link.dataset.id)
     if (itemId) {
       const inNewTab = event.ctrlKey || event.metaKey || event.shiftKey || event.altKey
-      clickFolderItem(itemId, appState, dispatch, inNewTab)
+      clickFolderItem(itemId, appState, dispatch, inNewTab, appState.openBookmarksInNewTab)
     }
   }
 }

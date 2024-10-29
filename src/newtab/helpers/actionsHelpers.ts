@@ -44,7 +44,7 @@ export function createFolder(dispatch: ActionDispatcher, title?: string, items?:
   return newFolderId
 }
 
-export function clickFolderItem(targetId: number, appState: IAppState, dispatch: ActionDispatcher, openInNewTab: boolean) {
+export function clickFolderItem(targetId: number, appState: IAppState, dispatch: ActionDispatcher, openInNewTab: boolean, openBookmarksInNewTab: boolean) {
   const targetItem = findItemById(appState, targetId)
   if (targetItem?.isSection) {
     onRenameSection(targetItem)
@@ -63,7 +63,12 @@ export function clickFolderItem(targetId: number, appState: IAppState, dispatch:
         chrome.windows.update(tab.windowId, { focused: true })
       } else {
         chrome.tabs.getCurrent(t => {
-          chrome.tabs.update(t?.id!, { url: targetItem.url })
+          if (openBookmarksInNewTab) {
+            chrome.tabs.create({ url: targetItem.url, active: true })
+          } else {
+            chrome.tabs.update(t?.id!, { url: targetItem.url })
+          }
+
         })
       }
     }

@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react"
-import { blurSearch, hasArchivedItems, hasItemsToHighlight } from "../helpers/utils"
+import { blurSearch } from "../helpers/utils"
 import { bindDADItemEffect } from "../helpers/dragAndDropItem"
-import { clickFolderItem, createFolder, getCanDragChecker, showMessage } from "../helpers/actionsHelpers"
+import { clickFolderItem, createFolder, getCanDragChecker } from "../helpers/actionsHelpers"
 import { Folder } from "./Folder"
 import { DropdownMenu } from "./DropdownMenu"
 import { handleBookmarksKeyDown, handleSearchKeyDown } from "../helpers/handleBookmarksKeyDown"
@@ -9,8 +9,8 @@ import { Modal } from "./Modal"
 import { apiGetToken } from "../../api/api"
 import { Action, IAppState } from "../state/state"
 import { DispatchContext } from "../state/actions"
-import Switch from "react-switch"
 import { wrapIntoTransaction } from "../state/oldActions"
+import { SettingsOptions } from "./SettingsOptions"
 
 export function Bookmarks(props: {
   appState: IAppState;
@@ -20,8 +20,8 @@ export function Bookmarks(props: {
   const [mouseDownEvent, setMouseDownEvent] = useState<React.MouseEvent | undefined>(undefined)
 
   const [isOverrideModalOpen, setOverrideModalOpen] = useState(false)
+  const [isShortcutsModalOpen, setShortcutsModalOpen] = useState(false)
 
-  const fileInput = useRef(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -60,7 +60,7 @@ export function Bookmarks(props: {
       }
       const onClick = (targetId: number) => {
         const meta = mouseDownEvent.metaKey || mouseDownEvent.ctrlKey || mouseDownEvent.button === 1
-        clickFolderItem(targetId, props.appState, dispatch, meta)
+        clickFolderItem(targetId, props.appState, dispatch, meta, props.appState.openBookmarksInNewTab)
       }
 
       const canDrag = getCanDragChecker(props.appState.search, dispatch)
@@ -100,33 +100,6 @@ export function Bookmarks(props: {
 
   function onToggleMore() {
     setMoreButtonsVisibility(!moreButtonsVisibility)
-  }
-
-  function onToggleExport() {
-    downloadObjectAsJson(props.appState.folders, "tabme_backup")
-  }
-
-  function downloadObjectAsJson(exportObj: any, exportName: string) {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj))
-    const downloadAnchorNode = document.createElement("a")
-    downloadAnchorNode.setAttribute("href", dataStr)
-    downloadAnchorNode.setAttribute("download", exportName + ".json")
-    document.body.appendChild(downloadAnchorNode) // required for firefox
-    downloadAnchorNode.click()
-    downloadAnchorNode.remove()
-  }
-
-  function onToggleImport(event: any) {
-    const file = event.target.files[0]
-    const fr = new FileReader()
-    fr.onload = receivedText
-    fr.readAsText(file)
-  }
-
-  function receivedText(e: any) {
-    let lines = e.target.result
-    const loadedState = JSON.parse(lines)
-    dispatch({ type: Action.InitFolders, folders: loadedState })
   }
 
   function onSearchChange(event: React.ChangeEvent) {
@@ -178,18 +151,6 @@ export function Bookmarks(props: {
 
         <div className="menu-buttons">
           {
-            props.appState.devMode ?
-              <>
-                <button className={"btn__setting"} onClick={onToggleExport}>Export JSON</button>
-                <div className="file-input-container">
-                  <button className={"btn__setting"}>Import JSON</button>
-                  <input type="file" accept=".json" className="hidden-file-input" ref={fileInput} onChange={onToggleImport}/>
-                </div>
-              </>
-              : null
-          }
-
-          {
             props.appState.betaMode ?
               <>
                 <button className={"btn__setting"} onClick={onLogin}>Login</button>
@@ -201,12 +162,13 @@ export function Bookmarks(props: {
           <button className={`btn__setting ${moreButtonsVisibility ? "btn__setting--active" : ""}`} onClick={onToggleMore}>Settings</button>
           {moreButtonsVisibility ? (
             <DropdownMenu onClose={() => {setMoreButtonsVisibility(false)}} className={"dropdown-menu--settings"} topOffset={30} noSmartPositioning={true}>
-              <SettingsOptions appState={props.appState} onOverrideNewTabMenu={() => setOverrideModalOpen(true)}/>
+              <SettingsOptions appState={props.appState} onOverrideNewTabMenu={() => setOverrideModalOpen(true)} onShortcutsModal={() => setShortcutsModalOpen(true)}/>
             </DropdownMenu>
           ) : null}
         </div>
+        <OverrideModal isOverrideModalOpen={isOverrideModalOpen} setOverrideModalOpen={setOverrideModalOpen}/>
+        <ShortcutsModal isShortcutsModalOpen={isShortcutsModalOpen} setShortcutsModalOpen={setShortcutsModalOpen}/>
       </div>
-      <OverrideModal isOverrideModalOpen={isOverrideModalOpen} setOverrideModalOpen={setOverrideModalOpen}/>
       <div className="bookmarks" onMouseDown={onMouseDown} onKeyDown={(e) => handleBookmarksKeyDown(e, props.appState, dispatch)}>
         <canvas id="canvas-selection" ref={canvasRef}></canvas>
 
@@ -237,215 +199,6 @@ export function Bookmarks(props: {
       </div>
     </div>
   )
-}
-
-const SettingsOptions = (props: {
-  appState: IAppState;
-  onOverrideNewTabMenu: () => void
-}) => {
-  const dispatch = useContext(DispatchContext)
-
-  function onToggleNotUsed() {
-    if (hasItemsToHighlight(props.appState.folders, props.appState.historyItems)) {
-      dispatch({ type: Action.UpdateShowNotUsedItems, value: !props.appState.showNotUsed })
-      const message = !props.appState.showNotUsed ? "Unused items for the past 60 days are highlighted" : "Highlighting canceled"
-      showMessage(message, dispatch)
-    } else {
-      showMessage(`There are no unused items to highlight`, dispatch)
-    }
-  }
-
-  function onToggleHidden() {
-    // if (hasArchivedItems(props.appState.folders)) {
-    dispatch({ type: Action.UpdateShowArchivedItems, value: !props.appState.showArchived })
-    // const message = !props.appState.showArchived ? "Archived items are visible" : "Archived items are hidden"
-    // showMessage(message, dispatch)
-    // } else {
-    //   showMessage(`There are no archived items yet`, dispatch)
-    // }
-  }
-
-  function onSendFeedback() {
-    chrome.tabs.create({ url: "https://docs.google.com/forms/d/e/1FAIpQLSeA-xs3GjBVNQQEzSbHiGUs1y9_XIo__pQBJKQth737VqAEOw/formResponse", active: true })
-  }
-
-  function onRateInStore() {
-    chrome.tabs.create({ url: "https://chromewebstore.google.com/detail/tabme/jnhiookaaldadiimlgncedhkpmhlmmip/reviews", active: true })
-  }
-
-  function onHowToUse() {
-    chrome.tabs.create({ url: "https://gettabme.com/guide.html", active: true })
-  }
-
-  function onImportExistingBookmarks() {
-    dispatch({ type: Action.UpdateAppState, newState: { page: "import" } })
-  }
-
-  function onToggleMode() {
-    dispatch({ type: Action.ToggleDarkMode })
-  }
-
-  function onAdvanced() {
-    dispatch({ type: Action.UpdateAppState, newState: { devMode: !props.appState.devMode } })
-  }
-
-  let toggleModeText
-  if (props.appState.colorTheme === "dark") {
-    toggleModeText = "Light Color Theme"
-  } else {
-    toggleModeText = "Dark Color Theme"
-  }
-
-  //
-  // Open cards on the same tab
-  //
-  //
-  // Dark Theme
-  //
-  // Auto theme with OS
-  //
-  //   Automatically close tabs
-  //
-  // Remove duplicate tabs
-  //
-  // Enable Shortcuts
-  type OnClickOption = { onClick: () => void; title: string; text: string; hidden?: boolean }
-  type OnToggleOption = { onToggle: () => void; value: boolean, title: string; text: string; hidden?: boolean }
-  const settingsOptions: Array<OnClickOption | OnToggleOption | { separator: true }> = [
-    {
-      onToggle: onToggleNotUsed,
-      value: true,
-      title: "Highlight not used in past 60 days to archive them. It helps to keep workspace clean.",
-      text: props.appState.showNotUsed ? "Unhighlight not used" : "Highlight not used"
-    },
-    {
-      onToggle: onToggleHidden,
-      value: false,
-      title: "It shows hidden bookmarks.",
-      text: props.appState.showArchived ? "Hide archived" : "Show archived",
-      hidden: !props.appState.devMode
-    },
-    {
-      onToggle: onToggleMode,
-      value: false,
-      title: "Change your Color Schema",
-      text: toggleModeText
-    },
-    {
-      onToggle: onToggleHidden,
-      value: props.appState.showArchived,
-      title: "",
-      text: "Open bookmarks on the same tab"
-    },
-    {
-      onToggle: () => {alert(1)},
-      value: false,
-      title: "It shows hidden bookmarks.",
-      text: props.appState.showArchived ? "Hide archived" : "Show archived",
-      hidden: !props.appState.devMode
-    },
-    {
-      onClick: props.onOverrideNewTabMenu,
-      title: "Manage browser new tab override by Tabme",
-      text: __OVERRIDE_NEWTAB ? "Don't like Tabme on the new tab? " : "Show Tabme on new tab"
-    },
-    {
-      separator: true
-    },
-    {
-      onClick: onImportExistingBookmarks,
-      title: "Import existing Chrome bookmarks into Tabme",
-      text: "Import browser bookmarks"
-    },
-    {
-      onClick: () => {alert(1)},
-      title: "",
-      text: "Export to JSON"
-    },
-    {
-      onClick: () => {alert(1)},
-      title: "",
-      text: "Import from JSON"
-    },
-    {
-      onClick: () => {alert(1)},
-      title: "",
-      text: "Import from Toby JSON"
-    },
-    {
-      separator: true
-    },
-    {
-      onClick: onHowToUse,
-      title: "Learn more about Tabme. There is a lot of hidden functionality",
-      text: "Guide: How to use"
-    },
-    {
-      onClick: () => {alert(1)},
-      title: "",
-      text: "Keyboard shortcuts"
-    },
-    {
-      onClick: onSendFeedback,
-      title: "I appreciate honest feedback on what needs to be improved or bug reports. Thanks for your time and support!",
-      text: "Send feedback"
-    },
-    {
-      onClick: onRateInStore,
-      title: "Thank you for using Tabme 🖤",
-      text: "Rate Tabme in Chrome Store"
-    }
-  ]
-
-  function isSeparator(opt: any): opt is { separator: boolean } {
-    return opt.hasOwnProperty("separator")
-  }
-
-  function isToggle(opt: any): opt is OnToggleOption {
-    return opt.hasOwnProperty("onToggle")
-  }
-
-  function isClick(opt: any): opt is OnClickOption {
-    return opt.hasOwnProperty("onClick")
-  }
-
-  return <>
-    {settingsOptions.map((option, index) => {
-      if ((option as any).hidden) {
-        return null
-      }
-
-      if (isSeparator(option)) {
-        return <div key={index} className="dropdown-menu__separator"/>
-      } else if (isToggle(option)) {
-        return <label className="dropdown-menu__button focusable" title={option.title}>
-          <Switch key={index}
-                  className={'switch'}
-                  height={16}
-                  width={28}
-                  onColor={'#599ef2'}
-                  offColor={'#cbcbcb'}
-                  checkedIcon={false}
-                  uncheckedIcon={false}
-                  checked={option.value}
-                  onChange={option.onToggle}
-          />
-          <span>{option.text}</span>
-        </label>
-
-      } else if (isClick(option)) {
-        return <button
-          key={index}
-          className="dropdown-menu__button focusable"
-          onClick={option.onClick}
-          title={option.title}
-        >
-
-          {option.text}
-        </button>
-      }
-    })}
-  </>
 }
 
 const OverrideModal = ({ isOverrideModalOpen, setOverrideModalOpen }:
@@ -495,5 +248,34 @@ const OverrideModal = ({ isOverrideModalOpen, setOverrideModalOpen }:
           <button className="btn__setting" onClick={() => setOverrideModalOpen(false)}>Close</button>
         </div>
       </Modal>
+  )
+}
+
+const ShortcutsModal = ({ isShortcutsModalOpen, setShortcutsModalOpen }:
+                          { isShortcutsModalOpen: boolean, setShortcutsModalOpen: (value: boolean) => void }) => {
+  return (
+    <Modal isOpen={isShortcutsModalOpen} onClose={() => setShortcutsModalOpen(false)}>
+      <div className="modal-no-override">
+        <h2>Keyboard shortcuts</h2>
+        <p>
+          <span className="hotkey">TAB</span> to focus on Search input
+        </p>
+        <p>
+          <span className="hotkey">Type text</span> immediate typing in Search input
+        </p>
+        <p>
+          <span className="hotkey">Arrow keys</span> navigate bookmarks
+        </p>
+        <p>
+          <span className="hotkey">⌘&thinsp;+&thinsp;click</span> open bookmark in new Tab
+        </p>
+        <p>
+          <span className="hotkey">DEL</span> delete selected items
+        </p>
+        <p>
+          <span className="hotkey">⌘&thinsp;+&thinsp;Z</span> undo
+        </p>
+      </div>
+    </Modal>
   )
 }

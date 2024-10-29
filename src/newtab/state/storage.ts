@@ -23,16 +23,17 @@ function saveState(appState: IAppState): void {
   })
 }
 
-export const saveStateThrottled = throttle(saveState, 1000)
+export const saveStateThrottled = throttle(saveState, 500)
 
-const savingStateDefaultValues = {
+const savingStateDefaultValues = { // if was not saved to LS yet
   "folders": [],
   "sidebarCollapsed": false,
+  "openBookmarksInNewTab": false,
   "colorTheme": "light", // todo I don't use system because it's not ready to used by default
   "stat": undefined
 }
 type SavingStateKeys = keyof typeof savingStateDefaultValues
-const savingStateKeys = Object.keys(savingStateDefaultValues)
+export const savingStateKeys = Object.keys(savingStateDefaultValues) as SavingStateKeys[]
 
 export type ISavingAppState = {
   [key in SavingStateKeys]: IAppState[key]
@@ -40,11 +41,21 @@ export type ISavingAppState = {
 
 export function getStateFromLS(callback: (state: ISavingAppState) => void): void {
   chrome.storage.local.get(savingStateKeys, (res) => {
-    for (const resKey in res) {
-      if (typeof res[resKey] === "undefined" && savingStateKeys.includes(resKey)) {
-        res[resKey] = savingStateDefaultValues[resKey as SavingStateKeys]
+    const result = {} as ISavingAppState
+    savingStateKeys.forEach(key => {
+      if (res.hasOwnProperty(key)) {
+        // @ts-ignore
+        result[key] = res[key]
+      } else {
+        // @ts-ignore
+        result[key] = savingStateDefaultValues[key as SavingStateKeys]
       }
-    }
-    callback(res as ISavingAppState)
+    })
+    console.log("getStateFromLS", res, result)
+    callback(result)
   })
+}
+
+;(window as any).debugClearStorage = () => {
+  chrome.storage.local.clear()
 }
