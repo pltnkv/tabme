@@ -10,6 +10,7 @@ import { Action } from "../state/state"
 import { canShowArchived, DispatchContext } from "../state/actions"
 import HistoryItem = chrome.history.HistoryItem
 import Tab = chrome.tabs.Tab
+import { wrapIntoTransaction } from "../state/oldActions"
 
 export function Folder(props: {
   folder: IFolder;
@@ -35,19 +36,23 @@ export function Folder(props: {
       }
     }
 
-    dispatch({
-      type: Action.DeleteFolder,
-      folderId: props.folder.id
+    wrapIntoTransaction(() => {
+      dispatch({
+        type: Action.DeleteFolder,
+        folderId: props.folder.id
+      })
     })
     showMessageWithUndo("Folder has been deleted", dispatch)
   }
 
   function saveFolderTitle(newTitle: string) {
     if (props.folder.title !== newTitle) {
-      dispatch({
-        type: Action.UpdateFolder,
-        folderId: props.folder.id,
-        title: newTitle
+      wrapIntoTransaction(() => {
+        dispatch({
+          type: Action.UpdateFolder,
+          folderId: props.folder.id,
+          title: newTitle
+        })
       })
     }
     setEditing(false)
@@ -68,16 +73,18 @@ export function Folder(props: {
 
   function onAddSection() {
     const newSection = createNewSection()
-    dispatch({
-      type: Action.CreateFolderItem,
-      folderId: props.folder.id,
-      itemIdInsertBefore: undefined,
-      item: newSection
-    })
+    wrapIntoTransaction(() => {
+      dispatch({
+        type: Action.CreateFolderItem,
+        folderId: props.folder.id,
+        itemIdInsertBefore: undefined,
+        item: newSection
+      })
 
-    dispatch({
-      type: Action.UpdateAppState,
-      newState: { itemInEdit: newSection.id }
+      dispatch({
+        type: Action.UpdateAppState,
+        newState: { itemInEdit: newSection.id }
+      })
     })
 
     setShowMenu(false)
@@ -102,10 +109,12 @@ export function Folder(props: {
   function setColorConfirmed(color: string) {
     console.log("setColorConfirmed", color)
     setLocalColor(undefined)
-    dispatch({
-      type: Action.UpdateFolder,
-      folderId: props.folder.id,
-      color: color
+    wrapIntoTransaction(() => {
+      dispatch({
+        type: Action.UpdateFolder,
+        folderId: props.folder.id,
+        color: color
+      })
     })
   }
 

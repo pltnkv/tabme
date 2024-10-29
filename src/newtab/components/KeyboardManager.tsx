@@ -2,6 +2,7 @@ import React, { useContext, useEffect } from "react"
 import { getSelectedItemsElements, getSelectedItemsIds } from "../helpers/selectionUtils"
 import { DispatchContext } from "../state/actions"
 import { Action } from "../state/state"
+import { wrapIntoTransaction } from "../state/oldActions"
 
 export const KeyboardManager = React.memo((props: {
   search: string;
@@ -15,9 +16,11 @@ export const KeyboardManager = React.memo((props: {
 
       if (getSelectedItemsElements().length > 0) {
         if (e.code === "Backspace" || e.code === "Delete") {
-          dispatch({
-            type: Action.DeleteFolderItems,
-            itemIds: getSelectedItemsIds()
+          wrapIntoTransaction(() => {
+            dispatch({
+              type: Action.DeleteFolderItems,
+              itemIds: getSelectedItemsIds()
+            })
           })
           return
         }

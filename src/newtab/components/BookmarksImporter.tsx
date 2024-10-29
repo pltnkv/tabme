@@ -4,6 +4,7 @@ import { createNewFolderItem, genUniqId, getFavIconUrl, getTopVisitedFromHistory
 import { DispatchContext } from "../state/actions"
 import { Action, IAppState } from "../state/state"
 import HistoryItem = chrome.history.HistoryItem
+import { wrapIntoTransaction } from "../state/oldActions"
 
 // copy-paste Chrome types
 type CustomBookmarkTreeNode = {
@@ -147,7 +148,9 @@ const BookmarkList = (props: {
           .map(item => createNewFolderItem(item.url, item.title, getFavIconUrl(item.url)))
 
         const newFolderId = genUniqId()
+        wrapIntoTransaction(() => {
           dispatch({ type: Action.CreateFolder, newFolderId, title: rec.folder.title, items })
+        })
       }
       selectedBookmarksCount += rec.folder.children?.reduce<number>((acc, item) => item.checked ? acc + 1 : acc, 0) ?? 0
     })

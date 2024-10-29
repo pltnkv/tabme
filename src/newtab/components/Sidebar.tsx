@@ -9,6 +9,7 @@ import { CL } from "../helpers/classNameHelper"
 import { Action, IAppState } from "../state/state"
 import { DispatchContext } from "../state/actions"
 import Tab = chrome.tabs.Tab
+import { wrapIntoTransaction } from "../state/oldActions"
 
 export function Sidebar(props: {
   appState: IAppState;
@@ -110,18 +111,19 @@ const StashButton = React.memo((props: { tabs: Tab[] }) => {
         // probably all the tabs where pinned
         return
       }
+      wrapIntoTransaction(() => {
+        const items = tabsToShelve.map(convertTabToItem)
+        const folderTitle = `Saved ${getCurrentData()}`
+        const folderId = createFolder(dispatch, folderTitle, items)
 
-      const items = tabsToShelve.map(convertTabToItem)
-      const folderTitle = `Saved ${getCurrentData()}`
-      const folderId = createFolder(dispatch, folderTitle, items)
+        dispatch({ type: Action.ShowNotification, message: "All Tabs has been saved" })
 
-      dispatch({ type: Action.ShowNotification, message: "All Tabs has been saved" })
-
-      requestAnimationFrame(() => {
-        const folderElement = document.querySelector(`[data-folder-id="${folderId}"]`)
-        if (folderElement) {
-          folderElement.scrollIntoView()
-        }
+        requestAnimationFrame(() => {
+          const folderElement = document.querySelector(`[data-folder-id="${folderId}"]`)
+          if (folderElement) {
+            folderElement.scrollIntoView()
+          }
+        })
       })
     })
   }

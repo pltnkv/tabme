@@ -25,10 +25,12 @@ export const FolderItem = React.memo((p: {
 
   function trySaveTitle(newTitle: string) {
     if (p.item.title !== newTitle) {
-      dispatch({
-        type: Action.UpdateFolderItem,
-        itemId: p.item.id,
-        title: newTitle
+      wrapIntoTransaction(() => {
+        dispatch({
+          type: Action.UpdateFolderItem,
+          itemId: p.item.id,
+          title: newTitle
+        })
       })
     }
   }
@@ -170,10 +172,12 @@ const FolderItemMenu = React.memo((p: {
     const newUrl = prompt("Edit URL", p.item.url)
 
     if (newUrl) {
+      wrapIntoTransaction(() => {
       dispatch({
         type: Action.UpdateFolderItem,
         itemId: p.item.id,
         url: newUrl
+      })
       })
     }
   }
