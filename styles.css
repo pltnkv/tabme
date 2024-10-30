@@ -1,5 +1,5 @@
 body {
-    font-family: system-ui, sans-serif;
+    font-family: "Open Sans", serif;
     margin: 0;
     padding: 0;
     display: flex;
@@ -15,8 +15,23 @@ body {
     min-height: 100%;
     max-width: 800px;
     min-width: 300px;
-    border-left: 1px solid #bbb;
-    border-right: 1px solid #bbb;
+    border-left: 1px solid rgba(0, 0, 0, 0.1);
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+    filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.1));
+}
+
+.not-home {
+    padding-top: 40px;
+
+    h1 {
+        margin-top: 0;
+        margin-bottom: 40px;
+    }
+
+    .install-button {
+        float: right;
+        margin-top: 15px;
+    }
 }
 
 .header {
@@ -35,6 +50,7 @@ body {
     img {
         display: block;
         margin: 0;
+        border-radius: 6px;
         filter: drop-shadow(2px -2px 4px rgba(0, 0, 0, 0.3));
     }
 
@@ -58,8 +74,15 @@ h2 {
     font-weight: normal;
 }
 
+.key-features h3 {
+    font-size: 22px;
+    font-weight: normal;
+    margin: 0 0 0 0;
+}
+
 .key-features p {
-    margin-top: 1.4em;
+    margin-top: 6px;
+    margin-bottom: 34px;
 }
 
 .goal-text {
@@ -81,19 +104,27 @@ p {
 
 .install-button {
     display: inline-block;
-    border: 1px solid #999;
-    border-radius: 4px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background-color: rgba(0, 123, 255, 1);
+    color: #FFF;
+    border-radius: 6px;
     padding: 12px;
-    font-size: 2em;
+    font-size: 22px;
     text-decoration: none;
+    margin-bottom: 46px;
 }
 
-.install-button:hover {
-    background-color: #e3f9ff;
+.install-button:hover, .install-button:active {
+    background-color: #0066ff;
 }
 
 .footer {
+    font-size: 16px;
     padding: 40px 0;
+}
+
+.footer a {
+    padding-left: 20px;
 }
 
 .footer hr {
@@ -122,7 +153,7 @@ p {
 
 /** END guide.html */
 
-.faq h3 {
+.faq h3, .toby h3  {
     margin-top: 44px;
     font-size: 20px;
     font-weight: normal;
