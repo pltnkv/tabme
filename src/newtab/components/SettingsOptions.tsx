@@ -1,5 +1,5 @@
 import React, { useContext } from "react"
-import { genNextRuntimeId, genUniqId, getFavIconUrl, hasItemsToHighlight } from "../helpers/utils"
+import { genNextRuntimeId, genUniqId, getFavIconUrl, hasArchivedItems, hasItemsToHighlight } from "../helpers/utils"
 import { showMessage } from "../helpers/actionsHelpers"
 import { Action, IAppState } from "../state/state"
 import { DispatchContext } from "../state/actions"
@@ -24,13 +24,13 @@ export const SettingsOptions = (props: {
   }
 
   function onToggleHidden() {
-    // if (hasArchivedItems(props.appState.folders)) {
-    dispatch({ type: Action.UpdateShowArchivedItems, value: !props.appState.showArchived })
-    // const message = !props.appState.showArchived ? "Archived items are visible" : "Archived items are hidden"
-    // showMessage(message, dispatch)
-    // } else {
-    //   showMessage(`There are no archived items yet`, dispatch)
-    // }
+    if (hasArchivedItems(props.appState.folders)) {
+      dispatch({ type: Action.UpdateShowArchivedItems, value: !props.appState.showArchived })
+      const message = !props.appState.showArchived ? "Archived items are visible" : "Archived items are hidden"
+      showMessage(message, dispatch)
+    } else {
+      showMessage(`There are no hidden items`, dispatch)
+    }
   }
 
   function onSendFeedback() {
@@ -143,6 +143,15 @@ export const SettingsOptions = (props: {
       value: props.appState.showNotUsed,
       title: "Highlight not used in past 60 days to archive them. It helps to keep workspace clean.",
       text: props.appState.showNotUsed ? "Unhighlight not used" : "Highlight not used"
+    },
+    {
+      onToggle: onToggleHidden,
+      value: props.appState.showArchived,
+      title: "You can hide unused folders and bookmarks to keep space clean",
+      text: "Show hidden items"
+    },
+    {
+      separator: true
     },
     {
       onToggle: onToggleMode,

@@ -110,10 +110,6 @@ export function Bookmarks(props: {
     dispatch({ type: Action.UpdateSearch, value: "" })
   }
 
-  function onDeleteFolders() {
-    dispatch({ type: Action.UpdateAppState, newState: { folders: [] } })
-  }
-
   async function onLogin() {
     try {
       const res = await apiGetToken()
@@ -122,6 +118,11 @@ export function Bookmarks(props: {
     } catch (e) {
       alert("Invalid credentials. Please try again.")
     }
+  }
+
+  async function onLogout() {
+    localStorage.removeItem("authToken")
+    alert("Logout successful")
   }
 
   const folders = props.appState.showArchived ? props.appState.folders : props.appState.folders.filter(f => !f.archived)
@@ -154,7 +155,7 @@ export function Bookmarks(props: {
             props.appState.betaMode ?
               <>
                 <button className={"btn__setting"} onClick={onLogin}>Login</button>
-                <button className={"btn__setting"} onClick={onDeleteFolders}>Delete folders</button>
+                <button className={"btn__setting"} onClick={onLogout}>Logout</button>
               </>
               : null
           }

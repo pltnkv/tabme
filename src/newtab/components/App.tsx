@@ -96,12 +96,6 @@ export function App() {
       }
     }
 
-    // Enable Dev mode via browser console
-    window.devMode = () => {
-      dispatch({ type: Action.UpdateAppState, newState: { devMode: true } })
-      showMessage("DevMode enabled", dispatch)
-    }
-
     chrome.windows.getCurrent((window) => {
       dispatch({ type: Action.UpdateAppState, newState: { currentWindowId: window.id } })
     })
@@ -171,7 +165,6 @@ export function App() {
 
 declare global {
   interface Window {
-    devMode: () => void
     betaMode: () => void
   }
 }

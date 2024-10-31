@@ -11,6 +11,7 @@ import { canShowArchived, DispatchContext } from "../state/actions"
 import HistoryItem = chrome.history.HistoryItem
 import Tab = chrome.tabs.Tab
 import { wrapIntoTransaction } from "../state/oldActions"
+import { Color } from "../helpers/Color"
 
 export function Folder(props: {
   folder: IFolder;
@@ -59,15 +60,17 @@ export function Folder(props: {
   }
 
   function onArchiveOrRestore() {
-    const newArchiveState = !props.folder.archived
-    dispatch({
-      type: Action.UpdateFolder,
-      folderId: props.folder.id,
-      archived: newArchiveState
-    })
+    wrapIntoTransaction(() => {
+      const newArchiveState = !props.folder.archived
+      dispatch({
+        type: Action.UpdateFolder,
+        folderId: props.folder.id,
+        archived: newArchiveState
+      })
 
-    const message = `Folder has been ${newArchiveState ? "archived" : "restored"}`
-    showMessageWithUndo(message, dispatch)
+      const message = `Folder has been ${newArchiveState ? "hidden" : "restored"}`
+      showMessageWithUndo(message, dispatch)
+    })
     setShowMenu(false)
   }
 
@@ -152,6 +155,10 @@ export function Folder(props: {
   `
   // const folderColor = folderIsEmptyDuringSearch ? EMPTY_FOLDER_COLOR : props.folder.color || DEFAULT_FOLDER_COLOR
   const folderColor = localColor ?? props.folder.color
+  const color = new Color()
+  color.setColor(localColor ?? props.folder.color ?? DEFAULT_FOLDER_COLOR)
+  color.setAlpha(props.folder.archived ? 0.2 : 1)
+  const folderColorWithOpacity = color.getRGBA()
 
   const onHeaderContextMenu = (e: React.MouseEvent) => {
     setShowMenu(!showMenu)
@@ -160,7 +167,10 @@ export function Folder(props: {
 
   return (
     <div className={folderClassName} data-folder-id={props.folder.id}>
-      <h2 style={{ backgroundColor: folderColor ?? DEFAULT_FOLDER_COLOR }} className="draggable-folder" onContextMenu={onHeaderContextMenu}>
+      <h2 style={{
+        backgroundColor: folderColorWithOpacity,
+        outline: props.folder.archived ? "1px solid rgba(0, 0, 0, 0.3)" : "none"
+      }} className="draggable-folder" onContextMenu={onHeaderContextMenu}>
         {
           <EditableTitle
             className="folder-title__text"
@@ -193,7 +203,7 @@ export function Folder(props: {
             <button className="dropdown-menu__button focusable" onClick={onOpenAll}>Open All</button>
             <button className="dropdown-menu__button focusable" onClick={onRename}>Rename</button>
             <button className="dropdown-menu__button focusable" onClick={onAddSection}>Add Header</button>
-            {/*<button className="dropdown-menu__button focusable" onClick={onArchiveOrRestore}>{props.folder.archived ? "Restore" : "Archive"}</button>*/}
+            <button className="dropdown-menu__button focusable" onClick={onArchiveOrRestore}>{props.folder.archived ? "Make visible" : "Hide"}</button>
             <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onDelete}>Delete</button>
           </DropdownMenu>
         ) : null}

@@ -69,7 +69,6 @@ export type IAppState = {
   colorTheme?: ColorTheme; // stored
   sidebarHovered: boolean; // for hover effects
   sidebarItemDragging: boolean // this flag is not used. But decided to not delete it in case need it in the future
-  devMode: boolean
   betaMode: boolean
   page: "default" | "import",
   stat: IAppStat | undefined
@@ -100,7 +99,6 @@ let initState: IAppState = {
   sidebarCollapsed: false, //should be named "sidebarCollapsable"
   sidebarHovered: false,
   sidebarItemDragging: false,
-  devMode: true,// false, //process.env.NODE_ENV === "development",
   betaMode: loadFromNetwork(),
   page: "default",
   stat: {

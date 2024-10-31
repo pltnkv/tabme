@@ -71,7 +71,6 @@ function addTokenInHeaders(headers: any): void {
 let __loadFromNetwork: any
 
 export function loadFromNetwork(): boolean {
-  return false
   if (__loadFromNetwork === undefined) {
     __loadFromNetwork = !!localStorage.getItem("authToken")
   }
