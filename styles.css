@@ -38,29 +38,40 @@ body {
     width: calc(100% + 120px);
     box-sizing: border-box;
     padding: 20px 60px 0px 60px;
-    background-color: #3C405B;
+    background: linear-gradient(180deg, #4F5896, #313760);
     margin-left: -60px;
     margin-bottom: 40px;
 
-    h1 {
-        margin-top: 0;
-        margin-bottom: 4px;
-    }
 
     img {
         display: block;
         margin: 0;
-        border-radius: 6px;
-        filter: drop-shadow(2px -2px 4px rgba(0, 0, 0, 0.3));
+        border-radius: 6px 6px 0 0;
+        filter: drop-shadow(2px -4px 4px rgba(0, 0, 0, 0.3));
     }
 
     h1, h2 {
-        color: #e4f4ff;
+        color: #FFF;
     }
-}
 
-.header img {
-    width: 100%;
+
+    h1 {
+        font-size: 3.8em;
+        font-weight: normal;
+
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+
+    .goal-text {
+        font-size: 2em;
+        font-weight: 300;
+        margin-top: 0;
+    }
+
+    img {
+        width: 100%;
+    }
 }
 
 h1 {
@@ -83,13 +94,6 @@ h2 {
 .key-features p {
     margin-top: 6px;
     margin-bottom: 34px;
-}
-
-.goal-text {
-    font-size: 2em;
-    font-weight: 200;
-    margin-top: 0;
-    font-style: italic;
 }
 
 h3.goal-text {
