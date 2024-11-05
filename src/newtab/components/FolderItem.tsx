@@ -220,7 +220,7 @@ const FolderItemMenu = React.memo((p: {
       selectedItemsIds.length > 1 ?
         <DropdownMenu onClose={() => p.setShowMenu(false)} className={"dropdown-menu--folder-item"} topOffset={4}>
           <button className="dropdown-menu__button focusable" onClick={onOpenNewTab}>Open in New Tab</button>
-          <button className="dropdown-menu__button focusable" onClick={onArchive}>Archive</button>
+          <button className="dropdown-menu__button focusable" onClick={onArchive}>Hide</button>
           <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onDeleteItem}>Delete</button>
         </DropdownMenu>
         :
@@ -228,6 +228,11 @@ const FolderItemMenu = React.memo((p: {
           {p.item.isSection ?
             <DropdownMenu onClose={() => p.setShowMenu(false)} className={"dropdown-menu--folder-section"}>
               <button className="dropdown-menu__button focusable" onClick={onRenameItem}>Rename</button>
+              {
+                p.item.archived
+                  ? <button className="dropdown-menu__button focusable" onClick={onRestore}>Make visible</button>
+                  : <button className="dropdown-menu__button focusable" onClick={onArchive}>Hide</button>
+              }
               <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onDeleteItem}>Delete</button>
             </DropdownMenu>
             :

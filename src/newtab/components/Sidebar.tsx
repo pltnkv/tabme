@@ -166,7 +166,7 @@ const StashButton = React.memo((props: { tabs: Tab[] }) => {
           </div>
           <div style={{ width: "100%", display: "flex" }}>
             <button className="focusable btn__setting primary" style={{marginRight: '8px'}} onClick={shelveTabs}>Stash tabs</button>
-            <button className="focusable btn__setting">Cancel</button>
+            <button className="focusable btn__setting" onClick={() => setConfirmationOpened(false)}>Cancel</button>
           </div>
         </DropdownMenu>
         : null

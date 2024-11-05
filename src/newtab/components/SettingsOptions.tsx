@@ -77,7 +77,7 @@ export const SettingsOptions = (props: {
   function onToggleHidden() {
     if (hasArchivedItems(props.appState.folders)) {
       dispatch({ type: Action.UpdateShowArchivedItems, value: !props.appState.showArchived })
-      const message = !props.appState.showArchived ? "Archived items are visible" : "Archived items are hidden"
+      const message = !props.appState.showArchived ? "Hidden items are visible" : "Hidden items are hidden"
       showMessage(message, dispatch)
     } else {
       showMessage(`There are no hidden items`, dispatch)
