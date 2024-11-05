@@ -10,6 +10,9 @@ import { Action, IAppState } from "../state/state"
 import { DispatchContext } from "../state/actions"
 import Tab = chrome.tabs.Tab
 import { wrapIntoTransaction } from "../state/oldActions"
+import IconClean from "../icons/clean.svg"
+import IconStash from "../icons/stash.svg"
+import IconPin from "../icons/pin.svg"
 
 export function Sidebar(props: {
   appState: IAppState;
@@ -31,6 +34,7 @@ export function Sidebar(props: {
   }
 
   const onSidebarMouseLeave = (e: any) => {
+
     if (!props.appState.sidebarCollapsed) {
       return
     }
@@ -61,13 +65,14 @@ export function Sidebar(props: {
               <span className="app-sidebar__header__text">Open tabs</span>
               <CleanupButton tabs={props.appState.tabs}/>
               <StashButton tabs={props.appState.tabs}/>
+              <button id="toggle-sidebar-btn"
+                      className={CL("btn__icon", { "active": !props.appState.sidebarCollapsed })}
+                      onClick={onToggleSidebar}
+                      style={props.appState.sidebarCollapsed ? { transform: "rotate(180deg)" } : {}}
+                      title={props.appState.sidebarCollapsed ? "Pin" : "Collapse"}>
+                <IconPin/>
+              </button>
             </div>
-            <button id="toggle-sidebar-btn"
-                    className={"btn__collapse-sidebar"}
-                    onClick={onToggleSidebar}
-                    title={props.appState.sidebarCollapsed ? "Pin" : "Collapse"}>
-              {props.appState.sidebarCollapsed ? "»" : "«"}
-            </button>
 
             <SidebarOpenTabs
               tabs={props.appState.tabs}
@@ -86,6 +91,7 @@ export function Sidebar(props: {
 
 const StashButton = React.memo((props: { tabs: Tab[] }) => {
   const [confirmationOpened, setConfirmationOpened] = useState(false)
+  const [shouldCloseTabs, setShouldCloseTabs] = useState(true)
   const dispatch = useContext(DispatchContext)
 
   const onStashClick = () => {
@@ -101,7 +107,7 @@ const StashButton = React.memo((props: { tabs: Tab[] }) => {
           if (!isTabmeTab(t)) {
             tabsToShelve.push(t)
           }
-          if (!t.active) {
+          if (!t.active && shouldCloseTabs) {
             chrome.tabs.remove(t.id)
           }
         }
@@ -131,30 +137,36 @@ const StashButton = React.memo((props: { tabs: Tab[] }) => {
   const filteredTabs = props.tabs.filter(t => !t.pinned && !isTabmeTab(t))
 
   return <div style={{ display: "inline-block", position: "relative" }}>
-    <button className={CL("btn__setting btn__shelve-tabs", { "btn__setting--active": confirmationOpened })}
+    <button className={CL("btn__icon", { "active": confirmationOpened })}
             disabled={filteredTabs.length < 1}
             title="Stash open Tabs in the new Folder"
             onClick={onStashClick}>
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M8.5 9L12 12M12 12L15.5 9M12 12V4.5M4 19V12.75H7.07692L8.92308 15.25H15.6923L16.9231 12.75H20V19H4Z" stroke="currentColor" strokeWidth="1.5"
-              strokeLinecap="square"/>
-      </svg>
+      <IconStash/>
     </button>
     {
       confirmationOpened ?
         <DropdownMenu onClose={() => setConfirmationOpened(false)}
                       className="stash-confirmation-popup"
-                      width={232}
+                      width={240}
                       leftOffset={-200}
                       topOffset={10}
                       skipTabIndexes={true}>
           <div style={{ width: "100%" }}>
-            <p><b>Stash open Tabs to a new Folder</b></p>
-            <p>It will close all non-pinned tabs <br/>of the current window. <br/><br/>Use "Open All" in the folder menu to restore stashed tabs.</p>
+            <p>Place all open Tabs to a new Folder</p>
+            <p>
+              <label>
+                <input 
+                  type="checkbox"
+                  checked={shouldCloseTabs}
+                  onChange={(e) => setShouldCloseTabs(e.target.checked)}
+                />
+                and close all the tabs
+              </label>
+            </p>
           </div>
-          <div style={{ width: "100%", display: "flex", justifyContent: "right" }}>
+          <div style={{ width: "100%", display: "flex" }}>
+            <button className="focusable btn__setting primary" style={{marginRight: '8px'}} onClick={shelveTabs}>Stash tabs</button>
             <button className="focusable btn__setting">Cancel</button>
-            <button className="focusable btn__setting primary" onClick={shelveTabs}>Stash</button>
           </div>
         </DropdownMenu>
         : null
@@ -183,11 +195,15 @@ const CleanupButton = React.memo((props: { tabs: Tab[] }) => {
       setDuplicateTabsCount(dt.length)
     }))
   }, [props.tabs])
-
-  return <button className="btn__setting btn__cleanup"
+  return <button className="btn__icon"
+                 style={{ position: "relative" }}
                  title="Close duplicate tabs"
                  disabled={duplicateTabsCount === 0}
-                 onClick={onCleanupTabs}>Dedup {duplicateTabsCount ? duplicateTabsCount : ""}</button>
+                 onClick={onCleanupTabs}>
+    <IconClean/>
+    {duplicateTabsCount > 0 ? <div className="duplicate-tabs-number">{duplicateTabsCount}</div> : null}
+
+  </button>
 })
 
 function getDuplicatedTabs(cb: (value: Tab[]) => void): void {

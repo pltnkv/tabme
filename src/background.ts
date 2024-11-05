@@ -24,9 +24,9 @@ function addLastActiveTabId(tabId: number) {
   lastActiveTabIds = newLastActiveTabs
 }
 
-chrome.tabs.onActivated.addListener((activeInfo => {
+chrome.tabs.onActivated.addListener(((activeInfo) => {
   chrome.tabs.get(activeInfo.tabId, (t) => {
-    if (t.id !== undefined && !isTabmeTab(t)) {
+    if (t.id !== undefined) {
       addLastActiveTabId(t.id)
       bc.postMessage({ type: "last-active-tabs-updated", tabs: lastActiveTabIds })
     }

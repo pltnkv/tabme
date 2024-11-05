@@ -10,6 +10,8 @@ import { DispatchContext } from "../state/actions"
 import Tab = chrome.tabs.Tab
 import HistoryItem = chrome.history.HistoryItem
 import { wrapIntoTransaction } from "../state/oldActions"
+import { CL } from "../helpers/classNameHelper"
+import IconClose from "../icons/close.svg"
 
 export const FolderItem = React.memo((p: {
   item: IFolderItem;
@@ -62,9 +64,6 @@ export const FolderItem = React.memo((p: {
   }
 
   const folderItemOpened = findTabsByURL(p.item.url, p.tabs).length !== 0
-  const titleClassName = "folder-item__inner__title "
-    + (folderItemOpened ? "opened " : "")
-    + (p.showNotUsed && isFolderItemNotUsed(p.item, p.historyItems) ? "not-used " : "")
 
   return (
     <div className={
@@ -85,9 +84,12 @@ export const FolderItem = React.memo((p: {
               onContextMenu={onContextMenu}
               onClick={() => setShowMenu(!showMenu)}>⋯
       </button>
+
       <a className={
-        "folder-item__inner draggable-item "
-        + (p.item.isSection ? "section " : "")
+        CL("folder-item__inner draggable-item", {
+          "section": p.item.isSection,
+          "open": folderItemOpened
+        })
       }
          tabIndex={2}
          data-id={p.item.id}
@@ -96,7 +98,9 @@ export const FolderItem = React.memo((p: {
          href={p.item.url}
          onContextMenu={onContextMenu}>
         <img src={p.item.favIconUrl} alt="" onError={handleImageError}/>
-        <EditableTitle className={titleClassName}
+        <EditableTitle className={CL("folder-item__inner__title", {
+          "not-used": p.showNotUsed && isFolderItemNotUsed(p.item, p.historyItems)
+        })}
                        inEdit={p.inEdit}
                        setEditing={setEditing}
                        initTitle={p.item.title}
@@ -106,9 +110,10 @@ export const FolderItem = React.memo((p: {
         {
           folderItemOpened ? <button className="btn__close-tab stop-dad-propagation"
                                      tabIndex={2}
-                                     title="Close the Tab"
-                                     onClick={onCloseTab}
-          ><span>✕</span></button> : null
+                                     title="Close tab"
+                                     onClick={onCloseTab}>
+            <IconClose></IconClose>
+          </button> : null
         }
       </a>
     </div>
@@ -173,11 +178,11 @@ const FolderItemMenu = React.memo((p: {
 
     if (newUrl) {
       wrapIntoTransaction(() => {
-      dispatch({
-        type: Action.UpdateFolderItem,
-        itemId: p.item.id,
-        url: newUrl
-      })
+        dispatch({
+          type: Action.UpdateFolderItem,
+          itemId: p.item.id,
+          url: newUrl
+        })
       })
     }
   }

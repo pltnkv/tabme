@@ -12,6 +12,7 @@ import HistoryItem = chrome.history.HistoryItem
 import Tab = chrome.tabs.Tab
 import { wrapIntoTransaction } from "../state/oldActions"
 import { Color } from "../helpers/Color"
+import MenuIcon from "../icons/menu.svg"
 
 export function Folder(props: {
   folder: IFolder;
@@ -110,7 +111,6 @@ export function Folder(props: {
   }
 
   function setColorConfirmed(color: string) {
-    console.log("setColorConfirmed", color)
     setLocalColor(undefined)
     wrapIntoTransaction(() => {
       dispatch({
@@ -156,9 +156,15 @@ export function Folder(props: {
   // const folderColor = folderIsEmptyDuringSearch ? EMPTY_FOLDER_COLOR : props.folder.color || DEFAULT_FOLDER_COLOR
   const folderColor = localColor ?? props.folder.color
   const color = new Color()
+  const color2 = new Color()
   color.setColor(localColor ?? props.folder.color ?? DEFAULT_FOLDER_COLOR)
   color.setAlpha(props.folder.archived ? 0.2 : 1)
-  const folderColorWithOpacity = color.getRGBA()
+  color2.value = {...color.value}
+  color2.setSaturation(color2.value.s + 0.1)
+  color2.value.h = color2.value.h + 0.05
+  // console.log(color2.value)
+  // const folderColorWithOpacity = color.getRGBA()
+  const folderGradientColor = `linear-gradient(45deg, ${color.getRGBA()}, ${color2.getRGBA()})`
 
   const onHeaderContextMenu = (e: React.MouseEvent) => {
     setShowMenu(!showMenu)
@@ -168,7 +174,7 @@ export function Folder(props: {
   return (
     <div className={folderClassName} data-folder-id={props.folder.id}>
       <h2 style={{
-        backgroundColor: folderColorWithOpacity,
+        background: folderGradientColor,
         outline: props.folder.archived ? "1px solid rgba(0, 0, 0, 0.3)" : "none"
       }} className="draggable-folder" onContextMenu={onHeaderContextMenu}>
         {
@@ -184,7 +190,7 @@ export function Folder(props: {
         <span className={CL("folder-title__button", {
           "folder-title__button--visible": showMenu
         })}
-              onClick={() => setShowMenu(!showMenu)}>☰</span>
+              onClick={() => setShowMenu(!showMenu)}><MenuIcon/></span>
 
         {showMenu ? (
           <DropdownMenu onClose={() => setShowMenu(false)} className={"dropdown-menu--folder"} topOffset={15} leftOffset={159}>
@@ -202,7 +208,7 @@ export function Folder(props: {
             </div>
             <button className="dropdown-menu__button focusable" onClick={onOpenAll}>Open All</button>
             <button className="dropdown-menu__button focusable" onClick={onRename}>Rename</button>
-            <button className="dropdown-menu__button focusable" onClick={onAddSection}>Add Header</button>
+            <button className="dropdown-menu__button focusable" onClick={onAddSection}>Add Section</button>
             <button className="dropdown-menu__button focusable" onClick={onArchiveOrRestore}>{props.folder.archived ? "Make visible" : "Hide"}</button>
             <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onDelete}>Delete</button>
           </DropdownMenu>
@@ -243,7 +249,8 @@ declare global {
   }
 }
 
-const PRESET_COLORS = [colors[0], colors[2], colors[4], colors[6], colors[8], colors[9], colors[13]]
+const PRESET_COLORS = [...colors]
+PRESET_COLORS.length = 7
 
 function PresetColor(p: { onClick: (color: string) => void; color: string, currentColor?: string }) {
   const borderColor = window.pSBC(-0.5, p.color)

@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react"
-import { blurSearch } from "../helpers/utils"
+import { blurSearch, IS_MAC_DEVICE } from "../helpers/utils"
 import { bindDADItemEffect } from "../helpers/dragAndDropItem"
 import { clickFolderItem, createFolder, getCanDragChecker } from "../helpers/actionsHelpers"
 import { Folder } from "./Folder"
@@ -10,19 +10,46 @@ import { apiGetToken } from "../../api/api"
 import { Action, IAppState } from "../state/state"
 import { DispatchContext } from "../state/actions"
 import { wrapIntoTransaction } from "../state/oldActions"
-import { SettingsOptions } from "./SettingsOptions"
+import { HelpOptions, SettingsOptions } from "./SettingsOptions"
+import { CL } from "../helpers/classNameHelper"
+import IconHelp from "../icons/help.svg"
+import IconSettings from "../icons/settings.svg"
+import IconFind from "../icons/find.svg"
 
 export function Bookmarks(props: {
   appState: IAppState;
 }) {
   const dispatch = useContext(DispatchContext)
-  const [moreButtonsVisibility, setMoreButtonsVisibility] = useState<boolean>(false)
+  const [settingsMenuVisibility, setSettingsMenuVisibility] = useState<boolean>(false)
+  const [helpMenuVisibility, setHelpMenuVisibility] = useState<boolean>(false)
   const [mouseDownEvent, setMouseDownEvent] = useState<React.MouseEvent | undefined>(undefined)
 
   const [isOverrideModalOpen, setOverrideModalOpen] = useState(false)
   const [isShortcutsModalOpen, setShortcutsModalOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  const bookmarksRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (bookmarksRef.current) {
+        setIsScrolled(bookmarksRef.current.scrollTop > 0)
+      }
+    }
+
+    const bookmarksElement = bookmarksRef.current
+    if (bookmarksElement) {
+      bookmarksElement.addEventListener("scroll", handleScroll)
+    }
+
+    return () => {
+      if (bookmarksElement) {
+        bookmarksElement.removeEventListener("scroll", handleScroll)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     if (mouseDownEvent) {
@@ -98,8 +125,12 @@ export function Bookmarks(props: {
     })
   }
 
-  function onToggleMore() {
-    setMoreButtonsVisibility(!moreButtonsVisibility)
+  function onToggleHelpSettings() {
+    setHelpMenuVisibility(!helpMenuVisibility)
+  }
+
+  function onToggleSettings() {
+    setSettingsMenuVisibility(!settingsMenuVisibility)
   }
 
   function onSearchChange(event: React.ChangeEvent) {
@@ -128,8 +159,9 @@ export function Bookmarks(props: {
   const folders = props.appState.showArchived ? props.appState.folders : props.appState.folders.filter(f => !f.archived)
   return (
     <div className="bookmarks-box">
-      <div className="bookmarks-menu">
+      <div className={CL("bookmarks-menu", { "bookmarks-menu--scrolled": isScrolled })}>
         <div style={{ display: "flex" }}>
+          <IconFind className="search-icon"/>
           <input
             tabIndex={1}
             className="search"
@@ -160,17 +192,32 @@ export function Bookmarks(props: {
               : null
           }
 
-          <button className={`btn__setting ${moreButtonsVisibility ? "btn__setting--active" : ""}`} onClick={onToggleMore}>Settings</button>
-          {moreButtonsVisibility ? (
-            <DropdownMenu onClose={() => {setMoreButtonsVisibility(false)}} className={"dropdown-menu--settings"} topOffset={30} noSmartPositioning={true}>
-              <SettingsOptions appState={props.appState} onOverrideNewTabMenu={() => setOverrideModalOpen(true)} onShortcutsModal={() => setShortcutsModalOpen(true)}/>
+          <button className={`btn__icon ${helpMenuVisibility ? "active" : ""}`} onClick={onToggleHelpSettings}>
+            <IconHelp/>
+          </button>
+          <button className={`btn__icon ${settingsMenuVisibility ? "active" : ""}`} onClick={onToggleSettings}>
+            <IconSettings/>
+          </button>
+          {helpMenuVisibility ? (
+            <DropdownMenu onClose={() => {setHelpMenuVisibility(false)}} className="dropdown-menu--settings dropdown-menu--help" topOffset={30} noSmartPositioning={true}>
+              <HelpOptions appState={props.appState} onShortcutsModal={() => setShortcutsModalOpen(true)}/>
             </DropdownMenu>
           ) : null}
+
+          {settingsMenuVisibility ? (
+            <DropdownMenu onClose={() => {setSettingsMenuVisibility(false)}} className="dropdown-menu--settings" topOffset={30} noSmartPositioning={true}>
+              <SettingsOptions appState={props.appState} onOverrideNewTabMenu={() => setOverrideModalOpen(true)}/>
+            </DropdownMenu>
+          ) : null}
+
         </div>
         <OverrideModal isOverrideModalOpen={isOverrideModalOpen} setOverrideModalOpen={setOverrideModalOpen}/>
         <ShortcutsModal isShortcutsModalOpen={isShortcutsModalOpen} setShortcutsModalOpen={setShortcutsModalOpen}/>
       </div>
-      <div className="bookmarks" onMouseDown={onMouseDown} onKeyDown={(e) => handleBookmarksKeyDown(e, props.appState, dispatch)}>
+      <div className="bookmarks"
+           ref={bookmarksRef}
+           onMouseDown={onMouseDown}
+           onKeyDown={(e) => handleBookmarksKeyDown(e, props.appState, dispatch)}>
         <canvas id="canvas-selection" ref={canvasRef}></canvas>
 
         {folders.map((folder) => (
@@ -254,6 +301,9 @@ const OverrideModal = ({ isOverrideModalOpen, setOverrideModalOpen }:
 
 const ShortcutsModal = ({ isShortcutsModalOpen, setShortcutsModalOpen }:
                           { isShortcutsModalOpen: boolean, setShortcutsModalOpen: (value: boolean) => void }) => {
+
+  const cmdOrCtrl = IS_MAC_DEVICE ? `⌘` : `CTRL`
+
   return (
     <Modal isOpen={isShortcutsModalOpen} onClose={() => setShortcutsModalOpen(false)}>
       <div className="modal-no-override">
@@ -268,13 +318,13 @@ const ShortcutsModal = ({ isShortcutsModalOpen, setShortcutsModalOpen }:
           <span className="hotkey">Arrow keys</span> navigate bookmarks
         </p>
         <p>
-          <span className="hotkey">⌘&thinsp;+&thinsp;click</span> open bookmark in new Tab
+          <span className="hotkey">{cmdOrCtrl}&thinsp;+&thinsp;click</span> open bookmark in new Tab
         </p>
         <p>
           <span className="hotkey">DEL</span> delete selected items
         </p>
         <p>
-          <span className="hotkey">⌘&thinsp;+&thinsp;Z</span> undo
+          <span className="hotkey">{cmdOrCtrl}&thinsp;+&thinsp;Z</span> undo
         </p>
       </div>
     </Modal>

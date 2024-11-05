@@ -7,6 +7,7 @@ import { DispatchContext } from "../state/actions"
 import { Action } from "../state/state"
 import Tab = chrome.tabs.Tab
 import { wrapIntoTransaction } from "../state/oldActions"
+import IconSaved from "../icons/saved.svg"
 
 export const SidebarOpenTabs = memo((props: {
   search: string;
@@ -137,32 +138,21 @@ export const SidebarOpenTabs = memo((props: {
       tabsByWindows.set(t.windowId, tabsInWindow)
     }
     tabsInWindow.push(t)
-    tabsCount++;
+    tabsCount++
   })
 
   const sortedWindowsWithTabs = getSortedWindowsWithTabs(tabsByWindows, props.currentWindowId)
-
-  const SectionItem = <div
-    className="inbox-item draggable-item"
-    data-id={0}
-  >
-    <img src={SECTION_ICON_BASE64} alt=""/>
-    <div className="inbox-item__text">
-      <div className="inbox-item__title">Header</div>
-      <div className="inbox-item__url">Drag to create new one</div>
-    </div>
-  </div>
 
   return (
     <div className="inbox-box" onMouseDown={onMouseDown}>
       {
         sortedWindowsWithTabs.length === 1 ?
-          sortedWindowsWithTabs[0].tabs.map((t) => getTabView(t, props.lastActiveTabIds[0], props.folders, props.search, onCloseTab))
+          sortedWindowsWithTabs[0].tabs.map((t) => getTabView(t, props.lastActiveTabIds[1], props.folders, props.search, onCloseTab))
           :
           sortedWindowsWithTabs.map((window, index) => {
             return <div key={window.windowId}>
               <div className="window-name">{index === 0 ? "current window" : "window"}</div>
-              {window.tabs.map((t) => getTabView(t, props.lastActiveTabIds[0], props.folders, props.search, onCloseTab))}
+              {window.tabs.map((t) => getTabView(t, props.lastActiveTabIds[1], props.folders, props.search, onCloseTab))}
             </div>
           })
 
@@ -220,7 +210,10 @@ function getTabView(t: Tab, lastActiveTabIds: number, folders: IFolder[], search
           : null
       }
     </div>
-    <div onClick={onCloseTab} className="inbox-item__close">⨉</div>
+    <div onClick={onCloseTab} className="inbox-item__close" title="Close tab">⨉</div>
+    {
+      folderTitles ? <IconSaved className="saved-tab-icon"></IconSaved> : null
+    }
   </div>)
 
 }

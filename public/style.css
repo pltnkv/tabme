@@ -2,18 +2,21 @@
     /* Light Theme Variables */
     --main-text-color: rgb(5, 0, 56);
     --second-text-color: rgba(5, 0, 56, 0.6);
-    --background-color: #ffffff;
+    --background-color: #F7F7F6;
+    --popup-background-color: #ffffff;
     --border-color: #e2e2e2;
-    --sidebar-background-color: #f5f5f5;
-    --input-background-color: #fafafa;
-    --input-border-color: #666;
+    --input-background-color: #FFFFFF;
+    --input-border-color: rgba(0, 0, 0, 0.16);
     --button-background-color: #FAFBFC;
-    --button-border-color: rgba(27, 31, 35, 0.15);
+    --button-border-color: rgba(0, 0, 0, 0.16);
     --button-hover-background-color: #F3F4F6;
     --button-active-background-color: #EDEFF2;
     --button-text-color: #24292E;
     --notification-background-color: #000;
     --notification-text-color: #fff;
+    --active-control-color: #0066FF;
+    --active-control-text: #fff;
+    --icon-color: #000;
 
     --colors-gray-100: #fafafa;
     --colors-gray-200: #f2f2f2;
@@ -60,12 +63,11 @@
 
 .dark-theme {
     /* Dark Theme Variables */
-    --main-text-color: rgb(220, 220, 220);
+    --main-text-color: #fff;
     --second-text-color: rgba(220, 220, 220, 0.6);
-    --background-color: #242424;
-    --popup-background-color: #181818;
+    --background-color: #2C2C2C;
+    --popup-background-color: #1E1E1E;
     --border-color: #333;
-    --sidebar-background-color: #1e1e1e;
     --input-background-color: #333;
     --input-border-color: #555;
     --button-background-color: #333;
@@ -75,6 +77,9 @@
     --button-text-color: #ddd;
     --notification-background-color: #444;
     --notification-text-color: #ddd;
+    --active-control-color: #FFF;
+    --active-control-text: #1E1E1E;
+    --icon-color: #909090;
 
     --colors-gray-100: #303030;
     --colors-gray-200: #3c3c3c;
@@ -138,6 +143,10 @@ button, input {
     color: var(--main-text-color);
 }
 
+svg {
+    color: var(--icon-color);
+}
+
 /* Hide the scrollbar on macOS-like behavior */
 ::-webkit-scrollbar {
     width: var(--scrollbar-width);
@@ -167,19 +176,21 @@ button, input {
 }
 
 input.search {
-    width: 296px;
     height: 24px;
-    padding: 8px;
+    width: 274px;
+    padding: 8px 8px 8px 32px;
     font-size: 16px;
     border-radius: 8px;
     border: 1px solid var(--input-border-color);
     background-color: var(--input-background-color);
     margin: 0;
+}
 
-    /*&::placeholder {*/
-    /*    color: var(--second-text-color);*/
-    /*    opacity: 1;*/
-    /*}*/
+.search-icon {
+    position: absolute;
+    margin-top: 13px;
+    margin-left: 8px;
+    opacity: 0.5;
 }
 
 .searched {
@@ -213,7 +224,7 @@ body.dark-theme .searched {
     box-sizing: border-box;
     flex-shrink: 0;
     width: 360px;
-    background-color: var(--sidebar-background-color);
+    background-color: var(--popup-background-color);
     border-right: 1px solid var(--border-color);
     padding: 0 16px 16px 16px;
     max-height: 100%;
@@ -242,38 +253,17 @@ body.dark-theme .searched {
     opacity: 0;
 }
 
-.btn__collapse-sidebar {
-    position: absolute;
-    right: 8px;
-    top: 16px;
-    cursor: pointer;
-    appearance: none;
-    background-color: var(--button-background-color);
-    border: 1px solid var(--button-border-color);
-    box-shadow: rgba(27, 31, 35, 0.04) 0 1px 0, rgba(255, 255, 255, 0.25) 0 1px 0 inset;
-    box-sizing: border-box;
-    width: 32px;
-    height: 32px;
-    color: var(--button-text-color);
-    user-select: none;
-    touch-action: manipulation;
-    border-radius: 50%;
-    font-size: 16px;
-    line-height: 16px;
-    padding: 0 0 2px 0;
-    transition: opacity 100ms;
-    transition-delay: 200ms;
-}
 
 .app-sidebar__header {
-    width: 340px;
-    padding-top: 16px;
-    padding-bottom: 8px;
+    display: flex;
+    width: 332px;
+    padding-top: 20px;
+    padding-bottom: 16px;
 
     .app-sidebar__header__text {
+        flex-grow: 1;
         font-size: 16px;
         vertical-align: middle;
-        margin-left: 20px;
         white-space: nowrap;
         transition: opacity 50ms;
         transition-delay: 100ms;
@@ -308,18 +298,33 @@ body.dark-theme .searched {
     opacity: 0;
 }
 
-.stash-confirmation-popup {
+.dropdown-menu.stash-confirmation-popup {
     align-items: flex-start;
     justify-content: flex-start;
     font-size: 14px;
+    padding: 16px;
+
+    input[type="checkbox"] {
+        padding: 0;
+        margin: 0;
+        margin-right: 4px;
+        vertical-align: middle;
+    }
 }
 
-.btn__collapse-sidebar:hover {
-    background-color: var(--button-hover-background-color);
-}
-
-.app-sidebar.collapsed .btn__collapse-sidebar {
-    opacity: 0;
+.duplicate-tabs-number {
+    background-color: var(--active-control-color);
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    color: var(--active-control-text);
+    border-radius: 50%;
+    font-size: 10px;
+    top: -3px;
+    left: 22px;
+    border: 1px solid var(--popup-background-color);;
+    line-height: 16px;
+    text-align: center;
 }
 
 .inbox-box {
@@ -332,6 +337,7 @@ body.dark-theme .searched {
 }
 
 .inbox-item {
+    position: relative;
     cursor: pointer;
     padding: 8px;
     white-space: nowrap;
@@ -356,7 +362,7 @@ body.dark-theme .searched {
 .window-name {
     margin-top: 12px;
     margin-bottom: 8px;
-    margin-left: 28px;
+    margin-left: 7px;
     white-space: nowrap;
     transition: opacity 50ms;
     transition-delay: 100ms;
@@ -369,7 +375,7 @@ body.dark-theme .searched {
     vertical-align: top;
     display: inline-flex;
     flex-direction: column;
-    width: 290px;
+    width: 282px;
 }
 
 .inbox-item__close {
@@ -386,6 +392,18 @@ body.dark-theme .searched {
     padding-top: 2px;
     box-sizing: border-box;
 }
+
+.saved-tab-icon {
+    color: var(--active-control-color);
+    position: absolute;
+    right: 11px;
+    top: 14px;
+}
+
+.inbox-item:hover .saved-tab-icon {
+    display: none;
+}
+
 
 .inbox-item:hover .inbox-item__close {
     visibility: visible;
@@ -473,15 +491,57 @@ body.dark-theme .searched {
     height: 68px;
     box-sizing: border-box;
     padding: 12px 0 16px 72px;
+}
+
+.bookmarks-menu--scrolled {
     border-bottom: 1px solid var(--border-color);
 }
 
 .dropdown-menu--settings {
-    right: 8px;
+    right: 12px;
+
+    &.dropdown-menu--help {
+        right: 48px;
+    }
+}
+
+.btn__icon {
+    appearance: none;
+    cursor: pointer;
+    background-color: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+
+    svg {
+        opacity: 0.7;
+    }
+
+    &:hover {
+        svg {
+            opacity: 1;
+        }
+    }
+
+    &.active {
+        svg {
+            color: var(--active-control-color);
+            opacity: 1;
+        }
+    }
+
+    &:disabled {
+        svg {
+            opacity: 0.2 !important;
+        }
+
+        cursor: default;
+    }
 }
 
 .btn__setting {
-    margin-left: 8px;
     appearance: none;
     background-color: var(--button-background-color);
     border: 1px solid var(--button-border-color);
@@ -574,6 +634,7 @@ body.dark-theme .searched {
 
 .menu-buttons {
     display: flex;
+    height: 40px;
     margin-right: 8px;
 }
 
@@ -622,7 +683,9 @@ body.dark-theme .searched {
     font-size: 18px;
 
     .folder-title__text {
+        display: inline-block;
         cursor: text;
+        max-width: calc(100% - 32px);
     }
 
     textarea {
@@ -692,6 +755,15 @@ body.dark-theme .searched {
     padding: 0 6px;
     float: right;
     visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+
+    svg {
+        color: #000;
+        opacity: 0.7;
+    }
 }
 
 .folder .folder-title__button--visible {
@@ -715,7 +787,7 @@ body.dark-theme .searched {
 .folder-item .folder-item__menu {
     cursor: pointer;
     margin-top: 5px;
-    margin-left: -3px;
+    margin-left: -4px;
     visibility: hidden;
     appearance: none;
     background-color: var(--button-background-color);
@@ -740,6 +812,7 @@ body.dark-theme .searched {
 
 .folder-item__inner {
     display: flex;
+    align-items: center;
     text-decoration: none;
     width: 100%;
     padding: 6px 0;
@@ -750,10 +823,15 @@ body.dark-theme .searched {
     img[src=""] {
         visibility: hidden;
     }
-}
 
-.folder-item__inner--selected {
-    background-color: rgb(209 224 255 / 80%);
+    &.open {
+        background-color: var(--popup-background-color);
+        filter: drop-shadow(1px 1px 0px rgba(0, 0, 0, 0.2));
+    }
+
+    &.folder-item__inner--selected {
+        background-color: rgb(209 224 255 / 80%);
+    }
 }
 
 .dad-dummy .folder-item__inner--selected {
@@ -791,7 +869,6 @@ body.dark-theme .searched {
     display: inline-block;
     vertical-align: top;
     margin-right: 8px;
-    margin-top: 2px;
 
     &.not-loaded {
         visibility: hidden;
@@ -820,10 +897,6 @@ body.dark-theme .searched {
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-.folder-item__inner__title.opened {
-    font-weight: bold;
 }
 
 .folder-item__inner__title.not-used {
@@ -860,35 +933,27 @@ body.dark-theme .searched {
 .btn__close-tab {
     width: 24px;
     min-width: 24px;
-    height: 24px;
+    height: 30px;
     cursor: pointer;
     display: inline-flex;
     border: 0;
-    padding: 3px;
-    margin: -3px;
+    padding: 10px 7px;
+    margin: -6px 0;
     margin-left: 4px;
-    background: transparent;
+    appearance: none;
+    background-color: transparent;
+    border: none;
 
-    span {
+    svg {
+        opacity: 0.5;
         pointer-events: none;
-        display: block;
-        width: 18px;
-        height: 18px;
-        background-color: rgba(0, 0, 0, 0.1);
-        border: none;
-        border-radius: 50%;
-        font-size: 10px;
-        box-sizing: border-box;
-        line-height: 19px;
-        padding: 0;
-        cursor: pointer;
-        text-align: center;
+    }
+
+    &:hover svg {
+        opacity: 1;
     }
 }
 
-.btn__close-tab:hover span {
-    background-color: rgba(0, 0, 0, 0.2);
-}
 
 /* DAD styles */
 body.dragging * {
@@ -946,7 +1011,7 @@ body.dragging * {
     position: absolute;
     min-width: 140px;
     margin-top: 24px;
-    background-color: var(--background-color);
+    background-color: var(--popup-background-color);
     border: 1px solid var(--border-color);
     box-shadow: 0 4px 12px 0 rgba(30, 30, 30, 0.2);
     border-radius: 8px;
@@ -1288,7 +1353,7 @@ body.dragging * {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(0, 0, 0, 0.6);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1297,7 +1362,7 @@ body.dragging * {
 
 .modal-inner {
     position: relative;
-    background: var(--background-color);
+    background: var(--popup-background-color);
     padding: 40px;
     border-radius: 8px;
     max-width: 640px;

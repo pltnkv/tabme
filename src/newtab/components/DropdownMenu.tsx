@@ -39,6 +39,11 @@ export function DropdownMenu(props: {
 
   useEffect(() => {
     function onKeydown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        props.onClose()
+        return
+      }
+
       if (e.key === "ArrowDown" || e.key === "ArrowUp") {
         e.preventDefault() // Prevent page scrolling
         const buttons = getButtons()

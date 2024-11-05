@@ -1,15 +1,66 @@
 import React, { useContext } from "react"
-import { genNextRuntimeId, genUniqId, getFavIconUrl, hasArchivedItems, hasItemsToHighlight } from "../helpers/utils"
+import { genUniqId, getFavIconUrl, hasArchivedItems, hasItemsToHighlight } from "../helpers/utils"
 import { showMessage } from "../helpers/actionsHelpers"
 import { Action, IAppState } from "../state/state"
 import { DispatchContext } from "../state/actions"
 import Switch from "react-switch"
 import { IFolder } from "../helpers/types"
 
+type OnClickOption = { onClick: (e: any) => void; title: string; text: string; hidden?: boolean; isFile?: boolean }
+type OnToggleOption = { onToggle: () => void; value: boolean, title: string; text: string; hidden?: boolean }
+type OptionsConfig = Array<OnClickOption | OnToggleOption | { separator: true }>
+
+export const HelpOptions = (props: {
+  appState: IAppState;
+  onShortcutsModal: () => void
+}) => {
+  function onSendFeedback() {
+    chrome.tabs.create({ url: "https://docs.google.com/forms/d/e/1FAIpQLSeA-xs3GjBVNQQEzSbHiGUs1y9_XIo__pQBJKQth737VqAEOw/formResponse", active: true })
+  }
+
+  function onRateInStore() {
+    if (__OVERRIDE_NEWTAB) {
+      chrome.tabs.create({ url: "https://chromewebstore.google.com/detail/tabme/jnhiookaaldadiimlgncedhkpmhlmmip/reviews", active: true })
+    } else {
+      chrome.tabs.create({ url: "https://chromewebstore.google.com/detail/tabme-%E2%80%94-version-without-n/jjdbikbbknmhkknpfnlhgpcikbfjldee/reviews", active: true })
+    }
+  }
+
+  function onHowToUse() {
+    chrome.tabs.create({ url: "https://gettabme.com/guide.html", active: true })
+  }
+
+  type OnClickOption = { onClick: (e: any) => void; title: string; text: string; hidden?: boolean; isFile?: boolean }
+  type OnToggleOption = { onToggle: () => void; value: boolean, title: string; text: string; hidden?: boolean }
+  const settingsOptions: Array<OnClickOption | OnToggleOption | { separator: true }> = [
+    {
+      onClick: onHowToUse,
+      title: "Learn more about Tabme. There is a lot of hidden functionality",
+      text: "Guide: How to use"
+    },
+    {
+      onClick: props.onShortcutsModal,
+      title: "Keyboard shortcuts",
+      text: "Keyboard shortcuts"
+    },
+    {
+      onClick: onSendFeedback,
+      title: "I appreciate honest feedback on what needs to be improved or bug reports. Thanks for your time and support!",
+      text: "Send feedback"
+    },
+    {
+      onClick: onRateInStore,
+      title: "Thank you for using Tabme 🖤",
+      text: "Rate Tabme in Chrome Store"
+    }
+  ]
+
+  return <Option optionsConfig={settingsOptions}/>
+}
+
 export const SettingsOptions = (props: {
   appState: IAppState;
   onOverrideNewTabMenu: () => void
-  onShortcutsModal: () => void
 }) => {
   const dispatch = useContext(DispatchContext)
 
@@ -31,18 +82,6 @@ export const SettingsOptions = (props: {
     } else {
       showMessage(`There are no hidden items`, dispatch)
     }
-  }
-
-  function onSendFeedback() {
-    chrome.tabs.create({ url: "https://docs.google.com/forms/d/e/1FAIpQLSeA-xs3GjBVNQQEzSbHiGUs1y9_XIo__pQBJKQth737VqAEOw/formResponse", active: true })
-  }
-
-  function onRateInStore() {
-    chrome.tabs.create({ url: "https://chromewebstore.google.com/detail/tabme/jnhiookaaldadiimlgncedhkpmhlmmip/reviews", active: true })
-  }
-
-  function onHowToUse() {
-    chrome.tabs.create({ url: "https://gettabme.com/guide.html", active: true })
   }
 
   function onImportExistingBookmarks() {
@@ -135,9 +174,7 @@ export const SettingsOptions = (props: {
     dispatch({ type: Action.UpdateAppState, newState: { openBookmarksInNewTab: !props.appState.openBookmarksInNewTab } })
   }
 
-  type OnClickOption = { onClick: (e: any) => void; title: string; text: string; hidden?: boolean; isFile?: boolean }
-  type OnToggleOption = { onToggle: () => void; value: boolean, title: string; text: string; hidden?: boolean }
-  const settingsOptions: Array<OnClickOption | OnToggleOption | { separator: true }> = [
+  const settingsOptions: OptionsConfig = [
     {
       onToggle: onToggleNotUsed,
       value: props.appState.showNotUsed,
@@ -195,31 +232,13 @@ export const SettingsOptions = (props: {
       title: "To get Toby`s 'JSON file' go to Account -> Export -> Json in the Toby App",
       text: "Import from Toby App JSON",
       isFile: true
-    },
-    {
-      separator: true
-    },
-    {
-      onClick: onHowToUse,
-      title: "Learn more about Tabme. There is a lot of hidden functionality",
-      text: "Guide: How to use"
-    },
-    {
-      onClick: props.onShortcutsModal,
-      title: "",
-      text: "Keyboard shortcuts"
-    },
-    {
-      onClick: onSendFeedback,
-      title: "I appreciate honest feedback on what needs to be improved or bug reports. Thanks for your time and support!",
-      text: "Send feedback"
-    },
-    {
-      onClick: onRateInStore,
-      title: "Thank you for using Tabme 🖤",
-      text: "Rate Tabme in Chrome Store"
     }
   ]
+
+  return <Option optionsConfig={settingsOptions}/>
+}
+
+const Option = (props: { optionsConfig: OptionsConfig }) => {
 
   function isSeparator(opt: any): opt is { separator: boolean } {
     return opt.hasOwnProperty("separator")
@@ -234,7 +253,7 @@ export const SettingsOptions = (props: {
   }
 
   return <>
-    {settingsOptions.map((option, index) => {
+    {props.optionsConfig.map((option, index) => {
       if ((option as any).hidden) {
         return null
       }

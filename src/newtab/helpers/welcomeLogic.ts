@@ -20,6 +20,6 @@ export function tryToCreateWelcomeFolder(appState: IAppState, history: HistoryIt
     // items.push(...getTopVisitedFromHistory(history, 5).map(i => createNewFolderItem(i.url, i.title, getFavIconUrl(i.url))))
 
     const newFolderId = genUniqId()
-    dispatch({ type: Action.CreateFolder, newFolderId, title: "Welcome to Tabme", items, color: "#c4ffbd" })
+    dispatch({ type: Action.CreateFolder, newFolderId, title: "Welcome to Tabme", items, color: "#A0F3A2" })
   }
 }

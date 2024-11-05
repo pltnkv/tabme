@@ -31,7 +31,11 @@ module.exports.getCommonConfig = (env) => {
           test: /\.tsx?$/,
           use: "ts-loader",
           exclude: /node_modules/
-        }
+        },
+        {
+          test: /\.svg$/, // Add this rule for SVG files
+          use: ["@svgr/webpack"],
+        },
       ]
     },
     resolve: {
