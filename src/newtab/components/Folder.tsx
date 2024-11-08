@@ -187,6 +187,7 @@ export function Folder(props: {
             onClick={() => setEditing(true)}
           />
         }
+        {props.folder.archived ? <span> [hidden]</span> : ''}
         <span className={CL("folder-title__button", {
           "folder-title__button--visible": showMenu
         })}
@@ -209,7 +210,7 @@ export function Folder(props: {
             <button className="dropdown-menu__button focusable" onClick={onOpenAll}>Open All</button>
             <button className="dropdown-menu__button focusable" onClick={onRename}>Rename</button>
             <button className="dropdown-menu__button focusable" onClick={onAddSection}>Add Section</button>
-            <button className="dropdown-menu__button focusable" onClick={onArchiveOrRestore}>{props.folder.archived ? "Make visible" : "Hide"}</button>
+            <button className="dropdown-menu__button focusable" onClick={onArchiveOrRestore}>{props.folder.archived ? "Unhide" : "Hide"}</button>
             <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onDelete}>Delete</button>
           </DropdownMenu>
         ) : null}

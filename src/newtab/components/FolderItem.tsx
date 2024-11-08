@@ -230,7 +230,7 @@ const FolderItemMenu = React.memo((p: {
               <button className="dropdown-menu__button focusable" onClick={onRenameItem}>Rename</button>
               {
                 p.item.archived
-                  ? <button className="dropdown-menu__button focusable" onClick={onRestore}>Make visible</button>
+                  ? <button className="dropdown-menu__button focusable" onClick={onRestore}>Unhide</button>
                   : <button className="dropdown-menu__button focusable" onClick={onArchive}>Hide</button>
               }
               <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onDeleteItem}>Delete</button>
@@ -243,7 +243,7 @@ const FolderItemMenu = React.memo((p: {
               <button className="dropdown-menu__button focusable" onClick={onEditUrl}>Edit url</button>
               {
                 p.item.archived
-                  ? <button className="dropdown-menu__button focusable" onClick={onRestore}>Make visible</button>
+                  ? <button className="dropdown-menu__button focusable" onClick={onRestore}>Unhide</button>
                   : <button className="dropdown-menu__button focusable" onClick={onArchive}>Hide</button>
               }
               <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onDeleteItem}>Delete</button>
