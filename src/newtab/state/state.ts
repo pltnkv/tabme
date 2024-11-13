@@ -168,6 +168,8 @@ export enum Action {
   UpdateFolderItem = "update-folder-item",
   MoveFolderItems = "move-folder-items",
 
+  SaveBookmarksToCloud = "save-bookmarks-to-cloud",
+
   // API HELPERS
   APICommandResolved = "api-command-resolved",
   APIConfirmEntityCreated = "api-confirm-entity-created",
@@ -204,12 +206,14 @@ export type ActionPayload = (
   | { type: Action.CreateFolder; newFolderId?: number; title?: string; items?: IFolderItemToCreate[]; color?: string; } // todo support items here
   | { type: Action.DeleteFolder; folderId: number; }
   | { type: Action.UpdateFolder; folderId: number; title?: string; color?: string; archived?: boolean; twoColumn?: boolean; }
-  | { type: Action.MoveFolder; folderId: number; insertBeforeFolderId: number|undefined; }
+  | { type: Action.MoveFolder; folderId: number; insertBeforeFolderId: number | undefined; }
 
   | { type: Action.CreateFolderItem; folderId: number; itemIdInsertBefore: number | undefined; item: IFolderItemToCreate; }
   | { type: Action.DeleteFolderItems; itemIds: number[] }
   | { type: Action.UpdateFolderItem; itemId: number; title?: string; archived?: boolean; url?: string }
   | { type: Action.MoveFolderItems; itemIds: number[]; targetFolderId: number; itemIdInsertBefore: number | undefined; }
+
+  | { type: Action.SaveBookmarksToCloud; }
 
   | { type: Action.APICommandResolved; commandId: number, }
   | { type: Action.APIConfirmEntityCreated; localId: number; remoteId: number; entityType: "folder" | "bookmark" }

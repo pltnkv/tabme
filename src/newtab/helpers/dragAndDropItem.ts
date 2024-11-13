@@ -27,7 +27,6 @@ export function bindDADItemEffect(
   if (targetRoot && mouseDownEvent.button === 0) {
     // checking if we start d&d one of selected item
     let targetRoots = [targetRoot]
-    console.log([...getSelectedItemsElements()])
     if (getSelectedItemsElements().includes(targetRoot)) {
       targetRoots = getSelectedItemsElements()
     }
@@ -36,7 +35,8 @@ export function bindDADItemEffect(
     unselectAll()
     return runFolderDragAndDrop(mouseDownEvent, targetFolderHeader.parentElement!, folderConfig.onDrop, folderConfig.onCancel)
   } else {
-    if (canvasEl && mouseDownEvent.button === 0) {
+    const isInput = (mouseDownEvent.target as HTMLElement).tagName === "INPUT"
+    if (canvasEl && mouseDownEvent.button === 0 && !isInput) {
       return runMultiselection(mouseDownEvent, canvasEl)
     }
   }
@@ -101,7 +101,7 @@ function runMultiselection(mouseDownEvent: React.MouseEvent, canvas: HTMLCanvasE
     })
   }
 
-  const onMouseUp = (e: MouseEvent) => {
+  const onMouseUp = () => {
     if (!mouseMoved) {
       unselectAll()
     }

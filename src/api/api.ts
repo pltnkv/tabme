@@ -1,7 +1,7 @@
 import { APIResponseDashboard, APIResponseGetToken } from "./api-types"
 
-export async function apiGetToken(): Promise<APIResponseGetToken> {
-  return fetchPOST(`${BASE_URL}/get-token`, { username: "test", password: "password" }, false)
+export async function apiGetToken(userName: string): Promise<APIResponseGetToken> {
+  return fetchPOST(`${BASE_URL}/get-token`, { username: userName, password: "password" }, false)
 }
 
 export async function apiGetDashboard(): Promise<APIResponseDashboard> {

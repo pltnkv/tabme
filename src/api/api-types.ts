@@ -8,8 +8,8 @@ export interface APIResponseBase<T> {
 export type APIResponseEntityCreated = {id:number, success:true}
 export type APIResponseEntityUpdatedOrDeleted = {success:true}
 
-export type APIResponseGetToken = {token:string, message: string}
+export type APIResponseGetToken = {token:string, firstLogin:boolean, message: string}
 
 export type APIResponseDashboard = {
-  folders: IFolder[]
+  spaces: {folders: IFolder[]}[]
 }

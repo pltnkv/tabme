@@ -10,7 +10,7 @@ import { Action } from "../state/state"
 import { canShowArchived, DispatchContext } from "../state/actions"
 import HistoryItem = chrome.history.HistoryItem
 import Tab = chrome.tabs.Tab
-import { wrapIntoTransaction } from "../state/oldActions"
+import { wrapIntoTransaction } from "../state/actions"
 import { Color } from "../helpers/Color"
 import MenuIcon from "../icons/menu.svg"
 
@@ -27,6 +27,7 @@ export function Folder(props: {
   const dispatch = useContext(DispatchContext)
   const [showMenu, setShowMenu] = useState<boolean>(false)
   const [localColor, setLocalColor] = useState<string | undefined>(undefined)
+  const [localTitle, setLocalTitle] = useState<string>(props.folder.title)
 
   function onDelete() {
     const archivedItemsCount = props.folder.items.filter(item => item.archived).length
@@ -181,9 +182,10 @@ export function Folder(props: {
           <EditableTitle
             className="folder-title__text"
             inEdit={props.folder.id === props.itemInEdit}
-            initTitle={props.folder.title}
+            localTitle={localTitle}
+            setLocalTitle={setLocalTitle}
+            onSaveTitle={saveFolderTitle}
             search=""
-            onSaveTitle={saveFolderTitle} // Save the new title
             onClick={() => setEditing(true)}
           />
         }
@@ -194,7 +196,7 @@ export function Folder(props: {
               onClick={() => setShowMenu(!showMenu)}><MenuIcon/></span>
 
         {showMenu ? (
-          <DropdownMenu onClose={() => setShowMenu(false)} className={"dropdown-menu--folder"} topOffset={15} leftOffset={159}>
+          <DropdownMenu onClose={() => setShowMenu(false)} className={"dropdown-menu--folder"} topOffset={13} leftOffset={159}>
             <div className="dropdown-menu__colors-row" style={{ marginTop: "4px" }}>
               <PresetColor color={PRESET_COLORS[0]} onClick={setColorConfirmed} currentColor={folderColor}/>
               <PresetColor color={PRESET_COLORS[1]} onClick={setColorConfirmed} currentColor={folderColor}/>

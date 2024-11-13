@@ -1,15 +1,13 @@
 import React, { useContext, useEffect, useRef, useState } from "react"
-import { blurSearch, IS_MAC_DEVICE } from "../helpers/utils"
+import { blurSearch, IS_MAC_DEVICE, isTargetSupportsDragAndDrop } from "../helpers/utils"
 import { bindDADItemEffect } from "../helpers/dragAndDropItem"
 import { clickFolderItem, createFolder, getCanDragChecker } from "../helpers/actionsHelpers"
 import { Folder } from "./Folder"
 import { DropdownMenu } from "./DropdownMenu"
 import { handleBookmarksKeyDown, handleSearchKeyDown } from "../helpers/handleBookmarksKeyDown"
 import { Modal } from "./Modal"
-import { apiGetToken } from "../../api/api"
 import { Action, IAppState } from "../state/state"
-import { DispatchContext } from "../state/actions"
-import { wrapIntoTransaction } from "../state/oldActions"
+import { canShowArchived, DispatchContext, wrapIntoTransaction } from "../state/actions"
 import { HelpOptions, SettingsOptions } from "./SettingsOptions"
 import { CL } from "../helpers/classNameHelper"
 import IconHelp from "../icons/help.svg"
@@ -109,9 +107,11 @@ export function Bookmarks(props: {
   }, [mouseDownEvent])
 
   function onMouseDown(e: React.MouseEvent) {
-    if (props.appState.itemInEdit === undefined) {
-      setMouseDownEvent(e)
+    console.log('onMouseDown 1')
+    if (!props.appState.itemInEdit && isTargetSupportsDragAndDrop(e)) {
+      console.log('onMouseDown 2')
       blurSearch(e)
+      setMouseDownEvent(e)
     }
   }
 
@@ -141,22 +141,15 @@ export function Bookmarks(props: {
     dispatch({ type: Action.UpdateSearch, value: "" })
   }
 
-  async function onLogin() {
-    try {
-      const res = await apiGetToken()
-      localStorage.setItem("authToken", res.token)
-      alert("Login successful!")
-    } catch (e) {
-      alert("Invalid credentials. Please try again.")
-    }
-  }
-
   async function onLogout() {
     localStorage.removeItem("authToken")
     alert("Logout successful")
   }
 
-  const folders = props.appState.showArchived ? props.appState.folders : props.appState.folders.filter(f => !f.archived)
+  const folders = props.appState.showArchived
+    ? props.appState.folders
+    : props.appState.folders.filter(f => canShowArchived(props.appState) || !f.archived)
+
   return (
     <div className="bookmarks-box">
       <div className={CL("bookmarks-menu", { "bookmarks-menu--scrolled": isScrolled })}>
@@ -186,7 +179,6 @@ export function Bookmarks(props: {
           {
             props.appState.betaMode ?
               <>
-                <button className={"btn__setting"} onClick={onLogin}>Login</button>
                 <button className={"btn__setting"} onClick={onLogout}>Logout</button>
               </>
               : null

@@ -16,9 +16,9 @@ console.log("__OVERRIDE_NEWTAB", __OVERRIDE_NEWTAB)
 if (loadFromNetwork()) {
   getStateFromLS((res) => {
     apiGetDashboard().then(dashboard => {
-      console.log(dashboard)
+      console.log(dashboard.spaces)
       //todo impl optimistic loading from LS first (and then later load from network)
-      res.folders = preprocessSortedFolders(dashboard.folders)
+      res.folders = preprocessSortedFolders(dashboard.spaces[0].folders)
       setInitAppState(res)
       mountApp()
     })

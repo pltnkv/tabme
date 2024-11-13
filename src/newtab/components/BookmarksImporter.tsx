@@ -1,10 +1,9 @@
 import React, { useContext, useEffect, useRef, useState } from "react"
 import { showMessage } from "../helpers/actionsHelpers"
 import { createNewFolderItem, genUniqId, getFavIconUrl, getTopVisitedFromHistory } from "../helpers/utils"
-import { DispatchContext } from "../state/actions"
+import { DispatchContext, wrapIntoTransaction } from "../state/actions"
 import { Action, IAppState } from "../state/state"
 import HistoryItem = chrome.history.HistoryItem
-import { wrapIntoTransaction } from "../state/oldActions"
 
 // copy-paste Chrome types
 type CustomBookmarkTreeNode = {

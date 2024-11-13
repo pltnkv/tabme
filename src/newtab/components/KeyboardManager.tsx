@@ -1,8 +1,7 @@
 import React, { useContext, useEffect } from "react"
 import { getSelectedItemsElements, getSelectedItemsIds } from "../helpers/selectionUtils"
-import { DispatchContext } from "../state/actions"
+import { DispatchContext, wrapIntoTransaction } from "../state/actions"
 import { Action } from "../state/state"
-import { wrapIntoTransaction } from "../state/oldActions"
 
 export const KeyboardManager = React.memo((props: {
   search: string;

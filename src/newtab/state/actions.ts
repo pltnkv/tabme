@@ -5,7 +5,15 @@ import { ColorTheme, IFolder, IFolderItem, IFolderItemToCreate } from "../helper
 import { applyTheme, findFolderById, findFolderByItemId, findItemById, genNextRuntimeId, genUniqId, getRandomHEXColor } from "../helpers/utils"
 import { saveStateThrottled, savingStateKeys } from "./storage"
 import { insertBetween, sortByPosition } from "../helpers/fractionalIndexes"
-import { loadFromNetwork } from "../../api/api"
+import { getGlobalAppState } from "../components/App"
+
+let prevState: IAppState | undefined
+
+export function wrapIntoTransaction(callback: () => void): void {
+  let _prevState = { ...getGlobalAppState() }
+  callback()
+  prevState = _prevState
+}
 
 export const DispatchContext = createContext<ActionDispatcher>(null!)
 
@@ -38,8 +46,6 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
     } as APICommandPayloadFull]
   }
 
-  const saveInCloud = loadFromNetwork()
-
   switch (action.type) {
 
     case Action.UpdateAppState: {
@@ -50,15 +56,28 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
     }
 
     case Action.Undo: {
-      const undoAction = state.undoActions[state.undoActions.length - 1]
-      if (undoAction) {
-        const newState: IAppState = {
-          ...showNotificationReducer("Undo"),
-          undoActions: state.undoActions.filter(u => u !== undoAction)
+      if (state.betaMode) {
+        const undoAction = state.undoActions[state.undoActions.length - 1]
+        if (undoAction) {
+          const newState: IAppState = {
+            ...showNotificationReducer("Undo"),
+            undoActions: state.undoActions.filter(u => u !== undoAction)
+          }
+          return stateReducer0(newState, undoAction)
+        } else {
+          return showNotificationReducer("Nothing to undo")
         }
-        return stateReducer0(newState, undoAction)
       } else {
-        return showNotificationReducer("Nothing to undo")
+        if (prevState) {
+          let _prevState = prevState
+          prevState = undefined
+          return {
+            ..._prevState,
+            notification: stateReducer0(state, { type: Action.ShowNotification, message: "Undo" }).notification
+          }
+        } else {
+          return stateReducer0(state, { type: Action.ShowNotification, message: "Nothing to undo" })
+        }
       }
     }
 
@@ -157,48 +176,62 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
      ********************************************************/
 
     case Action.CreateFolder: {
-      const lastFolder = state.folders.at(-1)
-      const newFolder: IFolder = {
-        id: action.newFolderId ?? genUniqId(),
-        title: action.title ?? "New folder",
-        items: addItemsToFolder(action.items ?? [], []),
-        color: action.color ?? getRandomHEXColor(),
-        position: insertBetween(lastFolder?.position ?? "", "")
-      }
+      if (state.betaMode) {
+        const lastFolder = state.folders.at(-1)
+        const newFolder: IFolder = {
+          id: action.newFolderId ?? genUniqId(),
+          title: action.title ?? "New folder",
+          items: addItemsToFolder(action.items ?? [], []),
+          color: action.color ?? getRandomHEXColor(),
+          position: insertBetween(lastFolder?.position ?? "", "")
+        }
 
-      let apiCommandsQueue = state.apiCommandsQueue
-      if (saveInCloud) {
+        let apiCommandsQueue = state.apiCommandsQueue
         apiCommandsQueue = getCommandsQueue(state, {
           type: Action.CreateFolder,
           body: { folder: newFolder }
         })
-      }
 
-      const undoActions = getUndoAction(action.byUndo, state, () => ({
-        type: Action.DeleteFolder,
-        folderId: newFolder.id
-      }))
+        const undoActions = getUndoAction(action.byUndo, state, () => ({
+          type: Action.DeleteFolder,
+          folderId: newFolder.id
+        }))
 
-      return {
-        ...state,
-        folders: [
-          ...state.folders,
-          newFolder
-        ],
-        apiCommandsQueue,
-        undoActions
+        return {
+          ...state,
+          folders: [
+            ...state.folders,
+            newFolder
+          ],
+          apiCommandsQueue,
+          undoActions
+        }
+      } else {
+        // BACKWARD COMP ########################
+        return {
+          ...state,
+          folders: [
+            ...state.folders,
+            {
+              id: action.newFolderId ?? genUniqId(),
+              title: action.title ?? "New folder",
+              items: insertFolderItemFake(action.items ?? []),
+              color: action.color ?? getRandomHEXColor()
+            }
+          ]
+        }
       }
     }
 
     case Action.DeleteFolder: {
-      const deletingFolder = findFolderById(state, action.folderId)
+      if (state.betaMode) {
+        const deletingFolder = findFolderById(state, action.folderId)
 
-      if (!deletingFolder) {
-        throw new Error("Deleting folder not found")
-      }
+        if (!deletingFolder) {
+          throw new Error("Deleting folder not found")
+        }
 
-      let apiCommandsQueue = state.apiCommandsQueue
-      if (saveInCloud) {
+        let apiCommandsQueue = state.apiCommandsQueue
         if (!deletingFolder.remoteId) {
           return showNotificationReducer("Network operation not available", true)
         }
@@ -208,24 +241,30 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
             folderId: deletingFolder.remoteId
           }
         })
-      }
 
-      // const undoActions = getUndoAction(action.byUndo, state, () => ({
-      //   type: Action.CreateFolder, //todo introduce (restore Action)
-      //   ...deletingFolder
-      // }))
+        // const undoActions = getUndoAction(action.byUndo, state, () => ({
+        //   type: Action.CreateFolder, //todo introduce (restore Action)
+        //   ...deletingFolder
+        // }))
 
-      //TODO: Undo for deleting folders not supported yet
-      const undoActions = getUndoAction(action.byUndo, state, () => ({
-        type: Action.UpdateAppState,
-        newState: state
-      }))
+        //TODO: Undo for deleting folders not supported yet
+        const undoActions = getUndoAction(action.byUndo, state, () => ({
+          type: Action.UpdateAppState,
+          newState: state
+        }))
 
-      return {
-        ...state,
-        folders: state.folders.filter((f) => f.id !== action.folderId),
-        apiCommandsQueue,
-        undoActions
+        return {
+          ...state,
+          folders: state.folders.filter((f) => f.id !== action.folderId),
+          apiCommandsQueue,
+          undoActions
+        }
+      } else {
+        // BACKWARD COMP ########################
+        return {
+          ...state,
+          folders: state.folders.filter((f) => f.id !== action.folderId)
+        }
       }
     }
 
@@ -249,9 +288,8 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       if (!targetFolder) {
         throw new Error(`Updating folder not found`)
       }
-
-      let apiCommandsQueue = state.apiCommandsQueue
-      if (saveInCloud) {
+      if (state.betaMode) {
+        let apiCommandsQueue = state.apiCommandsQueue
         if (!targetFolder.remoteId) {
           return showNotificationReducer("Network operation not available", true)
         }
@@ -262,33 +300,40 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
             folder: newProps
           }
         })
-      }
 
-      const undoActions = getUndoAction(action.byUndo, state, () => ({
-        type: Action.UpdateFolder,
-        folderId: action.folderId,
-        ...targetFolder
-      }))
+        const undoActions = getUndoAction(action.byUndo, state, () => ({
+          type: Action.UpdateFolder,
+          folderId: action.folderId,
+          ...targetFolder
+        }))
 
-      return {
-        ...state,
-        folders: updateFolder(state.folders, action.folderId, newProps),
-        apiCommandsQueue,
-        undoActions
+        return {
+          ...state,
+          folders: updateFolder(state.folders, action.folderId, newProps),
+          apiCommandsQueue,
+          undoActions
+        }
+      } else {
+        // BACKWARD COMP ########################
+        return {
+          ...state,
+          folders: updateFolder(state.folders, action.folderId, newProps)
+        }
       }
     }
 
     case Action.MoveFolder: {
-      const targetFolder = findFolderById(state, action.folderId)
-      const insertBeforeFolderIndex = state.folders.findIndex(f => f.id === action.insertBeforeFolderId)
-      const insertAfterFolderIndex = insertBeforeFolderIndex === -1 ? state.folders.length - 1 : insertBeforeFolderIndex - 1
+      if (state.betaMode) {
+        const targetFolder = findFolderById(state, action.folderId)
+        const insertBeforeFolderIndex = state.folders.findIndex(f => f.id === action.insertBeforeFolderId)
+        const insertAfterFolderIndex = insertBeforeFolderIndex === -1 ? state.folders.length - 1 : insertBeforeFolderIndex - 1
 
-      const position = insertBetween(state.folders[insertAfterFolderIndex]?.position ?? "", state.folders[insertBeforeFolderIndex]?.position ?? "") // confusing naming detected -_-
+        const position = insertBetween(state.folders[insertAfterFolderIndex]?.position ?? "", state.folders[insertBeforeFolderIndex]?.position ?? "") // confusing naming detected
+                                                                                                                                                      // -_-
 
-      const newFolders = sortByPosition(updateFolder(state.folders, action.folderId, { position }))
+        const newFolders = sortByPosition(updateFolder(state.folders, action.folderId, { position }))
 
-      let apiCommandsQueue = state.apiCommandsQueue
-      if (saveInCloud) {
+        let apiCommandsQueue = state.apiCommandsQueue
         if (!targetFolder?.remoteId) {
           return showNotificationReducer("Network operation not available", true)
         }
@@ -299,19 +344,41 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
             position: position
           }
         })
-      }
 
-      //TODO: Undo for moving folders not supported yet",
-      const undoActions = getUndoAction(action.byUndo, state, () => ({
-        type: Action.UpdateAppState,
-        newState: state
-      }))
+        //TODO: Undo for moving folders not supported yet",
+        const undoActions = getUndoAction(action.byUndo, state, () => ({
+          type: Action.UpdateAppState,
+          newState: state
+        }))
 
-      return {
-        ...state,
-        folders: newFolders,
-        apiCommandsQueue,
-        undoActions
+        return {
+          ...state,
+          folders: newFolders,
+          apiCommandsQueue,
+          undoActions
+        }
+      } else {
+        // BACKWARD COMP ########################
+        const newFolders = [...state.folders]
+        const targetFolderIndex = newFolders.findIndex(f => f.id === action.folderId)
+        let newIndex: number
+        if (action.insertBeforeFolderId === undefined) {
+          newIndex = newFolders.length - 1
+        } else {
+          const insertBeforeFolderIndex = newFolders.findIndex(f => f.id === action.insertBeforeFolderId)
+          newIndex = insertBeforeFolderIndex < targetFolderIndex ? insertBeforeFolderIndex : insertBeforeFolderIndex - 1
+        }
+
+        if (targetFolderIndex < 0 || targetFolderIndex >= newFolders.length || newIndex < 0 || newIndex >= newFolders.length) {
+          throw new Error(`Invalid indexes when swap folders ${targetFolderIndex} ${newIndex}`)
+        }
+
+        // Swap elements using a temporary variable
+        const temp = newFolders[targetFolderIndex]
+        newFolders.splice(targetFolderIndex, 1) // remove from old position
+        newFolders.splice(newIndex, 0, temp) // insert into new position
+
+        return { ...state, folders: newFolders }
       }
     }
 
@@ -320,19 +387,19 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
      ********************************************************/
 
     case Action.CreateFolderItem: {
+      if (state.betaMode) {
 
-      const folders = updateFolder(state.folders, action.folderId, (folder) => {
-        const items = addItemsToFolder([action.item], folder.items, action.itemIdInsertBefore)
-        return {
-          ...folder,
-          items
-        }
-      })
+        const folders = updateFolder(state.folders, action.folderId, (folder) => {
+          const items = addItemsToFolder([action.item], folder.items, action.itemIdInsertBefore)
+          return {
+            ...folder,
+            items
+          }
+        })
 
-      let createdItem: IFolderItem = findItemById({ folders }, action.item.id)!
+        let createdItem: IFolderItem = findItemById({ folders }, action.item.id)!
 
-      let apiCommandsQueue = state.apiCommandsQueue
-      if (saveInCloud) {
+        let apiCommandsQueue = state.apiCommandsQueue
         const targetFolder = findFolderById(state, action.folderId)
         if (!targetFolder?.remoteId) {
           return showNotificationReducer("Network operation not available", true)
@@ -344,25 +411,50 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
             item: createdItem
           }
         })
+
+        const undoActions = getUndoAction(action.byUndo, state, () => ({
+          type: Action.DeleteFolderItems,
+          itemIds: [action.item.id]
+        }))
+
+        return {
+          ...state,
+          folders,
+          apiCommandsQueue,
+          undoActions
+        }
+      } else {
+        // BACKWARD COMP ########################
+        return {
+          ...state,
+          folders: updateFolder(state.folders, action.folderId, (folder) => {
+            if (action.itemIdInsertBefore === undefined) {
+              return { //push last
+                ...folder,
+                items: insertFolderItemFake([...folder.items, action.item])
+              }
+            } else {
+              const targetIndex = folder.items.findIndex(
+                (item) => item.id === action.itemIdInsertBefore
+              )
+              return {
+                ...folder,
+                items: insertFolderItemFake([
+                  ...folder.items.slice(0, targetIndex),
+                  action.item,
+                  ...folder.items.slice(targetIndex)
+                ])
+              }
+            }
+          })
+        }
       }
 
-      const undoActions = getUndoAction(action.byUndo, state, () => ({
-        type: Action.DeleteFolderItems,
-        itemIds: [action.item.id]
-      }))
-
-      return {
-        ...state,
-        folders,
-        apiCommandsQueue,
-        undoActions
-      }
     }
 
     case Action.DeleteFolderItems: {
-
-      let apiCommandsQueue = state.apiCommandsQueue
-      if (saveInCloud) {
+      if (state.betaMode) {
+        let apiCommandsQueue = state.apiCommandsQueue
         const itemRemoteIds = action.itemIds.map(itemId => findItemById(state, itemId)?.remoteId!)
         if (itemRemoteIds.some(id => id === undefined)) {
           return showNotificationReducer("Network operation not available", true)
@@ -373,39 +465,58 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
             folderItemIds: itemRemoteIds
           }
         })
-      }
 
-      // const undoActions = getUndoAction(action.byUndo, state, () => ({
-      //   type: Action.ShowNotification,
-      //   message: "Undo for deleting items not supported yet", // todo fix it
-      //   isError: true
-      // }))
+        // const undoActions = getUndoAction(action.byUndo, state, () => ({
+        //   type: Action.ShowNotification,
+        //   message: "Undo for deleting items not supported yet", // todo fix it
+        //   isError: true
+        // }))
 
-      //TODO: Undo for deleting folders not supported yet",
-      const undoActions = getUndoAction(action.byUndo, state, () => ({
-        type: Action.UpdateAppState,
-        newState: state
-      }))
+        //TODO: Undo for deleting folders not supported yet",
+        const undoActions = getUndoAction(action.byUndo, state, () => ({
+          type: Action.UpdateAppState,
+          newState: state
+        }))
 
-      const deleteItemsFromFolders = (folders: IFolder[], itemId: number): IFolder[] => {
-        const folder = findFolderByItemId({ folders }, itemId)
-        if (folder) {
-          return updateFolder(folders, folder.id, (folder) => {
-            return {
-              ...folder,
-              items: folder.items.filter((i) => i.id !== itemId)
-            }
-          })
-        } else {
-          return folders
+        const deleteItemsFromFolders = (folders: IFolder[], itemId: number): IFolder[] => {
+          const folder = findFolderByItemId({ folders }, itemId)
+          if (folder) {
+            return updateFolder(folders, folder.id, (folder) => {
+              return {
+                ...folder,
+                items: folder.items.filter((i) => i.id !== itemId)
+              }
+            })
+          } else {
+            return folders
+          }
         }
-      }
 
-      return {
-        ...state,
-        folders: action.itemIds.reduce(deleteItemsFromFolders, state.folders),
-        apiCommandsQueue,
-        undoActions
+        return {
+          ...state,
+          folders: action.itemIds.reduce(deleteItemsFromFolders, state.folders),
+          apiCommandsQueue,
+          undoActions
+        }
+      } else {
+        // BACKWARD COMP ########################
+        const deleteItemsFromFolders = (_state: IAppState, itemId: number) => {
+          const folder = findFolderByItemId(_state, itemId)
+          if (folder) {
+            return {
+              ..._state,
+              folders: updateFolder(_state.folders, folder.id, (folder) => {
+                return {
+                  ...folder,
+                  items: folder.items.filter((i) => i.id !== itemId)
+                }
+              })
+            }
+          } else {
+            return _state
+          }
+        }
+        return action.itemIds.reduce(deleteItemsFromFolders, state)
       }
     }
 
@@ -429,8 +540,8 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         return state
       }
 
-      let apiCommandsQueue = state.apiCommandsQueue
-      if (saveInCloud) {
+      if (state.betaMode) {
+        let apiCommandsQueue = state.apiCommandsQueue
         if (!originalItem?.remoteId) {
           return showNotificationReducer("Network operation not available", true)
         }
@@ -442,53 +553,65 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
             item: newProps
           }
         })
+
+        const undoActions = getUndoAction(action.byUndo, state, () => ({
+          type: Action.UpdateFolderItem,
+          itemId: originalItem.id,
+          ...originalItem
+        }))
+
+        return {
+          ...state,
+          folders: updateFolderItem(
+            state.folders,
+            action.itemId,
+            newProps,
+            folderId
+          ),
+          apiCommandsQueue,
+          undoActions
+        }
+      } else {
+        // BACKWARD COMP ########################
+        return {
+          ...state,
+          folders: updateFolderItem(
+            state.folders,
+            action.itemId,
+            newProps,
+            folderId
+          )
+        }
       }
 
-      const undoActions = getUndoAction(action.byUndo, state, () => ({
-        type: Action.UpdateFolderItem,
-        itemId: originalItem.id,
-        ...originalItem
-      }))
-
-      return {
-        ...state,
-        folders: updateFolderItem(
-          state.folders,
-          action.itemId,
-          newProps,
-          folderId
-        ),
-        apiCommandsQueue,
-        undoActions
-      }
     }
 
     case Action.MoveFolderItems: {
-      const targetFolder = findFolderById(state, action.targetFolderId)
-      const movingItems = action.itemIds.map(itemId => findItemById(state, itemId)!)
+      if (state.betaMode) {
+        const targetFolder = findFolderById(state, action.targetFolderId)
+        const movingItems = action.itemIds.map(itemId => findItemById(state, itemId)!)
 
-      // Store the original folder IDs and positions for undo purposes
-      const originalPositions = movingItems.map(item => ({
-        itemId: item.id,
-        originalFolderId: findFolderByItemId(state, item.id)!.id,
-        originalPosition: item.position
-      }))
-
-      const folderWithRemovedItems = movingItems.reduce((folders, movingItem) => {
-        const folder = findFolderByItemId({ folders }, movingItem.id)!
-        return updateFolder(folders, folder.id, folder => ({
-          ...folder,
-          items: folder.items.filter(i => i.id !== movingItem.id)
+        // Store the original folder IDs and positions for undo purposes
+        const originalPositions = movingItems.map(item => ({
+          itemId: item.id,
+          originalFolderId: findFolderByItemId(state, item.id)!.id,
+          originalPosition: item.position
         }))
-      }, state.folders)
 
-      const folders = updateFolder(folderWithRemovedItems, action.targetFolderId, folder => ({
-        ...folder,
-        items: addItemsToFolder(movingItems, folder.items, action.itemIdInsertBefore)
-      }))
+        const folderWithRemovedItems = movingItems.reduce((folders, movingItem) => {
+          const folder = findFolderByItemId({ folders }, movingItem.id)!
+          return updateFolder(folders, folder.id, folder => ({
+            ...folder,
+            items: folder.items.filter(i => i.id !== movingItem.id)
+          }))
+        }, state.folders)
 
-      let apiCommandsQueue = state.apiCommandsQueue
-      if (saveInCloud) {
+        const folders = updateFolder(folderWithRemovedItems, action.targetFolderId, folder => ({
+          ...folder,
+          items: addItemsToFolder(movingItems, folder.items, action.itemIdInsertBefore)
+        }))
+
+        let apiCommandsQueue = state.apiCommandsQueue
         if (!targetFolder?.remoteId || movingItems.some(item => !item.remoteId)) {
           return showNotificationReducer("Network operation not available", true)
         }
@@ -506,35 +629,55 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
             })
           }
         })
-      }
 
-      // Generate undo actions to restore each item to its original folder and position
-      // const undoActions = getUndoAction(action.byUndo, state, () =>
-      //   originalPositions.map(pos => ({
-      //     type: Action.MoveFolderItems,
-      //     targetFolderId: pos.originalFolderId,
-      //     itemIds: [pos.itemId],
-      //     itemIdInsertBefore: pos.originalPosition
-      //   }))
-      // )
+        // Generate undo actions to restore each item to its original folder and position
+        // const undoActions = getUndoAction(action.byUndo, state, () =>
+        //   originalPositions.map(pos => ({
+        //     type: Action.MoveFolderItems,
+        //     targetFolderId: pos.originalFolderId,
+        //     itemIds: [pos.itemId],
+        //     itemIdInsertBefore: pos.originalPosition
+        //   }))
+        // )
 
-      // const undoActions = getUndoAction(action.byUndo, state, () => ({
-      //   type: Action.ShowNotification,
-      //   message: "Undo for moving items not supported yet", // todo fix it
-      //   isError: true
-      // }))
+        // const undoActions = getUndoAction(action.byUndo, state, () => ({
+        //   type: Action.ShowNotification,
+        //   message: "Undo for moving items not supported yet", // todo fix it
+        //   isError: true
+        // }))
 
-      // todo: Undo for moving items to folder not ready - fix it
-      const undoActions = getUndoAction(action.byUndo, state, () => ({
-        type: Action.UpdateAppState,
-        newState: { ...state }
-      }))
+        // todo: Undo for moving items to folder not ready - fix it
+        const undoActions = getUndoAction(action.byUndo, state, () => ({
+          type: Action.UpdateAppState,
+          newState: { ...state }
+        }))
 
-      return {
-        ...state,
-        folders,
-        apiCommandsQueue,
-        undoActions
+        return {
+          ...state,
+          folders,
+          apiCommandsQueue,
+          undoActions
+        }
+      } else {
+        // BACKWARD COMP ########################
+        return action.itemIds.reduce((_state, itemId) => {
+          const targetItem = findItemById(_state, itemId)
+          if (targetItem) {
+            return pipeActionsForStateOnly(_state,
+              {
+                type: Action.DeleteFolderItems,
+                itemIds: [itemId]
+              },
+              {
+                type: Action.CreateFolderItem,
+                folderId: action.targetFolderId,
+                itemIdInsertBefore: action.itemIdInsertBefore,
+                item: targetItem
+              })
+          } else {
+            return _state
+          }
+        }, state)
       }
     }
 
@@ -665,7 +808,7 @@ function addItemsToFolder(insertingItems: IFolderItemToCreate[], existingItems: 
   let insertBeforeItem = existingItems[insertBeforeItemIndex]
 
   const newItems: IFolderItem[] = []
-  insertingItems.forEach((insertingItem, index) => {
+  insertingItems.forEach((insertingItem) => {
     const item = insertFolderItem(insertingItem, insertAfterItem, insertBeforeItem)
     insertAfterItem = item
     newItems.push(item)

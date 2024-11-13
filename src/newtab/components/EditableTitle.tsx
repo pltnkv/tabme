@@ -1,22 +1,17 @@
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useRef } from "react"
 import { hlSearch } from "../helpers/utils"
 
 export function EditableTitle(p: {
   className?: string,
-  onClick?:() => void,
+  onClick?: () => void,
   inEdit: boolean,
   setEditing?: (value: boolean) => void,
-  initTitle: string,
+  localTitle: string,
+  setLocalTitle: (val: string) => void,
   search: string
-  onSaveTitle: (val: string) => void,
+  onSaveTitle: (title: string) => void,
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const [title, setTitle] = useState(p.initTitle)
-
-  useEffect(() => {
-    // to support UNDO operation
-    setTitle(p.initTitle)
-  }, [p.initTitle])
 
   useEffect(() => {
     // Select all text when entering edit mode
@@ -31,17 +26,19 @@ export function EditableTitle(p: {
       textareaRef.current.style.height = "0px" // Reset height to recalculate
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight + 2}px`
     }
-  }, [p.inEdit, title])
+  }, [p.inEdit, p.localTitle])
 
   function handleTitleChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
-    setTitle(event.target.value)
+    p.setLocalTitle(event.target.value)
   }
 
   function trySaveChange() {
+    console.log('trySaveChange 1')
     if (p.setEditing) {
+      console.log('trySaveChange 2')
       p.setEditing(false)
     }
-    p.onSaveTitle(title)
+    p.onSaveTitle(p.localTitle)
   }
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -54,7 +51,6 @@ export function EditableTitle(p: {
       if (p.setEditing) {
         p.setEditing(false)
       }
-      setTitle(p.initTitle)
     } else if (isEnter || isCmdEnter || isCtrlEnter) {
       event.preventDefault() // Prevent the default action to avoid inserting a newline
       trySaveChange()
@@ -70,10 +66,10 @@ export function EditableTitle(p: {
           onKeyDown={handleKeyDown}
           onChange={handleTitleChange}
           onBlur={trySaveChange}
-          value={title}
+          value={p.localTitle}
         />
         :
-        <span onClick={p.onClick} className={p.className} dangerouslySetInnerHTML={hlSearch(title, p.search)}/>
+        <span onClick={p.onClick} className={p.className} dangerouslySetInnerHTML={hlSearch(p.localTitle, p.search)}/>
     }
   </>
 }

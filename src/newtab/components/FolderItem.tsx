@@ -1,17 +1,17 @@
 import React, { useContext, useEffect, useState } from "react"
 import { IFolder, IFolderItem } from "../helpers/types"
-import { findItemsByIds, findTabsByURL, isFolderItemNotUsed } from "../helpers/utils"
-import { DropdownMenu } from "./DropdownMenu"
-import { showMessage, showMessageWithUndo } from "../helpers/actionsHelpers"
+import { findTabsByURL, isFolderItemNotUsed } from "../helpers/utils"
 import { EditableTitle } from "./EditableTitle"
-import { getSelectedItemsIds } from "../helpers/selectionUtils"
 import { Action } from "../state/state"
-import { DispatchContext } from "../state/actions"
-import Tab = chrome.tabs.Tab
-import HistoryItem = chrome.history.HistoryItem
-import { wrapIntoTransaction } from "../state/oldActions"
+import { DispatchContext, wrapIntoTransaction } from "../state/actions"
 import { CL } from "../helpers/classNameHelper"
 import IconClose from "../icons/close.svg"
+import IconMore from "../icons/more.svg"
+import { FolderItemMenu } from "./FolderItemMenu"
+import Tab = chrome.tabs.Tab
+import HistoryItem = chrome.history.HistoryItem
+
+const useBlueHeaders = !!localStorage.getItem("blue-headers")
 
 export const FolderItem = React.memo((p: {
   item: IFolderItem;
@@ -24,14 +24,21 @@ export const FolderItem = React.memo((p: {
 }) => {
   const dispatch = useContext(DispatchContext)
   const [showMenu, setShowMenu] = useState<boolean>(false)
+  const [localTitle, setLocalTitle] = useState<string>(p.item.title)
 
-  function trySaveTitle(newTitle: string) {
-    if (p.item.title !== newTitle) {
+  useEffect(() => {
+    // to support UNDO operation
+    setLocalTitle(p.item.title)
+  }, [p.item.title])
+
+  function trySaveTitleAndURL(newTitle: string, newUrl?: string) {
+    if (p.item.title !== newTitle || (newUrl && p.item.url !== newUrl)) {
       wrapIntoTransaction(() => {
         dispatch({
           type: Action.UpdateFolderItem,
           itemId: p.item.id,
-          title: newTitle
+          title: newTitle,
+          url: newUrl ?? p.item.url
         })
       })
     }
@@ -67,30 +74,35 @@ export const FolderItem = React.memo((p: {
 
   return (
     <div className={
-      "folder-item "
-      + (showMenu ? "selected " : "")
-      + (p.item.archived ? "archived " : "")
-    }>
+      CL("folder-item", {
+        "section": p.item.isSection,
+        "selected": showMenu,
+        "archived": p.item.archived,
+        "blue-header": useBlueHeaders
+      })}>
       {showMenu
         ? <FolderItemMenu
           folders={p.folders}
           item={p.item}
-          inEdit={p.inEdit}
-          setEditing={setEditing}
-          setShowMenu={setShowMenu}/>
+          localTitle={localTitle}
+          setLocalTitle={setLocalTitle}
+          onSave={trySaveTitleAndURL}
+          onClose={() => setShowMenu(false)}/>
         : null
       }
       <button className="folder-item__menu"
               onContextMenu={onContextMenu}
-              onClick={() => setShowMenu(!showMenu)}>⋯
+              onClick={() => setShowMenu(!showMenu)}>
+        <IconMore/>
       </button>
 
       <a className={
         CL("folder-item__inner draggable-item", {
           "section": p.item.isSection,
-          "open": folderItemOpened
+          "open": folderItemOpened,
         })
       }
+         onDragStart={(e) => {e.preventDefault()}} // to prevent text drag-and-drop in the textarea
          tabIndex={2}
          data-id={p.item.id}
          onClick={e => e.preventDefault()}
@@ -103,9 +115,10 @@ export const FolderItem = React.memo((p: {
         })}
                        inEdit={p.inEdit}
                        setEditing={setEditing}
-                       initTitle={p.item.title}
+                       localTitle={localTitle}
+                       setLocalTitle={setLocalTitle}
+                       onSaveTitle={trySaveTitleAndURL}
                        search={p.search}
-                       onSaveTitle={trySaveTitle}
         />
         {
           folderItemOpened ? <button className="btn__close-tab stop-dad-propagation"
@@ -118,140 +131,6 @@ export const FolderItem = React.memo((p: {
       </a>
     </div>
   )
-})
-
-const FolderItemMenu = React.memo((p: {
-  setShowMenu: (value: boolean) => void,
-  setEditing: (val: boolean) => void,
-  item: IFolderItem;
-  inEdit: boolean
-  folders: IFolder[]
-}) => {
-  const dispatch = useContext(DispatchContext)
-  const [selectedItemsIds, setSelectedItemsIds] = useState<number[]>([])
-
-  useEffect(() => {
-    const ids = getSelectedItemsIds()
-    if (ids.length > 0) {
-      setSelectedItemsIds(ids)
-    } else {
-      setSelectedItemsIds([p.item.id])
-    }
-  }, [])
-
-  function onRenameItem() {
-    p.setShowMenu(false)
-    p.setEditing(true)
-  }
-
-  // support multiple
-  function onOpenNewTab() {
-    let items = findItemsByIds(p, selectedItemsIds)
-    items.forEach((item) => {
-      if (item.url) {
-        chrome.tabs.create({ url: item.url })
-      }
-    })
-
-    p.setShowMenu(false)
-  }
-
-  // support multiple
-  function onDeleteItem() {
-    wrapIntoTransaction(() => {
-      dispatch({
-        type: Action.DeleteFolderItems,
-        itemIds: selectedItemsIds
-      })
-    })
-    showMessageWithUndo("Bookmark has been deleted", dispatch)
-  }
-
-  function onCopyUrl() {
-    navigator.clipboard.writeText(p.item.url)
-    p.setShowMenu(false)
-    showMessage("URL has been copied", dispatch)
-  }
-
-  function onEditUrl() {
-    const newUrl = prompt("Edit URL", p.item.url)
-
-    if (newUrl) {
-      wrapIntoTransaction(() => {
-        dispatch({
-          type: Action.UpdateFolderItem,
-          itemId: p.item.id,
-          url: newUrl
-        })
-      })
-    }
-  }
-
-  // support multiple
-  function onArchive() {
-    let items = findItemsByIds(p, selectedItemsIds)
-
-    wrapIntoTransaction(() => {
-      items.forEach((item) => {
-        dispatch({
-          type: Action.UpdateFolderItem,
-          itemId: item.id,
-          archived: true
-        })
-      })
-
-    })
-    showMessageWithUndo("Bookmark has been hidden", dispatch)
-  }
-
-  function onRestore() {
-    wrapIntoTransaction(() => {
-      dispatch({
-        type: Action.UpdateFolderItem,
-        itemId: p.item.id,
-        archived: false
-      })
-    })
-    showMessage("Bookmark has been restored", dispatch)
-  }
-
-  return <>
-    {
-      selectedItemsIds.length > 1 ?
-        <DropdownMenu onClose={() => p.setShowMenu(false)} className={"dropdown-menu--folder-item"} topOffset={4}>
-          <button className="dropdown-menu__button focusable" onClick={onOpenNewTab}>Open in New Tab</button>
-          <button className="dropdown-menu__button focusable" onClick={onArchive}>Hide</button>
-          <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onDeleteItem}>Delete</button>
-        </DropdownMenu>
-        :
-        <>
-          {p.item.isSection ?
-            <DropdownMenu onClose={() => p.setShowMenu(false)} className={"dropdown-menu--folder-section"}>
-              <button className="dropdown-menu__button focusable" onClick={onRenameItem}>Rename</button>
-              {
-                p.item.archived
-                  ? <button className="dropdown-menu__button focusable" onClick={onRestore}>Unhide</button>
-                  : <button className="dropdown-menu__button focusable" onClick={onArchive}>Hide</button>
-              }
-              <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onDeleteItem}>Delete</button>
-            </DropdownMenu>
-            :
-            <DropdownMenu onClose={() => p.setShowMenu(false)} className={"dropdown-menu--folder-item"} topOffset={4}>
-              <button className="dropdown-menu__button focusable" onClick={onOpenNewTab}>Open in New Tab</button>
-              <button className="dropdown-menu__button focusable" onClick={onRenameItem}>Rename</button>
-              <button className="dropdown-menu__button focusable" onClick={onCopyUrl}>Copy url</button>
-              <button className="dropdown-menu__button focusable" onClick={onEditUrl}>Edit url</button>
-              {
-                p.item.archived
-                  ? <button className="dropdown-menu__button focusable" onClick={onRestore}>Unhide</button>
-                  : <button className="dropdown-menu__button focusable" onClick={onArchive}>Hide</button>
-              }
-              <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onDeleteItem}>Delete</button>
-            </DropdownMenu>
-          }
-        </>
-    }
-  </>
 })
 
 let brokenImgSVG: string | undefined = undefined

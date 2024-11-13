@@ -4,7 +4,6 @@ import { Sidebar } from "./Sidebar"
 import { Notification } from "./Notification"
 import { KeyboardManager } from "./KeyboardManager"
 import { filterIrrelevantHistory } from "../helpers/utils"
-import { showMessage } from "../helpers/actionsHelpers"
 import { Welcome } from "./Welcome"
 import { tryToCreateWelcomeFolder } from "../helpers/welcomeLogic"
 import { Action, getInitAppState, IAppState } from "../state/state"
@@ -12,8 +11,7 @@ import { DispatchContext, stateReducer } from "../state/actions"
 import { getBC, getStateFromLS } from "../state/storage"
 import { executeAPICall } from "../../api/serverCommands"
 import Tab = chrome.tabs.Tab
-import { loadFromNetwork } from "../../api/api"
-import { oldStateReducer } from "../state/oldActions"
+import { apiGetToken } from "../../api/api"
 
 let notificationTimeout: number | undefined
 let globalAppState: IAppState
@@ -23,8 +21,7 @@ export function getGlobalAppState(): IAppState {
 }
 
 export function App() {
-  const reducer = loadFromNetwork() ? stateReducer : oldStateReducer
-  const [appState, dispatch] = useReducer(reducer, getInitAppState())
+  const [appState, dispatch] = useReducer(stateReducer, getInitAppState())
 
   function updateTabsAndHistory(init = false) {
     console.log("updateTabsAndHistory")
@@ -106,9 +103,17 @@ export function App() {
       }
     })
 
-    window.betaMode = () => {
-      dispatch({ type: Action.UpdateAppState, newState: { betaMode: true } })
-      showMessage("Beta Mode enabled", dispatch)
+    window.betaLogin = async () => {
+      try {
+        const userName = prompt("Enter your login")!
+        const res = await apiGetToken(userName)
+        localStorage.setItem("authToken", res.token)
+        dispatch({ type: Action.UpdateAppState, newState: { betaMode: true } })
+        // dispatch({ type: Action.SaveBookmarksToCloud })
+        alert("Login successful!")
+      } catch (e) {
+        alert("Invalid credentials. Please try again.")
+      }
     }
   }, [])
 
@@ -147,24 +152,28 @@ export function App() {
 
   return (
     <DispatchContext.Provider value={dispatch}>
-      <div className={"app " + (appState.sidebarCollapsed ? "collapsible-sidebar" : "")}>
-        <Notification notification={appState.notification}/>
-        {
-          appState.page === "import"
-            ? <Welcome appState={appState}/>
-            : <>
-              <Sidebar appState={appState}/>
-              <Bookmarks appState={appState}/>
-              <KeyboardManager search={appState.search}/>
-            </>
-        }
-      </div>
+      {appState.appLoaded ?
+        <div className={"app " + (appState.sidebarCollapsed ? "collapsible-sidebar" : "")}>
+          <Notification notification={appState.notification}/>
+          {
+            appState.page === "import"
+              ? <Welcome appState={appState}/>
+              : <>
+                <Sidebar appState={appState}/>
+                <Bookmarks appState={appState}/>
+                <KeyboardManager search={appState.search}/>
+              </>
+          }
+        </div>
+        : null
+      }
+
     </DispatchContext.Provider>
   )
 }
 
 declare global {
   interface Window {
-    betaMode: () => void
+    betaLogin: () => void
   }
 }

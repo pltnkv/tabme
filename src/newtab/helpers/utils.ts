@@ -215,7 +215,7 @@ export const colors = [
   "#f0f4c3",
   "#ffecb3",
   "#ffccbc",
-  "#d7ccc8",
+  "#d7ccc8"
 
   // "#ffcdd2",
   // "#f8bbd0",
@@ -235,7 +235,7 @@ export const colors = [
   // "#ffccbc",
   // "#d7ccc8",
   // "#cfd8dc"
-];
+]
 
 export function getRandomHEXColor(): string {
   return colors[Math.round(Math.random() * (colors.length - 1))]
@@ -279,11 +279,14 @@ export function isFolderItemNotUsed(item: IFolderItem, historyItems: HistoryItem
   return !historyItem
 }
 
-//todo impl regexp with camel cases insensitevness
 export function hlSearch(str: string, search: string): { __html: string } {
   if (search) {
     const searchRE = new RegExp(escapeRegex(search), "i")
-    return { __html: sanitizeHTML(str.replace(searchRE, `<span class="searched">${search}</span>`)) }
+    return {
+      __html: sanitizeHTML(
+        str.replace(searchRE, (match) => `<span class="searched">${match}</span>`)
+      )
+    }
   } else {
     return { __html: sanitizeHTML(str) }
   }
@@ -325,10 +328,15 @@ export function findFolderByItemId(appState: { folders: IFolder[] }, itemId: num
 }
 
 export function blurSearch(e: React.MouseEvent) {
-  e.preventDefault()
-  if (document.activeElement) {
+  if (document.activeElement && document.activeElement === document.querySelector("input.search")) {
     (document.activeElement as HTMLElement).blur()
+    // e.preventDefault() // commented it and it seems like everything works
   }
+}
+
+export function isTargetSupportsDragAndDrop(e: React.MouseEvent): boolean {
+  const tagName = (e.target as HTMLElement)?.tagName
+  return tagName !== "INPUT" && tagName !== "TEXTAREA"
 }
 
 export function debounce(f: any, ms: number): (...attrs: any[]) => void {

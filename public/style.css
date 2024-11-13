@@ -7,6 +7,7 @@
     --border-color: #e2e2e2;
     --input-background-color: #FFFFFF;
     --input-border-color: rgba(0, 0, 0, 0.16);
+    --input-border-color-active: rgba(0, 0, 0, 0.4);
     --button-background-color: #FAFBFC;
     --button-border-color: rgba(0, 0, 0, 0.16);
     --button-hover-background-color: #F3F4F6;
@@ -139,8 +140,14 @@ input, button, textarea {
     font-family: 'OpenSans', sans-serif;
 }
 
-button, input {
+button {
     color: var(--main-text-color);
+}
+
+input[type="text"], textarea {
+    color: var(--main-text-color);
+    border: 1px solid var(--input-border-color);
+    background-color: var(--input-background-color);
 }
 
 svg {
@@ -181,8 +188,6 @@ input.search {
     padding: 8px 8px 8px 32px;
     font-size: 16px;
     border-radius: 8px;
-    border: 1px solid var(--input-border-color);
-    background-color: var(--input-background-color);
     margin: 0;
 }
 
@@ -636,6 +641,10 @@ body.dark-theme .searched {
     display: flex;
     height: 40px;
     margin-right: 8px;
+
+    .btn__setting {
+        margin-right: 8px;
+    }
 }
 
 .btn__clear-search {
@@ -677,19 +686,23 @@ body.dark-theme .searched {
 .folder h2 {
     color: rgb(5, 0, 56); /** var(--main-text-color); */
     margin-left: 24px;
-    padding: 8px;
+    padding: 6px 8px;
     border-radius: 8px;
     position: relative;
     font-size: 18px;
+    height: 36px;
+    box-sizing: border-box;
 
     .folder-title__text {
         display: inline-block;
         cursor: text;
         max-width: calc(100% - 32px);
+        font-weight: 600;
     }
 
     textarea {
-        font-weight: bold;
+        color: rgb(5, 0, 56);
+        font-weight: 600;
         background: none;
         flex-grow: 1;
         height: 0;
@@ -782,24 +795,52 @@ body.dark-theme .searched {
     display: flex;
     align-items: flex-start;
     position: relative;
+    margin-bottom: 2px;
 }
 
 .folder-item .folder-item__menu {
-    cursor: pointer;
-    margin-top: 5px;
-    margin-left: -4px;
-    visibility: hidden;
-    appearance: none;
-    background-color: var(--button-background-color);
-    border: 1px solid var(--button-border-color);
-    box-shadow: rgba(27, 31, 35, 0.04) 0 1px 0, rgba(255, 255, 255, 0.25) 0 1px 0 inset;
-    box-sizing: border-box;
-    color: var(--button-text-color);
-    font-size: 14px;
-    font-weight: bold;
-    user-select: none;
-    border-radius: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     position: relative;
+    cursor: pointer;
+    visibility: hidden;
+    box-sizing: border-box;
+    appearance: none;
+    user-select: none;
+    border: none;
+    background-color: var(--popup-background-color);
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    filter: drop-shadow(1px 1px 0px rgba(0, 0, 0, 0.2));
+    padding: 0;
+    flex-shrink: 0;
+    margin: 0;
+    margin-left: -10px;
+    margin-right: 6px;
+
+    svg {
+        opacity: 0.7;
+        transform: scale(0.82);
+    }
+
+    svg:hover {
+        opacity: 1;
+    }
+}
+
+.folder-item.section.blue-header {
+    margin-top: 8px;
+    span {
+        color: var(--active-control-color);
+        font-size: 14px;
+        font-weight: normal;
+    }
+}
+
+.folder-item.section .folder-item__menu {
+    margin-top: 8px;
 }
 
 .folder-item.selected .folder-item__menu {
@@ -812,13 +853,13 @@ body.dark-theme .searched {
 
 .folder-item__inner {
     display: flex;
-    align-items: center;
+    align-items: start;
     text-decoration: none;
     width: 100%;
-    padding: 6px 0;
-    padding-left: 4px;
+    padding: 4px 0 5px 4px;
     cursor: pointer;
     border-radius: 4px;
+
 
     img[src=""] {
         visibility: hidden;
@@ -841,7 +882,6 @@ body.dark-theme .searched {
 
 .folder-item {
     textarea {
-        /*max-width: 264px;*/
         flex-grow: 1;
         height: 0;
         box-sizing: border-box;
@@ -850,7 +890,7 @@ body.dark-theme .searched {
         font-size: 14px;
         padding: 2px;
         margin: -2px;
-        margin-bottom: -3px;
+        margin-bottom: -4px;
     }
 
     .section textarea {
@@ -869,6 +909,7 @@ body.dark-theme .searched {
     display: inline-block;
     vertical-align: top;
     margin-right: 8px;
+    margin-top: 2px;
 
     &.not-loaded {
         visibility: hidden;
@@ -892,9 +933,6 @@ body.dark-theme .searched {
     max-width: 288px;
     vertical-align: top;
     font-size: 14px;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -1012,7 +1050,6 @@ body.dragging * {
     min-width: 140px;
     margin-top: 24px;
     background-color: var(--popup-background-color);
-    border: 1px solid var(--border-color);
     box-shadow: 0 4px 12px 0 rgba(30, 30, 30, 0.2);
     border-radius: 8px;
     padding: 8px;
@@ -1031,6 +1068,32 @@ body.dragging * {
         flex-direction: row;
         justify-content: flex-start;
         align-items: center;
+    }
+
+    label.input-label {
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        height: 36px;
+        padding: 0 8px;
+
+        span {
+            display: inline-block;
+            width: 38px;
+        }
+
+        input {
+            width: 262px;
+            height: 28px;
+            border-radius: 6px;
+            border: 1px solid var(--input-border-color);
+            padding: 0 8px;
+            font-size: 14px;
+
+            &:hover {
+                border: 1px solid var(--input-border-color-active);
+            }
+        }
     }
 }
 
@@ -1074,7 +1137,7 @@ body.dragging * {
 }
 
 .dropdown-menu--folder-item {
-    margin-left: -3px;
+    margin-left: -10px;
 }
 
 .dropdown-menu--folder-section {

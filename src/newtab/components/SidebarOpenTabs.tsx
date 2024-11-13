@@ -1,13 +1,21 @@
 import React, { memo, useContext, useEffect, useState } from "react"
-import { blurSearch, convertTabToItem, createNewSection, extractHostname, filterTabsBySearch, hlSearch, removeUselessProductName, SECTION_ICON_BASE64 } from "../helpers/utils"
+import {
+  blurSearch,
+  convertTabToItem,
+  createNewSection,
+  extractHostname,
+  filterTabsBySearch,
+  hlSearch,
+  isTargetSupportsDragAndDrop,
+  removeUselessProductName
+} from "../helpers/utils"
 import { bindDADItemEffect, getDraggedItemId } from "../helpers/dragAndDropItem"
 import { createFolder, getCanDragChecker, showMessage } from "../helpers/actionsHelpers"
 import { IFolder, IFolderItem } from "../helpers/types"
-import { DispatchContext } from "../state/actions"
+import { DispatchContext, wrapIntoTransaction } from "../state/actions"
 import { Action } from "../state/state"
-import Tab = chrome.tabs.Tab
-import { wrapIntoTransaction } from "../state/oldActions"
 import IconSaved from "../icons/saved.svg"
+import Tab = chrome.tabs.Tab
 
 export const SidebarOpenTabs = memo((props: {
   search: string;
@@ -109,12 +117,14 @@ export const SidebarOpenTabs = memo((props: {
   }, [mouseDownEvent])
 
   function onMouseDown(e: React.MouseEvent) {
-    blurSearch(e)
-    const target = e.target as HTMLElement | undefined
-    if (target && target.classList.contains("inbox-item__close")) {
-      return
+    if (isTargetSupportsDragAndDrop(e)) {
+      blurSearch(e)
+      const target = e.target as HTMLElement | undefined
+      if (target && target.classList.contains("inbox-item__close")) {
+        return
+      }
+      setMouseDownEvent(e)
     }
-    setMouseDownEvent(e)
   }
 
   function getTabIdFromCloseButton(target: HTMLElement): number {

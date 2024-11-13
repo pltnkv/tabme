@@ -9,7 +9,7 @@ import { CL } from "../helpers/classNameHelper"
 import { Action, IAppState } from "../state/state"
 import { DispatchContext } from "../state/actions"
 import Tab = chrome.tabs.Tab
-import { wrapIntoTransaction } from "../state/oldActions"
+import { wrapIntoTransaction } from "../state/actions"
 import IconClean from "../icons/clean.svg"
 import IconStash from "../icons/stash.svg"
 import IconPin from "../icons/pin.svg"
