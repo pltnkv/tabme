@@ -1,23 +1,19 @@
 body {
-    font-family: "Open Sans", serif;
+    font-family: "Open Sans", Arial, serif;
     margin: 0;
     padding: 0;
     display: flex;
+    flex-direction: column;
     justify-content: center;
-    align-items: start;
-    height: 100vh;
+    align-items: center;
     background-color: #f4f4f4;
 }
 
 .content {
-    background-color: #fff;
     padding: 0 60px;
     min-height: 100%;
-    max-width: 800px;
+    max-width: 1000px;
     min-width: 300px;
-    border-left: 1px solid rgba(0, 0, 0, 0.1);
-    border-right: 1px solid rgba(0, 0, 0, 0.1);
-    filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.1));
 }
 
 .not-home {
@@ -34,14 +30,25 @@ body {
     }
 }
 
-.header {
-    width: calc(100% + 120px);
-    box-sizing: border-box;
-    padding: 20px 60px 0px 60px;
+header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
     background: linear-gradient(180deg, #4F5896, #313760);
-    margin-left: -60px;
-    margin-bottom: 40px;
+    box-shadow: 0 4px 12px 0 rgba(30, 30, 30, 0.2);
+    margin-bottom: 60px;
+}
 
+.header__inner {
+    padding-top: 40px;
+    box-sizing: border-box;
+    max-width: 1000px;
+    video {
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        display: block;
+    }
 
     img {
         display: block;
@@ -72,6 +79,14 @@ body {
     img {
         width: 100%;
     }
+}
+
+.main-description {
+    font-size: 26px;
+}
+
+.main-description span {
+    background-color: #ffdf00;
 }
 
 h1 {
@@ -109,7 +124,7 @@ p {
 .install-button {
     display: inline-block;
     border: 1px solid rgba(0, 0, 0, 0.1);
-    background-color: rgba(0, 123, 255, 1);
+    background-color: #0066FF;
     color: #FFF;
     border-radius: 6px;
     padding: 12px;
@@ -119,7 +134,7 @@ p {
 }
 
 .install-button:hover, .install-button:active {
-    background-color: #0066ff;
+    background-color: #0056d6;
 }
 
 .footer {
