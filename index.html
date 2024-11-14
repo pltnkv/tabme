@@ -30,9 +30,6 @@
     <title>Tabme — Organize Bookmarks and Tabs, Chrome Extension</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
-
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
 
@@ -44,8 +41,20 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png">
     <link rel="manifest" href="/favicons/site.webmanifest">
 </head>
-<body>
 
+<body class="hidden">
+
+<script>
+  if (document.fonts) {
+    // Check if the font is loaded
+    document.fonts.load("1em \"Open Sans\"").then(() => {
+      document.body.classList.remove("hidden");
+    });
+  } else {
+    // If FontFace API is not supported, reveal content immediately
+    document.body.classList.remove("hidden");
+  }
+</script>
 
 <header>
     <div class="header__inner">
@@ -60,66 +69,68 @@
         </video>
     </div>
 </header>
-<div class="content content--full">
+<div class="content">
+    <div class="content__inner">
+        <p class="main-description">Tabme is a tab and bookmark manager that helps you <span>organize your projects</span>. <br>
+            <span>Boost your productivity</span> — turn chaotic browsing into a structured experience. <br>
+            Keep all your documents <span>one click away on one screen</span>.<br>
 
-    <p class="main-description">Tabme is a tab and bookmark manager that helps you <span>organize your projects</span>. <br>
-        <span>Boost your productivity</span> — turn chaotic browsing into a structured experience. <br>
-        Keep all your documents <span>one click away on one screen</span>.<br>
-
-        <br>
-        Tabme is entirely <span>free to use</span>.
-    </p>
-
-    <br>
-
-    <h2>Key features:</h2>
-
-    <div class="key-features">
-        <h3>👆 Simple Interface With Intuitive Drag-and-Drop</h3>
-        <p>Save your tabs effortlessly by dragging and dropping them into a Folder.<br>
-            Сolor coding and arranging in space helps find saved tabs instantly.
+            <br>
+            Tabme is entirely <span>free to use</span>.
         </p>
 
-        <h3>📦 Stash Open Tabs</h3>
-        <p>Save all your open tabs into a folder by clicking "Stash all Tabs".<br>
-            Use "Open All" in the Folder menu to restore all saved Tabs.</p>
+        <br>
 
-        <h3>🧹 Close Duplicated tabs</h3>
-        <p>Close the duplicate tabs with a single click.</p>
+        <h2>Key features:</h2>
 
-        <h3>🚀 Performance-Driven</h3>
-        <p> Works fast even with hundreds of saved tabs.</p>
+        <div class="key-features">
+            <h3>👆 Simple Interface With Intuitive Drag-and-Drop</h3>
+            <p>Save your tabs effortlessly by dragging and dropping them into a Folder.<br>
+                Сolor coding and arranging in space helps find saved tabs instantly.
+            </p>
 
-        <h3>🔎 Smart Search Functionality</h3>
-        <p> Seamlessly search across open, saved, archived, and recently closed tabs.</p>
+            <h3>📦 Stash Open Tabs</h3>
+            <p>Save all your open tabs into a folder by clicking "Stash all Tabs".<br>
+                Use "Open All" in the Folder menu to restore all saved Tabs.</p>
 
-        <h3>🌙 Dark Mode Support</h3>
-        <p> Switch to dark mode for comfortable viewing at night or in low-light environments.</p>
+            <h3>🧹 Close Duplicated tabs</h3>
+            <p>Close the duplicate tabs with a single click.</p>
 
-        <h3>⌨️ Keyboard Accessibility Support</h3>
-        <p> Manage bookmarks and tabs using keyboard shortcuts for faster navigation.</p>
+            <h3>🚀 Performance-Driven</h3>
+            <p> Works fast even with hundreds of saved tabs.</p>
 
-        <h3>⭐️ Instant Tab Access</h3>
-        <p> Replace your traditional new tab page with Tabme for instant access to all your saved tabs.<br>
-            There is an alternative "<a href="https://chromewebstore.google.com/detail/tabme-%E2%80%94-version-without-n/jjdbikbbknmhkknpfnlhgpcikbfjldee">Tabme — version without
-                newtab</a>" app. It has all the same features but without taking over "Chrome newtab".</p>
+            <h3>🔎 Smart Search Functionality</h3>
+            <p> Seamlessly search across open, saved, archived, and recently closed tabs.</p>
+
+            <h3>🌙 Dark Mode Support</h3>
+            <p> Switch to dark mode for comfortable viewing at night or in low-light environments.</p>
+
+            <h3>⌨️ Keyboard Accessibility Support</h3>
+            <p> Manage bookmarks and tabs using keyboard shortcuts for faster navigation.</p>
+
+            <h3>⭐️ Instant Tab Access</h3>
+            <p> Replace your traditional new tab page with Tabme for instant access to all your saved tabs.<br>
+                There is an alternative "<a href="https://chromewebstore.google.com/detail/tabme-%E2%80%94-version-without-n/jjdbikbbknmhkknpfnlhgpcikbfjldee">Tabme — version
+                    without
+                    newtab</a>" app. It has all the same features but without taking over "Chrome newtab".</p>
+        </div>
+
+        <a class="install-button"
+           title="Chrome extension for organizing bookmarks and tabs"
+           href="https://chromewebstore.google.com/detail/tabme/jnhiookaaldadiimlgncedhkpmhlmmip">Add to Chrome</a>
+
+        <footer class="footer">
+            <hr>
+            <span>©2023 — 2024</span>
+            <a href="mailto:gettabme@gmail.com">Contact</a>
+            <a href="guide.html">Guide</a>
+            <a href="faq.html">FAQ</a>
+            <a href="changelog.html">Changelog</a>
+            <a href="toby-alternative.html">Migrate from Toby</a>
+            <a href="https://github.com/pltnkv/tabme">GitHub</a>
+            <a href="/">Home</a>
+        </footer>
     </div>
-
-    <a class="install-button"
-       title="Chrome extension for organizing bookmarks and tabs"
-       href="https://chromewebstore.google.com/detail/tabme/jnhiookaaldadiimlgncedhkpmhlmmip">Add to Chrome</a>
-
-    <footer class="footer">
-        <hr>
-        <span>©2023 — 2024</span>
-        <a href="mailto:gettabme@gmail.com">Contact</a>
-        <a href="guide.html">Guide</a>
-        <a href="faq.html">FAQ</a>
-        <a href="changelog.html">Changelog</a>
-        <a href="toby-alternative.html">Migrate from Toby</a>
-        <a href="https://github.com/pltnkv/tabme">GitHub</a>
-        <a href="/">Home</a>
-    </footer>
 </div>
 </body>
 </html>
