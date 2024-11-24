@@ -1,8 +1,12 @@
-let selectedItems: HTMLElement[] = []
+import { IFolderItem } from "./types"
+import { getGlobalAppState } from "../components/App"
+import { findItemById } from "./utils"
+
+let selectedItemsElements: HTMLElement[] = []
 
 export function selectItem(el: HTMLElement) {
   el.classList.add("folder-item__inner--selected")
-  selectedItems.push(el)
+  selectedItemsElements.push(el)
 }
 
 export function unselectItemForced(el: HTMLElement) {
@@ -10,14 +14,24 @@ export function unselectItemForced(el: HTMLElement) {
 }
 
 export function unselectAll() {
-  selectedItems.forEach(item => unselectItemForced(item))
-  selectedItems.length = 0
+  selectedItemsElements.forEach(item => unselectItemForced(item))
+  selectedItemsElements.length = 0
 }
 
 export function getSelectedItemsElements(): HTMLElement[] {
-  return selectedItems
+  return selectedItemsElements
 }
 
 export function getSelectedItemsIds(): number[] {
-  return selectedItems.map(item => parseInt(item.dataset.id || "", 10))
+  return selectedItemsElements.map(el => getId(el))
 }
+
+export function getSelectedItems(): IFolderItem[] {
+  const state = getGlobalAppState()
+  return selectedItemsElements.map(el => findItemById(state, getId(el))!)
+}
+
+function getId(el: HTMLElement): number {
+  return parseInt(el.dataset.id || "", 10)
+}
+

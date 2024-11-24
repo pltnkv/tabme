@@ -107,9 +107,7 @@ export function Bookmarks(props: {
   }, [mouseDownEvent])
 
   function onMouseDown(e: React.MouseEvent) {
-    console.log('onMouseDown 1')
     if (!props.appState.itemInEdit && isTargetSupportsDragAndDrop(e)) {
-      console.log('onMouseDown 2')
       blurSearch(e)
       setMouseDownEvent(e)
     }
@@ -216,7 +214,6 @@ export function Bookmarks(props: {
           <Folder
             key={folder.id}
             folder={folder}
-            folders={props.appState.folders}
             tabs={props.appState.tabs}
             historyItems={props.appState.historyItems}
             showNotUsed={props.appState.showNotUsed}

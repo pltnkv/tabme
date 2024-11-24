@@ -12,6 +12,7 @@ import { getBC, getStateFromLS } from "../state/storage"
 import { executeAPICall } from "../../api/serverCommands"
 import Tab = chrome.tabs.Tab
 import { apiGetToken } from "../../api/api"
+import HistoryItem = chrome.history.HistoryItem
 
 let notificationTimeout: number | undefined
 let globalAppState: IAppState
@@ -23,40 +24,18 @@ export function getGlobalAppState(): IAppState {
 export function App() {
   const [appState, dispatch] = useReducer(stateReducer, getInitAppState())
 
-  function updateTabsAndHistory(init = false) {
-    console.log("updateTabsAndHistory")
-
-    chrome.tabs.query({}, (tabs) => {
-      const offset = 1000 * 60 * 60 * 24 * 60 //1000ms * 60sec *  60min * 24h * 60d
-      const startTime = Date.now() - offset
-      const openedTabs = tabs.reverse()
+  function updateHistory() {
+    const offset = 1000 * 60 * 60 * 24 * 60 //1000ms * 60sec *  60min * 24h * 60d
+    const startTime = Date.now() - offset
+    chrome.history.search({ text: "", maxResults: 10000, startTime }, function(data) {
+      // logging top 3 visited sides
+      // console.log(data.slice(0, 3))
+      const historyItems = filterIrrelevantHistory(data)
       dispatch({
-        type: Action.SetTabsAndHistory,
-        tabs: openedTabs
-      })
-
-      if (init) {
-        dispatch({ type: Action.UpdateAppState, newState: { appLoaded: true } })
-      }
-
-      chrome.history.search({ text: "", maxResults: 10000, startTime }, function(data) {
-        // logging top 3 visited sides
-        // console.log(data.slice(0, 3))
-        const historyItems = filterIrrelevantHistory(data)
-        dispatch({
-          type: Action.SetTabsAndHistory,
-          history: historyItems //filterOpenedTabsFromHistory(tabs, data)
-        })
-
-        if (init) {
-          tryToCreateWelcomeFolder(appState, historyItems, dispatch)
-        }
+        type: Action.SetTabsOrHistory,
+        history: historyItems //filterOpenedTabsFromHistory(tabs, data)
       })
     })
-  }
-
-  function onTabUpdated(tabId: number, info: Partial<Tab>, tab: Tab) {
-    dispatch({ type: Action.UpdateTab, tabId, opt: tab })
   }
 
   useEffect(() => {
@@ -64,16 +43,38 @@ export function App() {
     globalAppState = appState
   })
 
-  useEffect(() => {
-    updateTabsAndHistory(true)
+  useEffect(function() {
 
-    chrome.tabs.onCreated.addListener(() => updateTabsAndHistory())
-    chrome.tabs.onRemoved.addListener(() => updateTabsAndHistory()) // can do it more efficiently (don't update history)
-    chrome.tabs.onUpdated.addListener(onTabUpdated)
+    Promise.all([
+      getTabs(),
+      getHistory(), // TODO: now history updated only once, when app loaded. Fix it next time
+      getLastActiveTabsIds(),
+      getCurrentWindow()
+    ]).then(([tabs, historyItems, lastActiveTabIds, currentWindowId]) => {
+      dispatch({
+        type: Action.SetTabsOrHistory,
+        tabs: tabs,
+        history: historyItems
+      })
+      dispatch({ type: Action.UpdateAppState, newState: { lastActiveTabIds } })
+      dispatch({ type: Action.UpdateAppState, newState: { currentWindowId } })
 
-    chrome.runtime.sendMessage({ type: "get-last-active-tabs" }, function(response) {
-      dispatch({ type: Action.UpdateAppState, newState: { lastActiveTabIds: response.tabs } })
+      tryToCreateWelcomeFolder(appState, dispatch)
     })
+
+    function onTabUpdated(tabId: number, info: Partial<Tab>, tab: Tab) {
+      dispatch({ type: Action.UpdateTab, tabId, opt: tab })
+    }
+
+    function updateTabs() {
+      getTabs().then(tabs => {
+        dispatch({ type: Action.SetTabsOrHistory, tabs })
+      })
+    }
+
+    chrome.tabs.onCreated.addListener(() => updateTabs())
+    chrome.tabs.onRemoved.addListener(() => updateTabs())
+    chrome.tabs.onUpdated.addListener(onTabUpdated)
 
     getBC().onmessage = function(ev: MessageEvent) {
       console.log(ev)
@@ -92,10 +93,6 @@ export function App() {
         dispatch({ type: Action.UpdateAppState, newState: { lastActiveTabIds: ev.data.tabs } })
       }
     }
-
-    chrome.windows.getCurrent((window) => {
-      dispatch({ type: Action.UpdateAppState, newState: { currentWindowId: window.id } })
-    })
 
     chrome.windows.onFocusChanged.addListener((windowId) => {
       if (windowId !== -1) { // to don't do useless jumps when switch between browser and other windows
@@ -152,28 +149,63 @@ export function App() {
 
   return (
     <DispatchContext.Provider value={dispatch}>
-      {appState.appLoaded ?
-        <div className={"app " + (appState.sidebarCollapsed ? "collapsible-sidebar" : "")}>
-          <Notification notification={appState.notification}/>
-          {
-            appState.page === "import"
-              ? <Welcome appState={appState}/>
-              : <>
-                <Sidebar appState={appState}/>
-                <Bookmarks appState={appState}/>
-                <KeyboardManager search={appState.search}/>
-              </>
-          }
-        </div>
-        : null
-      }
-
+      <div className={"app " + (appState.sidebarCollapsed ? "collapsible-sidebar" : "")}>
+        <Notification notification={appState.notification}/>
+        {
+          appState.page === "import"
+            ? <Welcome appState={appState}/>
+            : <>
+              <Sidebar appState={appState}/>
+              <Bookmarks appState={appState}/>
+              <KeyboardManager search={appState.search}/>
+            </>
+        }
+      </div>
     </DispatchContext.Provider>
   )
+}
+
+function getHistory() {
+  return new Promise<HistoryItem[]>((res) => {
+    const offset = 1000 * 60 * 60 * 24 * 60 //1000ms * 60sec *  60min * 24h * 60d
+    const startTime = Date.now() - offset
+    chrome.history.search({ text: "", maxResults: 10000, startTime }, function(data) {
+      // logging top 3 visited sides
+      // console.log(data.slice(0, 3))
+      const historyItems = filterIrrelevantHistory(data)
+      res(historyItems)
+    })
+  })
+}
+
+function getTabs() {
+  return new Promise<Tab[]>((res) => {
+    chrome.tabs.query({}, (tabs) => {
+      const openedTabs = tabs.reverse()
+      res(openedTabs)
+    })
+  })
+}
+
+function getLastActiveTabsIds() {
+  return new Promise<number[]>((res) => {
+    chrome.runtime.sendMessage({ type: "get-last-active-tabs" }, function(response) {
+      res(response.tabs)
+    })
+  })
+}
+
+function getCurrentWindow() {
+  return new Promise<number>((res) => {
+    chrome.windows.getCurrent((window) => {
+      res(window.id)
+    })
+  })
 }
 
 declare global {
   interface Window {
     betaLogin: () => void
+    pSBC: any
   }
 }

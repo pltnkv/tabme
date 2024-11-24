@@ -1,11 +1,11 @@
 import React from "react"
-import ReactDOM from "react-dom"
 import { App } from "./components/App"
 import { applyTheme } from "./helpers/utils"
 import { setInitAppState } from "./state/state"
 import { getStateFromLS, ISavingAppState, saveStateThrottled } from "./state/storage"
 import { apiGetDashboard, loadFromNetwork } from "../api/api"
 import { preprocessSortedFolders } from "./helpers/dataConverters"
+import { createRoot } from "react-dom/client"
 
 declare global {
   const __OVERRIDE_NEWTAB: boolean
@@ -33,11 +33,11 @@ if (loadFromNetwork()) {
 }
 
 function mountApp() {
-  ReactDOM.render(
+  const root = createRoot(document.getElementById("root")!)
+  root.render(
     <React.StrictMode>
       <App/>
-    </React.StrictMode>,
-    document.getElementById("root")
+    </React.StrictMode>
   )
 }
 

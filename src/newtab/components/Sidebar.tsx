@@ -58,33 +58,27 @@ export function Sidebar(props: {
 
   return (
     <div className={"app-sidebar " + sidebarClassName} onMouseEnter={onSidebarMouseEnter} onMouseLeave={onSidebarMouseLeave}>
-      {
-        props.appState.appLoaded ?
-          <>
-            <div className="app-sidebar__header">
-              <span className="app-sidebar__header__text">Open tabs</span>
-              <CleanupButton tabs={props.appState.tabs}/>
-              <StashButton tabs={props.appState.tabs}/>
-              <button id="toggle-sidebar-btn"
-                      className={CL("btn__icon", { "active": !props.appState.sidebarCollapsed })}
-                      onClick={onToggleSidebar}
-                      style={props.appState.sidebarCollapsed ? { transform: "rotate(180deg)" } : {}}
-                      title={props.appState.sidebarCollapsed ? "Pin" : "Collapse"}>
-                <IconPin/>
-              </button>
-            </div>
+      <div className="app-sidebar__header">
+        <span className="app-sidebar__header__text">Open tabs</span>
+        <CleanupButton tabs={props.appState.tabs}/>
+        <StashButton tabs={props.appState.tabs}/>
+        <button id="toggle-sidebar-btn"
+                className={CL("btn__icon", { "active": !props.appState.sidebarCollapsed })}
+                onClick={onToggleSidebar}
+                style={props.appState.sidebarCollapsed ? { transform: "rotate(180deg)" } : {}}
+                title={props.appState.sidebarCollapsed ? "Pin" : "Collapse"}>
+          <IconPin/>
+        </button>
+      </div>
 
-            <SidebarOpenTabs
-              tabs={props.appState.tabs}
-              folders={props.appState.folders}
-              search={props.appState.search}
-              lastActiveTabIds={props.appState.lastActiveTabIds}
-              currentWindowId={props.appState.currentWindowId}
-            />
-            <SidebarHistory search={props.appState.search} historyItems={props.appState.historyItems}/>
-          </>
-          : null
-      }
+      <SidebarOpenTabs
+        tabs={props.appState.tabs}
+        folders={props.appState.folders}
+        search={props.appState.search}
+        lastActiveTabIds={props.appState.lastActiveTabIds}
+        currentWindowId={props.appState.currentWindowId}
+      />
+      <SidebarHistory search={props.appState.search} historyItems={props.appState.historyItems}/>
     </div>
   )
 }
@@ -155,7 +149,7 @@ const StashButton = React.memo((props: { tabs: Tab[] }) => {
             <p>Place all open Tabs to a new Folder</p>
             <p>
               <label>
-                <input 
+                <input
                   type="checkbox"
                   checked={shouldCloseTabs}
                   onChange={(e) => setShouldCloseTabs(e.target.checked)}
@@ -165,7 +159,7 @@ const StashButton = React.memo((props: { tabs: Tab[] }) => {
             </p>
           </div>
           <div style={{ width: "100%", display: "flex" }}>
-            <button className="focusable btn__setting primary" style={{marginRight: '8px'}} onClick={shelveTabs}>Stash tabs</button>
+            <button className="focusable btn__setting primary" style={{ marginRight: "8px" }} onClick={shelveTabs}>Stash tabs</button>
             <button className="focusable btn__setting" onClick={() => setConfirmationOpened(false)}>Cancel</button>
           </div>
         </DropdownMenu>

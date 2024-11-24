@@ -13,24 +13,15 @@ export function DropdownMenu(p: {
   const formEl = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    function onMouse(e: MouseEvent) {
+    function onMouseDown(e: MouseEvent) {
       if (formEl.current && !formEl.current.contains(e.target as HTMLElement)) {
         p.onClose()
       }
     }
 
-    let destroyed = false
-    requestAnimationFrame(() => {
-      if (!destroyed) {
-        document.addEventListener("mousedown", onMouse)
-        document.addEventListener("contextmenu", onMouse)
-      }
-    })
-
+    document.addEventListener("mousedown", onMouseDown)
     return () => {
-      destroyed = true
-      document.removeEventListener("mousedown", onMouse)
-      document.removeEventListener("contextmenu", onMouse)
+      document.removeEventListener("mousedown", onMouseDown)
     }
   }, [p.onClose])
 

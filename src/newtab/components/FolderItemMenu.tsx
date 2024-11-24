@@ -1,14 +1,12 @@
 import React, { useContext, useEffect, useState } from "react"
-import { IFolder, IFolderItem } from "../helpers/types"
-import { findItemsByIds } from "../helpers/utils"
+import { IFolderItem } from "../helpers/types"
 import { DropdownMenu } from "./DropdownMenu"
 import { showMessage, showMessageWithUndo } from "../helpers/actionsHelpers"
-import { getSelectedItemsIds } from "../helpers/selectionUtils"
+import { getSelectedItems } from "../helpers/selectionUtils"
 import { Action } from "../state/state"
 import { DispatchContext, wrapIntoTransaction } from "../state/actions"
 
 export const FolderItemMenu = React.memo((p: {
-  folders: IFolder[],
   localTitle: string,
   setLocalTitle: (val: string) => void
   onSave: (title: string, url: string) => void,
@@ -16,22 +14,21 @@ export const FolderItemMenu = React.memo((p: {
   item: IFolderItem;
 }) => {
   const dispatch = useContext(DispatchContext)
-  const [selectedItemsIds, setSelectedItemsIds] = useState<number[]>([])
+  const [selectedItems, setSelectedItems] = useState<IFolderItem[]>([])
   const [localURL, setLocalURL] = useState<string>(p.item.url)
 
   useEffect(() => {
-    const ids = getSelectedItemsIds()
-    if (ids.length > 0) {
-      setSelectedItemsIds(ids)
+    const items = getSelectedItems()
+    if (items.length > 0) {
+      setSelectedItems(items)
     } else {
-      setSelectedItemsIds([p.item.id])
+      setSelectedItems([p.item])
     }
   }, [])
 
   // support multiple
   function onOpenNewTab() {
-    let items = findItemsByIds(p, selectedItemsIds)
-    items.forEach((item) => {
+      selectedItems.forEach((item) => {
       if (item.url) {
         chrome.tabs.create({ url: item.url })
       }
@@ -45,7 +42,7 @@ export const FolderItemMenu = React.memo((p: {
     wrapIntoTransaction(() => {
       dispatch({
         type: Action.DeleteFolderItems,
-        itemIds: selectedItemsIds
+        itemIds: selectedItems.map(i => i.id)
       })
     })
     showMessageWithUndo("Bookmark has been deleted", dispatch)
@@ -59,10 +56,8 @@ export const FolderItemMenu = React.memo((p: {
 
   // support multiple
   function onArchive() {
-    let items = findItemsByIds(p, selectedItemsIds)
-
     wrapIntoTransaction(() => {
-      items.forEach((item) => {
+      selectedItems.forEach((item) => {
         dispatch({
           type: Action.UpdateFolderItem,
           itemId: item.id,
@@ -92,7 +87,7 @@ export const FolderItemMenu = React.memo((p: {
 
   return <>
     {
-      selectedItemsIds.length > 1 ?
+      selectedItems.length > 1 ?
         <DropdownMenu onClose={p.onClose} className={"dropdown-menu--folder-item"} topOffset={5}>
           <button className="dropdown-menu__button focusable" onClick={onOpenNewTab}>Open in New Tab</button>
           <button className="dropdown-menu__button focusable" onClick={onArchive}>Hide</button>

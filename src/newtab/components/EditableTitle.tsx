@@ -33,9 +33,7 @@ export function EditableTitle(p: {
   }
 
   function trySaveChange() {
-    console.log('trySaveChange 1')
     if (p.setEditing) {
-      console.log('trySaveChange 2')
       p.setEditing(false)
     }
     p.onSaveTitle(p.localTitle)

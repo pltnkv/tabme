@@ -11,12 +11,11 @@ import { FolderItemMenu } from "./FolderItemMenu"
 import Tab = chrome.tabs.Tab
 import HistoryItem = chrome.history.HistoryItem
 
-const useBlueHeaders = !!localStorage.getItem("blue-headers")
+const useBlueHeaders = true
 
 export const FolderItem = React.memo((p: {
   item: IFolderItem;
   inEdit: boolean
-  folders: IFolder[];
   tabs: Tab[];
   historyItems: HistoryItem[];
   showNotUsed: boolean;
@@ -82,7 +81,6 @@ export const FolderItem = React.memo((p: {
       })}>
       {showMenu
         ? <FolderItemMenu
-          folders={p.folders}
           item={p.item}
           localTitle={localTitle}
           setLocalTitle={setLocalTitle}

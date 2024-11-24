@@ -163,7 +163,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       }
     }
 
-    case Action.SetTabsAndHistory: {
+    case Action.SetTabsOrHistory: {
       return {
         ...state,
         tabs: action.tabs ?? state.tabs,

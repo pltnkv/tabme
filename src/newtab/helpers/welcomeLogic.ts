@@ -2,9 +2,8 @@ import { createNewFolderItem, createNewSection, genUniqId } from "./utils"
 import { IFolderItemToCreate } from "./types"
 import { Action, IAppState } from "../state/state"
 import { ActionDispatcher } from "../state/actions"
-import HistoryItem = chrome.history.HistoryItem
 
-export function tryToCreateWelcomeFolder(appState: IAppState, history: HistoryItem[], dispatch: ActionDispatcher) {
+export function tryToCreateWelcomeFolder(appState: IAppState, dispatch: ActionDispatcher) {
   if (appState.stat?.sessionNumber === 1 && appState.folders.length === 0) {
     const items: IFolderItemToCreate[] = []
     const favIconUrl = chrome.runtime.getURL("icon_32.png")

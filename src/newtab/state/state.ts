@@ -48,7 +48,6 @@ export type APICommand = {
 }
 
 export type IAppState = {
-  appLoaded: boolean
   folders: IFolder[];
   tabs: Tab[];
   currentWindowId: number | undefined
@@ -84,7 +83,6 @@ export type IAppState = {
 };
 
 let initState: IAppState = {
-  appLoaded: false, // prevents sidebar flickering during loading
   folders: [],
   historyItems: [],
   tabs: [],
@@ -151,7 +149,7 @@ export enum Action {
   UpdateSearch = "update-search",
   UpdateTab = "tab-update",
   CloseTabs = "close-tab",
-  SetTabsAndHistory = "set-tab-and-history",
+  SetTabsOrHistory = "set-tab-or-history",
   ToggleDarkMode = "toggle-dark-mode",
   UpdateShowArchivedItems = "update-show-hidden-items",
   UpdateShowNotUsedItems = "update-show-not-used-items",
@@ -197,7 +195,7 @@ export type ActionPayload = (
   | { type: Action.InitFolders; folders?: IFolder[], sidebarCollapsed?: boolean, ignoreSaving?: boolean, init?: boolean }
   | { type: Action.UpdateTab; tabId: number; opt: Tab; }
   | { type: Action.CloseTabs; tabIds: number[] }
-  | { type: Action.SetTabsAndHistory; tabs?: Tab[]; history?: HistoryItem[] }
+  | { type: Action.SetTabsOrHistory; tabs?: Tab[]; history?: HistoryItem[] }
   | { type: Action.ToggleDarkMode }
   | { type: Action.UpdateShowArchivedItems; value: boolean }
   | { type: Action.UpdateShowNotUsedItems; value: boolean }

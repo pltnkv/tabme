@@ -1,6 +1,7 @@
 :root {
     /* Light Theme Variables */
     --main-text-color: rgb(5, 0, 56);
+    --section-text-color: #0066FF;
     --second-text-color: rgba(5, 0, 56, 0.6);
     --background-color: #F7F7F6;
     --popup-background-color: #ffffff;
@@ -65,6 +66,7 @@
 .dark-theme {
     /* Dark Theme Variables */
     --main-text-color: #fff;
+    --section-text-color: rgba(220, 220, 220, 0.6);
     --second-text-color: rgba(220, 220, 220, 0.6);
     --background-color: #2C2C2C;
     --popup-background-color: #1E1E1E;
@@ -830,15 +832,6 @@ body.dark-theme .searched {
     }
 }
 
-.folder-item.section.blue-header {
-    margin-top: 8px;
-    span {
-        color: var(--active-control-color);
-        font-size: 14px;
-        font-weight: normal;
-    }
-}
-
 .folder-item.section .folder-item__menu {
     margin-top: 8px;
 }
@@ -894,10 +887,9 @@ body.dark-theme .searched {
     }
 
     .section textarea {
-        font-weight: 200;
-        font-size: 20px;
-        color: var(--colors-gray-700);
-        padding: 1px;
+        color: var(--section-text-color);
+        font-size: 14px;
+        font-weight: normal;
     }
 }
 
@@ -941,6 +933,10 @@ body.dark-theme .searched {
     color: salmon;
 }
 
+.folder-item.section {
+    margin-top: 8px;
+}
+
 .folder-item__inner.section {
     padding-top: 8px;
 
@@ -953,9 +949,9 @@ body.dark-theme .searched {
     }
 
     .folder-item__inner__title {
-        font-weight: 200;
-        font-size: 20px;
-        color: var(--second-text-color);
+        color: var(--section-text-color);
+        font-size: 14px;
+        font-weight: normal;
     }
 }
 

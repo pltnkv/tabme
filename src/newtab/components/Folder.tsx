@@ -14,9 +14,8 @@ import { wrapIntoTransaction } from "../state/actions"
 import { Color } from "../helpers/Color"
 import MenuIcon from "../icons/menu.svg"
 
-export function Folder(props: {
+export const Folder = React.memo(function Folder(props: {
   folder: IFolder;
-  folders: IFolder[];
   tabs: Tab[];
   historyItems: HistoryItem[];
   showNotUsed: boolean;
@@ -160,7 +159,7 @@ export function Folder(props: {
   const color2 = new Color()
   color.setColor(localColor ?? props.folder.color ?? DEFAULT_FOLDER_COLOR)
   color.setAlpha(props.folder.archived ? 0.2 : 1)
-  color2.value = {...color.value}
+  color2.value = { ...color.value }
   color2.setSaturation(color2.value.s + 0.1)
   color2.value.h = color2.value.h + 0.05
   // console.log(color2.value)
@@ -189,7 +188,7 @@ export function Folder(props: {
             onClick={() => setEditing(true)}
           />
         }
-        {props.folder.archived ? <span> [hidden]</span> : ''}
+        {props.folder.archived ? <span> [hidden]</span> : ""}
         <span className={CL("folder-title__button", {
           "folder-title__button--visible": showMenu
         })}
@@ -233,7 +232,6 @@ export function Folder(props: {
                 key={item.id}
                 item={item}
                 inEdit={item.id === props.itemInEdit}
-                folders={props.folders}
                 tabs={props.tabs}
                 historyItems={props.historyItems}
                 showNotUsed={props.showNotUsed}
@@ -244,13 +242,7 @@ export function Folder(props: {
       </div>
     </div>
   )
-}
-
-declare global {
-  interface Window {
-    pSBC: any
-  }
-}
+})
 
 const PRESET_COLORS = [...colors]
 PRESET_COLORS.length = 7
