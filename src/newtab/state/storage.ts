@@ -30,7 +30,9 @@ const savingStateDefaultValues = { // if was not saved to LS yet
   "sidebarCollapsed": false,
   "openBookmarksInNewTab": false,
   "colorTheme": "light", // todo I don't use system because it's not ready to used by default
-  "stat": undefined
+  "stat": undefined,
+  "showArchived": false,
+  "showNotUsed": false
 }
 type SavingStateKeys = keyof typeof savingStateDefaultValues
 export const savingStateKeys = Object.keys(savingStateDefaultValues) as SavingStateKeys[]
