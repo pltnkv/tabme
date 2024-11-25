@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
   "short_name": "Tabme",
-  "name": "Tabme — version without newtab",
+  "name": "Tabme — Organize Tabs and Bookmarks. Version without newtab",
   "description": "Boost productivity — Turn chaotic browsing into a structured experience.",
-  "version": "1.25.0",
+  "version": "1.27.0",
   "author": "pltnkv0+tabme@gmail.com",
   "icons": {
     "16": "icon_16.png",
