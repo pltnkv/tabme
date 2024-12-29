@@ -38,8 +38,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 )
 
-chrome.runtime.setUninstallURL("https://docs.google.com/forms/d/e/1FAIpQLSevGfJekcHfb0WjnnuE9XMFYhPIRwtxGFFZH6WV0ve3aBbgwQ/viewform", () => {
+let uninstallURL = __OVERRIDE_NEWTAB
+  ? "https://docs.google.com/forms/d/e/1FAIpQLSevGfJekcHfb0WjnnuE9XMFYhPIRwtxGFFZH6WV0ve3aBbgwQ/viewform"
+  : "https://docs.google.com/forms/d/e/1FAIpQLSc4f_Qfgd9jvL3kTk1puG_zAiobYPBYdKPEj7ug9YWsHU515Q/viewform?usp=header"
+
+chrome.runtime.setUninstallURL(uninstallURL, () => {
   if (chrome.runtime.lastError) {
-    console.error("Error setting uninstall URL:", chrome.runtime.lastError.message);
+    console.error("Error setting uninstall URL:", chrome.runtime.lastError.message)
   }
-});
+})
