@@ -3,8 +3,8 @@ import { getSelectedItemsElements, selectItem, unselectAll } from "./selectionUt
 const DAD_THRESHOLD = 4
 type DropArea = { folderId: number, element: HTMLElement, rect: DOMRect, itemRects: { thresholdY: number, itemTop: number, itemHeight: number }[] }
 
-let scrollDown = false
-let scrollUp = false
+let viewportWasScrolled = false //performance optimization
+let scrollByDummyClientY: number | undefined = undefined
 
 export function bindDADItemEffect(
   mouseDownEvent: React.MouseEvent,
@@ -194,16 +194,14 @@ function runItemDragAndDrop(
   let prevBoxToDrop: HTMLElement | undefined = undefined
   let indexToDrop: number
   let targetFolderId: number
-  const SCROLL_THRESHOLD = 20
 
   const onMouseMove = (e: MouseEvent) => {
-    if (scrollDown || scrollUp) {
+    if (viewportWasScrolled) {
       // recalculate drop areas if viewport was scrolled
       dropAreas = calculateDropAreas()
     }
-
-    scrollDown = false
-    scrollUp = false
+    viewportWasScrolled = false
+    scrollByDummyClientY = undefined
 
     if (dummy) {
       // move dummy
@@ -233,13 +231,7 @@ function runItemDragAndDrop(
         }
       }
 
-      // Check if the element is too close to the bottom edge of the viewport
-      const bottomThreshold = window.innerHeight - SCROLL_THRESHOLD
-      if (e.clientY > bottomThreshold) {
-        scrollDown = true
-      } else if (e.clientY < SCROLL_THRESHOLD) {
-        scrollUp = true
-      }
+      scrollByDummyClientY = e.clientY
     } else {
       if (
         Math.abs(mouseDownEvent.clientX - e.clientX) > DAD_THRESHOLD ||
@@ -265,8 +257,7 @@ function runItemDragAndDrop(
     }
   }
   const onMouseUp = () => {
-    scrollDown = false
-    scrollUp = false
+    scrollByDummyClientY = undefined
 
     if (dummy) {
       document.body.classList.remove("dragging")
@@ -319,16 +310,15 @@ function runFolderDragAndDrop(mouseDownEvent: React.MouseEvent,
   let dropArea: DropArea | undefined = undefined
   const draggingFolderId = getFolderId(targetRoot)
   let targetInsertBeforeFolderId: number | undefined
-  const SCROLL_THRESHOLD = 20
 
   const onMouseMove = (e: MouseEvent) => {
-    if (scrollDown || scrollUp) {
+    if (viewportWasScrolled) {
       // recalculate drop areas if viewport was scrolled
       dropAreas = calculateDropAreas()
     }
 
-    scrollDown = false
-    scrollUp = false
+    viewportWasScrolled = false
+    scrollByDummyClientY = undefined
 
     if (dummy) {
       // move dummy
@@ -353,13 +343,7 @@ function runFolderDragAndDrop(mouseDownEvent: React.MouseEvent,
         placeholder.remove()
       }
 
-      // Check if the element is too close to the bottom edge of the viewport
-      const bottomThreshold = window.innerHeight - SCROLL_THRESHOLD
-      if (e.clientY > bottomThreshold) {
-        scrollDown = true
-      } else if (e.clientY < SCROLL_THRESHOLD) {
-        scrollUp = true
-      }
+      scrollByDummyClientY = e.clientY
     } else {
       if (
         Math.abs(mouseDownEvent.clientX - e.clientX) > DAD_THRESHOLD ||
@@ -375,8 +359,7 @@ function runFolderDragAndDrop(mouseDownEvent: React.MouseEvent,
     }
   }
   const onMouseUp = () => {
-    scrollDown = false
-    scrollUp = false
+    scrollByDummyClientY = undefined
 
     if (dummy) {
       document.body.classList.remove("dragging")
@@ -552,19 +535,27 @@ function createPlaceholder(forItem: boolean) {
   return dummy
 }
 
-const SCROLL_SPEED = 8
+const MAX_SCROLL_SPEED = 18
+const SCROLL_THRESHOLD = 60
 
 function getBookmarksElement(): HTMLElement {
   return document.querySelector(".bookmarks") as HTMLElement
 }
 
 function tryToScrollViewport() {
-  if (scrollDown) {
-    getBookmarksElement().scrollBy(0, SCROLL_SPEED)
-  }
-
-  if (scrollUp) {
-    getBookmarksElement().scrollBy(0, -SCROLL_SPEED)
+  viewportWasScrolled = false
+  if (typeof scrollByDummyClientY === "number") {
+    // Check if the element is too close to the bottom edge of the viewport
+    const bottomThreshold = window.innerHeight - SCROLL_THRESHOLD
+    if (scrollByDummyClientY > bottomThreshold) { // scroll down
+      const speed = Math.min((scrollByDummyClientY - bottomThreshold) / SCROLL_THRESHOLD * MAX_SCROLL_SPEED, MAX_SCROLL_SPEED)
+      getBookmarksElement().scrollBy(0, speed)
+      viewportWasScrolled = true
+    } else if (scrollByDummyClientY < SCROLL_THRESHOLD) { // scroll up
+      const speed = Math.min((SCROLL_THRESHOLD - scrollByDummyClientY) / SCROLL_THRESHOLD * MAX_SCROLL_SPEED, MAX_SCROLL_SPEED)
+      getBookmarksElement().scrollBy(0, -speed)
+      viewportWasScrolled = true
+    }
   }
 
   requestAnimationFrame(tryToScrollViewport)

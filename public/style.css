@@ -204,7 +204,7 @@ input.search {
     background-color: #f0f000;
 }
 
-body.dark-theme .searched {
+.dark-theme .searched {
     color: var(--background-color);
 }
 
@@ -716,6 +716,10 @@ body.dark-theme .searched {
         padding: 2px;
         margin: -3px;
         margin-bottom: -9px;
+    }
+
+    .searched {
+        color: rgb(5, 0, 56);
     }
 }
 

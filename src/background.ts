@@ -1,5 +1,3 @@
-import { isTabmeTab } from "./newtab/helpers/isTabmeTab"
-
 const MAX_LAST_ACTIVE_TABS_COUNT = 3
 
 ////////////////////////////////////////////////////////
@@ -39,3 +37,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
   }
 )
+
+chrome.runtime.setUninstallURL("https://docs.google.com/forms/d/e/1FAIpQLSevGfJekcHfb0WjnnuE9XMFYhPIRwtxGFFZH6WV0ve3aBbgwQ/viewform", () => {
+  if (chrome.runtime.lastError) {
+    console.error("Error setting uninstall URL:", chrome.runtime.lastError.message);
+  }
+});

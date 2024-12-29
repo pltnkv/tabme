@@ -143,7 +143,7 @@ const BookmarkList = (props: {
       if (rec.folder.checked) {
 
         const items = rec.folder.children
-          ?.filter(item => item.checked)
+          ?.filter(item => item.checked && item.url)
           .map(item => createNewFolderItem(item.url, item.title, getFavIconUrl(item.url)))
 
         const newFolderId = genUniqId()

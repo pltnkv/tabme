@@ -184,7 +184,7 @@ export const Folder = React.memo(function Folder(props: {
             localTitle={localTitle}
             setLocalTitle={setLocalTitle}
             onSaveTitle={saveFolderTitle}
-            search=""
+            search={props.search}
             onClick={() => setEditing(true)}
           />
         }
@@ -210,8 +210,8 @@ export const Folder = React.memo(function Folder(props: {
             </div>
             <button className="dropdown-menu__button focusable" onClick={onOpenAll}>Open All</button>
             <button className="dropdown-menu__button focusable" onClick={onRename}>Rename</button>
-            <button className="dropdown-menu__button focusable" onClick={onAddSection}>Add Section</button>
             <button className="dropdown-menu__button focusable" onClick={onArchiveOrRestore}>{props.folder.archived ? "Unhide" : "Hide"}</button>
+            <button className="dropdown-menu__button focusable" onClick={onAddSection}>Add Section</button>
             <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onDelete}>Delete</button>
           </DropdownMenu>
         ) : null}

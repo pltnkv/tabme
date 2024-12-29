@@ -214,12 +214,16 @@ export const SettingsOptions = (props: {
     {
       onClick: onImportExistingBookmarks,
       title: "Import existing Chrome bookmarks into Tabme",
-      text: "Import browser bookmarks"
+      text: "Import from browser bookmarks"
     },
     {
-      onClick: onExportJson,
-      title: "Export all Folders and Bookmarks to JSON file",
-      text: "Export to JSON"
+      onClick: onImportFromToby,
+      title: "To get Toby`s 'JSON file' go to Account -> Export -> Json in the Toby App",
+      text: "Import from Toby App JSON",
+      isFile: true
+    },
+    {
+      separator: true
     },
     {
       onClick: onImportJson,
@@ -228,11 +232,10 @@ export const SettingsOptions = (props: {
       isFile: true
     },
     {
-      onClick: onImportFromToby,
-      title: "To get Toby`s 'JSON file' go to Account -> Export -> Json in the Toby App",
-      text: "Import from Toby App JSON",
-      isFile: true
-    }
+      onClick: onExportJson,
+      title: "Export all Folders and Bookmarks to JSON file",
+      text: "Export to JSON"
+    },
   ]
 
   return <Option optionsConfig={settingsOptions}/>
