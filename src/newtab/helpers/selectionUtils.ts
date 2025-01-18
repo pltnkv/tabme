@@ -3,17 +3,39 @@ import { getGlobalAppState } from "../components/App"
 import { findItemById } from "./utils"
 
 let selectedItemsElements: HTMLElement[] = []
+const SELECTOR = `folder-item--selected`
+const FIRST_SELECTOR = `folder-item--first-selected`
 
-export function selectItem(el: HTMLElement) {
-  el.classList.add("folder-item__inner--selected")
-  selectedItemsElements.push(el)
+const INNER_SELECTOR = `folder-item__inner--selected`
+
+export function selectItems(elements: HTMLElement[]) {
+  unselectAll()
+
+  elements.forEach((el: HTMLElement) => {
+    el.classList.add(INNER_SELECTOR)
+    el.parentElement?.classList.add(SELECTOR)
+  })
+
+  const prevSelectedElement = document.querySelector(`.${FIRST_SELECTOR}`)
+  const newFirstSelectedElement = document.querySelector(`.${SELECTOR}`)
+  if (newFirstSelectedElement && prevSelectedElement !== newFirstSelectedElement) {
+    newFirstSelectedElement.classList.add(FIRST_SELECTOR)
+  }
+  if (prevSelectedElement) {
+    prevSelectedElement.classList.remove(FIRST_SELECTOR)
+  }
+
+  selectedItemsElements = elements
 }
 
-export function unselectItemForced(el: HTMLElement) {
-  el.classList.remove("folder-item__inner--selected")
+function unselectItemForced(el: HTMLElement) {
+  el.classList.remove(INNER_SELECTOR)
+  el.parentElement?.classList.remove(SELECTOR)
+  document.querySelector(`.${FIRST_SELECTOR}`)?.classList.remove(FIRST_SELECTOR)
 }
 
 export function unselectAll() {
+  console.log('unselectAll')
   selectedItemsElements.forEach(item => unselectItemForced(item))
   selectedItemsElements.length = 0
 }

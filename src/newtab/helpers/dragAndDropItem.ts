@@ -1,4 +1,4 @@
-import { getSelectedItemsElements, selectItem, unselectAll } from "./selectionUtils"
+import { getSelectedItemsElements, selectItems, unselectAll } from "./selectionUtils"
 
 const DAD_THRESHOLD = 4
 type DropArea = { folderId: number, element: HTMLElement, rect: DOMRect, itemRects: { thresholdY: number, itemTop: number, itemHeight: number }[] }
@@ -93,17 +93,24 @@ function runMultiselection(mouseDownEvent: React.MouseEvent, canvas: HTMLCanvasE
       height: e.clientY - mouseDownEvent.clientY
     })
 
-    unselectAll()
+    const itemsToSelect: HTMLElement[] = []
     itemsByRect.forEach(i => {
       if (areRectsOverlapping(selectionRect, i.rect)) {
-        selectItem(i.element)
+        itemsToSelect.push(i.element)
       }
     })
+    selectItems(itemsToSelect)
   }
 
-  const onMouseUp = () => {
+  const onMouseUp = (e:MouseEvent) => {
     if (!mouseMoved) {
-      unselectAll()
+      const folderItemFirstSelected = document.querySelector(".folder-item--first-selected")
+      if (folderItemFirstSelected && folderItemFirstSelected.contains(e.target as HTMLElement)) {
+        // todo hacking hack. make possible to click content menu button on first selected element
+        // ideally we need to move selected-items management to store.
+      } else {
+        unselectAll()
+      }
     }
     context.clearRect(0, 0, canvas.width * dpr, canvas.height * dpr)
     canvas.style.pointerEvents = "none"

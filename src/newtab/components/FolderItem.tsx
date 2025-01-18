@@ -11,8 +11,6 @@ import { FolderItemMenu } from "./FolderItemMenu"
 import Tab = chrome.tabs.Tab
 import HistoryItem = chrome.history.HistoryItem
 
-const useBlueHeaders = true
-
 export const FolderItem = React.memo((p: {
   item: IFolderItem;
   inEdit: boolean
@@ -77,7 +75,6 @@ export const FolderItem = React.memo((p: {
         "section": p.item.isSection,
         "selected": showMenu,
         "archived": p.item.archived,
-        "blue-header": useBlueHeaders
       })}>
       {showMenu
         ? <FolderItemMenu

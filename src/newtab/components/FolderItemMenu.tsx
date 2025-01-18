@@ -28,7 +28,7 @@ export const FolderItemMenu = React.memo((p: {
 
   // support multiple
   function onOpenNewTab() {
-      selectedItems.forEach((item) => {
+    selectedItems.forEach((item) => {
       if (item.url) {
         chrome.tabs.create({ url: item.url })
       }
@@ -71,10 +71,12 @@ export const FolderItemMenu = React.memo((p: {
 
   function onRestore() {
     wrapIntoTransaction(() => {
-      dispatch({
-        type: Action.UpdateFolderItem,
-        itemId: p.item.id,
-        archived: false
+      selectedItems.forEach((item) => {
+        dispatch({
+          type: Action.UpdateFolderItem,
+          itemId: item.id,
+          archived: false
+        })
       })
     })
     showMessage("Bookmark has been restored", dispatch)
@@ -90,7 +92,14 @@ export const FolderItemMenu = React.memo((p: {
       selectedItems.length > 1 ?
         <DropdownMenu onClose={p.onClose} className={"dropdown-menu--folder-item"} topOffset={5}>
           <button className="dropdown-menu__button focusable" onClick={onOpenNewTab}>Open in New Tab</button>
-          <button className="dropdown-menu__button focusable" onClick={onArchive}>Hide</button>
+          {
+            selectedItems.some(item => item.archived)
+              ?
+              <button className="dropdown-menu__button focusable" onClick={onRestore}>Unhide</button>
+              :
+              <button className="dropdown-menu__button focusable" onClick={onArchive}>Hide</button>
+          }
+
           <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onDeleteItem}>Delete</button>
         </DropdownMenu>
         :
