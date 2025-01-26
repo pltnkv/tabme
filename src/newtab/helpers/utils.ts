@@ -1,9 +1,12 @@
 import Tab = chrome.tabs.Tab
 import HistoryItem = chrome.history.HistoryItem
-import { ColorTheme, IFolder, IFolderItem, IFolderItemToCreate } from "./types"
+import { ColorTheme, IFolder, IFolderItem, IFolderItemToCreate, IObject, ISpace } from "./types"
 import React from "react"
 import { isTabmeTab } from "./isTabmeTab"
 import { IAppState } from "../state/state"
+import { insertBetween } from "./fractionalIndexes"
+
+export const SECTION_ICON_BASE64 = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIj4KICA8cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2ZmZiIgLz4KPC9zdmc+Cg==`
 
 export const DEFAULT_FOLDER_COLOR = "#f0f0f0"
 export const EMPTY_FOLDER_COLOR = "transparent"
@@ -62,7 +65,7 @@ export function filterNonImportant(tab: Tab): boolean {
 
 export function convertTabToItem(item: Tab): IFolderItemToCreate {
   return {
-    id: genUniqId(),
+    id: genUniqLocalId(),
     favIconUrl: item.favIconUrl || "",
     title: item.title || "",
     url: item.url || ""
@@ -71,18 +74,16 @@ export function convertTabToItem(item: Tab): IFolderItemToCreate {
 
 export function createNewFolderItem(url?: string, title?: string, favIconUrl?: string): IFolderItemToCreate {
   return {
-    id: genUniqId(),
+    id: genUniqLocalId(),
     favIconUrl: favIconUrl ?? "",
     title: title ?? "",
     url: url ?? ""
   }
 }
 
-export const SECTION_ICON_BASE64 = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIj4KICA8cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2ZmZiIgLz4KPC9zdmc+Cg==`
-
 export function createNewSection(title = "Title"): IFolderItemToCreate {
   return {
-    id: genUniqId(),
+    id: genUniqLocalId(),
     favIconUrl: SECTION_ICON_BASE64,
     title,
     url: "",
@@ -104,12 +105,16 @@ export function filterTabsBySearch(
   })
 }
 
-export function hasArchivedItems(folders: IFolder[]): boolean {
-  return folders.some(f => f.archived || f.items.some(i => i.archived))
+export function hasArchivedItems(spaces: ISpace[]): boolean {
+  return spaces.some(s => {
+    return s.folders.some(f => f.archived || f.items.some(i => i.archived))
+  })
 }
 
-export function hasItemsToHighlight(folders: IFolder[], historyItems: HistoryItem[]): boolean {
-  return folders.some(f => f.items.some(i => isFolderItemNotUsed(i, historyItems)))
+export function hasItemsToHighlight(spaces: ISpace[], historyItems: HistoryItem[]): boolean {
+  return spaces.some(s => {
+    return s.folders.some(f => f.items.some(i => isFolderItemNotUsed(i, historyItems)))
+  })
 }
 
 export function filterItemsBySearch<T extends { title?: string, url?: string }>(
@@ -243,14 +248,24 @@ export function getRandomHEXColor(): string {
 
 // does not work
 // todo replace later on "genNextRuntimeId" everywere
-export function genUniqId(): number {
+export function genUniqLocalId(): number {
   return (new Date()).valueOf() + Math.round(Math.random() * 10000000)
 }
 
 let runtimeIdCounter = 10000
 
+/**
+ * NOTE: Can be used only within single app instance
+ */
 export function genNextRuntimeId(): number {
   return ++runtimeIdCounter
+}
+
+// temporary and for debug only
+let fakeRemoteIdCounter = 1000000
+
+export function get_FAKE_REMOTE_ID_TO_BE_DELETED(): number {
+  return ++fakeRemoteIdCounter
 }
 
 export function filterOpenedTabsFromHistory(
@@ -297,34 +312,57 @@ export function sanitizeHTML(html: string): string {
     .replace(/<script.*?>.*?<\/script>/gi, "")
     .replace(/on\w+=".*?"/gi, "")
     .replace(/javascript:/gi, "")
+    .replace(/\n/g, "<br>")
 }
 
 function escapeRegex(s: string): string {
   return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&")
 }
 
-export function findItemById(appState: { folders: IFolder[] }, itemId: number): IFolderItem | undefined {
+export function findItemById(appState: Pick<IAppState, "spaces">, itemId: number): IFolderItem | undefined {
   let res: IFolderItem | undefined = undefined
-  appState.folders.some(f => {
-    const item = f.items.find(i => i.id === itemId)
-    res = item
-    return !!item
+  appState.spaces.some(s => {
+    return s.folders.some(f => {
+      const item = f.items.find(i => i.id === itemId)
+      res = item
+      return !!item
+    })
   })
+
   return res
 }
 
-export function findFolderById(state: IAppState, folderId: number): IFolder | undefined {
-  return state.folders.find(f => f.id === folderId)
-}
-
-export function findItemsByIds(appState: { folders: IFolder[] }, itemsIds: number[]): IFolderItem[] {
-  return itemsIds.map(id => findItemById(appState, id)!).filter(item => !!item)
-}
-
-export function findFolderByItemId(appState: { folders: IFolder[] }, itemId: number): IFolder | undefined {
-  return appState.folders.find(f => {
-    return f.items.find(i => i.id === itemId)
+export function findFolderById(state: Pick<IAppState, "spaces">, folderId: number): IFolder | undefined {
+  let res: IFolder | undefined = undefined
+  state.spaces.some(s => {
+    res = s.folders.find(f => f.id === folderId)
+    return !!res
   })
+
+  return res
+}
+
+export function findSpaceByFolderId(state: Pick<IAppState, "spaces">, folderId: number): ISpace | undefined {
+  return state.spaces.find(s => {
+    return !!s.folders.find(f => f.id === folderId)
+  })
+}
+
+export function findSpaceById(state: Pick<IAppState, "spaces">, spaceId: number): ISpace | undefined {
+  return state.spaces.find(s => s.id === spaceId)
+}
+
+export function findFolderByItemId(appState: Pick<IAppState, "spaces">, itemId: number): IFolder | undefined {
+  let res: IFolder | undefined = undefined
+  appState.spaces.some(s => {
+    const folder = s.folders.find(f => {
+      return f.items.find(i => i.id === itemId)
+    })
+    res = folder
+    return !!folder
+  })
+
+  return res
 }
 
 export function blurSearch(e: React.MouseEvent) {
@@ -412,40 +450,16 @@ export function isCustomActionItem(item: IFolderItem | undefined): boolean {
   return item?.url.includes("tabme://") ?? false
 }
 
-const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)")
-let canUseSystemTheme = false
-
-darkThemeMq.addEventListener("change", () => {
-  if (canUseSystemTheme) {
-    setThemeStyle(darkThemeMq.matches)
-  }
-})
-
-export function applyTheme(theme: ColorTheme) {
-  canUseSystemTheme = false
-  switch (theme) {
-    case "light":
-      setThemeStyle(false)
-      break
-    case "dark":
-      setThemeStyle(true)
-      break
-    default:
-      setThemeStyle(false)
-      // who need system color?
-      // canUseSystemTheme = true
-      // setThemeStyle(darkThemeMq.matches)
-      break
-  }
+export function scrollElementIntoView(selector:string) {
+  requestAnimationFrame(() => {
+    const folderElement = document.querySelector(selector)
+    if (folderElement) {
+      folderElement.scrollIntoView()
+    }
+  })
 }
 
-function setThemeStyle(useDarkMode: boolean) {
-  if (useDarkMode) {
-    document.documentElement.classList.add("dark-theme")
-  } else {
-    document.documentElement.classList.remove("dark-theme")
-  }
-}
+
 
 export function getCurrentData() {
   const today = new Date()

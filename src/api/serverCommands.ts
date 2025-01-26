@@ -10,6 +10,7 @@ function postExecuteCommand<T>(cmd: any): Promise<T> {
 export function executeAPICall(command: APICommandPayloadFull, dispatch: ActionDispatcher) {
   const dispatchApiResolved = () => dispatch({ type: Action.APICommandResolved, commandId: command.commandId })
   const dispatchApiError = (e: any) => {
+    // todo dont allow continue editing if command failed without app reloading
     console.log("e", e)
     alert("API ERROR")
     dispatch({

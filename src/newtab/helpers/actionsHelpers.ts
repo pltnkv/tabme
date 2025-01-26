@@ -1,4 +1,4 @@
-import { findItemById, genUniqId, isCustomActionItem } from "./utils"
+import { findItemById, genUniqLocalId, isCustomActionItem } from "./utils"
 import { IFolderItem, IFolderItemToCreate } from "./types"
 import { ActionDispatcher, executeCustomAction } from "../state/actions"
 import { Action, IAppState } from "../state/state"
@@ -38,8 +38,8 @@ export function getCanDragChecker(search: string, dispatch: ActionDispatcher): (
   }
 }
 
-export function createFolder(dispatch: ActionDispatcher, title?: string, items?: IFolderItemToCreate[]): number {
-  const newFolderId = genUniqId()
+export function createFolder(dispatch: ActionDispatcher, title?: string, items?: IFolderItemToCreate[], historyStepId?:number): number {
+  const newFolderId = genUniqLocalId()
   dispatch({ type: Action.CreateFolder, newFolderId, title, items })
   return newFolderId
 }

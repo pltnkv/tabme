@@ -81,10 +81,10 @@ export function App() {
       if (ev.data?.type === "folders-updated") {
         getStateFromLS((res) => {
           if (globalAppState.sidebarCollapsed !== res.sidebarCollapsed) {
-            dispatch({ type: Action.InitFolders, sidebarCollapsed: res.sidebarCollapsed, ignoreSaving: true })
+            dispatch({ type: Action.InitDashboard, sidebarCollapsed: res.sidebarCollapsed, ignoreSaving: true })
           }
-          if (JSON.stringify(globalAppState.folders) !== JSON.stringify(res.folders)) {
-            dispatch({ type: Action.InitFolders, folders: res.folders, ignoreSaving: true })
+          if (JSON.stringify(globalAppState.spaces) !== JSON.stringify(res.spaces)) {
+            dispatch({ type: Action.InitDashboard, spaces: res.spaces, ignoreSaving: true })
           }
         })
       }

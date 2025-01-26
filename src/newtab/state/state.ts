@@ -1,6 +1,6 @@
 import { ActionDispatcher } from "./actions"
-import { ColorTheme, IFolder, IFolderItem, IFolderItemToCreate } from "../helpers/types"
-import { ISavingAppState } from "./storage"
+import { ColorTheme, IFolder, IFolderItem, IFolderItemToCreate, ISpace } from "../helpers/types"
+import { ISavingAppState, isBetaMode } from "./storage"
 import { loadFromNetwork } from "../../api/api"
 import Tab = chrome.tabs.Tab
 import HistoryItem = chrome.history.HistoryItem
@@ -47,8 +47,15 @@ export type APICommand = {
   body: any
 }
 
+export type UndoStep = {
+  id: number,
+  subSteps: ActionPayload[]
+}
+
 export type IAppState = {
-  folders: IFolder[];
+  spaces: ISpace[], // Stored in LS
+  currentSpaceId: number // Stored in LS
+
   tabs: Tab[];
   currentWindowId: number | undefined
   historyItems: HistoryItem[];
@@ -61,29 +68,29 @@ export type IAppState = {
   lastActiveTabIds: number[]
   search: string;
   itemInEdit: undefined | number, //can be item or folder
-  showArchived: boolean;
-  showNotUsed: boolean;
+  showArchived: boolean; // Stored in LS
+  showNotUsed: boolean; // Stored in LS
   openBookmarksInNewTab: boolean;
-  sidebarCollapsed: boolean; // stored
-  colorTheme?: ColorTheme; // stored
+  sidebarCollapsed: boolean; // Stored in LS
+  colorTheme?: ColorTheme; // Stored in LS
   sidebarHovered: boolean; // for hover effects
-  sidebarItemDragging: boolean // this flag is not used. But decided to not delete it in case need it in the future
-  betaMode: boolean
+  betaMode: boolean // IT MEANS SPACES & NETWORK ARE ENABLED
   page: "default" | "import",
-  stat: IAppStat | undefined
-  achievements: IAppAchievements
+  stat: IAppStat | undefined // Stored in LS
+  achievements: IAppAchievements  // Stored in LS
 
   // API
   apiCommandsQueue: APICommandPayloadFull[],
   apiCommandId?: number
   apiLastError?: string
 
-  // undo actions
-  undoActions: ActionPayload[]
+  // undo actions (some single actions can be reverted only by set of actions)
+  undoSteps: UndoStep[]
 };
 
 let initState: IAppState = {
-  folders: [],
+  spaces: [],
+  currentSpaceId: -1,
   historyItems: [],
   tabs: [],
   currentWindowId: undefined,
@@ -96,8 +103,7 @@ let initState: IAppState = {
   openBookmarksInNewTab: false,
   sidebarCollapsed: false, //should be named "sidebarCollapsable"
   sidebarHovered: false,
-  sidebarItemDragging: false,
-  betaMode: loadFromNetwork(),
+  betaMode: isBetaMode(),
   page: "default",
   stat: {
     sessionNumber: 0,
@@ -105,7 +111,7 @@ let initState: IAppState = {
     lastVersion: ""
   },
   apiCommandsQueue: [],
-  undoActions: [],
+  undoSteps: [],
   achievements: {
     folderCreated: 0,
     folderRenamed: 0,
@@ -142,7 +148,7 @@ export function getInitAppState(): IAppState {
 }
 
 export enum Action {
-  InitFolders = "init-folders",
+  InitDashboard = "init-dashboard",
   Undo = "undo",
   ShowNotification = "show-notification",
   HideNotification = "hide-notification",
@@ -153,15 +159,21 @@ export enum Action {
   ToggleDarkMode = "toggle-dark-mode",
   UpdateShowArchivedItems = "update-show-hidden-items",
   UpdateShowNotUsedItems = "update-show-not-used-items",
+  SelectSpace = "select-space",
   UpdateAppState = "update-app-state", // generic way to set simple value into AppState
 
   // CRUD OPERATIONS — causes saving on server
+  CreateSpace = "create-space",
+  DeleteSpace = "delete-space",
+  UpdateSpace = "update-space",
+
   CreateFolder = "create-folder",
   DeleteFolder = "delete-folder",
   UpdateFolder = "update-folder",
-  MoveFolder = "move-folder",
+  MoveFolder = "move-folder", //todo how to move between spaces? what is space is shared?
 
   CreateFolderItem = "create-folder-item",
+  CreateFolderItems = "create-folder-items",
   DeleteFolderItems = "delete-folder-items",
   UpdateFolderItem = "update-folder-item",
   MoveFolderItems = "move-folder-items",
@@ -186,27 +198,33 @@ export type APICommandPayload = (
   )
 
 export type APICommandPayloadFull = APICommandPayload & { commandId: number, rollbackState: IAppState }
-
+export type HistoryActionPayload = { byUndo?: boolean, historyStepId?: number }
 export type ActionPayload = (
   | { type: Action.Undo, dispatch: ActionDispatcher }
   | { type: Action.ShowNotification; message: string; button?: { onClick?: () => void; text: string }; isError?: boolean }
   | { type: Action.HideNotification }
   | { type: Action.UpdateSearch; value: string }
-  | { type: Action.InitFolders; folders?: IFolder[], sidebarCollapsed?: boolean, ignoreSaving?: boolean, init?: boolean }
+  | { type: Action.InitDashboard; spaces?: ISpace[], sidebarCollapsed?: boolean, ignoreSaving?: boolean, init?: boolean }
   | { type: Action.UpdateTab; tabId: number; opt: Tab; }
   | { type: Action.CloseTabs; tabIds: number[] }
   | { type: Action.SetTabsOrHistory; tabs?: Tab[]; history?: HistoryItem[] }
   | { type: Action.ToggleDarkMode }
   | { type: Action.UpdateShowArchivedItems; value: boolean }
   | { type: Action.UpdateShowNotUsedItems; value: boolean }
+  | { type: Action.SelectSpace; spaceId: number }
   | { type: Action.UpdateAppState; newState: Partial<IAppState> }
 
-  | { type: Action.CreateFolder; newFolderId?: number; title?: string; items?: IFolderItemToCreate[]; color?: string; } // todo support items here
+  | { type: Action.CreateSpace; spaceId: number; title: string; position?: string }
+  | { type: Action.DeleteSpace; spaceId: number; }
+  | { type: Action.UpdateSpace; spaceId: number; title?: string; position?: string; }
+
+  | { type: Action.CreateFolder; newFolderId?: number; title?: string; color?: string; position?: string; items?: IFolderItemToCreate[]; }
   | { type: Action.DeleteFolder; folderId: number; }
-  | { type: Action.UpdateFolder; folderId: number; title?: string; color?: string; archived?: boolean; twoColumn?: boolean; }
+  | { type: Action.UpdateFolder; folderId: number; title?: string; color?: string; archived?: boolean; twoColumn?: boolean; position?: string }
   | { type: Action.MoveFolder; folderId: number; insertBeforeFolderId: number | undefined; }
 
   | { type: Action.CreateFolderItem; folderId: number; itemIdInsertBefore: number | undefined; item: IFolderItemToCreate; }
+  | { type: Action.CreateFolderItems; folderId: number; items: IFolderItemToCreate[]; }
   | { type: Action.DeleteFolderItems; itemIds: number[] }
   | { type: Action.UpdateFolderItem; itemId: number; title?: string; archived?: boolean; url?: string }
   | { type: Action.MoveFolderItems; itemIds: number[]; targetFolderId: number; itemIdInsertBefore: number | undefined; }
@@ -215,4 +233,4 @@ export type ActionPayload = (
 
   | { type: Action.APICommandResolved; commandId: number, }
   | { type: Action.APIConfirmEntityCreated; localId: number; remoteId: number; entityType: "folder" | "bookmark" }
-  ) & { byUndo?: boolean };
+  ) & HistoryActionPayload;

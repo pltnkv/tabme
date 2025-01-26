@@ -102,7 +102,7 @@ function runMultiselection(mouseDownEvent: React.MouseEvent, canvas: HTMLCanvasE
     selectItems(itemsToSelect)
   }
 
-  const onMouseUp = (e:MouseEvent) => {
+  const onMouseUp = (e: MouseEvent) => {
     if (!mouseMoved) {
       const folderItemFirstSelected = document.querySelector(".folder-item--first-selected")
       if (folderItemFirstSelected && folderItemFirstSelected.contains(e.target as HTMLElement)) {
@@ -438,6 +438,10 @@ function calculateTargetInsertBeforeFolderId(dropAreas: DropArea[], dropArea: Dr
 }
 
 function findRootOfDraggableFolder(targetElement: HTMLElement): HTMLElement | null {
+  if (doStopPropagation(targetElement)) {
+    return null
+  }
+
   if (isDraggableFolderHeader(targetElement)) {
     return targetElement
   }
@@ -478,7 +482,14 @@ function isDraggableFolderHeader(targetElement: HTMLElement | null): boolean {
 }
 
 function doStopPropagation(targetElement: HTMLElement | null): boolean {
-  return targetElement ? targetElement.classList.contains("stop-dad-propagation") : false
+  let el = targetElement
+  while (el) {
+    if (el.classList.contains("stop-dad-propagation")) {
+      return true
+    }
+    el = el.parentElement
+  }
+  return false
 }
 
 function getFolderId(dropAreaElement: HTMLElement): number {

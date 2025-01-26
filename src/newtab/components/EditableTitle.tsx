@@ -5,7 +5,7 @@ export function EditableTitle(p: {
   className?: string,
   onClick?: () => void,
   inEdit: boolean,
-  setEditing?: (value: boolean) => void,
+  setEditing?: (value: boolean) => void, //todo seems like it can be simplified and setEditing() can be removed at all
   localTitle: string,
   setLocalTitle: (val: string) => void,
   search: string

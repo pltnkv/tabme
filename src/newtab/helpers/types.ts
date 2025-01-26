@@ -1,7 +1,15 @@
-export interface IFolder {
+export interface IObject {
   id: number // local id
   remoteId?: number // server id
-  position?: string //todo remove optional flag later
+  position: string
+}
+
+export interface ISpace extends IObject {
+  title: string
+  folders: IFolder[]
+}
+
+export interface IFolder extends IObject {
   title: string
   items: IFolderItem[]
   color?: string
@@ -9,10 +17,7 @@ export interface IFolder {
   archived?: boolean
 }
 
-export interface IFolderItem {
-  id: number // local id
-  remoteId?: number // server id
-  position: string
+export interface IFolderItem extends IObject {
   favIconUrl: string
   title: string
   url: string
@@ -22,7 +27,7 @@ export interface IFolderItem {
 }
 
 // Data for not yet created FolderItem
-export type IFolderItemToCreate = Pick<IFolderItem, "id" | "favIconUrl" | "url" | "title" | 'isSection'>
+export type IFolderItemToCreate = Pick<IFolderItem, "id" | "favIconUrl" | "url" | "title" | "isSection"> & { position?: string }
 
 // undefined === 'system'
 export type ColorTheme = "light" | "dark" | undefined

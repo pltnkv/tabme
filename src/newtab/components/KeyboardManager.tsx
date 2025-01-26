@@ -1,7 +1,8 @@
 import React, { useContext, useEffect } from "react"
 import { getSelectedItemsElements, getSelectedItemsIds } from "../helpers/selectionUtils"
-import { DispatchContext, wrapIntoTransaction } from "../state/actions"
+import { DispatchContext, mergeStepsInHistory } from "../state/actions"
 import { Action } from "../state/state"
+import { showMessageWithUndo } from "../helpers/actionsHelpers"
 
 export const KeyboardManager = React.memo((props: {
   search: string;
@@ -16,12 +17,11 @@ export const KeyboardManager = React.memo((props: {
 
       if (getSelectedItemsElements().length > 0) {
         if (e.code === "Backspace" || e.code === "Delete") {
-          wrapIntoTransaction(() => {
-            dispatch({
-              type: Action.DeleteFolderItems,
-              itemIds: getSelectedItemsIds()
-            })
+          dispatch({
+            type: Action.DeleteFolderItems,
+            itemIds: getSelectedItemsIds()
           })
+          showMessageWithUndo("Bookmark has been deleted", dispatch)
           return
         }
       }
@@ -34,7 +34,7 @@ export const KeyboardManager = React.memo((props: {
         return
       }
 
-      if(e.code === "ArrowDown") {
+      if (e.code === "ArrowDown") {
         ;(document.querySelector("input.search") as HTMLElement).focus()
         return
       }

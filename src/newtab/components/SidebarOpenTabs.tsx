@@ -2,25 +2,28 @@ import React, { memo, useContext, useEffect, useState } from "react"
 import {
   blurSearch,
   convertTabToItem,
-  createNewSection,
   extractHostname,
   filterTabsBySearch,
+  findSpaceById,
   hlSearch,
   isTargetSupportsDragAndDrop,
-  removeUselessProductName
+  removeUselessProductName,
+  scrollElementIntoView
 } from "../helpers/utils"
 import { bindDADItemEffect, getDraggedItemId } from "../helpers/dragAndDropItem"
 import { createFolder, getCanDragChecker, showMessage } from "../helpers/actionsHelpers"
-import { IFolder, IFolderItem } from "../helpers/types"
-import { DispatchContext, wrapIntoTransaction } from "../state/actions"
+import { IFolderItem, ISpace } from "../helpers/types"
+import { DispatchContext, mergeStepsInHistory } from "../state/actions"
 import { Action } from "../state/state"
 import IconSaved from "../icons/saved.svg"
 import Tab = chrome.tabs.Tab
+import { DropdownMenu } from "./DropdownMenu"
+import { CL } from "../helpers/classNameHelper"
 
 export const SidebarOpenTabs = memo((props: {
   search: string;
   tabs: Tab[]
-  folders: IFolder[];
+  spaces: ISpace[];
   lastActiveTabIds: number[]
   currentWindowId: number | undefined
 }) => {
@@ -29,15 +32,6 @@ export const SidebarOpenTabs = memo((props: {
 
   useEffect(() => {
     if (mouseDownEvent) {
-      const dispatchDraggingStop = () => {
-        dispatch({
-          type: Action.UpdateAppState,
-          newState: {
-            sidebarItemDragging: false
-          }
-        })
-      }
-
       const onDrop = (folderId: number, itemIdInsertBefore: number | undefined, targetTabsIds: number[]) => {
         const targetTabId = targetTabsIds[0] // we support D&D only single element from sidebar
         const tab = props.tabs.find((t) => t.id === targetTabId)
@@ -47,44 +41,27 @@ export const SidebarOpenTabs = memo((props: {
         }
 
         if (tab && tab.id) { // Add existing Tab
-          wrapIntoTransaction(() => {
-            const item = convertTabToItem(tab)
-            dispatch({
-              type: Action.CreateFolderItem,
-              folderId,
-              itemIdInsertBefore,
-              item
-            })
-
-            dispatch({
-              type: Action.UpdateAppState,
-              newState: {
-                itemInEdit: item.id
-              }
-            })
+          const item = convertTabToItem(tab)
+          dispatch({
+            type: Action.CreateFolderItem,
+            folderId,
+            itemIdInsertBefore,
+            item
           })
-        } else { // Add section
-          wrapIntoTransaction(() => {
 
-            const newSection = createNewSection()
-            dispatch({
-              type: Action.CreateFolderItem,
-              folderId,
-              itemIdInsertBefore,
-              item: newSection
-            })
-            dispatch({
-              type: Action.UpdateAppState,
-              newState: { itemInEdit: newSection.id }
-            })
+          dispatch({
+            type: Action.UpdateAppState,
+            newState: {
+              itemInEdit: item.id
+            }
           })
+        } else {
+          console.error("ERROR: tab not found")
         }
         setMouseDownEvent(undefined)
-        dispatchDraggingStop()
       }
       const onCancel = () => {
         setMouseDownEvent(undefined)
-        dispatchDraggingStop()
       }
       const onClick = (tabId: number) => {
         const tab = props.tabs.find(t => t.id === tabId)
@@ -92,15 +69,8 @@ export const SidebarOpenTabs = memo((props: {
         if (tab) {
           chrome.windows.update(tab.windowId, { focused: true })
         }
-        dispatchDraggingStop()
       }
       const onDragStarted = () => {
-        // dispatch({
-        //   type: Action.UpdateAppState,
-        //   newState: {
-        //     sidebarItemDragging: true
-        //   }
-        // })
         return getCanDragChecker(props.search, dispatch)()
       }
 
@@ -119,22 +89,14 @@ export const SidebarOpenTabs = memo((props: {
   function onMouseDown(e: React.MouseEvent) {
     if (isTargetSupportsDragAndDrop(e)) {
       blurSearch(e)
-      const target = e.target as HTMLElement | undefined
-      if (target && target.classList.contains("inbox-item__close")) {
-        return
-      }
       setMouseDownEvent(e)
     }
   }
 
-  function getTabIdFromCloseButton(target: HTMLElement): number {
-    return getDraggedItemId(target.parentElement!)
-  }
-
-  function onCloseTab(e: React.MouseEvent) {
+  function onCloseTab(tabId: number) {
     dispatch({
       type: Action.CloseTabs,
-      tabIds: [getTabIdFromCloseButton(e.target as HTMLElement)]
+      tabIds: [tabId]
     })
     showMessage("Tab has been closed", dispatch)
   }
@@ -157,17 +119,19 @@ export const SidebarOpenTabs = memo((props: {
     <div className="inbox-box" onMouseDown={onMouseDown}>
       {
         sortedWindowsWithTabs.length === 1 ?
-          sortedWindowsWithTabs[0].tabs.map((t) => getTabView(t, props.lastActiveTabIds[1], props.folders, props.search, onCloseTab))
+          sortedWindowsWithTabs[0].tabs.map((t) =>
+            <TabItem key={t.id} tab={t} lastActiveTabId={props.lastActiveTabIds[1]} spaces={props.spaces} search={props.search} onCloseTab={onCloseTab}/>)
           :
           sortedWindowsWithTabs.map((window, index) => {
             return <div key={window.windowId}>
               <div className="window-name">{index === 0 ? "current window" : "window"}</div>
-              {window.tabs.map((t) => getTabView(t, props.lastActiveTabIds[1], props.folders, props.search, onCloseTab))}
+              {window.tabs.map((t) =>
+                <TabItem key={t.id} tab={t} lastActiveTabId={props.lastActiveTabIds[1]} spaces={props.spaces} search={props.search} onCloseTab={onCloseTab}/>)}
             </div>
           })
 
       }
-      {tabsCount === 0 && props.search === "" ? <p className="no-opened-tabs">No open tabs.<br/> Pinned tabs are filtered out.</p> : null}
+      {tabsCount === 0 && props.search === "" ? <p className="no-opened-tabs">No open tabs.<br/> Pinned tabs are filtered oup.tab.</p> : null}
       {
         /* disabled it because it looks wierd with several Windows */
         /*{props.search === "" ? SectionItem : null}*/
@@ -176,9 +140,17 @@ export const SidebarOpenTabs = memo((props: {
   )
 })
 
-function getTabView(t: Tab, lastActiveTabIds: number, folders: IFolder[], search: string, onCloseTab: (e: React.MouseEvent) => void) {
+const TabItem = (p: {
+  tab: Tab, lastActiveTabId: number,
+  spaces: ISpace[],
+  search: string,
+  onCloseTab: (tabId: number) => void
+}) => {
+  const dispatch = useContext(DispatchContext)
+  const [showMenu, setShowMenu] = useState<boolean>(false)
+
   function getBgColor(tabId?: number): string {
-    if (tabId && lastActiveTabIds === tabId) {
+    if (tabId && p.lastActiveTabId === tabId) {
       return "rgba(181, 192, 235, 0.6)"
     } else {
       return ""
@@ -196,43 +168,108 @@ function getTabView(t: Tab, lastActiveTabIds: number, folders: IFolder[], search
     // }
   }
 
-  let shortenedTitle = removeUselessProductName(t.title)
-  let domain = extractHostname(t.url)
-  const folderTitles = findFoldersTitlesWhereTabSaved(t, folders)
+  const hideMenu = () => {
+    setShowMenu(false)
+    setVisibleSubMenuId(-1)
+  }
+
+  const onTabContextMenu = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    e.preventDefault()
+    setShowMenu(true)
+  }
+
+  const onMenuCloseClicked = (e: React.MouseEvent) => {
+    p.onCloseTab(p.tab.id!)
+    hideMenu()
+  }
+
+  const onMenuCopyClicked = (e: React.MouseEvent) => {
+    navigator.clipboard.writeText(p.tab.url ?? "")
+    showMessage("URL has been copied", dispatch) // !!!!! place all texts in a single file
+    hideMenu()
+  }
+
+  const moveToFolder = (folderId: number) => {
+    const item = convertTabToItem(p.tab)
+
+    dispatch({
+      type: Action.CreateFolderItem,
+      folderId,
+      itemIdInsertBefore: undefined,
+      item
+    })
+
+    dispatch({
+      type: Action.UpdateAppState,
+      newState: {
+        itemInEdit: item.id
+      }
+    })
+
+    dispatch({
+      type: Action.SelectSpace,
+      spaceId: visibleSubMenuId
+    })
+
+    scrollElementIntoView(`a[data-id="${item.id}"]`)
+
+    hideMenu()
+  }
+
+  const selectedSpaceSubmenuFolders = findSpaceById({ spaces: p.spaces }, visibleSubMenuId)?.folders ?? []
+
+  let shortenedTitle = removeUselessProductName(p.tab.title)
+  let domain = extractHostname(p.tab.url)
+  const folderTitles = findFoldersTitlesWhereTabSaved(p.tab, p.spaces)
 
   return (<div
-    key={t.id}
-    style={{ backgroundColor: getBgColor(t.id) }}
-    className="inbox-item draggable-item"
-    data-id={t.id}
+    key={p.tab.id}
+    style={{ backgroundColor: getBgColor(p.tab.id) }}
+    className={CL("inbox-item draggable-item", {
+      "active": showMenu
+    })}
+    data-id={p.tab.id}
+    onContextMenu={onTabContextMenu}
   >
-    <img src={t.favIconUrl} alt=""/>
+    <img src={p.tab.favIconUrl} alt=""/>
     <div className="inbox-item__text">
       <div className="inbox-item__title"
-           title={t.title}
-           dangerouslySetInnerHTML={hlSearch(shortenedTitle, search)}/>
+           title={p.tab.title}
+           dangerouslySetInnerHTML={hlSearch(shortenedTitle, p.search)}/>
       <div className="inbox-item__url"
-           title={t.url}
-           dangerouslySetInnerHTML={hlSearch(domain, search)}/>
+           title={p.tab.url}
+           dangerouslySetInnerHTML={hlSearch(domain, p.search)}/>
       {
         folderTitles
           ? <div className="inbox-item__already-saved">Already saved in {folderTitles}</div>
           : null
       }
     </div>
-    <div onClick={onCloseTab} className="inbox-item__close" title="Close tab">⨉</div>
+    <div onClick={() => p.onCloseTab(p.tab.id!)} className="inbox-item__close stop-click-propagation2 stop-dad-propagation" title="Close tab">⨉</div>
     {
       folderTitles ? <IconSaved className="saved-tab-icon"></IconSaved> : null
     }
-  </div>)
 
+    {showMenu ? (
+      <DropdownMenu onClose={hideMenu} className="stop-dad-propagation" topOffset={20} leftOffset={-1}>
+        <button className="dropdown-menu__button focusable" onClick={onMenuCopyClicked}>Copy url</button>
+        <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onMenuCloseClicked}>Close tab</button>
+      </DropdownMenu>
+    ) : null}
+  </div>)
 }
 
-function findFoldersTitlesWhereTabSaved(curTab: Tab, folders: IFolder[]): string {
-  return folders
-    .filter(folder => folder.items.some((item: IFolderItem) => item.url === curTab.url))
-    .map(folder => `«${folder.title}»`)
-    .join(", ")
+function findFoldersTitlesWhereTabSaved(curTab: Tab, spaces: ISpace[]): string {
+  let res: string[] = []
+  spaces.forEach((space) => {
+    const titles = space.folders
+      .filter(folder => folder.items.some((item: IFolderItem) => item.url === curTab.url))
+      .map(folder => `«${folder.title}»`)
+    res.push(...titles)
+  })
+  return res.join(", ")
+
 }
 
 function getSortedWindowsWithTabs(map: Map<number, Tab[]>, currentWindowId: number | undefined): { windowId: number, tabs: Tab[] }[] {

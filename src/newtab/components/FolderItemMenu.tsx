@@ -4,7 +4,7 @@ import { DropdownMenu } from "./DropdownMenu"
 import { showMessage, showMessageWithUndo } from "../helpers/actionsHelpers"
 import { getSelectedItems } from "../helpers/selectionUtils"
 import { Action } from "../state/state"
-import { DispatchContext, wrapIntoTransaction } from "../state/actions"
+import { DispatchContext, mergeStepsInHistory } from "../state/actions"
 
 export const FolderItemMenu = React.memo((p: {
   localTitle: string,
@@ -39,11 +39,9 @@ export const FolderItemMenu = React.memo((p: {
 
   // support multiple
   function onDeleteItem() {
-    wrapIntoTransaction(() => {
-      dispatch({
-        type: Action.DeleteFolderItems,
-        itemIds: selectedItems.map(i => i.id)
-      })
+    dispatch({
+      type: Action.DeleteFolderItems,
+      itemIds: selectedItems.map(i => i.id)
     })
     showMessageWithUndo("Bookmark has been deleted", dispatch)
   }
@@ -56,26 +54,27 @@ export const FolderItemMenu = React.memo((p: {
 
   // support multiple
   function onArchive() {
-    wrapIntoTransaction(() => {
+    mergeStepsInHistory((historyStepId) => {
       selectedItems.forEach((item) => {
         dispatch({
           type: Action.UpdateFolderItem,
           itemId: item.id,
-          archived: true
+          archived: true,
+          historyStepId
         })
       })
-
     })
     showMessageWithUndo("Bookmark has been hidden", dispatch)
   }
 
   function onRestore() {
-    wrapIntoTransaction(() => {
+    mergeStepsInHistory((historyStepId) => {
       selectedItems.forEach((item) => {
         dispatch({
           type: Action.UpdateFolderItem,
           itemId: item.id,
-          archived: false
+          archived: false,
+          historyStepId
         })
       })
     })

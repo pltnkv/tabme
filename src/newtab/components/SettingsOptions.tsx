@@ -1,10 +1,10 @@
 import React, { useContext } from "react"
-import { genUniqId, getFavIconUrl, hasArchivedItems, hasItemsToHighlight } from "../helpers/utils"
-import { showMessage } from "../helpers/actionsHelpers"
+import { genUniqLocalId, getFavIconUrl, hasArchivedItems, hasItemsToHighlight } from "../helpers/utils"
 import { Action, IAppState } from "../state/state"
 import { DispatchContext } from "../state/actions"
 import Switch from "react-switch"
 import { IFolder } from "../helpers/types"
+import { showMessage } from "../helpers/actionsHelpers"
 
 type OnClickOption = { onClick: (e: any) => void; title: string; text: string; hidden?: boolean; isFile?: boolean }
 type OnToggleOption = { onToggle: () => void; value: boolean, title: string; text: string; hidden?: boolean }
@@ -65,7 +65,7 @@ export const SettingsOptions = (props: {
   const dispatch = useContext(DispatchContext)
 
   function onToggleNotUsed() {
-    if (hasItemsToHighlight(props.appState.folders, props.appState.historyItems)) {
+    if (hasItemsToHighlight(props.appState.spaces, props.appState.historyItems)) {
       dispatch({ type: Action.UpdateShowNotUsedItems, value: !props.appState.showNotUsed })
       const message = !props.appState.showNotUsed ? "Unused items for the past 60 days are highlighted" : "Highlighting canceled"
       showMessage(message, dispatch)
@@ -75,7 +75,7 @@ export const SettingsOptions = (props: {
   }
 
   function onToggleHidden() {
-    if (hasArchivedItems(props.appState.folders)) {
+    if (hasArchivedItems(props.appState.spaces)) {
       dispatch({ type: Action.UpdateShowArchivedItems, value: !props.appState.showArchived })
       const message = !props.appState.showArchived ? "Hidden items are visible" : "Hidden items are hidden"
       showMessage(message, dispatch)
@@ -89,6 +89,7 @@ export const SettingsOptions = (props: {
   }
 
   function onImportJson(event: any) {
+    //!!!! support spaces
     function receivedText(e: any) {
       let lines = e.target.result
       try {
@@ -128,10 +129,11 @@ export const SettingsOptions = (props: {
       downloadAnchorNode.remove()
     }
 
-    downloadObjectAsJson(props.appState.folders, "tabme_backup")
+    downloadObjectAsJson(props.appState.spaces, "tabme_backup")
   }
 
   function onImportFromToby(event: any) {
+    //!!!! test that works
     function receivedText(e: any) {
       let lines = e.target.result
       try {
@@ -144,7 +146,7 @@ export const SettingsOptions = (props: {
               type: Action.CreateFolder,
               title: tobyFolder.title,
               items: tobyFolder.cards.map(card => ({
-                id: genUniqId(),
+                id: genUniqLocalId(),
                 title: card.title,
                 url: card.url,
                 favIconUrl: getFavIconUrl(card.url)

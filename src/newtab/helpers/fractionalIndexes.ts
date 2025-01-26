@@ -94,21 +94,22 @@ export function insertBetween(before: string, after: string): string {
   }
 }
 
-//todo fix types it later
+// NOTE: Sort array in place
+// todo fix types it later
 // export function sortByPosition<T extends { position: string }>(foldersOrItems: T[]): T[] {
 export function sortByPosition<T>(foldersOrItems: T[]): T[] {
-  if (loadFromNetwork()) {
-    return foldersOrItems.sort((a:any, b:any) => { //todo fix it also
-      if (a.position < b.position) {
-        return -1
-      } else if (a.position > b.position) {
-        return 1
-      }
-      return 0
-    })
-  } else {
-    return foldersOrItems
-  }
+  return foldersOrItems.sort((a: any, b: any) => { //todo fix it also
+    if (a.position < b.position) {
+      return -1
+    } else if (a.position > b.position) {
+      return 1
+    }
+    return 0
+  })
+}
+
+export function getFirstSortedByPosition<T>(foldersOrItems: T[]): T | undefined {
+  return sortByPosition([...foldersOrItems])[0]
 }
 
 // function generatePositionForInsertionAt(i) {

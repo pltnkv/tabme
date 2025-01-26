@@ -5,7 +5,7 @@ export function DropdownMenu(p: {
   topOffset?: number
   leftOffset?: number
   width?: number
-  children: React.ReactChild | React.ReactChild[];
+  children: any; //todo fix types
   onClose: () => void;
   noSmartPositioning?: boolean,
   skipTabIndexes?: boolean
@@ -86,10 +86,10 @@ export function DropdownMenu(p: {
       ref={formEl}
     >
       {React.Children.map(p.children, (child) => {
-        return React.cloneElement(child as React.ReactElement, {
+        return child ? React.cloneElement(child as any, {
           // Clone each child and modify it to be focusable
           //tabIndex: p.skipTabIndexes ? undefined : 0,
-        })
+        }) : null
       })}
     </div>
   )

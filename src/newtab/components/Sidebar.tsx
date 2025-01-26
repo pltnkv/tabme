@@ -3,16 +3,15 @@ import { createFolder, showMessage } from "../helpers/actionsHelpers"
 import { SidebarHistory } from "./SidebarHistory"
 import { SidebarOpenTabs } from "./SidebarOpenTabs"
 import { isTabmeTab } from "../helpers/isTabmeTab"
-import { convertTabToItem, getCurrentData } from "../helpers/utils"
+import { convertTabToItem, getCurrentData, scrollElementIntoView } from "../helpers/utils"
 import { DropdownMenu } from "./DropdownMenu"
 import { CL } from "../helpers/classNameHelper"
 import { Action, IAppState } from "../state/state"
-import { DispatchContext } from "../state/actions"
-import Tab = chrome.tabs.Tab
-import { wrapIntoTransaction } from "../state/actions"
+import { DispatchContext, mergeStepsInHistory } from "../state/actions"
 import IconClean from "../icons/clean.svg"
 import IconStash from "../icons/stash.svg"
 import IconPin from "../icons/pin.svg"
+import Tab = chrome.tabs.Tab
 
 export function Sidebar(props: {
   appState: IAppState;
@@ -73,7 +72,7 @@ export function Sidebar(props: {
 
       <SidebarOpenTabs
         tabs={props.appState.tabs}
-        folders={props.appState.folders}
+        spaces={props.appState.spaces}
         search={props.appState.search}
         lastActiveTabIds={props.appState.lastActiveTabIds}
         currentWindowId={props.appState.currentWindowId}
@@ -111,20 +110,14 @@ const StashButton = React.memo((props: { tabs: Tab[] }) => {
         // probably all the tabs where pinned
         return
       }
-      wrapIntoTransaction(() => {
-        const items = tabsToShelve.map(convertTabToItem)
-        const folderTitle = `Saved ${getCurrentData()}`
-        const folderId = createFolder(dispatch, folderTitle, items)
 
-        dispatch({ type: Action.ShowNotification, message: "All Tabs has been saved" })
+      const items = tabsToShelve.map(convertTabToItem)
+      const folderTitle = `Saved ${getCurrentData()}`
+      const folderId = createFolder(dispatch, folderTitle, items)
 
-        requestAnimationFrame(() => {
-          const folderElement = document.querySelector(`[data-folder-id="${folderId}"]`)
-          if (folderElement) {
-            folderElement.scrollIntoView()
-          }
-        })
-      })
+      dispatch({ type: Action.ShowNotification, message: "All Tabs has been saved" })
+
+      scrollElementIntoView(`[data-folder-id="${folderId}"]`)
     })
   }
 

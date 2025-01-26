@@ -3,7 +3,7 @@ import { IFolder, IFolderItem } from "../helpers/types"
 import { findTabsByURL, isFolderItemNotUsed } from "../helpers/utils"
 import { EditableTitle } from "./EditableTitle"
 import { Action } from "../state/state"
-import { DispatchContext, wrapIntoTransaction } from "../state/actions"
+import { DispatchContext, mergeStepsInHistory } from "../state/actions"
 import { CL } from "../helpers/classNameHelper"
 import IconClose from "../icons/close.svg"
 import IconMore from "../icons/more.svg"
@@ -30,13 +30,11 @@ export const FolderItem = React.memo((p: {
 
   function trySaveTitleAndURL(newTitle: string, newUrl?: string) {
     if (p.item.title !== newTitle || (newUrl && p.item.url !== newUrl)) {
-      wrapIntoTransaction(() => {
-        dispatch({
-          type: Action.UpdateFolderItem,
-          itemId: p.item.id,
-          title: newTitle,
-          url: newUrl ?? p.item.url
-        })
+      dispatch({
+        type: Action.UpdateFolderItem,
+        itemId: p.item.id,
+        title: newTitle,
+        url: newUrl ?? p.item.url
       })
     }
   }
@@ -74,7 +72,7 @@ export const FolderItem = React.memo((p: {
       CL("folder-item", {
         "section": p.item.isSection,
         "selected": showMenu,
-        "archived": p.item.archived,
+        "archived": p.item.archived
       })}>
       {showMenu
         ? <FolderItemMenu
@@ -94,7 +92,7 @@ export const FolderItem = React.memo((p: {
       <a className={
         CL("folder-item__inner draggable-item", {
           "section": p.item.isSection,
-          "open": folderItemOpened,
+          "open": folderItemOpened
         })
       }
          onDragStart={(e) => {e.preventDefault()}} // to prevent text drag-and-drop in the textarea
