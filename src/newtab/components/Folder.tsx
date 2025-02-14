@@ -1,19 +1,22 @@
 import React, { useContext, useEffect, useState } from "react"
-import { IFolder } from "../helpers/types"
-import { colors, createNewSection, DEFAULT_FOLDER_COLOR, filterItemsBySearch } from "../helpers/utils"
-import { DropdownMenu } from "./DropdownMenu"
-import { showMessageWithUndo } from "../helpers/actionsHelpers"
+import { IFolder, ISpace } from "../helpers/types"
+import { colors, DEFAULT_FOLDER_COLOR, filterItemsBySearch, scrollElementIntoView } from "../helpers/utils"
+import { DropdownMenu, DropdownSubMenu } from "./dropdown/DropdownMenu"
 import { FolderItem } from "./FolderItem"
 import { EditableTitle } from "./EditableTitle"
 import { CL } from "../helpers/classNameHelper"
 import { Action } from "../state/state"
-import { canShowArchived, DispatchContext, mergeStepsInHistory } from "../state/actions"
+import { canShowArchived, DispatchContext } from "../state/actions"
 import { Color } from "../helpers/Color"
 import MenuIcon from "../icons/menu.svg"
+import { getSpacesList } from "./dropdown/moveToHelpers"
 import HistoryItem = chrome.history.HistoryItem
 import Tab = chrome.tabs.Tab
+import { showMessageWithUndo } from "../helpers/actionsHelpersWithDOM"
+import { createNewSection, findSpaceByFolderId } from "../state/actionHelpers"
 
 export const Folder = React.memo(function Folder(p: {
+  spaces: ISpace[];
   folder: IFolder;
   tabs: Tab[];
   historyItems: HistoryItem[];
@@ -21,6 +24,7 @@ export const Folder = React.memo(function Folder(p: {
   showArchived: boolean;
   search: string;
   itemInEdit: undefined | number,
+  hiddenFeatureIsEnabled: boolean
 }) {
   const dispatch = useContext(DispatchContext)
   const [showMenu, setShowMenu] = useState<boolean>(false)
@@ -78,7 +82,7 @@ export const Folder = React.memo(function Folder(p: {
     dispatch({
       type: Action.CreateFolderItem,
       folderId: p.folder.id,
-      itemIdInsertBefore: undefined,
+      insertBeforeItemId: undefined,
       item: newSection
     })
 
@@ -89,17 +93,7 @@ export const Folder = React.memo(function Folder(p: {
 
     setShowMenu(false)
 
-    requestAnimationFrame(() => {
-      const element = document.querySelector(`[data-id="${newSection.id}"]`)
-      if (element) {
-        const rect = element.getBoundingClientRect()
-        const viewportHeight = window.document.body.clientHeight
-        if (rect.bottom > viewportHeight) {
-          element.scrollIntoView({ block: "center" })
-        }
-      }
-    })
-
+    scrollElementIntoView(`[data-id="${newSection.id}"]`)
   }
 
   function setColorLocally(color: string) {
@@ -165,6 +159,26 @@ export const Folder = React.memo(function Folder(p: {
     e.preventDefault()
   }
 
+  const moveFolderToSpace = (spaceId: number) => {
+    dispatch({
+      type: Action.MoveFolder,
+      folderId: p.folder.id,
+      targetSpaceId: spaceId,
+      insertBeforeFolderId: undefined
+    })
+
+    dispatch({
+      type: Action.SelectSpace,
+      spaceId: spaceId
+    })
+
+    dispatch({ type: Action.ShowNotification, message: "Folder has been moved" })
+
+    scrollElementIntoView(`[data-folder-id="${p.folder.id}"]`)
+
+    setShowMenu(false)
+  }
+
   return (
     <div className={folderClassName} data-folder-id={p.folder.id}>
       <h2 style={{
@@ -189,7 +203,7 @@ export const Folder = React.memo(function Folder(p: {
               onClick={() => setShowMenu(!showMenu)}><MenuIcon/></span>
 
         {showMenu ? (
-          <DropdownMenu onClose={() => setShowMenu(false)} className={"dropdown-menu--folder"} topOffset={13} leftOffset={159}>
+          <DropdownMenu onClose={() => setShowMenu(false)} className={"dropdown-menu--folder"} offset={{ top: -19, left: 150, bottom: 38 }}>
             <div className="dropdown-menu__colors-row" style={{ marginTop: "4px" }}>
               <PresetColor color={PRESET_COLORS[0]} onClick={setColorConfirmed} currentColor={folderColor}/>
               <PresetColor color={PRESET_COLORS[1]} onClick={setColorConfirmed} currentColor={folderColor}/>
@@ -204,15 +218,20 @@ export const Folder = React.memo(function Folder(p: {
             </div>
             <button className="dropdown-menu__button focusable" onClick={onOpenAll}>Open All</button>
             <button className="dropdown-menu__button focusable" onClick={onRename}>Rename</button>
-            <button className="dropdown-menu__button focusable" onClick={onArchiveOrRestore}>{p.folder.archived ? "Unhide" : "Hide"}</button>
+            {
+              p.hiddenFeatureIsEnabled && <button className="dropdown-menu__button focusable" onClick={onArchiveOrRestore}>{p.folder.archived ? "Unhide" : "Hide"}</button>
+            }
+            {
+              p.spaces.length > 1 ?
+                <DropdownSubMenu
+                  menuId={1}
+                  title={"Move to space"}
+                  submenuContent={getSpacesList(p.spaces, moveFolderToSpace, findSpaceByFolderId(p, p.folder.id)?.id)}
+                /> : null
+            }
+
             <button className="dropdown-menu__button focusable" onClick={onAddSection}>Add Section</button>
-            <button className="dropdown-menu__button focusable" data-submenu-button="move-to">sub menu</button>
             <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onDelete}>Delete</button>
-            <div className="sub-menu level-1" data-submenu="move-to">
-              <button className="dropdown-menu__button focusable">Open All</button>
-              <button className="dropdown-menu__button focusable">Rename</button>
-              <button className="dropdown-menu__button focusable">last</button>
-            </div>
           </DropdownMenu>
         ) : null}
       </h2>
@@ -230,12 +249,14 @@ export const Folder = React.memo(function Folder(p: {
             (item) => (
               <FolderItem
                 key={item.id}
+                spaces={p.spaces}
                 item={item}
                 inEdit={item.id === p.itemInEdit}
                 tabs={p.tabs}
                 historyItems={p.historyItems}
                 showNotUsed={p.showNotUsed}
                 search={p.search}
+                hiddenFeatureIsEnabled={p.hiddenFeatureIsEnabled}
               />
             )
           )}

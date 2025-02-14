@@ -1,54 +1,19 @@
 import React, { useContext, useEffect, useRef, useState } from "react"
-import { showMessage } from "../helpers/actionsHelpers"
-import { createNewFolderItem, genUniqLocalId, getFavIconUrl, getTopVisitedFromHistory } from "../helpers/utils"
-import { DispatchContext, mergeStepsInHistory } from "../state/actions"
-import { Action, IAppState } from "../state/state"
+import { DispatchContext } from "../state/actions"
+import { IAppState } from "../state/state"
+import { showMessage } from "../helpers/actionsHelpersWithDOM"
+import { BookmarksAsPlainList, CustomBookmarkTreeNode, getBrowserBookmarks, importBrowserBookmarks, PlainListRecord } from "../helpers/importExportHelpers"
 import HistoryItem = chrome.history.HistoryItem
-
-// copy-paste Chrome types
-type CustomBookmarkTreeNode = {
-  checked?: boolean
-  mostVisited?: boolean
-
-  /** Optional. The 0-based position of this node within its parent folder.  */
-  index?: number;
-  /** Optional. When this node was created, in milliseconds since the epoch (new Date(dateAdded)).  */
-  dateAdded?: number;
-  /** The text displayed for the node. */
-  title: string;
-  /** Optional. The URL navigated to when a user clicks the bookmark. Omitted for folders.   */
-  url?: string;
-  /** Optional. When the contents of this folder last changed, in milliseconds since the epoch.   */
-  dateGroupModified?: number;
-  /** The unique identifier for the node. IDs are unique within the current profile, and they remain valid even after the browser is restarted.  */
-  id: string;
-  /** Optional. The id of the parent folder. Omitted for the root node.   */
-  parentId?: string;
-  /** Optional. An ordered list of children of this node.  */
-  children?: CustomBookmarkTreeNode[];
-  /**
-   * Optional.
-   * Since Chrome 37.
-   * Indicates the reason why this node is unmodifiable. The managed value indicates that this node was configured by the system administrator or by the custodian of a supervised
-   * user. Omitted if the node can be modified by the user and the extension (default).
-   */
-  unmodifiable?: any;
-}
-
-type PlainListRecord = {
-  breadcrumbs: CustomBookmarkTreeNode[]
-  folder: CustomBookmarkTreeNode
-}
-type BookmarksAsPlainList = PlainListRecord[]
 
 const recordToTitle = (rec: PlainListRecord) => {
   const res = rec.breadcrumbs.map(r => r.title).join(" / ")
   return res.length > 0 ? `${res} / ` : ""
 }
 
-const BookmarkList = (props: {
+const BookmarkList = (p: {
   historyItems: HistoryItem[],
   onClose: () => void
+  onBack?: () => void
 }) => {
   const dispatch = useContext(DispatchContext)
   // Refs for folder checkboxes to manipulate the DOM for indeterminate state
@@ -57,19 +22,9 @@ const BookmarkList = (props: {
   const [records, setPlainRecords] = useState<BookmarksAsPlainList>([])
 
   useEffect(() => {
-    const history = getTopVisitedFromHistory(props.historyItems, 1000)
-
-    // Fetch bookmark folders from Chrome API
-    chrome.bookmarks.getTree((bookmarks) => {
-      const root = bookmarks[0]
-      if (root.children) {
-        const plain: BookmarksAsPlainList = []
-        traverseTree(root.children, plain, [], history)
-        setPlainRecords(plain)
-      } else {
-        // No root???
-      }
-    })
+    getBrowserBookmarks((plain) => {
+      setPlainRecords(plain)
+    }, p.historyItems, dispatch)
   }, [])
 
   const handleFolderCheckChange = (recIndex: number, isChecked: boolean) => {
@@ -139,24 +94,11 @@ const BookmarkList = (props: {
   })
 
   const onImport = () => {
-    records.forEach(rec => {
-      if (rec.folder.checked) {
-
-        const items = rec.folder.children
-          ?.filter(item => item.checked && item.url)
-          .map(item => createNewFolderItem(item.url, item.title, getFavIconUrl(item.url)))
-
-        const newFolderId = genUniqLocalId()
-        dispatch({ type: Action.CreateFolder, newFolderId, title: rec.folder.title, items })
-      }
-      selectedBookmarksCount += rec.folder.children?.reduce<number>((acc, item) => item.checked ? acc + 1 : acc, 0) ?? 0
-    })
-
-    showMessage("Bookmarks imported", dispatch)
-    props.onClose()
+    importBrowserBookmarks(records, dispatch, false)
+    p.onClose()
   }
 
-  const onQuickImport = () => {
+  const onImportRecent = () => {
     let mostVisitedNum = 0
     records.forEach(rec => {
       rec.folder.children?.forEach(item => {
@@ -174,8 +116,42 @@ const BookmarkList = (props: {
     }
   }
 
+  const onSelectAll = () => {
+    const newRecords = records.map(rec => {
+      return {
+        ...rec,
+        folder: {
+          ...rec.folder,
+          checked: true,
+          children: rec.folder.children?.map(item => {
+            return {
+              ...item,
+              checked: true
+            }
+          })
+        }
+      }
+    })
+    setPlainRecords(newRecords)
+  }
+
+  const onImportAll = () => {
+    importBrowserBookmarks(records, dispatch, true)
+    p.onClose()
+  }
+
   return <>
-    <button className="btn__setting primary" style={{ marginLeft: 0 }} onClick={onQuickImport}>Quick import all "Recently visited"</button>
+    {
+      selectedBookmarksCount > 0
+        ? <button className="btn__setting primary" onClick={onImport}>Import {selectedBookmarksCount} selected bookmarks</button>
+        : <button className="btn__setting primary" disabled={true}>Select some bookmarks to import</button>
+    }
+    <button className="btn__setting" style={{ marginLeft: "8px" }} onClick={onSelectAll}>Select all bookmarks</button>
+    {
+      p.onBack && <button className="btn__setting borderless" style={{ marginLeft: "8px" }} onClick={p.onBack}>Go back</button>
+    }
+
+
     <div className="importing-bookmarks-list">
       {records.map((rec, recIndex) => (
         <div key={rec.folder.id}>
@@ -208,45 +184,26 @@ const BookmarkList = (props: {
           ? <button className="btn__setting primary" onClick={onImport}>Import {selectedBookmarksCount} selected bookmarks</button>
           : <button className="btn__setting primary" disabled={true}>Select some bookmarks to import</button>
       }
-      <button className="btn__setting" onClick={props.onClose}>Cancel</button>
+      <button className="btn__setting" style={{ marginLeft: "8px" }} onClick={onSelectAll}>Select all bookmarks</button>
+      <button className="btn__setting" style={{ marginLeft: "8px" }} onClick={p.onClose}>Skip</button>
     </p>
   </>
 }
 
-function traverseTree(nodes: CustomBookmarkTreeNode[], plainList: BookmarksAsPlainList, breadcrumbs: CustomBookmarkTreeNode[], history: HistoryItem[]) {
-  nodes.forEach(node => {
-    if (node.children && node.children.length > 0) {
-      plainList.push({
-        breadcrumbs,
-        folder: node
-      })
-      traverseTree(node.children, plainList, [...breadcrumbs, node], history)
-    } else {
-      node.mostVisited = history.some(hItem => node.url && hItem.url?.includes(node.url))
-    }
-  })
-}
-
-export function BookmarkImporter(props: {
+export function BookmarkImporter(p: {
   appState: IAppState;
+  onClose: () => void;
+  onBack?: () => void;
 }) {
 
-  const dispatch = useContext(DispatchContext)
-  const onClose = () => {
-    dispatch({ type: Action.UpdateAppState, newState: { page: "default" } })
-  }
-
   return (
-    <div className="importing-bookmarks">
-      <div onClick={onClose} className="importing-bookmarks__close">⨉</div>
-      <h1>Import existing bookmarks</h1>
-
-      <p style={{ fontSize: "18px", lineHeight: "26px" }}>
-        Tabme helps to keep your important links, just one-click away. <br/>
-        Boost your productivity by creating a central hub for your most-used project links.<br/>
-        Import only the bookmarks you use frequently to keep your workspace clean and efficient.<br/>
-      </p><br/>
-      <BookmarkList historyItems={props.appState.historyItems} onClose={onClose}/>
+    <div className="importing-bookmarks-screen">
+      {
+        !p.onBack && <div onClick={p.onClose} className="importing-bookmarks__close">⨉</div>
+      }
+      <h1>Importing browser bookmarks 📦</h1>
+      <h2>Select the bookmarks you'd like to import</h2>
+      <BookmarkList historyItems={p.appState.historyItems} onClose={p.onClose} onBack={p.onBack}/>
     </div>
   )
 }

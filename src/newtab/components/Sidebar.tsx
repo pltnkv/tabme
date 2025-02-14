@@ -1,17 +1,18 @@
 import React, { useContext, useEffect, useState } from "react"
-import { createFolder, showMessage } from "../helpers/actionsHelpers"
 import { SidebarHistory } from "./SidebarHistory"
 import { SidebarOpenTabs } from "./SidebarOpenTabs"
 import { isTabmeTab } from "../helpers/isTabmeTab"
-import { convertTabToItem, getCurrentData, scrollElementIntoView } from "../helpers/utils"
-import { DropdownMenu } from "./DropdownMenu"
+import { getCurrentData, scrollElementIntoView } from "../helpers/utils"
+import { DropdownMenu } from "./dropdown/DropdownMenu"
 import { CL } from "../helpers/classNameHelper"
 import { Action, IAppState } from "../state/state"
-import { DispatchContext, mergeStepsInHistory } from "../state/actions"
+import { DispatchContext } from "../state/actions"
 import IconClean from "../icons/clean.svg"
 import IconStash from "../icons/stash.svg"
 import IconPin from "../icons/pin.svg"
 import Tab = chrome.tabs.Tab
+import { convertTabToItem } from "../state/actionHelpers"
+import { createFolder, showMessage } from "../helpers/actionsHelpersWithDOM"
 
 export function Sidebar(props: {
   appState: IAppState;
@@ -135,8 +136,7 @@ const StashButton = React.memo((props: { tabs: Tab[] }) => {
         <DropdownMenu onClose={() => setConfirmationOpened(false)}
                       className="stash-confirmation-popup"
                       width={240}
-                      leftOffset={-200}
-                      topOffset={10}
+                      offset={{ top: -12, left: 4 }}
                       skipTabIndexes={true}>
           <div style={{ width: "100%" }}>
             <p>Place all open Tabs to a new Folder</p>

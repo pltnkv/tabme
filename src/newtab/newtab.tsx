@@ -1,11 +1,12 @@
 import React from "react"
 import { App } from "./components/App"
 import { setInitAppState } from "./state/state"
-import { applyTheme, getStateFromLS, ISavingAppState, saveStateThrottled } from "./state/storage"
+import { applyTheme, getStateFromLS, ISavingAppState, isBetaMode, saveStateThrottled } from "./state/storage"
 import { apiGetDashboard, loadFromNetwork } from "../api/api"
-import { preprocessSortedFolders } from "./helpers/dataConverters"
 import { createRoot } from "react-dom/client"
-import { getFirstSortedByPosition } from "./helpers/fractionalIndexes"
+import { getFirstSortedByPosition, insertBetween, regeneratePositions } from "./helpers/fractionalIndexes"
+import { ISpace } from "./helpers/types"
+import { genUniqLocalId } from "./state/actionHelpers"
 
 declare global {
   const __OVERRIDE_NEWTAB: boolean
@@ -34,7 +35,9 @@ if (loadFromNetwork()) {
 function runLocally() {
   // loading state from LS
   getStateFromLS((res) => {
+    migrateToSpaces(res)
     preprocessLoadedState(res)
+    disableHideItemFunctionality(res)
     setInitAppState(res)
     mountApp()
   })
@@ -44,13 +47,33 @@ function mountApp() {
   const root = createRoot(document.getElementById("root")!)
   root.render(
     // <React.StrictMode>
-      <App/>
+    <App/>
     // </React.StrictMode>
   )
 }
 
+function migrateToSpaces(state: ISavingAppState) {
+  if (Array.isArray(state.folders)) {
+    const initSpace: ISpace = {
+      id: genUniqLocalId(),
+      title: "Bookmarks",
+      folders: regeneratePositions(state.folders.map(f => {
+        return {
+          ...f,
+          items: regeneratePositions(f.items)
+        }
+      })),
+      position: insertBetween("", "")
+    }
+    state.spaces = [initSpace]
+    state.folders = null! // to prevent the next migrations
+  }
+}
+
 function preprocessLoadedState(state: ISavingAppState): void {
+  ////////////////////////////////////////////////////////////
   // initialize app.stat
+  ////////////////////////////////////////////////////////////
   if (state.stat) { // not first run, need to update stat
     state.stat.sessionNumber++
     state.stat.lastVersion = chrome.runtime.getManifest().version
@@ -62,9 +85,9 @@ function preprocessLoadedState(state: ISavingAppState): void {
     }
   }
 
-  // todo check if no spaces exists
-
-  // Check if selected space exists
+  ////////////////////////////////////////////////////////////
+  // Making sure that selected space exists
+  ////////////////////////////////////////////////////////////
   const selectedSpace = state.spaces.find(s => s.id === state.currentSpaceId)
   if (!selectedSpace) {
     const firstSortedSpace = getFirstSortedByPosition(state.spaces)
@@ -73,8 +96,22 @@ function preprocessLoadedState(state: ISavingAppState): void {
     }
   }
 
+  ////////////////////////////////////////////////////////////
+  // Check if I beta
+  ////////////////////////////////////////////////////////////
+  state.betaMode = (state.spaces ?? []).length > 1 || isBetaMode()
+
+  ////////////////////////////////////////////////////////////
+  // Apply Dark Light Themes
+  ////////////////////////////////////////////////////////////
   applyTheme(state.colorTheme)
 
+  ////////////////////////////////////////////////////////////
   // save updated stat in state
+  ////////////////////////////////////////////////////////////
   saveStateThrottled(state)
+}
+
+function disableHideItemFunctionality(res: ISavingAppState) {
+  res.hiddenFeatureIsEnabled = res.spaces.some(s => s.folders.some(f => f.archived || f.items.some(i => i.archived)))
 }

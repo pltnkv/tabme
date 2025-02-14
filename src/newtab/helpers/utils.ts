@@ -1,10 +1,8 @@
 import Tab = chrome.tabs.Tab
 import HistoryItem = chrome.history.HistoryItem
-import { ColorTheme, IFolder, IFolderItem, IFolderItemToCreate, IObject, ISpace } from "./types"
-import React from "react"
+import { IFolderItem, ISpace } from "./types"
+import type React from "react"
 import { isTabmeTab } from "./isTabmeTab"
-import { IAppState } from "../state/state"
-import { insertBetween } from "./fractionalIndexes"
 
 export const SECTION_ICON_BASE64 = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIj4KICA8cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2ZmZiIgLz4KPC9zdmc+Cg==`
 
@@ -63,33 +61,6 @@ export function filterNonImportant(tab: Tab): boolean {
   )
 }
 
-export function convertTabToItem(item: Tab): IFolderItemToCreate {
-  return {
-    id: genUniqLocalId(),
-    favIconUrl: item.favIconUrl || "",
-    title: item.title || "",
-    url: item.url || ""
-  }
-}
-
-export function createNewFolderItem(url?: string, title?: string, favIconUrl?: string): IFolderItemToCreate {
-  return {
-    id: genUniqLocalId(),
-    favIconUrl: favIconUrl ?? "",
-    title: title ?? "",
-    url: url ?? ""
-  }
-}
-
-export function createNewSection(title = "Title"): IFolderItemToCreate {
-  return {
-    id: genUniqLocalId(),
-    favIconUrl: SECTION_ICON_BASE64,
-    title,
-    url: "",
-    isSection: true
-  }
-}
 
 export function filterTabsBySearch(
   list: Tab[],
@@ -133,8 +104,8 @@ export function isContainsSearch<T extends { title?: string, url?: string }>(
   item: T,
   searchValue: string
 ): boolean {
-  return item.title!.toLowerCase().includes(searchValue)
-    || item.url!.toLowerCase().includes(searchValue)
+  return item.title?.toLowerCase().includes(searchValue)
+    || item.url?.toLowerCase().includes(searchValue) || false
 }
 
 // const irrelecantHosts = [
@@ -246,12 +217,6 @@ export function getRandomHEXColor(): string {
   return colors[Math.round(Math.random() * (colors.length - 1))]
 }
 
-// does not work
-// todo replace later on "genNextRuntimeId" everywere
-export function genUniqLocalId(): number {
-  return (new Date()).valueOf() + Math.round(Math.random() * 10000000)
-}
-
 let runtimeIdCounter = 10000
 
 /**
@@ -319,51 +284,7 @@ function escapeRegex(s: string): string {
   return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&")
 }
 
-export function findItemById(appState: Pick<IAppState, "spaces">, itemId: number): IFolderItem | undefined {
-  let res: IFolderItem | undefined = undefined
-  appState.spaces.some(s => {
-    return s.folders.some(f => {
-      const item = f.items.find(i => i.id === itemId)
-      res = item
-      return !!item
-    })
-  })
 
-  return res
-}
-
-export function findFolderById(state: Pick<IAppState, "spaces">, folderId: number): IFolder | undefined {
-  let res: IFolder | undefined = undefined
-  state.spaces.some(s => {
-    res = s.folders.find(f => f.id === folderId)
-    return !!res
-  })
-
-  return res
-}
-
-export function findSpaceByFolderId(state: Pick<IAppState, "spaces">, folderId: number): ISpace | undefined {
-  return state.spaces.find(s => {
-    return !!s.folders.find(f => f.id === folderId)
-  })
-}
-
-export function findSpaceById(state: Pick<IAppState, "spaces">, spaceId: number): ISpace | undefined {
-  return state.spaces.find(s => s.id === spaceId)
-}
-
-export function findFolderByItemId(appState: Pick<IAppState, "spaces">, itemId: number): IFolder | undefined {
-  let res: IFolder | undefined = undefined
-  appState.spaces.some(s => {
-    const folder = s.folders.find(f => {
-      return f.items.find(i => i.id === itemId)
-    })
-    res = folder
-    return !!folder
-  })
-
-  return res
-}
 
 export function blurSearch(e: React.MouseEvent) {
   if (document.activeElement && document.activeElement === document.querySelector("input.search")) {
@@ -434,32 +355,29 @@ export function getTopVisitedFromHistory(history: HistoryItem[], limit = 20) {
   return sortedHistory.slice(0, limit)
 }
 
-export function getFavIconUrl(val?: string): string {
-  if (val) {
-    try {
-      return (new URL(val)).origin + "/favicon.ico"
-    } catch (e) {
-      return ""
-    }
-  } else {
-    return ""
-  }
-}
-
-export function isCustomActionItem(item: IFolderItem | undefined): boolean {
-  return item?.url.includes("tabme://") ?? false
-}
-
 export function scrollElementIntoView(selector:string) {
   requestAnimationFrame(() => {
-    const folderElement = document.querySelector(selector)
-    if (folderElement) {
-      folderElement.scrollIntoView()
+    const element = document.querySelector(selector)
+    if (element) {
+      const rect = element.getBoundingClientRect()
+      const viewportHeight = window.document.body.clientHeight
+      if (rect.bottom > viewportHeight) {
+        element.scrollIntoView({block: 'center', behavior: 'smooth'})
+      }
     }
   })
 }
 
-
+export function isSomeParentHaveClass(targetElement: HTMLElement | null, classOnParent:string): boolean {
+  let el = targetElement
+  while (el) {
+    if (el.classList.contains(classOnParent)) {
+      return true
+    }
+    el = el.parentElement
+  }
+  return false
+}
 
 export function getCurrentData() {
   const today = new Date()

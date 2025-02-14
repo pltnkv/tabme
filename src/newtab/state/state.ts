@@ -1,7 +1,6 @@
 import { ActionDispatcher } from "./actions"
 import { ColorTheme, IFolder, IFolderItem, IFolderItemToCreate, ISpace } from "../helpers/types"
-import { ISavingAppState, isBetaMode } from "./storage"
-import { loadFromNetwork } from "../../api/api"
+import { ISavingAppState } from "./storage"
 import Tab = chrome.tabs.Tab
 import HistoryItem = chrome.history.HistoryItem
 
@@ -75,9 +74,10 @@ export type IAppState = {
   colorTheme?: ColorTheme; // Stored in LS
   sidebarHovered: boolean; // for hover effects
   betaMode: boolean // IT MEANS SPACES & NETWORK ARE ENABLED
-  page: "default" | "import",
+  page: "default" | "import" | "welcome",
   stat: IAppStat | undefined // Stored in LS
   achievements: IAppAchievements  // Stored in LS
+  loaded: boolean
 
   // API
   apiCommandsQueue: APICommandPayloadFull[],
@@ -86,9 +86,20 @@ export type IAppState = {
 
   // undo actions (some single actions can be reverted only by set of actions)
   undoSteps: UndoStep[]
+
+  // saved data format version
+  version: number
+
+  /**
+   * depracated. DONT USE
+   */
+  folders: IFolder[]
+  hiddenFeatureIsEnabled: boolean
 };
 
 let initState: IAppState = {
+  version: 2,
+  folders: [],
   spaces: [],
   currentSpaceId: -1,
   historyItems: [],
@@ -103,13 +114,15 @@ let initState: IAppState = {
   openBookmarksInNewTab: false,
   sidebarCollapsed: false, //should be named "sidebarCollapsable"
   sidebarHovered: false,
-  betaMode: isBetaMode(),
+  betaMode: false,
+  loaded: false,
   page: "default",
   stat: {
     sessionNumber: 0,
     firstSessionDate: 0,
     lastVersion: ""
   },
+  hiddenFeatureIsEnabled: false,
   apiCommandsQueue: [],
   undoSteps: [],
   achievements: {
@@ -150,7 +163,7 @@ export function getInitAppState(): IAppState {
 export enum Action {
   InitDashboard = "init-dashboard",
   Undo = "undo",
-  ShowNotification = "show-notification",
+  ShowNotification = "show-notification", // todo !!!! fix. error can be overriding by next normal message. not clear for user
   HideNotification = "hide-notification",
   UpdateSearch = "update-search",
   UpdateTab = "tab-update",
@@ -160,17 +173,19 @@ export enum Action {
   UpdateShowArchivedItems = "update-show-hidden-items",
   UpdateShowNotUsedItems = "update-show-not-used-items",
   SelectSpace = "select-space",
+  FixBrokenIcons = "fix-broken-icons",
   UpdateAppState = "update-app-state", // generic way to set simple value into AppState
 
   // CRUD OPERATIONS — causes saving on server
   CreateSpace = "create-space",
   DeleteSpace = "delete-space",
   UpdateSpace = "update-space",
+  MoveSpace = "move-space",
 
   CreateFolder = "create-folder",
   DeleteFolder = "delete-folder",
   UpdateFolder = "update-folder",
-  MoveFolder = "move-folder", //todo how to move between spaces? what is space is shared?
+  MoveFolder = "move-folder",
 
   CreateFolderItem = "create-folder-item",
   CreateFolderItems = "create-folder-items",
@@ -204,30 +219,32 @@ export type ActionPayload = (
   | { type: Action.ShowNotification; message: string; button?: { onClick?: () => void; text: string }; isError?: boolean }
   | { type: Action.HideNotification }
   | { type: Action.UpdateSearch; value: string }
-  | { type: Action.InitDashboard; spaces?: ISpace[], sidebarCollapsed?: boolean, ignoreSaving?: boolean, init?: boolean }
+  | { type: Action.InitDashboard; spaces?: ISpace[], sidebarCollapsed?: boolean, saveToLS?: boolean, init?: boolean }
   | { type: Action.UpdateTab; tabId: number; opt: Tab; }
   | { type: Action.CloseTabs; tabIds: number[] }
   | { type: Action.SetTabsOrHistory; tabs?: Tab[]; history?: HistoryItem[] }
   | { type: Action.ToggleDarkMode }
   | { type: Action.UpdateShowArchivedItems; value: boolean }
   | { type: Action.UpdateShowNotUsedItems; value: boolean }
-  | { type: Action.SelectSpace; spaceId: number }
+  | { type: Action.FixBrokenIcons }
+  | { type: Action.SelectSpace; spaceId: number | undefined }
   | { type: Action.UpdateAppState; newState: Partial<IAppState> }
 
   | { type: Action.CreateSpace; spaceId: number; title: string; position?: string }
   | { type: Action.DeleteSpace; spaceId: number; }
+  | { type: Action.MoveSpace; spaceId: number; insertBeforeSpaceId: number | undefined; }
   | { type: Action.UpdateSpace; spaceId: number; title?: string; position?: string; }
 
-  | { type: Action.CreateFolder; newFolderId?: number; title?: string; color?: string; position?: string; items?: IFolderItemToCreate[]; }
+  | { type: Action.CreateFolder; newFolderId?: number; title?: string; color?: string; position?: string; items?: IFolderItemToCreate[]; spaceId?: number }
   | { type: Action.DeleteFolder; folderId: number; }
   | { type: Action.UpdateFolder; folderId: number; title?: string; color?: string; archived?: boolean; twoColumn?: boolean; position?: string }
-  | { type: Action.MoveFolder; folderId: number; insertBeforeFolderId: number | undefined; }
+  | { type: Action.MoveFolder; folderId: number; targetSpaceId: number, insertBeforeFolderId: number | undefined; }
 
-  | { type: Action.CreateFolderItem; folderId: number; itemIdInsertBefore: number | undefined; item: IFolderItemToCreate; }
+  | { type: Action.CreateFolderItem; folderId: number; insertBeforeItemId: number | undefined; item: IFolderItemToCreate; }
   | { type: Action.CreateFolderItems; folderId: number; items: IFolderItemToCreate[]; }
   | { type: Action.DeleteFolderItems; itemIds: number[] }
   | { type: Action.UpdateFolderItem; itemId: number; title?: string; archived?: boolean; url?: string }
-  | { type: Action.MoveFolderItems; itemIds: number[]; targetFolderId: number; itemIdInsertBefore: number | undefined; }
+  | { type: Action.MoveFolderItems; itemIds: number[]; targetFolderId: number; insertBeforeItemId: number | undefined; }
 
   | { type: Action.SaveBookmarksToCloud; }
 

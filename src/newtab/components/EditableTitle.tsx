@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { hlSearch } from "../helpers/utils"
 
 export function EditableTitle(p: {
@@ -68,6 +68,82 @@ export function EditableTitle(p: {
         />
         :
         <span onClick={p.onClick} className={p.className} dangerouslySetInnerHTML={hlSearch(p.localTitle, p.search)}/>
+    }
+  </>
+}
+
+export function SimpleEditableTitle(p: {
+  onClick?: () => void,
+  onContextMenu?: () => void,
+  className?: string,
+  inEdit: boolean,
+  value: string,
+  onSave: (title: string) => void,
+}) {
+  const [localValue, setLocalValue] = useState(p.value)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    setLocalValue(p.value)
+  }, [p.value])
+
+  useEffect(() => {
+    // Select all text when entering edit mode
+    if (p.inEdit && inputRef.current) {
+      inputRef.current.focus()
+      inputRef.current.select()
+    }
+  }, [p.inEdit])
+
+  useEffect(() => {
+    if (p.inEdit && inputRef.current) {
+      inputRef.current.style.width = localValue.length * 1.2 + "ch"
+    }
+  }, [p.inEdit, p.value, localValue, inputRef])
+
+  function handleTitleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setLocalValue(event.target.value)
+  }
+
+  function saveChange() {
+    p.onSave(localValue)
+  }
+
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    const isCmdEnter = event.metaKey && event.key === "Enter"
+    const isCtrlEnter = event.ctrlKey && event.key === "Enter"
+    const isEnter = event.key === "Enter" && !event.shiftKey
+    const isEscape = event.key === "Escape"
+
+    if (isEscape) {
+      if (p.onSave) {
+        setLocalValue(p.value)
+        p.onSave(p.value)
+      }
+    } else if (isEnter || isCmdEnter || isCtrlEnter) {
+      event.preventDefault() // Prevent the default action to avoid inserting a newline
+      saveChange()
+    }
+  }
+
+  return <>
+    {
+      p.inEdit ?
+        <input
+          tabIndex={2}
+          ref={inputRef}
+          onKeyDown={handleKeyDown}
+          onChange={handleTitleChange}
+          onBlur={saveChange}
+          value={localValue}
+        />
+        :
+        <span className={p.className}
+              onClick={p.onClick}
+              onContextMenu={(e) => {
+                e.preventDefault()
+                p.onContextMenu && p.onContextMenu()
+              }}>{localValue}</span>
     }
   </>
 }

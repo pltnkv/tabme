@@ -1,9 +1,8 @@
 import React, { useContext, useEffect, useRef, useState } from "react"
-import { blurSearch, findSpaceById, isTargetSupportsDragAndDrop } from "../helpers/utils"
+import { blurSearch, isContainsSearch, isTargetSupportsDragAndDrop } from "../helpers/utils"
 import { bindDADItemEffect } from "../helpers/dragAndDropItem"
-import { clickFolderItem, createFolder, getCanDragChecker } from "../helpers/actionsHelpers"
 import { Folder } from "./Folder"
-import { DropdownMenu } from "./DropdownMenu"
+import { DropdownMenu } from "./dropdown/DropdownMenu"
 import { handleBookmarksKeyDown, handleSearchKeyDown } from "../helpers/handleBookmarksKeyDown"
 import { Action, IAppState } from "../state/state"
 import { canShowArchived, DispatchContext, mergeStepsInHistory } from "../state/actions"
@@ -17,6 +16,8 @@ import { OverrideModal } from "./modals/OverrideModal"
 import { ShortcutsModal } from "./modals/ShortcutsModal"
 import { IFolder } from "../helpers/types"
 import { loadFromNetwork } from "../../api/api"
+import { findSpaceById } from "../state/actionHelpers"
+import { clickFolderItem, createFolder, getCanDragChecker } from "../helpers/actionsHelpersWithDOM"
 
 export function Bookmarks(p: {
   appState: IAppState;
@@ -63,21 +64,23 @@ export function Bookmarks(p: {
             folderId = createFolder(dispatch, undefined, undefined, historyStepId)
           }
 
+          // todo !!! support switching spaces like for folders
           dispatch({
             type: Action.MoveFolderItems,
             itemIds: targetsIds,
             targetFolderId: folderId,
-            itemIdInsertBefore: insertBeforeItemId,
+            insertBeforeItemId: insertBeforeItemId,
             historyStepId
           })
         })
 
         setMouseDownEvent(undefined)
       }
-      const onDropFolder = (folderId: number, insertBeforeFolderId: number | undefined) => {
+      const onDropFolder = (folderId: number, targetSpaceId: number | undefined, insertBeforeFolderId: number | undefined) => {
         dispatch({
           type: Action.MoveFolder,
           folderId,
+          targetSpaceId: targetSpaceId ?? p.appState.currentSpaceId,
           insertBeforeFolderId
         })
 
@@ -91,6 +94,13 @@ export function Bookmarks(p: {
         clickFolderItem(targetId, p.appState, dispatch, meta, p.appState.openBookmarksInNewTab)
       }
 
+      const onChangeSpace = (spaceId: number) => {
+        dispatch({
+          type: Action.SelectSpace,
+          spaceId
+        })
+      }
+
       const canDrag = getCanDragChecker(p.appState.search, dispatch)
       return bindDADItemEffect(mouseDownEvent,
         {
@@ -102,7 +112,9 @@ export function Bookmarks(p: {
         },
         {
           onDrop: onDropFolder,
-          onCancel
+          onCancel,
+          onChangeSpace,
+          onDragStarted: canDrag
         },
         canvasRef.current!
       )
@@ -146,11 +158,22 @@ export function Bookmarks(p: {
   }
 
   let folders: IFolder[] = []
-  const currentSpace = findSpaceById(p.appState, p.appState.currentSpaceId)
-  if (currentSpace) {
-    folders = p.appState.showArchived
-      ? currentSpace.folders ?? [] // just in case of broken data
-      : currentSpace.folders.filter(f => canShowArchived(p.appState) || !f.archived)
+  if (p.appState.search === "") {
+    const currentSpace = findSpaceById(p.appState, p.appState.currentSpaceId)
+    if (currentSpace) {
+      folders = p.appState.showArchived
+        ? currentSpace.folders ?? [] // just in case of broken data
+        : currentSpace.folders.filter(f => canShowArchived(p.appState) || !f.archived)
+    }
+  } else {
+    const searchValueLC = p.appState.search.toLowerCase()
+    p.appState.spaces.forEach(s => {
+      s.folders.forEach(f => {
+        if (isContainsSearch(f, searchValueLC) || f.items.some(i => isContainsSearch(i, searchValueLC))) {
+          folders.push(f)
+        }
+      })
+    })
   }
 
   return (
@@ -225,13 +248,13 @@ export function Bookmarks(p: {
             <IconSettings/>
           </button>
           {helpMenuVisibility ? (
-            <DropdownMenu onClose={() => {setHelpMenuVisibility(false)}} className="dropdown-menu--settings dropdown-menu--help" topOffset={30} noSmartPositioning={true}>
+            <DropdownMenu onClose={() => {setHelpMenuVisibility(false)}} noSmartPositioning={true} alignRight={true} offset={{ top: 14, right: 48 }}>
               <HelpOptions appState={p.appState} onShortcutsModal={() => setShortcutsModalOpen(true)}/>
             </DropdownMenu>
           ) : null}
 
           {settingsMenuVisibility ? (
-            <DropdownMenu onClose={() => {setSettingsMenuVisibility(false)}} className="dropdown-menu--settings" topOffset={30} noSmartPositioning={true}>
+            <DropdownMenu onClose={() => {setSettingsMenuVisibility(false)}} noSmartPositioning={true} alignRight={true} offset={{ top: 14 }}>
               <SettingsOptions appState={p.appState} onOverrideNewTabMenu={() => setOverrideModalOpen(true)}/>
             </DropdownMenu>
           ) : null}
@@ -249,6 +272,7 @@ export function Bookmarks(p: {
         {folders.map((folder) => (
           <Folder
             key={folder.id}
+            spaces={p.appState.spaces}
             folder={folder}
             tabs={p.appState.tabs}
             historyItems={p.appState.historyItems}
@@ -256,6 +280,7 @@ export function Bookmarks(p: {
             showArchived={p.appState.showArchived}
             search={p.appState.search}
             itemInEdit={p.appState.itemInEdit}
+            hiddenFeatureIsEnabled={p.appState.hiddenFeatureIsEnabled}
           />
         ))}
 
@@ -267,7 +292,9 @@ export function Bookmarks(p: {
                 <div className="folder-items-box" data-folder-id="-1"/>
               </div>
             )
-            : null
+            : (
+              folders.length === 0 ? <div style={{ marginLeft: "52px" }}>No search results</div> : null
+            )
         }
       </div>
     </div>

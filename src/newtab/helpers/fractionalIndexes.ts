@@ -8,7 +8,7 @@
 // instead. So "insertBetween('', positions[0])" inserts at the front and
 // "insertBetween(positions[positions.length - 1], '')" inserts at the back.
 
-import { loadFromNetwork } from "../../api/api"
+import { IFolderItem, IFolderItemToCreate, IObject } from "./types"
 
 export function insertBetween(before: string, after: string): string {
   // This demo uses "0" as the first digit and "9" as the last digit for
@@ -112,18 +112,38 @@ export function getFirstSortedByPosition<T>(foldersOrItems: T[]): T | undefined 
   return sortByPosition([...foldersOrItems])[0]
 }
 
-// function generatePositionForInsertionAt(i) {
-//   // Pass an empty string for any missing positions
-//   const prevPos = i > 0 ? this.sorted[i - 1].pos : ""
-//   const nextPos = i < this.sorted.length ? this.sorted[i].pos : ""
-//   return insertBetween(prevPos, nextPos)
-// }
-//
-// function insertBefore(i) {
-//   const newID = Math.random().toString(36).slice(2)
-//   this.db.set(newID, "pos", this.generatePositionForInsertionAt(i))
-// }
-//
-// function deleteAt(i) {
-//   this.db.set(this.sorted[i].id, "pos", null)
-// }
+export function addItemsToFolder(insertingItems: IFolderItemToCreate[], existingItems: IFolderItem[], insertBeforeItemId?: number): IFolderItem[] {
+  const insertBeforeItemIndex = existingItems.findIndex((item) => item.id === insertBeforeItemId)
+  // if insertBeforeItem not found — it means add to the end
+  const insertAfterItemIndex = insertBeforeItemIndex !== -1 ? insertBeforeItemIndex - 1 : existingItems.length - 1
+
+  let insertAfterItem = existingItems[insertAfterItemIndex]
+  let insertBeforeItem = existingItems[insertBeforeItemIndex]
+
+  const newItems: IFolderItem[] = []
+  insertingItems.forEach((insertingItem) => {
+    const item = insertFolderItem(insertingItem, insertAfterItem, insertBeforeItem)
+    insertAfterItem = item
+    newItems.push(item)
+  })
+
+  return sortByPosition([...existingItems, ...newItems])
+}
+
+function insertFolderItem(newItem: IFolderItemToCreate, insertAfterItem: IFolderItem | undefined, insertBeforeItem: IFolderItem | undefined): IFolderItem {
+  return {
+    ...newItem,
+    position: insertBetween(insertAfterItem?.position ?? "", insertBeforeItem?.position ?? "")
+  }
+}
+
+export function regeneratePositions<T extends IObject>(records: T[]): T[] {
+  let prevObject: IObject | undefined = undefined
+
+  records.forEach((obj) => {
+    obj.position = insertBetween(prevObject?.position ?? "", "")
+    prevObject = obj
+  })
+
+  return records
+}

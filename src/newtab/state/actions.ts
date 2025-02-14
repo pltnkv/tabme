@@ -1,20 +1,12 @@
 import { createContext } from "react"
 import { Action, ActionPayload, APICommandPayload, APICommandPayloadFull, HistoryActionPayload, IAppState, UndoStep } from "./state"
 import { unselectAll } from "../helpers/selectionUtils"
-import { ColorTheme, IFolder, IFolderItem, IFolderItemToCreate, ISpace } from "../helpers/types"
-import {
-  findFolderById,
-  findFolderByItemId,
-  findItemById,
-  findSpaceByFolderId,
-  findSpaceById,
-  genNextRuntimeId,
-  genUniqLocalId,
-  getRandomHEXColor
-} from "../helpers/utils"
+import { ColorTheme, IFolder, IFolderItem, ISpace } from "../helpers/types"
 import { applyTheme, saveStateThrottled, savingStateKeys } from "./storage"
-import { insertBetween, sortByPosition } from "../helpers/fractionalIndexes"
+import { addItemsToFolder, insertBetween, sortByPosition } from "../helpers/fractionalIndexes"
 import { loadFromNetwork } from "../../api/api"
+import { findFolderById, findFolderByItemId, findItemById, findSpaceByFolderId, findSpaceById, genUniqLocalId, updateFolder, updateFolderItem, updateSpace } from "./actionHelpers"
+import { genNextRuntimeId, getRandomHEXColor } from "../helpers/utils"
 
 type ObjectWithRemoteId = {
   remoteId: number
@@ -31,7 +23,7 @@ export function stateReducer(state: IAppState, action: ActionPayload): IAppState
 
   const haveSomethingToSave = savingStateKeys.some(key => state[key] !== newState[key])
   if (haveSomethingToSave) {
-    if (action.type !== Action.InitDashboard || !action.ignoreSaving) {
+    if (action.type !== Action.InitDashboard || action.saveToLS) {
       saveStateThrottled(newState)
     }
   }
@@ -40,7 +32,8 @@ export function stateReducer(state: IAppState, action: ActionPayload): IAppState
 
 function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
   //todo add error icon prop
-  const showNotificationReducer = (message: string, isError = false) => stateReducer0(state, { type: Action.ShowNotification, message, isError })
+  const showNotificationReducer = (message: string) => stateReducer0(state, { type: Action.ShowNotification, message, isError: false })
+  const showErrorReducer = (message: string) => stateReducer0(state, { type: Action.ShowNotification, message, isError: true })
 
   const getCommandsQueue = (state: IAppState, command: APICommandPayload): APICommandPayloadFull[] => {
     return [...state.apiCommandsQueue, {
@@ -164,9 +157,10 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
     }
 
     case Action.SelectSpace: {
+      const targetSpace = findSpaceById(state, action.spaceId)
       return {
         ...state,
-        currentSpaceId: action.spaceId
+        currentSpaceId: targetSpace?.id ?? state.spaces.at(0)?.id ?? -1
       }
     }
 
@@ -177,7 +171,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
 
     case Action.CreateSpace: {
       const lastSpace = state.spaces.at(-1)
-      // todo add network later !!!!
+      // todo add network later !!!
 
       const undoActions = getUndoAction(action, state, () => ({
         type: Action.DeleteSpace,
@@ -202,30 +196,30 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
     }
 
     case Action.DeleteSpace: {
-      // todo add network later !!!!
+      // todo add network later !!!
 
       const deletingSpace = findSpaceById(state, action.spaceId)
       if (!deletingSpace) {
-        console.error("deletingSpace not found") // todo replace all such message with red notifications
-        return state
+        return showErrorReducer("Deleting space not found")
       }
 
       // todo can be different when network supported
-      const undoActions = getUndoAction(action, state, () => ({
-        type: Action.CreateSpace,
-        spaceId: deletingSpace.id,
-        ...deletingSpace // todo !!!! support restoring folders with UNDO in space
-      }))
+      // const undoActions = getUndoAction(action, state, () => ({
+      //   type: Action.CreateSpace,
+      //   spaceId: deletingSpace.id,
+      //   ...deletingSpace // todo !!! support restoring folders with UNDO in space
+      // }))
 
       return {
         ...state,
-        spaces: state.spaces.filter((s) => s.id !== action.spaceId),
-        undoSteps: undoActions
+        currentSpaceId: state.currentSpaceId !== action.spaceId ? state.currentSpaceId : state.spaces[0].id,
+        spaces: state.spaces.filter((s) => s.id !== action.spaceId)
+        // undoSteps: undoActions
       }
     }
 
     case Action.UpdateSpace: {
-      // todo add network later !!!!
+      // todo add network later !!!
       const newProps: ISpace = {} as any
       if (typeof action.title !== "undefined") {
         newProps.title = action.title
@@ -237,7 +231,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       const targetSpace = findSpaceById(state, action.spaceId)
 
       if (!targetSpace) {
-        throw new Error(`Updating space not found`)
+        return showErrorReducer("Updating space not found")
       }
 
       const undoActions = getUndoAction(action, state, () => ({
@@ -254,15 +248,47 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       }
     }
 
+    case Action.MoveSpace: {
+      const movingSpace = findSpaceById(state, action.spaceId)
+      if (!movingSpace) {
+        return showErrorReducer(`Moving space not found`)
+      }
+
+      const insertBeforeSpaceIndex = state.spaces.findIndex(s => s.id === action.insertBeforeSpaceId)
+      const insertAfterSpaceIndex = insertBeforeSpaceIndex === -1 ? state.spaces.length - 1 : insertBeforeSpaceIndex - 1
+
+      // confusing naming detected
+      const newPosition = insertBetween(state.spaces[insertAfterSpaceIndex]?.position ?? "", state.spaces[insertBeforeSpaceIndex]?.position ?? "")
+
+      const spaces = updateSpace(state.spaces, action.spaceId, { position: newPosition })
+
+      let apiCommandsQueue = state.apiCommandsQueue
+      if (isNetworkAvailable()) {
+        // todo !!! impl later
+      }
+
+      const undoActions = getUndoAction(action, state, () => ({
+        type: Action.UpdateSpace,
+        spaceId: movingSpace.id,
+        position: movingSpace.position
+      }))
+
+      return {
+        ...state,
+        spaces: spaces,
+        apiCommandsQueue,
+        undoSteps: undoActions
+      }
+    }
+
     /********************************************************
      * FOLDERS CRUD
      ********************************************************/
 
     case Action.CreateFolder: {
-      const currentSpace = findSpaceById(state, state.currentSpaceId)
+      const currentSpace = findSpaceById(state, action.spaceId ?? state.currentSpaceId)
       if (!currentSpace) {
-        alert("Space not found")
-        return state
+        return showErrorReducer(`Space not found`)
       }
 
       const lastFolder = currentSpace.folders.at(-1)
@@ -305,7 +331,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       const parentSpace = findSpaceByFolderId(state, action.folderId)
 
       if (!deletingFolder || !parentSpace) {
-        throw new Error("Deleting folder not found")
+        return showErrorReducer(`Deleting folder or space not found`)
       }
 
       let apiCommandsQueue = state.apiCommandsQueue
@@ -359,7 +385,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       const targetFolder = findFolderById(state, action.folderId)
 
       if (!targetFolder) {
-        throw new Error(`Updating folder not found`)
+        return showErrorReducer(`Updating folder not found`)
       }
 
       let apiCommandsQueue = state.apiCommandsQueue
@@ -391,41 +417,57 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
     }
 
     case Action.MoveFolder: {
-      const currentSpace = findSpaceById(state, state.currentSpaceId)
-      const targetFolder = findFolderById(state, action.folderId)
-      if (!currentSpace || !targetFolder) {
-        alert("Current space or folder not found")
-        return state
+      const targetFolderSpace = findSpaceById(state, action.targetSpaceId)
+      const prevFolderSpace = findSpaceByFolderId(state, action.folderId)
+      const movingFolder = findFolderById(state, action.folderId)
+      if (!targetFolderSpace || !movingFolder || !prevFolderSpace) {
+        return showErrorReducer(`Space or folder not found`)
       }
 
-      const insertBeforeFolderIndex = currentSpace.folders.findIndex(f => f.id === action.insertBeforeFolderId)
-      const insertAfterFolderIndex = insertBeforeFolderIndex === -1 ? currentSpace.folders.length - 1 : insertBeforeFolderIndex - 1
+      const insertBeforeFolderIndex = targetFolderSpace.folders.findIndex(f => f.id === action.insertBeforeFolderId)
+      const insertAfterFolderIndex = insertBeforeFolderIndex === -1 ? targetFolderSpace.folders.length - 1 : insertBeforeFolderIndex - 1
 
-      const position = insertBetween(currentSpace.folders[insertAfterFolderIndex]?.position ?? "", currentSpace.folders[insertBeforeFolderIndex]?.position ?? "") // confusing//
-                                                                                                                                                                  // naming//
-                                                                                                                                                                  // detected
-      const spaces = updateFolder(state.spaces, action.folderId, { position }, true)
+      // confusing naming detected
+      const position = insertBetween(targetFolderSpace.folders[insertAfterFolderIndex]?.position ?? "", targetFolderSpace.folders[insertBeforeFolderIndex]?.position ?? "")
 
-      let apiCommandsQueue = state.apiCommandsQueue
-      if (isNetworkAvailable(targetFolder)) {
-        apiCommandsQueue = getCommandsQueue(state, {
-          type: Action.MoveFolder,
-          body: {
-            folderId: targetFolder.remoteId,
-            position: position
+      let spaces: ISpace[]
+      if (prevFolderSpace.id === targetFolderSpace.id) {
+        spaces = updateFolder(state.spaces, action.folderId, { position }, true)
+      } else {
+        spaces = state.spaces.map(s => {
+          if (s.id === prevFolderSpace.id) {
+            return {
+              ...s,
+              folders: s.folders.filter((f) => f.id !== action.folderId)
+            }
+          } else if (s.id === targetFolderSpace.id) {
+            return {
+              ...s,
+              folders: sortByPosition([...s.folders, {
+                ...movingFolder,
+                position
+              }])
+            }
+          } else {
+            return s
           }
         })
       }
 
+      let apiCommandsQueue = state.apiCommandsQueue
+      if (isNetworkAvailable(movingFolder)) {
+        //todo !!!
+      }
+
       const undoActions = getUndoAction(action, state, () => ({
         type: Action.UpdateFolder,
-        folderId: targetFolder.id,
-        position: targetFolder.position
+        folderId: movingFolder.id,
+        position: movingFolder.position
       }))
 
       return {
         ...state,
-        spaces: spaces,
+        spaces,
         apiCommandsQueue,
         undoSteps: undoActions
       }
@@ -437,7 +479,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
 
     case Action.CreateFolderItem: {
       const spaces = updateFolder(state.spaces, action.folderId, (folder) => {
-        const items = addItemsToFolder([action.item], folder.items, action.itemIdInsertBefore)
+        const items = addItemsToFolder([action.item], folder.items, action.insertBeforeItemId)
         return {
           ...folder,
           items
@@ -451,7 +493,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         //todo maybe we should not check presence of removeId at all here. and just let it be resolved async?
         // otherwise how I create folder with items in several actions?
         apiCommandsQueue = getCommandsQueue(state, {
-          type: Action.CreateFolderItem, // TODO USE DIFFERENT ACTION TYPES !!!!!!!!!!!!!!!!!!!!
+          type: Action.CreateFolderItem, // TODO USE DIFFERENT ACTION TYPES !!!
           body: {
             folderId: targetFolder.remoteId,
             item: createdItem
@@ -485,12 +527,11 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         })
       }
 
-      // TODO: Undo for deleting folders for network can be different
-      // !!!
-      // const undoActions = getUndoAction(action, state, () => ({
-      //   type: Action.CreateFolderItems,
-      //   item
-      // }))
+      // TODO: Undo for deleting folders for network should be different
+      const undoActions = getUndoAction(action, state, () => ({
+        type: Action.InitDashboard,
+        spaces: state.spaces
+      }))
 
       const deleteItemsFromFolders = (spaces: ISpace[], itemId: number): ISpace[] => {
         const folder = findFolderByItemId({ spaces }, itemId)
@@ -509,8 +550,8 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       return {
         ...state,
         spaces: action.itemIds.reduce(deleteItemsFromFolders, state.spaces),
-        apiCommandsQueue
-        // undoSteps: undoActions
+        apiCommandsQueue,
+        undoSteps: undoActions
       }
     }
 
@@ -529,12 +570,12 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       const originalItem = findItemById(state, action.itemId)
       if (!originalItem) {
         console.error("Item was not found for item:", action.itemId)
-        return state
+        return showErrorReducer("Item was not found")
       }
       const folderId = findFolderByItemId(state, action.itemId)?.id
       if (!folderId) {
         console.error("Folder was not found for item:", action.itemId)
-        return state
+        return showErrorReducer("Folder was not found")
       }
 
       let apiCommandsQueue = state.apiCommandsQueue
@@ -588,7 +629,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
 
       const spaces = updateFolder(spaceWithFolderWithRemovedItems, action.targetFolderId, folder => ({
         ...folder,
-        items: addItemsToFolder(movingItems, folder.items, action.itemIdInsertBefore)
+        items: addItemsToFolder(movingItems, folder.items, action.insertBeforeItemId)
       }))
 
       let apiCommandsQueue = state.apiCommandsQueue
@@ -596,7 +637,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
 
       if (isNetworkAvailable()) {
         if (!targetFolder?.remoteId || movingItems.some(item => !item.remoteId)) {
-          return showNotificationReducer("Network operation not available", true)
+          return showErrorReducer("Network operation not available")
         }
         apiCommandsQueue = getCommandsQueue(state, {
           type: Action.MoveFolderItems,
@@ -613,33 +654,17 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         })
       }
 
-      // Generate undo actions to restore each item to its original folder and position
-      // const undoActions = getUndoAction(action, state, () =>
-      //   originalPositions.map(pos => ({
-      //     type: Action.MoveFolderItems,
-      //     targetFolderId: pos.originalFolderId,
-      //     itemIds: [pos.itemId],
-      //     itemIdInsertBefore: pos.originalPosition
-      //   }))
-      // )
-
-      // const undoActions = getUndoAction(action, state, () => ({
-      //   type: Action.ShowNotification,
-      //   message: "Undo for moving items not supported yet", // todo fix it
-      //   isError: true
-      // }))
-
-      // todo: !!! Undo for moving items to folder not ready - fix it
-      // const undoActions = getUndoAction(action, state, () => ({
-      //   type: Action.UpdateAppState,
-      //   newState: { ...state }
-      // }))
+      //todo Generate undo actions to restore each item to its original folder and position
+      const undoActions = getUndoAction(action, state, () => ({
+        type: Action.InitDashboard,
+        spaces: state.spaces
+      }))
 
       return {
         ...state,
         spaces: spaces,
-        apiCommandsQueue
-        // undoSteps: undoActions
+        apiCommandsQueue,
+        undoSteps: undoActions
       }
     }
 
@@ -683,91 +708,6 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
 //////////////////////////////////////////////////////////////////////
 // UTILS
 //////////////////////////////////////////////////////////////////////
-
-function pipeActionsForStateOnly(state: IAppState, ...actions: ActionPayload[]): IAppState {
-  return actions.reduce(stateReducer0, state)
-}
-
-export function updateSpace(
-  spaces: ISpace[],
-  spaceId: number,
-  newSpace: Partial<ISpace> | ((space: ISpace) => ISpace)
-): ISpace[] {
-  return spaces.map((s) => {
-    if (s.id === spaceId) {
-      if (typeof newSpace === "function") {
-        return newSpace(s)
-      } else {
-        return { ...s, ...newSpace }
-      }
-    } else {
-      return s
-    }
-  })
-}
-
-export function updateFolder(
-  spaces: ISpace[],
-  folderId: number,
-  newFolder: Partial<IFolder> | ((folder: IFolder) => IFolder),
-  sortFolders = false
-): ISpace[] {
-  return spaces.map((space) => {
-    const hasTargetFolder = space.folders.find(f => f.id === folderId)
-    if (hasTargetFolder) {
-
-      const newFolders = space.folders.map((f) => {
-        if (f.id === folderId) {
-          if (typeof newFolder === "function") {
-            return newFolder(f)
-          } else {
-            return { ...f, ...newFolder }
-          }
-        } else {
-          return f
-        }
-      })
-
-      if (sortFolders) {
-        sortByPosition(newFolders)
-      }
-
-      return {
-        ...space,
-        folders: newFolders
-      }
-    } else {
-      return space
-    }
-  })
-}
-
-export function updateFolderItem(
-  spaces: ISpace[],
-  itemId: number,
-  newItemProps: Partial<IFolderItem>,
-  folderId?: number //just optimization
-): ISpace[] {
-  if (!folderId) {
-    const folder = findFolderByItemId({ spaces }, itemId)
-    if (!folder) {
-      console.error("updateFolderItem can not find folder item")
-      return spaces
-    }
-    folderId = folder.id
-  }
-  return updateFolder(spaces, folderId, (folder) => {
-    const items = folder.items.map((item) => {
-      if (item.id === itemId) {
-        return { ...item, ...newItemProps }
-      } else {
-        return item
-      }
-    })
-
-    return { ...folder, items }
-  })
-}
 
 export function canShowArchived(appState: Pick<IAppState, "search" | "showArchived">) {
   return appState.showArchived || appState.search.length > 0
@@ -816,27 +756,3 @@ function getUndoAction(currentAction: HistoryActionPayload, state: IAppState, ca
   }
 }
 
-function addItemsToFolder(insertingItems: IFolderItemToCreate[], existingItems: IFolderItem[], itemIdInsertBefore?: number): IFolderItem[] {
-  const insertBeforeItemIndex = existingItems.findIndex((item) => item.id === itemIdInsertBefore)
-  // if insertBeforeItem not found — it means add to the end
-  const insertAfterItemIndex = insertBeforeItemIndex !== -1 ? insertBeforeItemIndex - 1 : existingItems.length - 1
-
-  let insertAfterItem = existingItems[insertAfterItemIndex]
-  let insertBeforeItem = existingItems[insertBeforeItemIndex]
-
-  const newItems: IFolderItem[] = []
-  insertingItems.forEach((insertingItem) => {
-    const item = insertFolderItem(insertingItem, insertAfterItem, insertBeforeItem)
-    insertAfterItem = item
-    newItems.push(item)
-  })
-
-  return sortByPosition([...existingItems, ...newItems])
-}
-
-function insertFolderItem(newItem: IFolderItemToCreate, insertAfterItem: IFolderItem | undefined, insertBeforeItem: IFolderItem | undefined): IFolderItem {
-  return {
-    ...newItem,
-    position: insertBetween(insertAfterItem?.position ?? "", insertBeforeItem?.position ?? "")
-  }
-}

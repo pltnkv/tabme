@@ -1,6 +1,6 @@
 import { IFolderItem } from "./types"
 import { getGlobalAppState } from "../components/App"
-import { findItemById } from "./utils"
+import { findItemById } from "../state/actionHelpers"
 
 let selectedItemsElements: HTMLElement[] = []
 const SELECTOR = `folder-item--selected`
@@ -35,7 +35,6 @@ function unselectItemForced(el: HTMLElement) {
 }
 
 export function unselectAll() {
-  console.log('unselectAll')
   selectedItemsElements.forEach(item => unselectItemForced(item))
   selectedItemsElements.length = 0
 }

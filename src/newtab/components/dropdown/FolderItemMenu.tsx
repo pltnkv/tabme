@@ -1,17 +1,22 @@
 import React, { useContext, useEffect, useState } from "react"
-import { IFolderItem } from "../helpers/types"
-import { DropdownMenu } from "./DropdownMenu"
-import { showMessage, showMessageWithUndo } from "../helpers/actionsHelpers"
-import { getSelectedItems } from "../helpers/selectionUtils"
-import { Action } from "../state/state"
-import { DispatchContext, mergeStepsInHistory } from "../state/actions"
+import { IFolderItem, ISpace } from "../../helpers/types"
+import { DropdownMenu, DropdownSubMenu } from "./DropdownMenu"
+import { getSelectedItems } from "../../helpers/selectionUtils"
+import { Action } from "../../state/state"
+import { DispatchContext, mergeStepsInHistory } from "../../state/actions"
+import { getSpacesWithNestedFoldersList } from "./moveToHelpers"
+import { createFolder, showMessage, showMessageWithUndo } from "../../helpers/actionsHelpersWithDOM"
+import { findFolderByItemId } from "../../state/actionHelpers"
+import { scrollElementIntoView } from "../../helpers/utils"
 
 export const FolderItemMenu = React.memo((p: {
+  spaces: ISpace[],
   localTitle: string,
   setLocalTitle: (val: string) => void
   onSave: (title: string, url: string) => void,
   onClose: () => void,
   item: IFolderItem;
+  hiddenFeatureIsEnabled: boolean
 }) => {
   const dispatch = useContext(DispatchContext)
   const [selectedItems, setSelectedItems] = useState<IFolderItem[]>([])
@@ -86,17 +91,51 @@ export const FolderItemMenu = React.memo((p: {
     p.onClose()
   }
 
+  const moveToFolder = (folderId: number) => {
+
+    dispatch({
+      type: Action.MoveFolderItems,
+      itemIds: [p.item.id],
+      targetFolderId: folderId,
+      insertBeforeItemId: undefined
+    })
+
+    showMessage("Bookmarks has been moved", dispatch) // todo place all texts in a single file
+
+    scrollElementIntoView(`a[data-id="${p.item.id}"]`)
+
+    p.onClose()
+  }
+
+  const moveToNewFolder = (spaceId: number) => {
+    mergeStepsInHistory((historyStepId) => {
+      const folderId = createFolder(dispatch, undefined, undefined, historyStepId, spaceId)
+      dispatch({
+        type: Action.MoveFolderItems,
+        itemIds: [p.item.id],
+        targetFolderId: folderId,
+        insertBeforeItemId: undefined,
+        historyStepId
+      })
+    })
+
+    showMessage("Bookmarks has been moved", dispatch)
+
+    p.onClose()
+  }
+
   return <>
     {
       selectedItems.length > 1 ?
-        <DropdownMenu onClose={p.onClose} className={"dropdown-menu--folder-item"} topOffset={5}>
+        <DropdownMenu onClose={p.onClose} className={"dropdown-menu--folder-item"} offset={{ top: 5 , bottom: 32}}>
           <button className="dropdown-menu__button focusable" onClick={onOpenNewTab}>Open in New Tab</button>
           {
-            selectedItems.some(item => item.archived)
-              ?
-              <button className="dropdown-menu__button focusable" onClick={onRestore}>Unhide</button>
-              :
-              <button className="dropdown-menu__button focusable" onClick={onArchive}>Hide</button>
+            p.hiddenFeatureIsEnabled ? (selectedItems.some(item => item.archived)
+                ?
+                <button className="dropdown-menu__button focusable" onClick={onRestore}>Unhide</button>
+                :
+                <button className="dropdown-menu__button focusable" onClick={onArchive}>Hide</button>
+            ) : null
           }
 
           <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onDeleteItem}>Delete</button>
@@ -104,7 +143,7 @@ export const FolderItemMenu = React.memo((p: {
         :
         <>
           {p.item.isSection ?
-            <DropdownMenu onClose={onSaveAndClose} className={"dropdown-menu--folder-item dropdown-menu--folder-section"} topOffset={13}>
+            <DropdownMenu onClose={onSaveAndClose} className={"dropdown-menu--folder-item dropdown-menu--folder-section"} offset={{ top: 13, bottom: 32 }}>
               <label className="input-label">
                 <span>Title</span>
                 <input
@@ -115,14 +154,16 @@ export const FolderItemMenu = React.memo((p: {
                   onChange={e => p.setLocalTitle(e.target.value)}/>
               </label>
               {
-                p.item.archived
-                  ? <button className="dropdown-menu__button focusable" onClick={onRestore}>Unhide</button>
-                  : <button className="dropdown-menu__button focusable" onClick={onArchive}>Hide</button>
+                p.hiddenFeatureIsEnabled ? (
+                  p.item.archived
+                    ? <button className="dropdown-menu__button focusable" onClick={onRestore}>Unhide</button>
+                    : <button className="dropdown-menu__button focusable" onClick={onArchive}>Hide</button>
+                ) : null
               }
               <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onDeleteItem}>Delete</button>
             </DropdownMenu>
             :
-            <DropdownMenu onClose={onSaveAndClose} className={"dropdown-menu--folder-item"} topOffset={5} width={334}>
+            <DropdownMenu onClose={onSaveAndClose} className={"dropdown-menu--folder-item"} offset={{ top: 5, bottom: 32 }} width={334}>
               <label className="input-label">
                 <span>Title</span>
                 <input type="text"
@@ -141,10 +182,17 @@ export const FolderItemMenu = React.memo((p: {
               <button className="dropdown-menu__button focusable" onClick={onOpenNewTab}>Open in New Tab</button>
               <button className="dropdown-menu__button focusable" onClick={onCopyUrl}>Copy url</button>
               {
-                p.item.archived
-                  ? <button className="dropdown-menu__button focusable" onClick={onRestore}>Unhide</button>
-                  : <button className="dropdown-menu__button focusable" onClick={onArchive}>Hide</button>
+                p.hiddenFeatureIsEnabled ? (
+                  p.item.archived
+                    ? <button className="dropdown-menu__button focusable" onClick={onRestore}>Unhide</button>
+                    : <button className="dropdown-menu__button focusable" onClick={onArchive}>Hide</button>
+                ) : null
               }
+              <DropdownSubMenu
+                menuId={1}
+                title={"Move to"}
+                submenuContent={getSpacesWithNestedFoldersList(p.spaces, moveToFolder, moveToNewFolder, findFolderByItemId(p, p.item.id)?.id)}
+              />
               <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onDeleteItem}>Delete</button>
             </DropdownMenu>
           }

@@ -2,7 +2,7 @@ import React from "react"
 import { Modal } from "./Modal"
 
 export const OverrideModal = ({ isOverrideModalOpen, setOverrideModalOpen }:
-                         { isOverrideModalOpen: boolean, setOverrideModalOpen: (value: boolean) => void }) => {
+                                { isOverrideModalOpen: boolean, setOverrideModalOpen: (value: boolean) => void }) => {
   return (
     __OVERRIDE_NEWTAB
       ?
@@ -18,7 +18,8 @@ export const OverrideModal = ({ isOverrideModalOpen, setOverrideModalOpen }:
             <li>Uninstall current "Tabme" extension. <br/>
               <span>Go to "Manage extensions" from your browser. Find the card for Tabme and click "Remove"</span></li>
             <li>Install "<a href="https://chromewebstore.google.com/detail/tabme-%E2%80%94-version-without-n/jjdbikbbknmhkknpfnlhgpcikbfjldee">Tabme — version without newtab</a>"
-              extension
+              extension.<br/>
+              <span>Choose "No, start fresh" option in the onboarding</span>
             </li>
             <li>[optional] Import saved bookmarks.<br/>
               <span>Settings → Import from JSON</span></li>

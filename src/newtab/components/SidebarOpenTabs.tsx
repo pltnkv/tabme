@@ -1,24 +1,16 @@
 import React, { memo, useContext, useEffect, useState } from "react"
-import {
-  blurSearch,
-  convertTabToItem,
-  extractHostname,
-  filterTabsBySearch,
-  findSpaceById,
-  hlSearch,
-  isTargetSupportsDragAndDrop,
-  removeUselessProductName,
-  scrollElementIntoView
-} from "../helpers/utils"
-import { bindDADItemEffect, getDraggedItemId } from "../helpers/dragAndDropItem"
-import { createFolder, getCanDragChecker, showMessage } from "../helpers/actionsHelpers"
+import { blurSearch, extractHostname, filterTabsBySearch, hlSearch, isTargetSupportsDragAndDrop, removeUselessProductName, scrollElementIntoView } from "../helpers/utils"
+import { bindDADItemEffect } from "../helpers/dragAndDropItem"
 import { IFolderItem, ISpace } from "../helpers/types"
 import { DispatchContext, mergeStepsInHistory } from "../state/actions"
 import { Action } from "../state/state"
 import IconSaved from "../icons/saved.svg"
-import Tab = chrome.tabs.Tab
-import { DropdownMenu } from "./DropdownMenu"
+import { DropdownMenu, DropdownSubMenu } from "./dropdown/DropdownMenu"
 import { CL } from "../helpers/classNameHelper"
+import { getFoldersList } from "./dropdown/moveToHelpers"
+import { convertTabToItem, findSpaceByFolderId } from "../state/actionHelpers"
+import { createFolder, getCanDragChecker, showMessage } from "../helpers/actionsHelpersWithDOM"
+import Tab = chrome.tabs.Tab
 
 export const SidebarOpenTabs = memo((props: {
   search: string;
@@ -32,7 +24,7 @@ export const SidebarOpenTabs = memo((props: {
 
   useEffect(() => {
     if (mouseDownEvent) {
-      const onDrop = (folderId: number, itemIdInsertBefore: number | undefined, targetTabsIds: number[]) => {
+      const onDrop = (folderId: number, insertBeforeItemId: number | undefined, targetTabsIds: number[]) => {
         const targetTabId = targetTabsIds[0] // we support D&D only single element from sidebar
         const tab = props.tabs.find((t) => t.id === targetTabId)
 
@@ -45,7 +37,7 @@ export const SidebarOpenTabs = memo((props: {
           dispatch({
             type: Action.CreateFolderItem,
             folderId,
-            itemIdInsertBefore,
+            insertBeforeItemId,
             item
           })
 
@@ -141,7 +133,8 @@ export const SidebarOpenTabs = memo((props: {
 })
 
 const TabItem = (p: {
-  tab: Tab, lastActiveTabId: number,
+  tab: Tab,
+  lastActiveTabId: number,
   spaces: ISpace[],
   search: string,
   onCloseTab: (tabId: number) => void
@@ -170,7 +163,6 @@ const TabItem = (p: {
 
   const hideMenu = () => {
     setShowMenu(false)
-    setVisibleSubMenuId(-1)
   }
 
   const onTabContextMenu = (e: React.MouseEvent) => {
@@ -186,17 +178,18 @@ const TabItem = (p: {
 
   const onMenuCopyClicked = (e: React.MouseEvent) => {
     navigator.clipboard.writeText(p.tab.url ?? "")
-    showMessage("URL has been copied", dispatch) // !!!!! place all texts in a single file
+    showMessage("URL has been copied", dispatch) // !!! place all texts in a single file
     hideMenu()
   }
 
   const moveToFolder = (folderId: number) => {
     const item = convertTabToItem(p.tab)
+    const targetSpaceId = findSpaceByFolderId(p, folderId)?.id
 
     dispatch({
       type: Action.CreateFolderItem,
       folderId,
-      itemIdInsertBefore: undefined,
+      insertBeforeItemId: undefined,
       item
     })
 
@@ -207,57 +200,87 @@ const TabItem = (p: {
       }
     })
 
-    dispatch({
-      type: Action.SelectSpace,
-      spaceId: visibleSubMenuId
-    })
+    // todo !!! switching space after creation does not work
+    if (targetSpaceId) {
+      dispatch({
+        type: Action.SelectSpace,
+        spaceId: targetSpaceId
+      })
+    }
 
     scrollElementIntoView(`a[data-id="${item.id}"]`)
 
     hideMenu()
   }
 
-  const selectedSpaceSubmenuFolders = findSpaceById({ spaces: p.spaces }, visibleSubMenuId)?.folders ?? []
+  const moveToNewFolder = (spaceId: number) => {
+    mergeStepsInHistory((historyStepId) => {
+      const folderId = createFolder(dispatch, undefined, undefined, historyStepId, spaceId)
+      moveToFolder(folderId)
+    })
+  }
 
   let shortenedTitle = removeUselessProductName(p.tab.title)
   let domain = extractHostname(p.tab.url)
   const folderTitles = findFoldersTitlesWhereTabSaved(p.tab, p.spaces)
 
-  return (<div
-    key={p.tab.id}
-    style={{ backgroundColor: getBgColor(p.tab.id) }}
-    className={CL("inbox-item draggable-item", {
-      "active": showMenu
-    })}
-    data-id={p.tab.id}
-    onContextMenu={onTabContextMenu}
-  >
-    <img src={p.tab.favIconUrl} alt=""/>
-    <div className="inbox-item__text">
-      <div className="inbox-item__title"
-           title={p.tab.title}
-           dangerouslySetInnerHTML={hlSearch(shortenedTitle, p.search)}/>
-      <div className="inbox-item__url"
-           title={p.tab.url}
-           dangerouslySetInnerHTML={hlSearch(domain, p.search)}/>
+  return (
+    <div
+      key={p.tab.id}
+      style={{ backgroundColor: getBgColor(p.tab.id) }}
+      className={CL("inbox-item draggable-item", {
+        "active": showMenu
+      })}
+      data-id={p.tab.id}
+      onContextMenu={onTabContextMenu}
+    >
+      <img src={p.tab.favIconUrl} alt=""/>
+      <div className="inbox-item__text">
+        <div className="inbox-item__title"
+             title={p.tab.title}
+             dangerouslySetInnerHTML={hlSearch(shortenedTitle, p.search)}/>
+        <div className="inbox-item__url"
+             title={p.tab.url}
+             dangerouslySetInnerHTML={hlSearch(domain, p.search)}/>
+        {
+          folderTitles
+            ? <div className="inbox-item__already-saved">Already saved in {folderTitles}</div>
+            : null
+        }
+      </div>
+      <div onClick={() => p.onCloseTab(p.tab.id!)} className="inbox-item__close stop-click-propagation2 stop-dad-propagation" title="Close tab">⨉</div>
       {
-        folderTitles
-          ? <div className="inbox-item__already-saved">Already saved in {folderTitles}</div>
-          : null
+        folderTitles ? <IconSaved className="saved-tab-icon"></IconSaved> : null
       }
-    </div>
-    <div onClick={() => p.onCloseTab(p.tab.id!)} className="inbox-item__close stop-click-propagation2 stop-dad-propagation" title="Close tab">⨉</div>
-    {
-      folderTitles ? <IconSaved className="saved-tab-icon"></IconSaved> : null
-    }
 
-    {showMenu ? (
-      <DropdownMenu onClose={hideMenu} className="stop-dad-propagation" topOffset={20} leftOffset={-1}>
-        <button className="dropdown-menu__button focusable" onClick={onMenuCopyClicked}>Copy url</button>
-        <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onMenuCloseClicked}>Close tab</button>
-      </DropdownMenu>
-    ) : null}
-  </div>)
+      {showMenu ? (
+        <DropdownMenu onClose={hideMenu} className="stop-dad-propagation" offset={{top: -16, left: -8}}>
+          {
+            p.spaces.length === 1
+              ? (<DropdownSubMenu
+                menuId={1}
+                title={"Save to"}
+                submenuContent={getFoldersList(p.spaces[0], moveToFolder, moveToNewFolder)}
+              />)
+              : p.spaces.map(s => {
+                return <DropdownSubMenu
+                  menuId={s.id}
+                  title={`Save to "${s.title}"`}
+                  submenuContent={getFoldersList(s, moveToFolder, moveToNewFolder)}
+                />
+              })
+          }
+
+          <button className="dropdown-menu__button focusable" onClick={onMenuCopyClicked}>
+            Copy url
+          </button>
+          <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onMenuCloseClicked}>
+            Close tab
+          </button>
+        </DropdownMenu>
+      ) : null}
+    </div>
+  )
 }
 
 function findFoldersTitlesWhereTabSaved(curTab: Tab, spaces: ISpace[]): string {

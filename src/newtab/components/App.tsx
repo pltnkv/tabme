@@ -4,8 +4,8 @@ import { Sidebar } from "./Sidebar"
 import { Notification } from "./Notification"
 import { KeyboardManager } from "./KeyboardManager"
 import { filterIrrelevantHistory } from "../helpers/utils"
-import { Welcome } from "./Welcome"
-import { tryToCreateWelcomeFolder } from "../helpers/welcomeLogic"
+import { ImportBookmarksFromSettings } from "./ImportBookmarksFromSettings"
+import { createWelcomeFolder } from "../helpers/welcomeLogic"
 import { Action, getInitAppState, IAppState } from "../state/state"
 import { DispatchContext, stateReducer } from "../state/actions"
 import { getBC, getStateFromLS } from "../state/storage"
@@ -13,6 +13,8 @@ import { executeAPICall } from "../../api/serverCommands"
 import Tab = chrome.tabs.Tab
 import { apiGetToken } from "../../api/api"
 import HistoryItem = chrome.history.HistoryItem
+import { CL } from "../helpers/classNameHelper"
+import { Welcome } from "./Welcome"
 
 let notificationTimeout: number | undefined
 let globalAppState: IAppState
@@ -24,24 +26,25 @@ export function getGlobalAppState(): IAppState {
 export function App() {
   const [appState, dispatch] = useReducer(stateReducer, getInitAppState())
 
-  function updateHistory() {
-    const offset = 1000 * 60 * 60 * 24 * 60 //1000ms * 60sec *  60min * 24h * 60d
-    const startTime = Date.now() - offset
-    chrome.history.search({ text: "", maxResults: 10000, startTime }, function(data) {
-      // logging top 3 visited sides
-      // console.log(data.slice(0, 3))
-      const historyItems = filterIrrelevantHistory(data)
-      dispatch({
-        type: Action.SetTabsOrHistory,
-        history: historyItems //filterOpenedTabsFromHistory(tabs, data)
-      })
-    })
-  }
-
   useEffect(() => {
     // hack for getting last instance of appState in "getBC().onmessage" callback
     globalAppState = appState
   })
+
+  useEffect(() => {
+    // hack for getting last instance of appState in "getBC().onmessage" callback
+    if (appState.betaMode) {
+      document.body.classList.add("beta")
+    }
+  }, [appState.betaMode])
+
+  useEffect(() => {
+    if (appState.loaded) {
+      requestAnimationFrame(() => {
+        document.body.classList.add("app-loaded")
+      })
+    }
+  }, [appState.loaded])
 
   useEffect(function() {
 
@@ -58,8 +61,14 @@ export function App() {
       })
       dispatch({ type: Action.UpdateAppState, newState: { lastActiveTabIds } })
       dispatch({ type: Action.UpdateAppState, newState: { currentWindowId } })
+      dispatch({ type: Action.UpdateAppState, newState: { version: 2 } })
+      dispatch({ type: Action.UpdateAppState, newState: { loaded: true } })
 
-      tryToCreateWelcomeFolder(appState, dispatch)
+      // first open time
+      if (appState.stat?.sessionNumber === 1) {
+        dispatch({ type: Action.UpdateAppState, newState: { page: "welcome" } })
+        createWelcomeFolder(dispatch)
+      }
     })
 
     function onTabUpdated(tabId: number, info: Partial<Tab>, tab: Tab) {
@@ -81,10 +90,10 @@ export function App() {
       if (ev.data?.type === "folders-updated") {
         getStateFromLS((res) => {
           if (globalAppState.sidebarCollapsed !== res.sidebarCollapsed) {
-            dispatch({ type: Action.InitDashboard, sidebarCollapsed: res.sidebarCollapsed, ignoreSaving: true })
+            dispatch({ type: Action.InitDashboard, sidebarCollapsed: res.sidebarCollapsed, saveToLS: false })
           }
           if (JSON.stringify(globalAppState.spaces) !== JSON.stringify(res.spaces)) {
-            dispatch({ type: Action.InitDashboard, spaces: res.spaces, ignoreSaving: true })
+            dispatch({ type: Action.InitDashboard, spaces: res.spaces, saveToLS: false })
           }
         })
       }
@@ -149,16 +158,23 @@ export function App() {
 
   return (
     <DispatchContext.Provider value={dispatch}>
-      <div className={"app " + (appState.sidebarCollapsed ? "collapsible-sidebar" : "")}>
+      <div className={CL("app", {
+        "beta": appState.betaMode,
+        "collapsible-sidebar": appState.sidebarCollapsed
+      })}>
         <Notification notification={appState.notification}/>
         {
-          appState.page === "import"
-            ? <Welcome appState={appState}/>
-            : <>
-              <Sidebar appState={appState}/>
-              <Bookmarks appState={appState}/>
-              <KeyboardManager search={appState.search}/>
-            </>
+          appState.page === "welcome" && <Welcome appState={appState}/>
+        }
+        {
+          appState.page === "import" && <ImportBookmarksFromSettings appState={appState}/>
+        }
+        {
+          appState.page === "default" && <>
+            <Sidebar appState={appState}/>
+            <Bookmarks appState={appState}/>
+            <KeyboardManager search={appState.search}/>
+          </>
         }
       </div>
     </DispatchContext.Provider>
@@ -190,7 +206,11 @@ function getTabs() {
 function getLastActiveTabsIds() {
   return new Promise<number[]>((res) => {
     chrome.runtime.sendMessage({ type: "get-last-active-tabs" }, function(response) {
-      res(response.tabs)
+      if (response) {
+        res(response.tabs)
+      } else {
+        res([])
+      }
     })
   })
 }

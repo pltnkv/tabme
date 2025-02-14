@@ -1,7 +1,8 @@
 import { getSelectedItemsElements, selectItems, unselectAll } from "./selectionUtils"
+import { isSomeParentHaveClass } from "./utils"
 
 const DAD_THRESHOLD = 4
-type DropArea = { folderId: number, element: HTMLElement, rect: DOMRect, itemRects: { thresholdY: number, itemTop: number, itemHeight: number }[] }
+type DropArea = { objectId: number, element: HTMLElement, rect: DOMRect, itemRects: { thresholdY: number, itemTop: number, itemHeight: number }[] }
 
 let viewportWasScrolled = false //performance optimization
 let scrollByDummyClientY: number | undefined = undefined
@@ -16,8 +17,10 @@ export function bindDADItemEffect(
     onDragStarted: () => boolean // return false to prevent action. Previously was named canDrag()
   },
   folderConfig?: {
-    onDrop: (draggedFolderId: number, insertBeforeFolderId: number | undefined) => void,
+    onDrop: (draggedFolderId: number, targetSpaceId: number | undefined, insertBeforeFolderId: number | undefined) => void,
     onCancel: () => void,
+    onChangeSpace: (spaceId: number) => void,
+    onDragStarted: () => boolean // return false to prevent action. Previously was named canDrag()
   },
   canvasEl?: HTMLCanvasElement
 ) {
@@ -33,7 +36,7 @@ export function bindDADItemEffect(
     return runItemDragAndDrop(mouseDownEvent, targetRoots, itemConfig.isFolderItem, itemConfig.onDrop, itemConfig.onCancel, itemConfig.onClick, itemConfig.onDragStarted)
   } else if (folderConfig && targetFolderHeader && mouseDownEvent.button === 0) {
     unselectAll()
-    return runFolderDragAndDrop(mouseDownEvent, targetFolderHeader.parentElement!, folderConfig.onDrop, folderConfig.onCancel)
+    return runFolderDragAndDrop(mouseDownEvent, targetFolderHeader.parentElement!, folderConfig.onDrop, folderConfig.onCancel, itemConfig.onDragStarted, folderConfig.onChangeSpace)
   } else {
     const isInput = (mouseDownEvent.target as HTMLElement).tagName === "INPUT"
     if (canvasEl && mouseDownEvent.button === 0 && !isInput) {
@@ -172,7 +175,7 @@ function runItemDragAndDrop(
   mouseDownEvent: React.MouseEvent,
   targetRoots: HTMLElement[],
   isFolderItem: boolean,
-  onDrop: (folderId: number, itemIdInsertBefore: number | undefined, targetIds: number[]) => void,
+  onDrop: (folderId: number, insertBeforeItemId: number | undefined, targetIds: number[]) => void,
   onCancel: () => void,
   onClick: (targetId: number) => void,
   onDragStarted: () => boolean) {
@@ -182,21 +185,7 @@ function runItemDragAndDrop(
   const placeholder: HTMLElement = createPlaceholder(true)
 
   const folderEls = Array.from(document.querySelectorAll(".folder .folder-items-box"))
-  const calculateDropAreas = (): DropArea[] => folderEls.map((el) => ({
-    folderId: getFolderId(el as HTMLElement),
-    element: el as HTMLElement,
-    rect: el.getBoundingClientRect(),
-    itemRects: Array.from(el.children).map((item) => {
-      //todo support grid
-      const offsetTop = (item as HTMLElement).offsetTop
-      return {
-        thresholdY: offsetTop + item.clientHeight / 2,
-        itemTop: offsetTop,
-        itemHeight: item.clientHeight
-      }
-    })
-  }))
-  let dropAreas = calculateDropAreas()
+  let dropAreas = calculateFoldersDropAreas(folderEls, true)
 
   let prevBoxToDrop: HTMLElement | undefined = undefined
   let indexToDrop: number
@@ -205,7 +194,7 @@ function runItemDragAndDrop(
   const onMouseMove = (e: MouseEvent) => {
     if (viewportWasScrolled) {
       // recalculate drop areas if viewport was scrolled
-      dropAreas = calculateDropAreas()
+      dropAreas = calculateFoldersDropAreas(folderEls, true)
     }
     viewportWasScrolled = false
     scrollByDummyClientY = undefined
@@ -227,7 +216,7 @@ function runItemDragAndDrop(
       }
       if (curBoxToDrop && dropArea) {
         const res = getNewPlacementForItem(dropArea, e)
-        targetFolderId = dropArea.folderId
+        targetFolderId = dropArea.objectId
         const tryAddToOriginalPos = targetFolderId === originalFolderId && inRange(res.index, originalIndex, originalIndex + targetRoots.length)
         if (tryAddToOriginalPos) { //actual only for isFolderItem
           placeholder.style.top = `${dropArea.itemRects[originalIndex].itemTop}px`
@@ -274,8 +263,8 @@ function runItemDragAndDrop(
       const tryAddToOriginalPos = targetFolderId === originalFolderId && inRange(indexToDrop, originalIndex, originalIndex + targetRoots.length)
       if (prevBoxToDrop && !tryAddToOriginalPos) {
         const folderId = getFolderId(prevBoxToDrop)
-        const itemIdInsertBefore = getItemIdByIndex(prevBoxToDrop, indexToDrop)
-        onDrop(folderId, itemIdInsertBefore, getDraggedItemsIds(targetRoots))
+        const insertBeforeItemId = getItemIdByIndex(prevBoxToDrop, indexToDrop)
+        onDrop(folderId, insertBeforeItemId, getDraggedItemsIds(targetRoots))
       } else {
         onCancel()
       }
@@ -300,28 +289,27 @@ function runItemDragAndDrop(
 
 function runFolderDragAndDrop(mouseDownEvent: React.MouseEvent,
                               targetRoot: HTMLElement,
-                              onDrop: (draggedFolderId: number, insertBeforeFolderId: number | undefined) => void,
-                              onCancel: () => void) {
+                              onDrop: (draggedFolderId: number, targetSpaceId: number | undefined, insertBeforeFolderId: number | undefined) => void,
+                              onCancel: () => void,
+                              onDragStarted: () => boolean,
+                              onChangeSpace: (spaceId: number) => void) {
 
   let dummy: undefined | HTMLElement = undefined
   const placeholder: HTMLElement = createPlaceholder(false)
-
   const folderEls = Array.from(document.querySelectorAll(".folder:not(.folder--new)"))
-  const calculateDropAreas = (): DropArea[] => folderEls.map((el) => ({
-    folderId: getFolderId(el as HTMLElement),
-    element: el as HTMLElement,
-    rect: el.getBoundingClientRect(),
-    itemRects: null! // not needed for folder
-  }))
-  let dropAreas = calculateDropAreas()
+  let dropFoldersAreas = calculateFoldersDropAreas(folderEls)
+  let dropSpacesAreas = calculateSpacesDropAreas()
+  let prevSpaceDropArea: DropArea | undefined = undefined
   let dropArea: DropArea | undefined = undefined
   const draggingFolderId = getFolderId(targetRoot)
   let targetInsertBeforeFolderId: number | undefined
+  let lastSelectedSpaceId: number | undefined
 
   const onMouseMove = (e: MouseEvent) => {
     if (viewportWasScrolled) {
       // recalculate drop areas if viewport was scrolled
-      dropAreas = calculateDropAreas()
+      const folderEls = Array.from(document.querySelectorAll(".folder:not(.folder--new)"))
+      dropFoldersAreas = calculateFoldersDropAreas(folderEls)
     }
 
     viewportWasScrolled = false
@@ -331,23 +319,39 @@ function runFolderDragAndDrop(mouseDownEvent: React.MouseEvent,
       // move dummy
       dummy.style.transform = `translateX(${e.clientX + "px"}) translateY(${e.clientY + "px"})`
 
-      // find target position
-      dropArea = getOverlappedDropArea(dropAreas, e)
-      if (dropArea) {
-        const insertBefore = e.clientX < dropArea.rect.left + dropArea.rect.width / 2
-        targetInsertBeforeFolderId = calculateTargetInsertBeforeFolderId(dropAreas, dropArea, insertBefore)
+      const spaceDropArea = getOverlappedSpaceDropArea(dropSpacesAreas, e)
 
-        if (dropArea.folderId !== draggingFolderId) {
-          const leftShift = 10
-          dropArea.element.parentElement?.appendChild(placeholder)
-          placeholder.style.top = `${dropArea.element.offsetTop + 22}px`
-          placeholder.style.left = insertBefore ? `${dropArea.element.offsetLeft + leftShift}px` : `${dropArea.element.offsetLeft + dropArea.element.clientWidth + leftShift}px`
-          placeholder.style.height = `${dropArea.element.clientHeight - 80}px`
+      if (spaceDropArea) {
+        if (spaceDropArea !== prevSpaceDropArea) {
+          prevSpaceDropArea = spaceDropArea
+          onChangeSpace(spaceDropArea.objectId)
+          lastSelectedSpaceId = spaceDropArea.objectId
+          requestAnimationFrame(() => {
+            viewportWasScrolled = true
+          })
+        }
+        placeholder.remove()
+        dropArea = undefined
+      } else {
+        prevSpaceDropArea = undefined
+        dropArea = getOverlappedDropArea(dropFoldersAreas, e)
+        if (dropArea) {
+          const insertBefore = e.clientX < dropArea.rect.left + dropArea.rect.width / 2
+          targetInsertBeforeFolderId = calculateTargetInsertBeforeFolderId(dropFoldersAreas, dropArea, insertBefore)
+          console.log("targetInsertBeforeFolderId", targetInsertBeforeFolderId)
+
+          if (dropArea.objectId !== draggingFolderId) {
+            const leftShift = 10
+            dropArea.element.parentElement?.appendChild(placeholder)
+            placeholder.style.top = `${dropArea.element.offsetTop + 22}px`
+            placeholder.style.left = insertBefore ? `${dropArea.element.offsetLeft + leftShift}px` : `${dropArea.element.offsetLeft + dropArea.element.clientWidth + leftShift}px`
+            placeholder.style.height = `${dropArea.element.clientHeight - 80}px`
+          } else {
+            placeholder.remove()
+          }
         } else {
           placeholder.remove()
         }
-      } else {
-        placeholder.remove()
       }
 
       scrollByDummyClientY = e.clientY
@@ -356,10 +360,15 @@ function runFolderDragAndDrop(mouseDownEvent: React.MouseEvent,
         Math.abs(mouseDownEvent.clientX - e.clientX) > DAD_THRESHOLD ||
         Math.abs(mouseDownEvent.clientY - e.clientY) > DAD_THRESHOLD
       ) {
+        if (!onDragStarted()) {
+          unsubscribeEvents()
+          return
+        }
+
         //create dummy
         dummy = createFolderDummy(targetRoot, mouseDownEvent)
         dummy.style.transform = `translateX(${e.clientX + "px"}) translateY(${e.clientY + "px"})`
-        targetRoot.style.opacity = "0"
+        targetRoot.style.opacity = "0.2"
         document.body.classList.add("dragging")
         document.body.append(dummy)
       }
@@ -373,8 +382,8 @@ function runFolderDragAndDrop(mouseDownEvent: React.MouseEvent,
       dummy.remove()
       placeholder.remove()
       targetRoot.style.removeProperty("opacity")
-      if (dropArea && draggingFolderId !== targetInsertBeforeFolderId) {
-        onDrop(draggingFolderId, targetInsertBeforeFolderId)
+      if (dropArea) {
+        onDrop(draggingFolderId, lastSelectedSpaceId, targetInsertBeforeFolderId)
       } else {
         onCancel()
       }
@@ -407,6 +416,17 @@ function getOverlappedDropArea(dropAreas: DropArea[], e: MouseEvent): DropArea |
   })
 }
 
+function getOverlappedSpaceDropArea(dropAreas: DropArea[], e: MouseEvent): DropArea | undefined {
+  return dropAreas.find((da) => {
+    return (
+      da.rect.left < e.clientX &&
+      e.clientX < da.rect.right &&
+      da.rect.top < e.clientY &&
+      e.clientY < da.rect.bottom
+    )
+  })
+}
+
 function getNewPlacementForItem(dropArea: DropArea, e: MouseEvent): { placeholderY: number, index: number } {
   const deltaY = e.clientY - dropArea.rect.y
 
@@ -430,10 +450,10 @@ function getNewPlacementForItem(dropArea: DropArea, e: MouseEvent): { placeholde
  */
 function calculateTargetInsertBeforeFolderId(dropAreas: DropArea[], dropArea: DropArea, insertBefore: boolean): number | undefined {
   if (insertBefore) {
-    return dropArea.folderId
+    return dropArea.objectId
   } else {
     const indexOfNextDropArea = dropAreas.indexOf(dropArea) + 1
-    return indexOfNextDropArea < dropAreas.length ? dropAreas[indexOfNextDropArea].folderId : undefined
+    return indexOfNextDropArea < dropAreas.length ? dropAreas[indexOfNextDropArea].objectId : undefined
   }
 }
 
@@ -482,18 +502,15 @@ function isDraggableFolderHeader(targetElement: HTMLElement | null): boolean {
 }
 
 function doStopPropagation(targetElement: HTMLElement | null): boolean {
-  let el = targetElement
-  while (el) {
-    if (el.classList.contains("stop-dad-propagation")) {
-      return true
-    }
-    el = el.parentElement
-  }
-  return false
+  return isSomeParentHaveClass(targetElement, "stop-dad-propagation")
 }
 
 function getFolderId(dropAreaElement: HTMLElement): number {
   return parseInt(dropAreaElement.dataset.folderId!)
+}
+
+function getSpaceId(dropAreaElement: HTMLElement): number {
+  return parseInt(dropAreaElement.dataset.spaceId!)
 }
 
 export function getDraggedItemsIds(targets: HTMLElement[]): number[] {
@@ -536,9 +553,41 @@ function createTabDummy(targetRoots: HTMLElement[], mouseDownEvent: React.MouseE
   return dummy
 }
 
+function calculateFoldersDropAreas(folderEls: Element[], calcItemRects = false): DropArea[] {
+  return folderEls.map((el) => ({
+    objectId: getFolderId(el as HTMLElement),
+    element: el as HTMLElement,
+    rect: el.getBoundingClientRect(),
+    itemRects: calcItemRects ? Array.from(el.children).map((item) => {
+      //todo support grid
+      const offsetTop = (item as HTMLElement).offsetTop
+      return {
+        thresholdY: offsetTop + item.clientHeight / 2,
+        itemTop: offsetTop,
+        itemHeight: item.clientHeight
+      }
+    }) : null!
+  }))
+}
+
+function calculateSpacesDropAreas(): DropArea[] {
+  const spacesEls = Array.from(document.querySelectorAll(".spaces-list__item"))
+  return spacesEls.map((el) => ({
+    objectId: getSpaceId(el as HTMLElement),
+    element: el as HTMLElement,
+    rect: el.getBoundingClientRect(),
+    itemRects: null!
+  }))
+}
+
 function createFolderDummy(targetRoot: HTMLElement, mouseDownEvent: React.MouseEvent): HTMLElement {
+  // targetRoot.style.opacity = `0.4`
   const dummy = document.createElement("div")
   dummy.append(targetRoot.cloneNode(true))
+  dummy.style.opacity = "0.8"
+  const itemsBoxEl = dummy.querySelector<HTMLElement>(".folder-items-box")!
+  itemsBoxEl.style.visibility = "hidden"
+
   const rect = targetRoot.getBoundingClientRect()
   // dummy.style.width = `${rect.width + 4}px`
   dummy.style.marginTop = `${rect.top - mouseDownEvent.clientY}px`
@@ -553,7 +602,7 @@ function createPlaceholder(forItem: boolean) {
   return dummy
 }
 
-const MAX_SCROLL_SPEED = 18
+const MAX_SCROLL_SPEED = 22
 const SCROLL_THRESHOLD = 60
 
 function getBookmarksElement(): HTMLElement {

@@ -1,6 +1,6 @@
 import { IAppState } from "./state"
 import { throttle } from "../helpers/utils"
-import { ColorTheme } from "../helpers/types"
+import { ColorTheme, IFolder } from "../helpers/types"
 
 /**
  * SAVING STATE AND BROADCASTING CHANGES
@@ -21,12 +21,12 @@ function saveState(appState: IAppState): void {
   chrome.storage.local.set(savingState, () => {
     // TODO. store in LS only when last transaction confirmed by server
     // if last transaction was not confirmed, reload app and use prev state from LS
-    console.log("SAVED")
+    console.log("SAVED", savingState)
     bc.postMessage({ type: "folders-updated" })
   })
 }
 
-export const saveStateThrottled = throttle(saveState, 500)
+export const saveStateThrottled = throttle(saveState, 300)
 
 const savingStateDefaultValues = { // if was not saved to LS yet
   "spaces": [],
@@ -36,14 +36,16 @@ const savingStateDefaultValues = { // if was not saved to LS yet
   "colorTheme": "light", // todo I don't use system because it's not ready to used by default
   "stat": undefined,
   "showArchived": false,
-  "showNotUsed": false
+  "showNotUsed": false,
+  "version": 1,
+  "folders": undefined // folders is legacy. Dont delete it until all users are migrated
 }
 type SavingStateKeys = keyof typeof savingStateDefaultValues
 export const savingStateKeys = Object.keys(savingStateDefaultValues) as SavingStateKeys[]
 
 export type ISavingAppState = {
   [key in SavingStateKeys]: IAppState[key]
-}
+} & { hiddenFeatureIsEnabled: boolean, betaMode:boolean; folders: IFolder[] }
 
 export function getStateFromLS(callback: (state: ISavingAppState) => void): void {
   chrome.storage.local.get(savingStateKeys, (res) => {
@@ -104,18 +106,29 @@ function setThemeStyle(useDarkMode: boolean) {
 ////////////////////////////////////////////////////////
 // DEBUG COMMANDS
 ////////////////////////////////////////////////////////
+const cmd:any = {}
+;(window as any).cmd = cmd
 
-
-;(window as any).debugClearStorage = () => {
+cmd.clearChromeStorage = () => {
   chrome.storage.local.clear()
 }
-
-;(window as any).startBeta = () => {
-  localStorage.setItem("betaMode", "true")
+cmd.clearLocalStorage = () => {
+  localStorage.clear()
 }
 
-;(window as any).stopBeta = () => {
+cmd.clearChromeAndLocalStorages = () => {
+  chrome.storage.local.clear()
+  localStorage.clear()
+}
+
+cmd.startBeta = () => {
+  localStorage.setItem("betaMode", "true")
+  location.reload()
+}
+
+cmd.stopBeta = () => {
   localStorage.removeItem("betaMode")
+  location.reload()
 }
 
 export function isBetaMode(): boolean {

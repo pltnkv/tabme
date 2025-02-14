@@ -4,6 +4,7 @@ import ReactDOM from "react-dom"
 export const Modal = (props: {
   isOpen: boolean,
   onClose: () => void,
+  className?: string,
   children: React.ReactChild | React.ReactChild[];
 }) => {
   // Close modal when clicking outside of it or pressing the ESC key
@@ -26,7 +27,7 @@ export const Modal = (props: {
       className="modal-wrapper"
       onClick={props.onClose}>
       <div
-        className="modal-inner"
+        className={"modal-inner " + props.className}
         // Prevent closing when clicking inside modal content
         onClick={(e) => e.stopPropagation()}>
         <div onClick={props.onClose} className="modal-close-x">⨉</div>

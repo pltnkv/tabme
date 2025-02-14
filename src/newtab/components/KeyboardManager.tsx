@@ -1,8 +1,8 @@
 import React, { useContext, useEffect } from "react"
 import { getSelectedItemsElements, getSelectedItemsIds } from "../helpers/selectionUtils"
-import { DispatchContext, mergeStepsInHistory } from "../state/actions"
+import { DispatchContext } from "../state/actions"
 import { Action } from "../state/state"
-import { showMessageWithUndo } from "../helpers/actionsHelpers"
+import { showMessageWithUndo } from "../helpers/actionsHelpersWithDOM"
 
 export const KeyboardManager = React.memo((props: {
   search: string;

@@ -1,10 +1,11 @@
-import React, { useContext } from "react"
-import { genUniqLocalId, getFavIconUrl, hasArchivedItems, hasItemsToHighlight } from "../helpers/utils"
+import React, { useContext, useRef, useState } from "react"
+import { hasArchivedItems, hasItemsToHighlight } from "../helpers/utils"
 import { Action, IAppState } from "../state/state"
 import { DispatchContext } from "../state/actions"
 import Switch from "react-switch"
-import { IFolder } from "../helpers/types"
-import { showMessage } from "../helpers/actionsHelpers"
+import { showMessage } from "../helpers/actionsHelpersWithDOM"
+import { onExportJson, onImportFromToby, importFromJson } from "../helpers/importExportHelpers"
+import { ImportConfirmationModal } from "./modals/ImportConfirmationModal"
 
 type OnClickOption = { onClick: (e: any) => void; title: string; text: string; hidden?: boolean; isFile?: boolean }
 type OnToggleOption = { onToggle: () => void; value: boolean, title: string; text: string; hidden?: boolean }
@@ -55,13 +56,15 @@ export const HelpOptions = (props: {
     }
   ]
 
-  return <Option optionsConfig={settingsOptions}/>
+  return <Options optionsConfig={settingsOptions}/>
 }
 
 export const SettingsOptions = (props: {
   appState: IAppState;
   onOverrideNewTabMenu: () => void
 }) => {
+  const [importConfirmationOpen, setImportConfirmationOpen] = useState(false)
+  const fileEvent = useRef(null)
   const dispatch = useContext(DispatchContext)
 
   function onToggleNotUsed() {
@@ -88,92 +91,29 @@ export const SettingsOptions = (props: {
     dispatch({ type: Action.UpdateAppState, newState: { page: "import" } })
   }
 
-  function onImportJson(event: any) {
-    //!!!! support spaces
-    function receivedText(e: any) {
-      let lines = e.target.result
-      try {
-        const loadedFolders = JSON.parse(lines) as IFolder[]
-        const validFormat = Array.isArray(loadedFolders) && loadedFolders[0]?.title && loadedFolders[0]?.items
-        if (validFormat) {
-          loadedFolders.forEach(loadedFolder => {
-            dispatch({
-              type: Action.CreateFolder,
-              title: loadedFolder.title,
-              items: loadedFolder.items,
-              color: loadedFolder.color
-            })
-          })
-        } else {
-          throw new Error("Unsupported")
-        }
-      } catch (e) {
-        dispatch({ type: Action.ShowNotification, isError: true, message: "Unsupported JSON format" })
-      }
-    }
-
-    const file = event.target.files[0]
-    const fr = new FileReader()
-    fr.onload = receivedText
-    fr.readAsText(file)
-  }
-
-  function onExportJson() {
-    function downloadObjectAsJson(exportObj: any, exportName: string) {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj))
-      const downloadAnchorNode = document.createElement("a")
-      downloadAnchorNode.setAttribute("href", dataStr)
-      downloadAnchorNode.setAttribute("download", exportName + ".json")
-      document.body.appendChild(downloadAnchorNode) // required for firefox
-      downloadAnchorNode.click()
-      downloadAnchorNode.remove()
-    }
-
-    downloadObjectAsJson(props.appState.spaces, "tabme_backup")
-  }
-
-  function onImportFromToby(event: any) {
-    //!!!! test that works
-    function receivedText(e: any) {
-      let lines = e.target.result
-      try {
-        const tobyData = JSON.parse(lines) as ITobyJson
-        const validFormat = Array.isArray(tobyData.lists)
-        if (validFormat) {
-
-          tobyData.lists.forEach(tobyFolder => {
-            dispatch({
-              type: Action.CreateFolder,
-              title: tobyFolder.title,
-              items: tobyFolder.cards.map(card => ({
-                id: genUniqLocalId(),
-                title: card.title,
-                url: card.url,
-                favIconUrl: getFavIconUrl(card.url)
-              }))
-            })
-          })
-        } else {
-          throw new Error("Unsupported")
-        }
-      } catch (e) {
-        console.error(e)
-        dispatch({ type: Action.ShowNotification, isError: true, message: "Unsupported JSON format" })
-      }
-    }
-
-    const file = event.target.files[0]
-    const fr = new FileReader()
-    fr.onload = receivedText
-    fr.readAsText(file)
-  }
-
   function onToggleMode() {
     dispatch({ type: Action.ToggleDarkMode })
   }
 
   function onToggleOpenInTheNewTab() {
     dispatch({ type: Action.UpdateAppState, newState: { openBookmarksInNewTab: !props.appState.openBookmarksInNewTab } })
+  }
+
+  function onImportClick(e: any) {
+    fileEvent.current = e
+    setImportConfirmationOpen(true)
+  }
+
+  function onImportTypeConfirmed(opt: string) {
+    setImportConfirmationOpen(false)
+    if (opt === "import") {
+      importFromJson(fileEvent.current, dispatch)
+    }
+  }
+
+  function tryFixBrokenIcons() {
+    dispatch({ type: Action.FixBrokenIcons })
+    showMessage("Broken favicons are updated", dispatch)
   }
 
   const settingsOptions: OptionsConfig = [
@@ -187,7 +127,8 @@ export const SettingsOptions = (props: {
       onToggle: onToggleHidden,
       value: props.appState.showArchived,
       title: "You can hide unused folders and bookmarks to keep space clean",
-      text: "Show hidden items"
+      text: "Show hidden items",
+      hidden: !props.appState.hiddenFeatureIsEnabled
     },
     {
       separator: true
@@ -210,6 +151,12 @@ export const SettingsOptions = (props: {
       value: __OVERRIDE_NEWTAB,
       text: "Show Tabme on each new tab"
     },
+    // fix later maybe
+    // {
+    //   onClick: tryFixBrokenIcons,
+    //   title: "Sometimes favicons are not showing, this option may help to fix it",
+    //   text: "Try reload broken favicons"
+    // },
     {
       separator: true
     },
@@ -219,7 +166,11 @@ export const SettingsOptions = (props: {
       text: "Import from browser bookmarks"
     },
     {
-      onClick: onImportFromToby,
+      onClick: (e) => {
+        onImportFromToby(e, dispatch, () => {
+          showMessage("Bookmarks has been imported", dispatch)
+        })
+      },
       title: "To get Toby`s 'JSON file' go to Account -> Export -> Json in the Toby App",
       text: "Import from Toby App JSON",
       isFile: true
@@ -228,22 +179,25 @@ export const SettingsOptions = (props: {
       separator: true
     },
     {
-      onClick: onImportJson,
+      onClick: e => onImportClick(e),
       title: "Import exported Tabme JSON file",
       text: "Import from JSON",
       isFile: true
     },
     {
-      onClick: onExportJson,
+      onClick: () => onExportJson(props.appState.spaces),
       title: "Export all Folders and Bookmarks to JSON file",
       text: "Export to JSON"
-    },
+    }
   ]
 
-  return <Option optionsConfig={settingsOptions}/>
+  return <>
+    <Options optionsConfig={settingsOptions}/>
+    <ImportConfirmationModal isModalOpen={importConfirmationOpen} onClose={onImportTypeConfirmed}/>
+  </>
 }
 
-const Option = (props: { optionsConfig: OptionsConfig }) => {
+const Options = (props: { optionsConfig: OptionsConfig }) => {
 
   function isSeparator(opt: any): opt is { separator: boolean } {
     return opt.hasOwnProperty("separator")
@@ -301,16 +255,4 @@ const Option = (props: { optionsConfig: OptionsConfig }) => {
       }
     })}
   </>
-}
-
-type ITobyItem = {
-  "title": string,
-  "url": string,
-}
-type ITobyFolder = {
-  title: string
-  cards: ITobyItem[]
-}
-type ITobyJson = {
-  lists: ITobyFolder[]
 }

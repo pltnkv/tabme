@@ -1,13 +1,19 @@
-import { findItemById, genUniqLocalId, isCustomActionItem } from "./utils"
 import { IFolderItem, IFolderItemToCreate } from "./types"
 import { ActionDispatcher, executeCustomAction } from "../state/actions"
 import { Action, IAppState } from "../state/state"
+import { findItemById, genUniqLocalId, isCustomActionItem } from "../state/actionHelpers"
 
 export function showMessage(message: string, dispatch: ActionDispatcher): void {
   dispatch({
     type: Action.ShowNotification,
     message: message
   })
+}
+
+export function createFolder(dispatch: any, title?: string, items?: IFolderItemToCreate[], historyStepId?: number, spaceId?: number): number {
+  const newFolderId = genUniqLocalId()
+  dispatch({ type: Action.CreateFolder, newFolderId, title, items, historyStepId, spaceId })
+  return newFolderId
 }
 
 export function showMessageWithUndo(message: string, dispatch: ActionDispatcher): void {
@@ -29,19 +35,13 @@ export function getCanDragChecker(search: string, dispatch: ActionDispatcher): (
     if (search) {
       dispatch({
         type: Action.ShowNotification,
-        message: "Dragging is unavailable during search"
+        message: "Sorting is unavailable in search"
       })
       return false
     } else {
       return true
     }
   }
-}
-
-export function createFolder(dispatch: ActionDispatcher, title?: string, items?: IFolderItemToCreate[], historyStepId?:number): number {
-  const newFolderId = genUniqLocalId()
-  dispatch({ type: Action.CreateFolder, newFolderId, title, items })
-  return newFolderId
 }
 
 export function clickFolderItem(targetId: number, appState: IAppState, dispatch: ActionDispatcher, openInNewTab: boolean, openBookmarksInNewTab: boolean) {

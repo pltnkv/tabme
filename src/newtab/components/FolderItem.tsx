@@ -1,23 +1,25 @@
 import React, { useContext, useEffect, useState } from "react"
-import { IFolder, IFolderItem } from "../helpers/types"
+import { IFolderItem, ISpace } from "../helpers/types"
 import { findTabsByURL, isFolderItemNotUsed } from "../helpers/utils"
 import { EditableTitle } from "./EditableTitle"
 import { Action } from "../state/state"
-import { DispatchContext, mergeStepsInHistory } from "../state/actions"
+import { DispatchContext } from "../state/actions"
 import { CL } from "../helpers/classNameHelper"
 import IconClose from "../icons/close.svg"
 import IconMore from "../icons/more.svg"
-import { FolderItemMenu } from "./FolderItemMenu"
+import { FolderItemMenu } from "./dropdown/FolderItemMenu"
 import Tab = chrome.tabs.Tab
 import HistoryItem = chrome.history.HistoryItem
 
 export const FolderItem = React.memo((p: {
+  spaces: ISpace[];
   item: IFolderItem;
   inEdit: boolean
   tabs: Tab[];
   historyItems: HistoryItem[];
   showNotUsed: boolean;
   search: string;
+  hiddenFeatureIsEnabled: boolean
 }) => {
   const dispatch = useContext(DispatchContext)
   const [showMenu, setShowMenu] = useState<boolean>(false)
@@ -76,7 +78,9 @@ export const FolderItem = React.memo((p: {
       })}>
       {showMenu
         ? <FolderItemMenu
+          spaces={p.spaces}
           item={p.item}
+          hiddenFeatureIsEnabled={p.hiddenFeatureIsEnabled}
           localTitle={localTitle}
           setLocalTitle={setLocalTitle}
           onSave={trySaveTitleAndURL}
