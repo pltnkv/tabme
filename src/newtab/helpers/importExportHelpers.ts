@@ -5,6 +5,7 @@ import { createNewFolderItem, genUniqLocalId, getFavIconUrl } from "../state/act
 import { showMessage } from "./actionsHelpersWithDOM"
 import { getTopVisitedFromHistory } from "./utils"
 import HistoryItem = chrome.history.HistoryItem
+import { trackStat } from "./stats"
 
 type IBackup = {
   isTabme: true,
@@ -39,13 +40,14 @@ export function importFromJson(event: any, dispatch: ActionDispatcher) {
         const loadedFolders = res as IFolder[]
         loadedFolders.forEach(loadedFolder => {
           dispatch({
-            type: Action.CreateFolder,
+            type: Action.CreateFolder, // intentionally does not send additional stat here
             title: loadedFolder.title,
             items: loadedFolder.items,
             color: loadedFolder.color
           })
         })
 
+        trackStat("importedTabmeBookmarks", { version: "v1" })
         showMessage("Backup has been imported", dispatch)
       } else if (isImportJsonV2(res)) {
         const data = res as IBackup
@@ -60,6 +62,7 @@ export function importFromJson(event: any, dispatch: ActionDispatcher) {
           spaceId: -1 //hack to force update
         })
 
+        trackStat("importedTabmeBookmarks", { version: "v2" })
         showMessage("Backup has been imported", dispatch)
       } else {
         dispatch({ type: Action.ShowNotification, isError: true, message: "Unsupported JSON format" })
@@ -95,16 +98,17 @@ export function onExportJson(spaces: ISpace[]) {
   downloadObjectAsJson(backup, "tabme_backup")
 }
 
-export function onImportFromToby(event: any, dispatch: ActionDispatcher, onReady?:() => void) {
+export function onImportFromToby(event: any, dispatch: ActionDispatcher, onReady?: () => void) {
   function receivedText(e: any) {
     let lines = e.target.result
     try {
       const tobyData = JSON.parse(lines) as ITobyJson
       const validFormat = Array.isArray(tobyData.lists)
       if (validFormat) {
+        let count = 0
         tobyData.lists.forEach(tobyFolder => {
           dispatch({
-            type: Action.CreateFolder,
+            type: Action.CreateFolder, // intentionally does not send additional stat here
             title: tobyFolder.title,
             items: tobyFolder.cards.map(card => ({
               id: genUniqLocalId(),
@@ -113,7 +117,9 @@ export function onImportFromToby(event: any, dispatch: ActionDispatcher, onReady
               favIconUrl: getFavIconUrl(card.url)
             }))
           })
+          count += tobyFolder.cards.length
         })
+        trackStat("importedTobyBookmarks", { count })
         onReady && onReady()
       } else {
         dispatch({ type: Action.ShowNotification, isError: true, message: "Unsupported JSON format" })
@@ -216,15 +222,18 @@ function traverseTree(nodes: CustomBookmarkTreeNode[], plainList: BookmarksAsPla
   })
 }
 
-export function importBrowserBookmarks(records:BookmarksAsPlainList, dispatch:ActionDispatcher, skipChecked:boolean) {
+export function importBrowserBookmarks(records: BookmarksAsPlainList, dispatch: ActionDispatcher, skipChecked: boolean) {
+  let count = 0
   records.forEach(rec => {
     if (skipChecked || rec.folder.checked) {
       const items = rec.folder.children
         ?.filter(item => (skipChecked || item.checked) && item.url)
         .map(item => createNewFolderItem(item.url, item.title, getFavIconUrl(item.url)))
+      count += items?.length ?? 0
 
       const newFolderId = genUniqLocalId()
-      dispatch({ type: Action.CreateFolder, newFolderId, title: rec.folder.title, items })
+      dispatch({ type: Action.CreateFolder, newFolderId, title: rec.folder.title, items }) // intentionally does not send additional stat here
     }
   })
+  trackStat("importedBrowserBookmarks", { count })
 }

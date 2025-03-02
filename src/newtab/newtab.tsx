@@ -7,12 +7,7 @@ import { createRoot } from "react-dom/client"
 import { getFirstSortedByPosition, insertBetween, regeneratePositions } from "./helpers/fractionalIndexes"
 import { ISpace } from "./helpers/types"
 import { genUniqLocalId } from "./state/actionHelpers"
-
-declare global {
-  const __OVERRIDE_NEWTAB: boolean
-}
-
-console.log("__OVERRIDE_NEWTAB", __OVERRIDE_NEWTAB)
+import { initStats } from "./helpers/stats"
 
 if (loadFromNetwork()) {
   // todo: Always start from LS. rendering should happen without loaded cloud data
@@ -32,7 +27,8 @@ if (loadFromNetwork()) {
   runLocally()
 }
 
-function runLocally() {
+async function runLocally() {
+  await initStats()
   // loading state from LS
   getStateFromLS((res) => {
     migrateToSpaces(res)

@@ -9,8 +9,9 @@ import { DropdownMenu, DropdownSubMenu } from "./dropdown/DropdownMenu"
 import { CL } from "../helpers/classNameHelper"
 import { getFoldersList } from "./dropdown/moveToHelpers"
 import { convertTabToItem, findSpaceByFolderId } from "../state/actionHelpers"
-import { createFolder, getCanDragChecker, showMessage } from "../helpers/actionsHelpersWithDOM"
+import { createFolderWithStat, getCanDragChecker, showMessage } from "../helpers/actionsHelpersWithDOM"
 import Tab = chrome.tabs.Tab
+import { trackStat } from "../helpers/stats"
 
 export const SidebarOpenTabs = memo((props: {
   search: string;
@@ -29,7 +30,7 @@ export const SidebarOpenTabs = memo((props: {
         const tab = props.tabs.find((t) => t.id === targetTabId)
 
         if (folderId === -1) { // we need to create new folder first
-          folderId = createFolder(dispatch)
+          folderId = createFolderWithStat(dispatch, {}, 'by-drag-in-new-folder--sidebar')
         }
 
         if (tab && tab.id) { // Add existing Tab
@@ -57,10 +58,11 @@ export const SidebarOpenTabs = memo((props: {
       }
       const onClick = (tabId: number) => {
         const tab = props.tabs.find(t => t.id === tabId)
-        chrome.tabs.update(tabId, { active: true })
         if (tab) {
+          chrome.tabs.update(tabId, { active: true })
           chrome.windows.update(tab.windowId, { focused: true })
         }
+        trackStat('tabFocused', {source: 'sidebar'})
       }
       const onDragStarted = () => {
         return getCanDragChecker(props.search, dispatch)()
@@ -91,6 +93,7 @@ export const SidebarOpenTabs = memo((props: {
       tabIds: [tabId]
     })
     showMessage("Tab has been closed", dispatch)
+    trackStat('tabClosed', {source: 'sidebar'})
   }
 
   const tabsByWindows: Map<number, Tab[]> = new Map()
@@ -123,7 +126,7 @@ export const SidebarOpenTabs = memo((props: {
           })
 
       }
-      {tabsCount === 0 && props.search === "" ? <p className="no-opened-tabs">No open tabs.<br/> Pinned tabs are filtered oup.tab.</p> : null}
+      {tabsCount === 0 && props.search === "" ? <p className="no-opened-tabs">No open tabs.<br/> Pinned tabs are filtered out.</p> : null}
       {
         /* disabled it because it looks wierd with several Windows */
         /*{props.search === "" ? SectionItem : null}*/
@@ -215,7 +218,7 @@ const TabItem = (p: {
 
   const moveToNewFolder = (spaceId: number) => {
     mergeStepsInHistory((historyStepId) => {
-      const folderId = createFolder(dispatch, undefined, undefined, historyStepId, spaceId)
+      const folderId = createFolderWithStat(dispatch, {historyStepId, spaceId}, 'by-save-to-new-folder')
       moveToFolder(folderId)
     })
   }
@@ -254,7 +257,7 @@ const TabItem = (p: {
       }
 
       {showMenu ? (
-        <DropdownMenu onClose={hideMenu} className="stop-dad-propagation" offset={{top: -16, left: -8}}>
+        <DropdownMenu onClose={hideMenu} className="stop-dad-propagation" offset={{ top: -16, left: -8 }}>
           {
             p.spaces.length === 1
               ? (<DropdownSubMenu

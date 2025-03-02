@@ -1,6 +1,7 @@
 import { IAppState } from "./state"
 import { throttle } from "../helpers/utils"
 import { ColorTheme, IFolder } from "../helpers/types"
+import { setCommonStatProps } from "../helpers/stats"
 
 /**
  * SAVING STATE AND BROADCASTING CHANGES
@@ -45,7 +46,7 @@ export const savingStateKeys = Object.keys(savingStateDefaultValues) as SavingSt
 
 export type ISavingAppState = {
   [key in SavingStateKeys]: IAppState[key]
-} & { hiddenFeatureIsEnabled: boolean, betaMode:boolean; folders: IFolder[] }
+} & { hiddenFeatureIsEnabled: boolean, betaMode: boolean; folders: IFolder[] }
 
 export function getStateFromLS(callback: (state: ISavingAppState) => void): void {
   chrome.storage.local.get(savingStateKeys, (res) => {
@@ -101,12 +102,15 @@ function setThemeStyle(useDarkMode: boolean) {
   } else {
     document.documentElement.classList.remove("dark-theme")
   }
+  setCommonStatProps({
+    colorTheme: useDarkMode ? "dark" : "light"
+  })
 }
 
 ////////////////////////////////////////////////////////
 // DEBUG COMMANDS
 ////////////////////////////////////////////////////////
-const cmd:any = {}
+const cmd: any = {}
 ;(window as any).cmd = cmd
 
 cmd.clearChromeStorage = () => {

@@ -3,6 +3,7 @@ import { getSelectedItemsElements, getSelectedItemsIds } from "../helpers/select
 import { DispatchContext } from "../state/actions"
 import { Action } from "../state/state"
 import { showMessageWithUndo } from "../helpers/actionsHelpersWithDOM"
+import { isSomeModalOpened } from "./modals/Modal"
 
 export const KeyboardManager = React.memo((props: {
   search: string;
@@ -10,6 +11,10 @@ export const KeyboardManager = React.memo((props: {
   const dispatch = useContext(DispatchContext)
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
+
+      if (isSomeModalOpened()) { // disabling hotkeys when any Modal open
+        return
+      }
 
       if (document.activeElement !== document.body) {
         return
@@ -37,6 +42,19 @@ export const KeyboardManager = React.memo((props: {
       if (e.code === "ArrowDown") {
         ;(document.querySelector("input.search") as HTMLElement).focus()
         return
+      }
+
+      if (e.code.startsWith("Digit")) {
+        if (e.ctrlKey || e.altKey) {
+          const spaceIndex = parseInt(e.code.at(5) ?? "", 10)
+          if (spaceIndex > 0 && spaceIndex < 10) {
+            dispatch({
+              type: Action.SelectSpace,
+              spaceIndex: spaceIndex - 1
+            })
+            return
+          }
+        }
       }
 
       const isLetterOrNumber = !!(e.key.length === 1 && e.key.match(/[a-z]|[а-я]|[0-9]/i))

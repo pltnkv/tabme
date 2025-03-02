@@ -2,6 +2,7 @@ const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
 const srcDir = path.join(__dirname, "..", "src");
 const webpack = require("webpack");
+const Dotenv = require("dotenv-webpack")
 
 module.exports.getCommonConfig = (env) => {
   const override_newtab = env.BUILD_TYPE !== "overrideless";
@@ -59,8 +60,9 @@ module.exports.getCommonConfig = (env) => {
         ],
         options: {}
       }),
+      new Dotenv(), // Load .env variables
       new webpack.DefinePlugin({
-        "__OVERRIDE_NEWTAB": JSON.stringify(override_newtab)
+        "__OVERRIDE_NEWTAB": JSON.stringify(override_newtab),
       })
     ]
   };

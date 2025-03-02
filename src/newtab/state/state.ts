@@ -173,6 +173,7 @@ export enum Action {
   UpdateShowArchivedItems = "update-show-hidden-items",
   UpdateShowNotUsedItems = "update-show-not-used-items",
   SelectSpace = "select-space",
+  SwipeSpace = "swipe-space",
   FixBrokenIcons = "fix-broken-icons",
   UpdateAppState = "update-app-state", // generic way to set simple value into AppState
 
@@ -182,6 +183,9 @@ export enum Action {
   UpdateSpace = "update-space",
   MoveSpace = "move-space",
 
+  /**
+   * Use only with helper createFolder()
+   */
   CreateFolder = "create-folder",
   DeleteFolder = "delete-folder",
   UpdateFolder = "update-folder",
@@ -227,7 +231,8 @@ export type ActionPayload = (
   | { type: Action.UpdateShowArchivedItems; value: boolean }
   | { type: Action.UpdateShowNotUsedItems; value: boolean }
   | { type: Action.FixBrokenIcons }
-  | { type: Action.SelectSpace; spaceId: number | undefined }
+  | { type: Action.SelectSpace; spaceId?: number, spaceIndex?: number }
+  | { type: Action.SwipeSpace; direction: "left" | "right" }
   | { type: Action.UpdateAppState; newState: Partial<IAppState> }
 
   | { type: Action.CreateSpace; spaceId: number; title: string; position?: string }

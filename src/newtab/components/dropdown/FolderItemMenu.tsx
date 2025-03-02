@@ -5,9 +5,10 @@ import { getSelectedItems } from "../../helpers/selectionUtils"
 import { Action } from "../../state/state"
 import { DispatchContext, mergeStepsInHistory } from "../../state/actions"
 import { getSpacesWithNestedFoldersList } from "./moveToHelpers"
-import { createFolder, showMessage, showMessageWithUndo } from "../../helpers/actionsHelpersWithDOM"
+import { createFolderWithStat, showMessage, showMessageWithUndo } from "../../helpers/actionsHelpersWithDOM"
 import { findFolderByItemId } from "../../state/actionHelpers"
 import { scrollElementIntoView } from "../../helpers/utils"
+import { trackStat } from "../../helpers/stats"
 
 export const FolderItemMenu = React.memo((p: {
   spaces: ISpace[],
@@ -70,6 +71,7 @@ export const FolderItemMenu = React.memo((p: {
       })
     })
     showMessageWithUndo("Bookmark has been hidden", dispatch)
+    trackStat('bookmarksHidden', {})
   }
 
   function onRestore() {
@@ -109,7 +111,7 @@ export const FolderItemMenu = React.memo((p: {
 
   const moveToNewFolder = (spaceId: number) => {
     mergeStepsInHistory((historyStepId) => {
-      const folderId = createFolder(dispatch, undefined, undefined, historyStepId, spaceId)
+      const folderId = createFolderWithStat(dispatch, {historyStepId, spaceId}, 'by-move-to-new-folder')
       dispatch({
         type: Action.MoveFolderItems,
         itemIds: [p.item.id],

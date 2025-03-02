@@ -12,7 +12,8 @@ import IconStash from "../icons/stash.svg"
 import IconPin from "../icons/pin.svg"
 import Tab = chrome.tabs.Tab
 import { convertTabToItem } from "../state/actionHelpers"
-import { createFolder, showMessage } from "../helpers/actionsHelpersWithDOM"
+import { createFolderWithStat, showMessage } from "../helpers/actionsHelpersWithDOM"
+import { trackStat } from "../helpers/stats"
 
 export function Sidebar(props: {
   appState: IAppState;
@@ -48,6 +49,7 @@ export function Sidebar(props: {
   }
 
   function onToggleSidebar() {
+    trackStat("toggleSidebar", { sidebarCollapsed: !props.appState.sidebarCollapsed })
     dispatch({
       type: Action.UpdateAppState, newState: {
         sidebarCollapsed: !props.appState.sidebarCollapsed,
@@ -113,10 +115,11 @@ const StashButton = React.memo((props: { tabs: Tab[] }) => {
       }
 
       const items = tabsToShelve.map(convertTabToItem)
-      const folderTitle = `Saved ${getCurrentData()}`
-      const folderId = createFolder(dispatch, folderTitle, items)
+      const title = `Saved ${getCurrentData()}`
+      const folderId = createFolderWithStat(dispatch, {title, items}, 'by-stash')
 
       dispatch({ type: Action.ShowNotification, message: "All Tabs has been saved" })
+      trackStat("tabsStashed", { stashedTabsClosed: shouldCloseTabs })
 
       scrollElementIntoView(`[data-folder-id="${folderId}"]`)
     })
@@ -174,6 +177,7 @@ const CleanupButton = React.memo((props: { tabs: Tab[] }) => {
       }))
       const message = duplicatedTabs.length > 0 ? `${duplicatedTabs.length} duplicate tabs was closed` : "There are no duplicate tabs"
       showMessage(message, dispatch)
+      trackStat("tabsDeduplicated", { count: duplicatedTabs.length })
     })
   }
 

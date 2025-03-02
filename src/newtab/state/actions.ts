@@ -54,7 +54,6 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
   }
 
   switch (action.type) {
-
     case Action.UpdateAppState: {
       return {
         ...state,
@@ -157,13 +156,37 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
     }
 
     case Action.SelectSpace: {
-      const targetSpace = findSpaceById(state, action.spaceId)
+      const targetSpace = action.spaceIndex
+        ? state.spaces[action.spaceIndex]
+        : findSpaceById(state, action.spaceId)
       return {
         ...state,
         currentSpaceId: targetSpace?.id ?? state.spaces.at(0)?.id ?? -1
       }
     }
 
+    case Action.SwipeSpace: {
+      const currentIndex = state.spaces.findIndex(space => space.id === state.currentSpaceId);
+
+      if (currentIndex === -1) {
+        return showErrorReducer("Current space not found")
+      }
+
+      let newIndex = currentIndex;
+
+      if (action.direction === "left") {
+        newIndex = currentIndex === 0 ? state.spaces.length - 1 : currentIndex - 1;
+      } else if (action.direction === "right") {
+        newIndex = currentIndex === state.spaces.length - 1 ? 0 : currentIndex + 1;
+      } else {
+        return state; // Invalid direction, no change
+      }
+
+      return {
+        ...state,
+        currentSpaceId: state.spaces[newIndex].id
+      };
+    }
 
     /********************************************************
      * SPACES CRUD

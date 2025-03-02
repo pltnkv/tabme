@@ -18,6 +18,10 @@ export const Modal = (props: {
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [props.onClose])
 
+  useEffect(() => {
+    someModalOpened = props.isOpen
+  }, [props.isOpen])
+
   if (!props.isOpen) {
     return null
   }
@@ -36,4 +40,10 @@ export const Modal = (props: {
     </div>,
     document.body
   )
+}
+
+let someModalOpened = false
+
+export function isSomeModalOpened(): boolean {
+  return someModalOpened
 }

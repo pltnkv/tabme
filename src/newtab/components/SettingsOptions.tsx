@@ -6,6 +6,7 @@ import Switch from "react-switch"
 import { showMessage } from "../helpers/actionsHelpersWithDOM"
 import { onExportJson, onImportFromToby, importFromJson } from "../helpers/importExportHelpers"
 import { ImportConfirmationModal } from "./modals/ImportConfirmationModal"
+import { trackStat } from "../helpers/stats"
 
 type OnClickOption = { onClick: (e: any) => void; title: string; text: string; hidden?: boolean; isFile?: boolean }
 type OnToggleOption = { onToggle: () => void; value: boolean, title: string; text: string; hidden?: boolean }
@@ -17,6 +18,7 @@ export const HelpOptions = (props: {
 }) => {
   function onSendFeedback() {
     chrome.tabs.create({ url: "https://docs.google.com/forms/d/e/1FAIpQLSeA-xs3GjBVNQQEzSbHiGUs1y9_XIo__pQBJKQth737VqAEOw/formResponse", active: true })
+    trackStat('settingsClicked', {settingName: 'sendFeedback'})
   }
 
   function onRateInStore() {
@@ -25,10 +27,12 @@ export const HelpOptions = (props: {
     } else {
       chrome.tabs.create({ url: "https://chromewebstore.google.com/detail/tabme-%E2%80%94-version-without-n/jjdbikbbknmhkknpfnlhgpcikbfjldee/reviews", active: true })
     }
+    trackStat('settingsClicked', {settingName: 'rateInStore'})
   }
 
   function onHowToUse() {
     chrome.tabs.create({ url: "https://gettabme.com/guide.html", active: true })
+    trackStat('settingsClicked', {settingName: 'HowToUse'})
   }
 
   type OnClickOption = { onClick: (e: any) => void; title: string; text: string; hidden?: boolean; isFile?: boolean }
@@ -40,7 +44,10 @@ export const HelpOptions = (props: {
       text: "Guide: How to use"
     },
     {
-      onClick: props.onShortcutsModal,
+      onClick: () => {
+        props.onShortcutsModal()
+        trackStat('settingsClicked', {settingName: 'shortcuts'})
+      },
       title: "Keyboard shortcuts",
       text: "Keyboard shortcuts"
     },
@@ -75,6 +82,7 @@ export const SettingsOptions = (props: {
     } else {
       showMessage(`There are no unused items to highlight`, dispatch)
     }
+    trackStat('settingsClicked', {settingName: 'ToggleNotUsed'})
   }
 
   function onToggleHidden() {
@@ -85,23 +93,28 @@ export const SettingsOptions = (props: {
     } else {
       showMessage(`There are no hidden items`, dispatch)
     }
+    trackStat('settingsClicked', {settingName: 'ToggleHidden'})
   }
 
   function onImportExistingBookmarks() {
     dispatch({ type: Action.UpdateAppState, newState: { page: "import" } })
+    trackStat('settingsClicked', {settingName: 'ImportExistingBookmarks'})
   }
 
   function onToggleMode() {
     dispatch({ type: Action.ToggleDarkMode })
+    trackStat('settingsClicked', {settingName: 'ToggleDarkMode'})
   }
 
   function onToggleOpenInTheNewTab() {
     dispatch({ type: Action.UpdateAppState, newState: { openBookmarksInNewTab: !props.appState.openBookmarksInNewTab } })
+    trackStat('settingsClicked', {settingName: 'ToggleOpenInTheNewTab'})
   }
 
   function onImportClick(e: any) {
     fileEvent.current = e
     setImportConfirmationOpen(true)
+    trackStat('settingsClicked', {settingName: 'ImportTabmeJSON'})
   }
 
   function onImportTypeConfirmed(opt: string) {
@@ -147,7 +160,10 @@ export const SettingsOptions = (props: {
     },
     {
       title: "Manage browser new tab override by Tabme",
-      onToggle: props.onOverrideNewTabMenu,
+      onToggle: () => {
+        props.onOverrideNewTabMenu()
+        trackStat('settingsClicked', {settingName: 'toggleShowTabmeOnEachNewTab'})
+      },
       value: __OVERRIDE_NEWTAB,
       text: "Show Tabme on each new tab"
     },
@@ -170,6 +186,7 @@ export const SettingsOptions = (props: {
         onImportFromToby(e, dispatch, () => {
           showMessage("Bookmarks has been imported", dispatch)
         })
+        trackStat('settingsClicked', {settingName: 'ImportFromToby'})
       },
       title: "To get Toby`s 'JSON file' go to Account -> Export -> Json in the Toby App",
       text: "Import from Toby App JSON",
@@ -180,12 +197,15 @@ export const SettingsOptions = (props: {
     },
     {
       onClick: e => onImportClick(e),
-      title: "Import exported Tabme JSON file",
+      title: "Open exported Tabme JSON file",
       text: "Import from JSON",
       isFile: true
     },
     {
-      onClick: () => onExportJson(props.appState.spaces),
+      onClick: () => {
+        onExportJson(props.appState.spaces)
+        trackStat('settingsClicked', {settingName: 'ExportToJson'})
+      },
       title: "Export all Folders and Bookmarks to JSON file",
       text: "Export to JSON"
     }

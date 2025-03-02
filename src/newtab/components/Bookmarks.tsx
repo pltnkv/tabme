@@ -17,7 +17,8 @@ import { ShortcutsModal } from "./modals/ShortcutsModal"
 import { IFolder } from "../helpers/types"
 import { loadFromNetwork } from "../../api/api"
 import { findSpaceById } from "../state/actionHelpers"
-import { clickFolderItem, createFolder, getCanDragChecker } from "../helpers/actionsHelpersWithDOM"
+import { clickFolderItem, createFolderWithStat, getCanDragChecker } from "../helpers/actionsHelpersWithDOM"
+import { useSwipeAnimation } from "../helpers/bookmarksSwipes"
 
 export function Bookmarks(p: {
   appState: IAppState;
@@ -32,11 +33,12 @@ export function Bookmarks(p: {
   const [isScrolled, setIsScrolled] = useState(false)
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
-
   const bookmarksRef = useRef<HTMLDivElement>(null)
 
+  useSwipeAnimation(bookmarksRef, p.appState.currentSpaceId, p.appState.spaces.length)
+
   useEffect(() => {
-    const handleScroll = () => {
+    const handleScroll = (e: any) => {
       if (bookmarksRef.current) {
         setIsScrolled(bookmarksRef.current.scrollTop > 0)
       }
@@ -61,7 +63,7 @@ export function Bookmarks(p: {
         mergeStepsInHistory((historyStepId) => {
 
           if (folderId === -1) { // we need to create new folder first
-            folderId = createFolder(dispatch, undefined, undefined, historyStepId)
+            folderId = createFolderWithStat(dispatch, {historyStepId}, 'by-drag-in-new-folder--bookmarks')
           }
 
           // todo !!! support switching spaces like for folders
@@ -129,7 +131,7 @@ export function Bookmarks(p: {
   }
 
   function onCreateFolder() {
-    const folderId = createFolder(dispatch)
+    const folderId = createFolderWithStat(dispatch, {}, 'by-click-new-in-bookmarks')
     dispatch({
       type: Action.UpdateAppState,
       newState: { itemInEdit: folderId }
@@ -182,7 +184,12 @@ export function Bookmarks(p: {
         {
           p.appState.betaMode ?
             <>
-              <SpacesList spaces={p.appState.spaces} currentSpaceId={p.appState.currentSpaceId}/>
+              {
+                p.appState.search && <div className="search-results-header">Search results:</div>
+              }
+              {
+                !p.appState.search && <SpacesList spaces={p.appState.spaces} currentSpaceId={p.appState.currentSpaceId}/>
+              }
               <div className="menu-stretching-space"></div>
               <div style={{ display: "flex", marginRight: "12px" }}>
                 <IconFind className="search-icon"/>
@@ -293,7 +300,7 @@ export function Bookmarks(p: {
               </div>
             )
             : (
-              folders.length === 0 ? <div style={{ marginLeft: "52px" }}>No search results</div> : null
+              folders.length === 0 ? <div style={{ marginLeft: "52px" }}>Nothing found</div> : null
             )
         }
       </div>

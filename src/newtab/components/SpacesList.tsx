@@ -73,7 +73,7 @@ export function SpacesList(p: {
               onSave={(title) => onSaveNewSpaceTitle(space.id, title)}
             />
             {
-              menuSpaceId === space.id && <DropdownMenu onClose={() => {setMenuSpaceId(-1)}} className={"dropdown-menu--folder"} offset={{top: -22, left: -16}}>
+              menuSpaceId === space.id && <DropdownMenu onClose={() => {setMenuSpaceId(-1)}} className={"dropdown-menu--folder"} offset={{ top: -22, left: -16 }}>
                 <button className="dropdown-menu__button focusable" onClick={() => onRenameSpace(space.id)}>Rename</button>
                 <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={() => deleteSpace(space)}>Delete space</button>
               </DropdownMenu>

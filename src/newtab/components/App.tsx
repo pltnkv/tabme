@@ -6,7 +6,7 @@ import { KeyboardManager } from "./KeyboardManager"
 import { filterIrrelevantHistory } from "../helpers/utils"
 import { ImportBookmarksFromSettings } from "./ImportBookmarksFromSettings"
 import { createWelcomeFolder } from "../helpers/welcomeLogic"
-import { Action, getInitAppState, IAppState } from "../state/state"
+import { Action, getInitAppState, IAppStat, IAppState } from "../state/state"
 import { DispatchContext, stateReducer } from "../state/actions"
 import { getBC, getStateFromLS } from "../state/storage"
 import { executeAPICall } from "../../api/serverCommands"
@@ -15,6 +15,7 @@ import { apiGetToken } from "../../api/api"
 import HistoryItem = chrome.history.HistoryItem
 import { CL } from "../helpers/classNameHelper"
 import { Welcome } from "./Welcome"
+import { CommonStatProps, setCommonStatProps, trackStat } from "../helpers/stats"
 
 let notificationTimeout: number | undefined
 let globalAppState: IAppState
@@ -23,15 +24,43 @@ export function getGlobalAppState(): IAppState {
   return globalAppState
 }
 
+function invalidateStats(newState: IAppState, prevState: IAppState | undefined) {
+  const statProps: Partial<CommonStatProps> = {}
+
+  statProps.totalSpacesCount = newState.spaces.length
+  statProps.sidebarCollapsed = newState.sidebarCollapsed
+
+  if (newState.tabs !== prevState?.tabs) {
+    const uniqWinIds: number[] = []
+    newState.tabs.forEach(tab => {
+      if (!uniqWinIds.includes(tab.windowId)) {
+        uniqWinIds.push(tab.windowId)
+      }
+    })
+
+    statProps.totalOpenTabsCount = newState.tabs.length
+    statProps.totalWindowsCount = uniqWinIds.length
+  }
+
+  if (newState.spaces !== prevState?.spaces) {
+    statProps.totalFoldersCount = newState.spaces.reduce((sum, curSpace) => sum + curSpace.folders.length, 0)
+    statProps.totalBookmarksCount = newState.spaces.reduce((sSum, curSpace) => sSum + curSpace.folders.reduce((fSum, folder) => fSum + folder.items.length, 0), 0)
+  }
+
+  setCommonStatProps(statProps)
+}
+
 export function App() {
   const [appState, dispatch] = useReducer(stateReducer, getInitAppState())
 
   useEffect(() => {
+    invalidateStats(appState, globalAppState)
     // hack for getting last instance of appState in "getBC().onmessage" callback
     globalAppState = appState
   })
 
   useEffect(() => {
+    console.log()
     // hack for getting last instance of appState in "getBC().onmessage" callback
     if (appState.betaMode) {
       document.body.classList.add("beta")
@@ -63,6 +92,10 @@ export function App() {
       dispatch({ type: Action.UpdateAppState, newState: { currentWindowId } })
       dispatch({ type: Action.UpdateAppState, newState: { version: 2 } })
       dispatch({ type: Action.UpdateAppState, newState: { loaded: true } })
+
+      requestAnimationFrame(() => { // raf needed to invalidate number of tabs and windows in stat
+        trackStat("appLoaded", {})
+      })
 
       // first open time
       if (appState.stat?.sessionNumber === 1) {

@@ -2,6 +2,7 @@ import { IFolderItem, IFolderItemToCreate } from "./types"
 import { ActionDispatcher, executeCustomAction } from "../state/actions"
 import { Action, IAppState } from "../state/state"
 import { findItemById, genUniqLocalId, isCustomActionItem } from "../state/actionHelpers"
+import { trackStat } from "./stats"
 
 export function showMessage(message: string, dispatch: ActionDispatcher): void {
   dispatch({
@@ -10,9 +11,20 @@ export function showMessage(message: string, dispatch: ActionDispatcher): void {
   })
 }
 
-export function createFolder(dispatch: any, title?: string, items?: IFolderItemToCreate[], historyStepId?: number, spaceId?: number): number {
+type CreateFolderProps = {
+  newFolderId?: number;
+  title?: string;
+  color?: string;
+  position?: string;
+  items?: IFolderItemToCreate[];
+  spaceId?: number,
+  historyStepId?: number
+}
+
+export function createFolderWithStat(dispatch: any, props: CreateFolderProps, statSource: string): number {
   const newFolderId = genUniqLocalId()
-  dispatch({ type: Action.CreateFolder, newFolderId, title, items, historyStepId, spaceId })
+  dispatch({ type: Action.CreateFolder, ...props })
+  trackStat("folderCreated", { source: statSource })
   return newFolderId
 }
 
@@ -54,6 +66,7 @@ export function clickFolderItem(targetId: number, appState: IAppState, dispatch:
     if (openInNewTab) {
       // open in new tab
       chrome.tabs.create({ url: targetItem.url, active: false })
+      trackStat("tabOpened", { inNewTab: true })
       //TODO fix bug of not updating bold items when move to new tab in new window
     } else {
       // open in the same tab or switch to already opened
@@ -61,6 +74,7 @@ export function clickFolderItem(targetId: number, appState: IAppState, dispatch:
       if (tab && tab.id) {
         chrome.tabs.update(tab.id, { active: true })
         chrome.windows.update(tab.windowId, { focused: true })
+        trackStat("tabFocused", { source: "bookmarks" })
       } else {
         chrome.tabs.getCurrent(t => {
           if (openBookmarksInNewTab) {
@@ -68,7 +82,7 @@ export function clickFolderItem(targetId: number, appState: IAppState, dispatch:
           } else {
             chrome.tabs.update(t?.id!, { url: targetItem.url })
           }
-
+          trackStat("tabOpened", { inNewTab: false })
         })
       }
     }

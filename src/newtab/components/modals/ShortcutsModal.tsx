@@ -24,6 +24,9 @@ export const ShortcutsModal = ({ isShortcutsModalOpen, setShortcutsModalOpen }:
           <span className="hotkey">{cmdOrCtrl}&thinsp;+&thinsp;click</span> open bookmark in new Tab
         </p>
         <p>
+          <span className="hotkey">CTRL + 1..9</span> open Space by index
+        </p>
+        <p>
           <span className="hotkey">DEL</span> delete selected items
         </p>
         <p>

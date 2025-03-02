@@ -10,6 +10,7 @@ import IconMore from "../icons/more.svg"
 import { FolderItemMenu } from "./dropdown/FolderItemMenu"
 import Tab = chrome.tabs.Tab
 import HistoryItem = chrome.history.HistoryItem
+import { trackStat } from "../helpers/stats"
 
 export const FolderItem = React.memo((p: {
   spaces: ISpace[];
@@ -60,6 +61,7 @@ export const FolderItem = React.memo((p: {
       type: Action.CloseTabs,
       tabIds: tabIds
     })
+    trackStat('tabClosed', {source: 'bookmarks'})
   }
 
   function handleImageError(e: React.SyntheticEvent) {

@@ -9,7 +9,8 @@ export const OverrideModal = ({ isOverrideModalOpen, setOverrideModalOpen }:
       <Modal isOpen={isOverrideModalOpen} onClose={() => setOverrideModalOpen(false)}>
         <div className="modal-no-override">
           <h2>How to remove Tabme from the new tab?</h2>
-          <p>If you want to use Tabme without it taking over your new tab, <br/>try the "Tabme — version without newtab" extension.</p>
+          <p>If you want to use Tabme without it taking over your new tab, <br/>try the "<a
+            href="https://chromewebstore.google.com/detail/tabme-%E2%80%94-version-without-n/jjdbikbbknmhkknpfnlhgpcikbfjldee">Tabme Mini</a>" extension.</p>
           <p>It includes all the same features but doesn’t open on every new tab</p>
           <p>Steps:</p>
           <ol>
@@ -17,7 +18,7 @@ export const OverrideModal = ({ isOverrideModalOpen, setOverrideModalOpen }:
               <span>Settings → Export to JSON</span></li>
             <li>Uninstall current "Tabme" extension. <br/>
               <span>Go to "Manage extensions" from your browser. Find the card for Tabme and click "Remove"</span></li>
-            <li>Install "<a href="https://chromewebstore.google.com/detail/tabme-%E2%80%94-version-without-n/jjdbikbbknmhkknpfnlhgpcikbfjldee">Tabme — version without newtab</a>"
+            <li>Install "<a href="https://chromewebstore.google.com/detail/tabme-%E2%80%94-version-without-n/jjdbikbbknmhkknpfnlhgpcikbfjldee">Tabme Mini — version without newtab</a>"
               extension.<br/>
               <span>Choose "No, start fresh" option in the onboarding</span>
             </li>
