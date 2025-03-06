@@ -79,6 +79,7 @@ export function SimpleEditableTitle(p: {
   inEdit: boolean,
   value: string,
   onSave: (title: string) => void,
+  onMouseDown?: (e: React.MouseEvent<HTMLTextAreaElement>) => void,
 }) {
   const [localValue, setLocalValue] = useState(p.value)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -139,6 +140,7 @@ export function SimpleEditableTitle(p: {
         />
         :
         <span className={p.className}
+              onMouseDown={p.onMouseDown}
               onClick={p.onClick}
               onContextMenu={(e) => {
                 e.preventDefault()

@@ -66,7 +66,7 @@ export type IAppState = {
   };
   lastActiveTabIds: number[]
   search: string;
-  itemInEdit: undefined | number, //can be item or folder
+  itemInEdit: undefined | number, //can be item or folder or space
   showArchived: boolean; // Stored in LS
   showNotUsed: boolean; // Stored in LS
   openBookmarksInNewTab: boolean;

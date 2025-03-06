@@ -103,7 +103,7 @@ function setThemeStyle(useDarkMode: boolean) {
     document.documentElement.classList.remove("dark-theme")
   }
   setCommonStatProps({
-    colorTheme: useDarkMode ? "dark" : "light"
+    zColorTheme: useDarkMode ? "dark" : "light"
   })
 }
 

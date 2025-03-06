@@ -27,8 +27,8 @@ export function getGlobalAppState(): IAppState {
 function invalidateStats(newState: IAppState, prevState: IAppState | undefined) {
   const statProps: Partial<CommonStatProps> = {}
 
-  statProps.totalSpacesCount = newState.spaces.length
-  statProps.sidebarCollapsed = newState.sidebarCollapsed
+  statProps.zTotalSpacesCount = newState.spaces.length
+  statProps.zSidebarCollapsed = newState.sidebarCollapsed
 
   if (newState.tabs !== prevState?.tabs) {
     const uniqWinIds: number[] = []
@@ -38,13 +38,13 @@ function invalidateStats(newState: IAppState, prevState: IAppState | undefined) 
       }
     })
 
-    statProps.totalOpenTabsCount = newState.tabs.length
-    statProps.totalWindowsCount = uniqWinIds.length
+    statProps.zTotalOpenTabsCount = newState.tabs.length
+    statProps.zTotalWindowsCount = uniqWinIds.length
   }
 
   if (newState.spaces !== prevState?.spaces) {
-    statProps.totalFoldersCount = newState.spaces.reduce((sum, curSpace) => sum + curSpace.folders.length, 0)
-    statProps.totalBookmarksCount = newState.spaces.reduce((sSum, curSpace) => sSum + curSpace.folders.reduce((fSum, folder) => fSum + folder.items.length, 0), 0)
+    statProps.zTotalFoldersCount = newState.spaces.reduce((sum, curSpace) => sum + curSpace.folders.length, 0)
+    statProps.zTotalBookmarksCount = newState.spaces.reduce((sSum, curSpace) => sSum + curSpace.folders.reduce((fSum, folder) => fSum + folder.items.length, 0), 0)
   }
 
   setCommonStatProps(statProps)

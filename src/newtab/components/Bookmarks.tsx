@@ -188,7 +188,7 @@ export function Bookmarks(p: {
                 p.appState.search && <div className="search-results-header">Search results:</div>
               }
               {
-                !p.appState.search && <SpacesList spaces={p.appState.spaces} currentSpaceId={p.appState.currentSpaceId}/>
+                !p.appState.search && <SpacesList spaces={p.appState.spaces} currentSpaceId={p.appState.currentSpaceId} itemInEdit={p.appState.itemInEdit}/>
               }
               <div className="menu-stretching-space"></div>
               <div style={{ display: "flex", marginRight: "12px" }}>

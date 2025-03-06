@@ -1,22 +1,32 @@
-import React, { useContext, useState } from "react"
-import MenuIcon from "../icons/menu.svg"
+import React, { useContext, useEffect, useState } from "react"
+import PlusIcon from "../icons/plus.svg"
 import { ISpace } from "../helpers/types"
 import { CL } from "../helpers/classNameHelper"
 import { DispatchContext } from "../state/actions"
 import { Action } from "../state/state"
-import { SpacesModal } from "./modals/SpacesModal"
 import { SimpleEditableTitle } from "./EditableTitle"
 import { DropdownMenu } from "./dropdown/DropdownMenu"
+import { bindDADSpaceEffect } from "../helpers/dragAndDropSpace"
+import { isTargetSupportsDragAndDrop } from "../helpers/utils"
+import { genUniqLocalId } from "../state/actionHelpers"
+import { insertBetween } from "../helpers/fractionalIndexes"
 
 export function SpacesList(p: {
   spaces: ISpace[]
   currentSpaceId: number
+  itemInEdit: number | undefined
 }) {
   const dispatch = useContext(DispatchContext)
 
   const [menuSpaceId, setMenuSpaceId] = useState(-1)
-  const [editingSpaceId, setEditingSpaceId] = useState(-1)
-  const [isSpacesModalOpen, setSpacesModalOpen] = useState(false)
+  const [mouseDownEvent, setMouseDownEvent] = useState<React.MouseEvent | undefined>(undefined)
+
+  const setEditingSpaceId = (spaceId: number | undefined) => {
+    dispatch({
+      type: Action.UpdateAppState,
+      newState: { itemInEdit: spaceId }
+    })
+  }
 
   const onSpaceClick = (spaceId: number) => {
     if (p.currentSpaceId === spaceId) {
@@ -53,8 +63,53 @@ export function SpacesList(p: {
     }
   }
 
+  const onAddSpace = () => {
+    const lastSpace = p.spaces.at(-1)
+    const spaceId = genUniqLocalId()
+    dispatch({
+      type: Action.CreateSpace,
+      spaceId: spaceId,
+      title: `New space`,
+      position: insertBetween(lastSpace?.position ?? "", "")
+    })
+
+    dispatch({
+      type: Action.SelectSpace,
+      spaceId: spaceId
+    })
+
+    setEditingSpaceId(spaceId)
+  }
+
+  useEffect(() => {
+    if (mouseDownEvent) {
+
+      const onChangeSpacePosition = (spaceId: number, newPosition: string) => {
+        console.log(spaceId, newPosition)
+        dispatch({
+          type: Action.UpdateSpace,
+          spaceId: spaceId,
+          position: newPosition
+        })
+      }
+
+      return bindDADSpaceEffect(mouseDownEvent,
+        {
+          onChangeSpacePosition
+        }
+      )
+    }
+  }, [mouseDownEvent])
+
+  function onMouseDown(e: React.MouseEvent) {
+    if (isTargetSupportsDragAndDrop(e)) {
+      setMouseDownEvent(e)
+    }
+  }
+
   return (
-    <div className="spaces-list">
+    <div className="spaces-list"
+         onMouseDown={onMouseDown}>
       {
         p.spaces.length === 0 && <span style={{ padding: "8px" }}>no spaces</span>
       }
@@ -62,14 +117,14 @@ export function SpacesList(p: {
         p.spaces.map((space) => {
           return <span key={space.id}
                        className={CL("spaces-list__item", { active: space.id === p.currentSpaceId })}
+                       data-position={space.position}
                        data-space-id={space.id}
           >
             <SimpleEditableTitle
-              inEdit={space.id === editingSpaceId}
+              inEdit={space.id === p.itemInEdit}
               onClick={() => onSpaceClick(space.id)}
               onContextMenu={() => setMenuSpaceId(space.id)}
-
-              value={space.title}
+              value={space.title || 'untitled'}
               onSave={(title) => onSaveNewSpaceTitle(space.id, title)}
             />
             {
@@ -83,13 +138,9 @@ export function SpacesList(p: {
         })
 
       }
-      <div className="spaces-list__settings" onClick={() => setSpacesModalOpen(!isSpacesModalOpen)}>
-        <MenuIcon/>
+      <div className="spaces-list__new" onClick={onAddSpace} title="Add new space">
+        <PlusIcon/>
       </div>
-      <SpacesModal setSpacesModalOpen={setSpacesModalOpen}
-                   isSpacesModalOpen={isSpacesModalOpen}
-                   currentSpaceId={p.currentSpaceId}
-                   spaces={p.spaces}/>
     </div>
   )
 }

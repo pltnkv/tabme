@@ -61,7 +61,6 @@ export function filterNonImportant(tab: Tab): boolean {
   )
 }
 
-
 export function filterTabsBySearch(
   list: Tab[],
   searchValue: string
@@ -284,8 +283,6 @@ function escapeRegex(s: string): string {
   return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&")
 }
 
-
-
 export function blurSearch(e: React.MouseEvent) {
   if (document.activeElement && document.activeElement === document.querySelector("input.search")) {
     (document.activeElement as HTMLElement).blur()
@@ -355,20 +352,20 @@ export function getTopVisitedFromHistory(history: HistoryItem[], limit = 20) {
   return sortedHistory.slice(0, limit)
 }
 
-export function scrollElementIntoView(selector:string) {
+export function scrollElementIntoView(selector: string) {
   requestAnimationFrame(() => {
     const element = document.querySelector(selector)
     if (element) {
       const rect = element.getBoundingClientRect()
       const viewportHeight = window.document.body.clientHeight
       if (rect.bottom > viewportHeight) {
-        element.scrollIntoView({block: 'center', behavior: 'smooth'})
+        element.scrollIntoView({ block: "center", behavior: "smooth" })
       }
     }
   })
 }
 
-export function isSomeParentHaveClass(targetElement: HTMLElement | null, classOnParent:string): boolean {
+export function isSomeParentHaveClass(targetElement: HTMLElement | null, classOnParent: string): boolean {
   let el = targetElement
   while (el) {
     if (el.classList.contains(classOnParent)) {
@@ -377,6 +374,17 @@ export function isSomeParentHaveClass(targetElement: HTMLElement | null, classOn
     el = el.parentElement
   }
   return false
+}
+
+export function findParentWithClass(targetElement: HTMLElement | null, classOnParent: string): HTMLElement | undefined {
+  let el = targetElement
+  while (el) {
+    if (el.classList.contains(classOnParent)) {
+      return el
+    }
+    el = el.parentElement
+  }
+  return undefined
 }
 
 export function getCurrentData() {

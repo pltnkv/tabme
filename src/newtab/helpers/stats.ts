@@ -77,14 +77,14 @@ export function initStats(): Promise<void> {
 // Error tracking
 
 export type CommonStatProps = {
-  totalOpenTabsCount: number
-  totalBookmarksCount: number
-  totalFoldersCount: number
-  totalSpacesCount: number
-  totalWindowsCount: number
-  tabmeType: string
-  colorTheme: string
-  sidebarCollapsed: boolean
+  zTotalOpenTabsCount: number
+  zTotalBookmarksCount: number
+  zTotalFoldersCount: number
+  zTotalSpacesCount: number
+  zTotalWindowsCount: number
+  zTabmeType: string
+  zColorTheme: string
+  zSidebarCollapsed: boolean
 }
 
 type EventOptionsMap = {
@@ -92,7 +92,7 @@ type EventOptionsMap = {
 
   // WELCOME
   welcomeStep: { welcomeStepName: string };
-  welcomeCompleted: unknown;
+  welcomeCompleted: {};
 
   // IMPORT / EXPORT
   importedBrowserBookmarks: { count: number };
@@ -110,7 +110,7 @@ type EventOptionsMap = {
   // todo later
 
   // BOOKMARKS
-  bookmarksHidden: unknown
+  bookmarksHidden: {}
 
   // FOLDER
   folderCreated: { source: string }
@@ -120,11 +120,11 @@ type EventOptionsMap = {
 
   // UI SETTINGS
   "toggleSidebar": { sidebarCollapsed: boolean };
-  "settingsClicked": {settingName:string},
+  "settingsClicked": { settingName: string },
 };
 
 let commonProps: Partial<CommonStatProps> = {
-  tabmeType: __OVERRIDE_NEWTAB ? "newtab" : "overrideless"
+  zTabmeType: __OVERRIDE_NEWTAB ? "newtab" : "overrideless"
 }
 
 export function setCommonStatProps(props: Partial<CommonStatProps>) {
@@ -140,7 +140,9 @@ export function trackStat<T extends keyof EventOptionsMap>(
 ): void {
   try {
     console.log("TRACK", eventName, opt, commonProps)
-    mixpanel.track(eventName, opt)
+    if (process.env.NODE_ENV !== "development") {
+      mixpanel.track(eventName, { ...commonProps, ...opt })
+    }
   } catch (e) {
     console.error(e)
   }
