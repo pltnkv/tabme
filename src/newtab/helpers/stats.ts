@@ -145,9 +145,10 @@ export function trackStat<T extends keyof EventOptionsMap>(
   opt: EventOptionsMap[T]
 ): void {
   try {
-    console.log("TRACK", eventName, opt, commonProps)
     if (process.env.NODE_ENV !== "development") {
       mixpanel.track(eventName, { ...commonProps, ...opt })
+    } else {
+      console.log("TRACK", eventName, opt, commonProps)
     }
   } catch (e) {
     console.error(e)

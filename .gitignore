@@ -4,5 +4,6 @@
 *.iml
 target
 dist
+builds
 node_modules
 .env
