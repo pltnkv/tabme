@@ -63,7 +63,7 @@ export function Bookmarks(p: {
         mergeStepsInHistory((historyStepId) => {
 
           if (folderId === -1) { // we need to create new folder first
-            folderId = createFolderWithStat(dispatch, {historyStepId}, 'by-drag-in-new-folder--bookmarks')
+            folderId = createFolderWithStat(dispatch, { historyStepId }, "by-drag-in-new-folder--bookmarks")
           }
 
           // todo !!! support switching spaces like for folders
@@ -124,14 +124,14 @@ export function Bookmarks(p: {
   }, [mouseDownEvent])
 
   function onMouseDown(e: React.MouseEvent) {
-    if (!p.appState.itemInEdit && isTargetSupportsDragAndDrop(e)) {
+    if (isTargetSupportsDragAndDrop(e)) {
       blurSearch(e)
       setMouseDownEvent(e)
     }
   }
 
   function onCreateFolder() {
-    const folderId = createFolderWithStat(dispatch, {}, 'by-click-new-in-bookmarks')
+    const folderId = createFolderWithStat(dispatch, {}, "by-click-new-in-bookmarks")
     dispatch({
       type: Action.UpdateAppState,
       newState: { itemInEdit: folderId }
@@ -182,61 +182,37 @@ export function Bookmarks(p: {
     <div className="bookmarks-box">
       <div className={CL("bookmarks-menu", { "bookmarks-menu--scrolled": isScrolled })}>
         {
-          p.appState.betaMode ?
-            <>
-              {
-                p.appState.search && <div className="search-results-header">Search results:</div>
-              }
-              {
-                !p.appState.search && <SpacesList spaces={p.appState.spaces} currentSpaceId={p.appState.currentSpaceId} itemInEdit={p.appState.itemInEdit}/>
-              }
-              <div className="menu-stretching-space"></div>
-              <div style={{ display: "flex", marginRight: "12px" }}>
-                <IconFind className="search-icon"/>
-                <input
-                  tabIndex={1}
-                  className="search"
-                  type="text"
-                  placeholder="Search in Tabme"
-                  value={p.appState.search}
-                  onChange={onSearchChange}
-                  onKeyDown={handleSearchKeyDown}
-                />
-              </div>
-
-              {
-                p.appState.search !== ""
-                  ? <button tabIndex={1}
-                            className={"btn__clear-search"}
-                            style={{ right: "110px", left: "auto" }}
-                            onClick={onClearSearch}>✕</button>
-                  : null
-              }
-
-
-            </> :
-            <>
-              <div style={{ display: "flex" }}>
-                <IconFind className="search-icon"/>
-                <input
-                  tabIndex={1}
-                  className="search"
-                  type="text"
-                  placeholder="Search in Tabme"
-                  value={p.appState.search}
-                  onChange={onSearchChange}
-                  onKeyDown={handleSearchKeyDown}
-                />
-              </div>
-              {
-                p.appState.search !== ""
-                  ? <button tabIndex={1} className={"btn__clear-search"} onClick={onClearSearch}>✕</button>
-                  : null
-              }
-
-              <div className="menu-stretching-space"></div>
-            </>
+          p.appState.search && <div className="search-results-header">Search results:</div>
         }
+        {
+          !p.appState.search && <SpacesList
+            betaMode={p.appState.betaMode}
+            spaces={p.appState.spaces}
+            currentSpaceId={p.appState.currentSpaceId}
+            itemInEdit={p.appState.itemInEdit}/>
+        }
+        <div className="menu-stretching-space"></div>
+        <div style={{ display: "flex", marginRight: "12px" }}>
+          <IconFind className="search-icon"/>
+          <input
+            tabIndex={1}
+            className="search"
+            type="text"
+            placeholder="Search in Tabme"
+            value={p.appState.search}
+            onChange={onSearchChange}
+            onKeyDown={handleSearchKeyDown}
+          />
+        </div>
+        {
+          p.appState.search !== ""
+            ? <button tabIndex={1}
+                      className={"btn__clear-search"}
+                      style={{ right: "110px", left: "auto" }}
+                      onClick={onClearSearch}>✕</button>
+            : null
+        }
+
 
         <div className="menu-buttons">
           {
@@ -300,7 +276,7 @@ export function Bookmarks(p: {
               </div>
             )
             : (
-              folders.length === 0 ? <div style={{ marginLeft: "52px" }}>Nothing found</div> : null
+              folders.length === 0 ? <div style={{ marginLeft: "58px" }}>Nothing found</div> : null
             )
         }
       </div>

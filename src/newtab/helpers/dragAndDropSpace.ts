@@ -10,7 +10,9 @@ export function bindDADSpaceEffect(
     onChangeSpacePosition: (spaceId: number, newPosition:string) => void,
   }
 ) {
-  runDragAndDrop(mouseDownEvent, config.onChangeSpacePosition)
+  if(mouseDownEvent.button === 0) {
+    runDragAndDrop(mouseDownEvent, config.onChangeSpacePosition)
+  }
 }
 
 type InitRes = {

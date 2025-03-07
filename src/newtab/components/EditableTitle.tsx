@@ -79,10 +79,18 @@ export function SimpleEditableTitle(p: {
   inEdit: boolean,
   value: string,
   onSave: (title: string) => void,
+  onUnmount?: () => void,
   onMouseDown?: (e: React.MouseEvent<HTMLTextAreaElement>) => void,
 }) {
   const [localValue, setLocalValue] = useState(p.value)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    return () => {
+      // because onBlur from deleted input is not dispatched -> we dont set itemInEdit undefined -> "new space" button is not visible
+      p.onUnmount && p.onUnmount()
+    }
+  }, [])
 
   useEffect(() => {
     setLocalValue(p.value)
@@ -98,7 +106,7 @@ export function SimpleEditableTitle(p: {
 
   useEffect(() => {
     if (p.inEdit && inputRef.current) {
-      inputRef.current.style.width = localValue.length * 1.2 + "ch"
+      inputRef.current.style.width = `${getTextWidthWithSpan(inputRef.current)}px`
     }
   }, [p.inEdit, p.value, localValue, inputRef])
 
@@ -148,4 +156,16 @@ export function SimpleEditableTitle(p: {
               }}>{localValue}</span>
     }
   </>
+}
+
+function getTextWidthWithSpan(inputElement: HTMLInputElement): number {
+  const span = document.createElement("span")
+  span.style.visibility = "hidden"
+  span.style.whiteSpace = "nowrap"
+  span.style.font = window.getComputedStyle(inputElement).font
+  span.textContent = inputElement.value + '.'
+  document.body.appendChild(span)
+  const width = span.offsetWidth
+  document.body.removeChild(span)
+  return width
 }

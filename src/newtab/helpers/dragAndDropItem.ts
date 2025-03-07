@@ -304,7 +304,7 @@ function runFolderDragAndDrop(mouseDownEvent: React.MouseEvent,
   const draggingFolderId = getFolderId(targetRoot)
   let targetInsertBeforeFolderId: number | undefined
   let lastSelectedSpaceId: number | undefined
-
+  console.log('!!! runFolderDragAndDrop')
   const onMouseMove = (e: MouseEvent) => {
     if (viewportWasScrolled) {
       // recalculate drop areas if viewport was scrolled

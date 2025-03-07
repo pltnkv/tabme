@@ -121,6 +121,13 @@ type EventOptionsMap = {
   // UI SETTINGS
   "toggleSidebar": { sidebarCollapsed: boolean };
   "settingsClicked": { settingName: string },
+
+  // BETA
+  "betaModalShown": {},
+  "betaModalClosed": {},
+  "betaModalJoined": { email: string },
+  "betaLeaveModalShown": {},
+  "betaStopped": {},
 };
 
 let commonProps: Partial<CommonStatProps> = {

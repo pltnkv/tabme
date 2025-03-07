@@ -111,7 +111,7 @@ export const Folder = React.memo(function Folder(p: {
 
   function onOpenAll() {
     p.folder.items.forEach(item => {
-      if (!item.archived) {
+      if (!item.archived && !item.isSection) {
         chrome.tabs.create({ url: item.url, active: false })
       }
     })

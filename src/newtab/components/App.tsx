@@ -60,8 +60,6 @@ export function App() {
   })
 
   useEffect(() => {
-    console.log()
-    // hack for getting last instance of appState in "getBC().onmessage" callback
     if (appState.betaMode) {
       document.body.classList.add("beta")
     }
@@ -148,7 +146,6 @@ export function App() {
         const res = await apiGetToken(userName)
         localStorage.setItem("authToken", res.token)
         dispatch({ type: Action.UpdateAppState, newState: { betaMode: true } })
-        // dispatch({ type: Action.SaveBookmarksToCloud })
         alert("Login successful!")
       } catch (e) {
         alert("Invalid credentials. Please try again.")
@@ -192,7 +189,6 @@ export function App() {
   return (
     <DispatchContext.Provider value={dispatch}>
       <div className={CL("app", {
-        "beta": appState.betaMode,
         "collapsible-sidebar": appState.sidebarCollapsed
       })}>
         <Notification notification={appState.notification}/>

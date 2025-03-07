@@ -290,8 +290,12 @@ export function blurSearch(e: React.MouseEvent) {
   }
 }
 
-export function isTargetSupportsDragAndDrop(e: React.MouseEvent): boolean {
-  const tagName = (e.target as HTMLElement)?.tagName
+export function isTargetSupportsDragAndDrop(e: React.MouseEvent, ignoreElementWithClass?: string): boolean {
+  const target = e.target as HTMLElement
+  const tagName = target?.tagName
+  if (ignoreElementWithClass && target.classList.contains(ignoreElementWithClass)) {
+    return false
+  }
   return tagName !== "INPUT" && tagName !== "TEXTAREA"
 }
 

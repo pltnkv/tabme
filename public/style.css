@@ -201,15 +201,11 @@ svg {
 
 input.search {
     height: 24px;
-    width: 274px;
+    width: 146px;
     padding: 8px 8px 8px 32px;
     font-size: 16px;
     border-radius: 8px;
     margin: 0;
-}
-
-.beta input.search {
-    width: 146px;
 }
 
 .search-icon {
@@ -765,7 +761,30 @@ input.search {
             opacity: 1;
         }
     }
+}
 
+.spaces-list__delete-button {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    background: none;
+    width: 38px;
+    padding: 0;
+    padding-top: 8px;
+    margin-left: 4px;
+    margin-right: -16px;
+    vertical-align: top;
+    cursor: pointer;
+
+    svg {
+        pointer-events: none;
+    }
+
+    &:hover svg {
+        color: var(--colors-red-600);
+        opacity: 1;
+    }
 }
 
 .modal-inner.spaces-settings-modal {
@@ -1917,4 +1936,19 @@ label.input-label {
             font-size: 14px;
         }
     }
+}
+
+.normal-input {
+    height: 18px;
+    width: 146px;
+    padding: 8px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid var(--colors-gray-800);
+    margin: 0;
+}
+
+.description-text {
+    font-size: 14px;
+    color: var(--colors-gray-700);
 }

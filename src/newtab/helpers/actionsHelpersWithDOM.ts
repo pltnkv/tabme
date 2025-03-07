@@ -12,7 +12,6 @@ export function showMessage(message: string, dispatch: ActionDispatcher): void {
 }
 
 type CreateFolderProps = {
-  newFolderId?: number;
   title?: string;
   color?: string;
   position?: string;
@@ -23,7 +22,7 @@ type CreateFolderProps = {
 
 export function createFolderWithStat(dispatch: any, props: CreateFolderProps, statSource: string): number {
   const newFolderId = genUniqLocalId()
-  dispatch({ type: Action.CreateFolder, ...props })
+  dispatch({ type: Action.CreateFolder, newFolderId, ...props })
   trackStat("folderCreated", { source: statSource })
   return newFolderId
 }

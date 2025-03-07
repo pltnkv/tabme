@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from "react"
 import PlusIcon from "../icons/plus.svg"
+import DeleteIcon from "../icons/delete.svg"
 import { ISpace } from "../helpers/types"
 import { CL } from "../helpers/classNameHelper"
 import { DispatchContext } from "../state/actions"
@@ -10,8 +11,10 @@ import { bindDADSpaceEffect } from "../helpers/dragAndDropSpace"
 import { isTargetSupportsDragAndDrop } from "../helpers/utils"
 import { genUniqLocalId } from "../state/actionHelpers"
 import { insertBetween } from "../helpers/fractionalIndexes"
+import { JoinBetaModal } from "./modals/JoinBetaModal"
 
 export function SpacesList(p: {
+  betaMode: boolean
   spaces: ISpace[]
   currentSpaceId: number
   itemInEdit: number | undefined
@@ -20,6 +23,7 @@ export function SpacesList(p: {
 
   const [menuSpaceId, setMenuSpaceId] = useState(-1)
   const [mouseDownEvent, setMouseDownEvent] = useState<React.MouseEvent | undefined>(undefined)
+  const [isJoinBetaModalOpen, setJoinBetaModalOpen] = useState(false)
 
   const setEditingSpaceId = (spaceId: number | undefined) => {
     dispatch({
@@ -45,7 +49,11 @@ export function SpacesList(p: {
       spaceId,
       title
     })
-    setEditingSpaceId(-1)
+    setEditingSpaceId(undefined)
+  }
+
+  const onSpaceTitleElementUnmount = () => {
+    setEditingSpaceId(undefined)
   }
 
   const onRenameSpace = (spaceId: number) => {
@@ -54,7 +62,7 @@ export function SpacesList(p: {
   }
 
   const deleteSpace = (space: ISpace) => {
-    const res = confirm(`Are you sure you want to delete '${space.title}' space?`)
+    const res = confirm(`Are you sure you want to delete '${space.title}' Space with all its Bookmarks?`)
     if (res) {
       dispatch({
         type: Action.DeleteSpace,
@@ -64,28 +72,31 @@ export function SpacesList(p: {
   }
 
   const onAddSpace = () => {
-    const lastSpace = p.spaces.at(-1)
-    const spaceId = genUniqLocalId()
-    dispatch({
-      type: Action.CreateSpace,
-      spaceId: spaceId,
-      title: `New space`,
-      position: insertBetween(lastSpace?.position ?? "", "")
-    })
+    if (p.betaMode) {
+      const lastSpace = p.spaces.at(-1)
+      const spaceId = genUniqLocalId()
+      dispatch({
+        type: Action.CreateSpace,
+        spaceId: spaceId,
+        title: `New space`,
+        position: insertBetween(lastSpace?.position ?? "", "")
+      })
 
-    dispatch({
-      type: Action.SelectSpace,
-      spaceId: spaceId
-    })
+      dispatch({
+        type: Action.SelectSpace,
+        spaceId: spaceId
+      })
 
-    setEditingSpaceId(spaceId)
+      setEditingSpaceId(spaceId)
+    } else {
+      setJoinBetaModalOpen(true)
+    }
   }
 
   useEffect(() => {
     if (mouseDownEvent) {
 
       const onChangeSpacePosition = (spaceId: number, newPosition: string) => {
-        console.log(spaceId, newPosition)
         dispatch({
           type: Action.UpdateSpace,
           spaceId: spaceId,
@@ -102,7 +113,7 @@ export function SpacesList(p: {
   }, [mouseDownEvent])
 
   function onMouseDown(e: React.MouseEvent) {
-    if (isTargetSupportsDragAndDrop(e)) {
+    if (isTargetSupportsDragAndDrop(e, "spaces-list__delete-button") && p.spaces.length > 1) {
       setMouseDownEvent(e)
     }
   }
@@ -117,30 +128,44 @@ export function SpacesList(p: {
         p.spaces.map((space) => {
           return <span key={space.id}
                        className={CL("spaces-list__item", { active: space.id === p.currentSpaceId })}
+                       onClick={() => onSpaceClick(space.id)}
                        data-position={space.position}
                        data-space-id={space.id}
           >
             <SimpleEditableTitle
               inEdit={space.id === p.itemInEdit}
-              onClick={() => onSpaceClick(space.id)}
               onContextMenu={() => setMenuSpaceId(space.id)}
-              value={space.title || 'untitled'}
+              value={space.title || "untitled"}
               onSave={(title) => onSaveNewSpaceTitle(space.id, title)}
+              onUnmount={onSpaceTitleElementUnmount}
             />
             {
+              space.id === p.itemInEdit && <button className="spaces-list__delete-button"
+                                                   title="Delete space"
+                                                   onMouseDown={() => deleteSpace(space)}
+              >
+                <DeleteIcon/>
+              </button>
+            }
+            {
               menuSpaceId === space.id && <DropdownMenu onClose={() => {setMenuSpaceId(-1)}} className={"dropdown-menu--folder"} offset={{ top: -22, left: -16 }}>
-                <button className="dropdown-menu__button focusable" onClick={() => onRenameSpace(space.id)}>Rename</button>
-                <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={() => deleteSpace(space)}>Delete space</button>
+                <button className="dropdown-menu__button focusable" onClick={() => onRenameSpace(space.id)}>Rename space</button>
+                {
+                  p.spaces.length > 1 && <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={() => deleteSpace(space)}>Delete space</button>
+                }
               </DropdownMenu>
             }
-
           </span>
         })
 
       }
-      <div className="spaces-list__new" onClick={onAddSpace} title="Add new space">
-        <PlusIcon/>
-      </div>
+      {
+        !p.itemInEdit && <div className="spaces-list__new" onClick={onAddSpace} title="Add new space">
+          <PlusIcon/>
+        </div>
+      }
+
+      <JoinBetaModal setOpen={setJoinBetaModalOpen} isOpen={isJoinBetaModalOpen}/>
     </div>
   )
 }
