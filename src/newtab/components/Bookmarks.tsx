@@ -6,11 +6,12 @@ import { DropdownMenu } from "./dropdown/DropdownMenu"
 import { handleBookmarksKeyDown, handleSearchKeyDown } from "../helpers/handleBookmarksKeyDown"
 import { Action, IAppState } from "../state/state"
 import { canShowArchived, DispatchContext, mergeStepsInHistory } from "../state/actions"
-import { HelpOptions, SettingsOptions } from "./SettingsOptions"
+import { BetaOptions, HelpOptions, SettingsOptions } from "./SettingsOptions"
 import { CL } from "../helpers/classNameHelper"
 import IconHelp from "../icons/help.svg"
 import IconSettings from "../icons/settings.svg"
 import IconFind from "../icons/find.svg"
+import IconBeta from "../icons/beta.svg"
 import { SpacesList } from "./SpacesList"
 import { OverrideModal } from "./modals/OverrideModal"
 import { ShortcutsModal } from "./modals/ShortcutsModal"
@@ -24,6 +25,7 @@ export function Bookmarks(p: {
   appState: IAppState;
 }) {
   const dispatch = useContext(DispatchContext)
+  const [betaMenuVisibility, setBetaMenuVisibility] = useState<boolean>(false)
   const [settingsMenuVisibility, setSettingsMenuVisibility] = useState<boolean>(false)
   const [helpMenuVisibility, setHelpMenuVisibility] = useState<boolean>(false)
   const [mouseDownEvent, setMouseDownEvent] = useState<React.MouseEvent | undefined>(undefined)
@@ -154,6 +156,10 @@ export function Bookmarks(p: {
     dispatch({ type: Action.UpdateSearch, value: "" })
   }
 
+  function toggleBetaMenu() {
+    setBetaMenuVisibility(!betaMenuVisibility)
+  }
+
   async function onLogout() {
     localStorage.removeItem("authToken")
     alert("Logout successful")
@@ -192,7 +198,7 @@ export function Bookmarks(p: {
             itemInEdit={p.appState.itemInEdit}/>
         }
         <div className="menu-stretching-space"></div>
-        <div style={{ display: "flex", marginRight: "12px" }}>
+        <div style={{ display: "flex", marginRight: "12px", position: "relative" }}>
           <IconFind className="search-icon"/>
           <input
             tabIndex={1}
@@ -203,18 +209,29 @@ export function Bookmarks(p: {
             onChange={onSearchChange}
             onKeyDown={handleSearchKeyDown}
           />
+          {
+            p.appState.search !== ""
+              ? <button tabIndex={1}
+                        className={"btn__clear-search"}
+                        style={{ left: "155px", top: "9px" }}
+                        onClick={onClearSearch}>✕</button>
+              : null
+          }
         </div>
-        {
-          p.appState.search !== ""
-            ? <button tabIndex={1}
-                      className={"btn__clear-search"}
-                      style={{ right: "110px", left: "auto" }}
-                      onClick={onClearSearch}>✕</button>
-            : null
-        }
 
 
         <div className="menu-buttons">
+          {
+            p.appState.betaMode && <>
+              <span className={CL("beta-mode-label", {'active': betaMenuVisibility})} onClick={toggleBetaMenu}> <IconBeta/> Beta Mode </span>
+              {
+                betaMenuVisibility && <DropdownMenu onClose={() => {setBetaMenuVisibility(false)}} noSmartPositioning={true} alignRight={true} offset={{ top: 14, right: 80 }}>
+                  <BetaOptions appState={p.appState}/>
+                </DropdownMenu>
+              }
+
+            </>
+          }
           {
             loadFromNetwork() ?
               <>

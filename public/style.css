@@ -854,6 +854,30 @@ input.search {
     }
 }
 
+.beta-mode-label {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 8px;
+    cursor: pointer;
+    opacity: 0.7;
+
+    svg {
+        pointer-events: none;
+    }
+
+    &.active {
+        opacity: 1;
+        color: var(--active-control-color);
+        svg {
+            color: var(--active-control-color);
+        }
+    }
+
+    &:hover {
+        opacity: 1;
+    }
+}
+
 .btn__clear-search {
     position: absolute;
     left: 354px;

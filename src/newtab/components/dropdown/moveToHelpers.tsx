@@ -5,7 +5,7 @@ import IconSaved from "../../icons/saved.svg"
 
 export function getFoldersList(
   space: ISpace,
-  onFolderClick: (folderId: number) => void,
+  onFolderClick: (folderId: number, spaceId: number) => void,
   onCreateFolderClick: (spaceId: number) => void,
   currentFolderId?: number) {
   return (<>
@@ -15,7 +15,7 @@ export function getFoldersList(
         key={folder.id}
         className="dropdown-menu__button focusable"
         disabled={currentFolderId === folder.id}
-        onClick={() => onFolderClick(folder.id)}
+        onClick={() => onFolderClick(folder.id, space.id)}
       >
         <span className="folder-color" style={{ backgroundColor: folder.color }}></span>
         <span style={{ flexGrow: 1 }}>{folder.title}</span>

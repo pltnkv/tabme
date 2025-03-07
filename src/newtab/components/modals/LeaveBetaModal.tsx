@@ -14,7 +14,7 @@ export const LeaveBetaModal = (p: {
   const dispatch = useContext(DispatchContext)
 
   const leaveTheBeta = () => {
-    trackStat("betaLeaveModalShown", {})
+    trackStat("betaLeave", {})
     localStorage.removeItem("betaMode")
 
     const firstSpace = p.spaces[0]
@@ -43,7 +43,7 @@ export const LeaveBetaModal = (p: {
     showMessage("Beta has been disabled and spaces merged", dispatch)
 
     setTimeout(() => {
-      // location.reload()
+      location.reload()
     }, 2000)
   }
 

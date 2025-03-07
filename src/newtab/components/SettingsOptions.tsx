@@ -13,11 +13,47 @@ type OnClickOption = { onClick: (e: any) => void; title: string; text: string; h
 type OnToggleOption = { onToggle: () => void; value: boolean, title: string; text: string; hidden?: boolean }
 type OptionsConfig = Array<OnClickOption | OnToggleOption | { separator: true }>
 
+export const BetaOptions = (props: {
+  appState: IAppState;
+}) => {
+  const [leavingBetaModalOpen, setLeavingBetaModalOpen] = useState<boolean>(false)
+
+  function onStopBeta() {
+    trackStat("settingsClicked", { settingName: "betaStopped" })
+    setLeavingBetaModalOpen(true)
+  }
+
+  function onSendFeedbackBeta() {
+    chrome.tabs.create({ url: "https://docs.google.com/forms/d/e/1FAIpQLSeA-xs3GjBVNQQEzSbHiGUs1y9_XIo__pQBJKQth737VqAEOw/formResponse", active: true })
+    trackStat("settingsClicked", { settingName: "sendFeedbackBeta" })
+  }
+
+  type OnClickOption = { onClick: (e: any) => void; title: string; text: string; hidden?: boolean; isFile?: boolean }
+  type OnToggleOption = { onToggle: () => void; value: boolean, title: string; text: string; hidden?: boolean }
+  const options: Array<OnClickOption | OnToggleOption | { separator: true }> = [
+    {
+      onClick: onSendFeedbackBeta,
+      title: "I appreciate honest feedback on what needs to be improved or bug reports. Thanks for your time and support!",
+      text: "Send feedback"
+    },
+    {
+      onClick: onStopBeta,
+      title: "Cancel the beta program and switch to free plan",
+      text: "Cancel Beta program 👋",
+      hidden: !props.appState.betaMode
+    }
+  ]
+
+  return <>
+    <Options optionsConfig={options}/>
+    <LeaveBetaModal isOpen={leavingBetaModalOpen} setOpen={setLeavingBetaModalOpen} spaces={props.appState.spaces}/>
+  </>
+}
+
 export const HelpOptions = (props: {
   appState: IAppState;
   onShortcutsModal: () => void
 }) => {
-  const [leavingBetaModalOpen, setLeavingBetaModalOpen] = useState<boolean>(false)
 
   function onSendFeedback() {
     chrome.tabs.create({ url: "https://docs.google.com/forms/d/e/1FAIpQLSeA-xs3GjBVNQQEzSbHiGUs1y9_XIo__pQBJKQth737VqAEOw/formResponse", active: true })
@@ -36,11 +72,6 @@ export const HelpOptions = (props: {
   function onHowToUse() {
     chrome.tabs.create({ url: "https://gettabme.com/guide.html", active: true })
     trackStat("settingsClicked", { settingName: "HowToUse" })
-  }
-
-  function onStopBeta() {
-    trackStat("betaStopped", {})
-    setLeavingBetaModalOpen(true)
   }
 
   type OnClickOption = { onClick: (e: any) => void; title: string; text: string; hidden?: boolean; isFile?: boolean }
@@ -68,22 +99,11 @@ export const HelpOptions = (props: {
       onClick: onSendFeedback,
       title: "I appreciate honest feedback on what needs to be improved or bug reports. Thanks for your time and support!",
       text: "Send feedback"
-    },
-    {
-      separator: true,
-      hidden: !props.appState.betaMode
-    },
-    {
-      onClick: onStopBeta,
-      title: "Cancel the beta program and switch to free plan",
-      text: "Cancel Beta program 👋",
-      hidden: !props.appState.betaMode
     }
   ]
 
   return <>
     <Options optionsConfig={settingsOptions}/>
-    <LeaveBetaModal isOpen={leavingBetaModalOpen} setOpen={setLeavingBetaModalOpen} spaces={props.appState.spaces}/>
   </>
 }
 

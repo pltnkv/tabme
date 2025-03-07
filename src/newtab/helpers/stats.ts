@@ -107,7 +107,7 @@ type EventOptionsMap = {
   tabsStashed: { stashedTabsClosed: boolean };
 
   // SPACES
-  // todo later
+  spaceCreated: { source: string }
 
   // BOOKMARKS
   bookmarksHidden: {}
@@ -126,8 +126,7 @@ type EventOptionsMap = {
   "betaModalShown": {},
   "betaModalClosed": {},
   "betaModalJoined": { email: string },
-  "betaLeaveModalShown": {},
-  "betaStopped": {},
+  "betaLeave": {},
 };
 
 let commonProps: Partial<CommonStatProps> = {

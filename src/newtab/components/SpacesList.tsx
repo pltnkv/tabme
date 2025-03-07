@@ -12,6 +12,7 @@ import { isTargetSupportsDragAndDrop } from "../helpers/utils"
 import { genUniqLocalId } from "../state/actionHelpers"
 import { insertBetween } from "../helpers/fractionalIndexes"
 import { JoinBetaModal } from "./modals/JoinBetaModal"
+import { trackStat } from "../helpers/stats"
 
 export function SpacesList(p: {
   betaMode: boolean
@@ -88,6 +89,8 @@ export function SpacesList(p: {
       })
 
       setEditingSpaceId(spaceId)
+
+      trackStat("spaceCreated", {source: 'new-space-button'})
     } else {
       setJoinBetaModalOpen(true)
     }
@@ -140,7 +143,7 @@ export function SpacesList(p: {
               onUnmount={onSpaceTitleElementUnmount}
             />
             {
-              space.id === p.itemInEdit && <button className="spaces-list__delete-button"
+              space.id === p.itemInEdit && p.spaces.length > 1 && <button className="spaces-list__delete-button"
                                                    title="Delete space"
                                                    onMouseDown={() => deleteSpace(space)}
               >

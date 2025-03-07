@@ -30,7 +30,7 @@ export const SidebarOpenTabs = memo((props: {
         const tab = props.tabs.find((t) => t.id === targetTabId)
 
         if (folderId === -1) { // we need to create new folder first
-          folderId = createFolderWithStat(dispatch, {}, 'by-drag-in-new-folder--sidebar')
+          folderId = createFolderWithStat(dispatch, {}, "by-drag-in-new-folder--sidebar")
         }
 
         if (tab && tab.id) { // Add existing Tab
@@ -62,7 +62,7 @@ export const SidebarOpenTabs = memo((props: {
           chrome.tabs.update(tabId, { active: true })
           chrome.windows.update(tab.windowId, { focused: true })
         }
-        trackStat('tabFocused', {source: 'sidebar'})
+        trackStat("tabFocused", { source: "sidebar" })
       }
       const onDragStarted = () => {
         return getCanDragChecker(props.search, dispatch)()
@@ -93,7 +93,7 @@ export const SidebarOpenTabs = memo((props: {
       tabIds: [tabId]
     })
     showMessage("Tab has been closed", dispatch)
-    trackStat('tabClosed', {source: 'sidebar'})
+    trackStat("tabClosed", { source: "sidebar" })
   }
 
   const tabsByWindows: Map<number, Tab[]> = new Map()
@@ -185,9 +185,8 @@ const TabItem = (p: {
     hideMenu()
   }
 
-  const moveToFolder = (folderId: number) => {
+  const moveToFolder = (folderId: number, spaceId: number) => {
     const item = convertTabToItem(p.tab)
-    const targetSpaceId = findSpaceByFolderId(p, folderId)?.id
 
     dispatch({
       type: Action.CreateFolderItem,
@@ -203,13 +202,10 @@ const TabItem = (p: {
       }
     })
 
-    // todo !!! switching space after creation does not work
-    if (targetSpaceId) {
-      dispatch({
-        type: Action.SelectSpace,
-        spaceId: targetSpaceId
-      })
-    }
+    dispatch({
+      type: Action.SelectSpace,
+      spaceId
+    })
 
     scrollElementIntoView(`a[data-id="${item.id}"]`)
 
@@ -218,8 +214,8 @@ const TabItem = (p: {
 
   const moveToNewFolder = (spaceId: number) => {
     mergeStepsInHistory((historyStepId) => {
-      const folderId = createFolderWithStat(dispatch, {historyStepId, spaceId}, 'by-save-to-new-folder')
-      moveToFolder(folderId)
+      const folderId = createFolderWithStat(dispatch, { historyStepId, spaceId }, "by-save-to-new-folder")
+      moveToFolder(folderId, spaceId)
     })
   }
 
