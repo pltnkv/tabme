@@ -48,6 +48,7 @@ function mountApp() {
   )
 }
 
+// TODO remove in JUNE WHEN EVERYONE has version more than v1.30
 function migrateToSpaces(state: ISavingAppState) {
   if (Array.isArray(state.folders)) {
     const initSpace: ISpace = {

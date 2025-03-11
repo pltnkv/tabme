@@ -3,6 +3,13 @@ export interface IPoint {
   y: number;
 }
 
+export interface IRect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 export interface IOffset {
   top: number;
   bottom: number;

@@ -1,12 +1,12 @@
 import { createContext } from "react"
 import { Action, ActionPayload, APICommandPayload, APICommandPayloadFull, HistoryActionPayload, IAppState, UndoStep } from "./state"
 import { unselectAll } from "../helpers/selectionUtils"
-import { ColorTheme, IFolder, IFolderItem, ISpace } from "../helpers/types"
+import { ColorTheme, IFolder, IFolderItem, ISpace, IWidgetData } from "../helpers/types"
 import { applyTheme, saveStateThrottled, savingStateKeys } from "./storage"
 import { addItemsToFolder, insertBetween, sortByPosition } from "../helpers/fractionalIndexes"
 import { loadFromNetwork } from "../../api/api"
 import { findFolderById, findFolderByItemId, findItemById, findSpaceByFolderId, findSpaceById, genUniqLocalId, updateFolder, updateFolderItem, updateSpace } from "./actionHelpers"
-import { genNextRuntimeId, getRandomHEXColor } from "../helpers/utils"
+import { genNextRuntimeId, getRandomHEXColor, isArraysEqual } from "../helpers/utils"
 
 type ObjectWithRemoteId = {
   remoteId: number
@@ -17,7 +17,7 @@ export const DispatchContext = createContext<ActionDispatcher>(null!)
 export type ActionDispatcher = (action: ActionPayload) => void;
 
 export function stateReducer(state: IAppState, action: ActionPayload): IAppState {
-  unselectAll()
+  // unselectAll()
   const newState = stateReducer0(state, action)
   console.log("[action]:", action, " [new state]:", newState)
 
@@ -166,26 +166,26 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
     }
 
     case Action.SwipeSpace: {
-      const currentIndex = state.spaces.findIndex(space => space.id === state.currentSpaceId);
+      const currentIndex = state.spaces.findIndex(space => space.id === state.currentSpaceId)
 
       if (currentIndex === -1) {
         return showErrorReducer("Current space not found")
       }
 
-      let newIndex = currentIndex;
+      let newIndex = currentIndex
 
       if (action.direction === "left") {
-        newIndex = currentIndex === 0 ? state.spaces.length - 1 : currentIndex - 1;
+        newIndex = currentIndex === 0 ? state.spaces.length - 1 : currentIndex - 1
       } else if (action.direction === "right") {
-        newIndex = currentIndex === state.spaces.length - 1 ? 0 : currentIndex + 1;
+        newIndex = currentIndex === state.spaces.length - 1 ? 0 : currentIndex + 1
       } else {
-        return state; // Invalid direction, no change
+        return state // Invalid direction, no change
       }
 
       return {
         ...state,
         currentSpaceId: state.spaces[newIndex].id
-      };
+      }
     }
 
     /********************************************************
@@ -688,6 +688,177 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         spaces: spaces,
         apiCommandsQueue,
         undoSteps: undoActions
+      }
+    }
+
+
+    /********************************************************
+     * WIDGETS CRUD
+     ********************************************************/
+
+    case Action.CreateWidget: {
+      const currentSpace = findSpaceById(state, action.spaceId)
+      if (!currentSpace) {
+        return showErrorReducer(`Space not found`)
+      }
+
+      const newWidget: IWidgetData = {
+        id: action.widgetId ?? genUniqLocalId(),
+        type: "Sticker",
+        pos: action.pos,
+        content: {
+          type: "Sticker",
+          text: "Sticky note"
+        }
+      }
+
+      return {
+        ...state,
+        spaces: state.spaces.map(space =>
+          space.id === action.spaceId
+            ? { ...space, widgets: [...(space.widgets || []), newWidget] }
+            : space
+        )
+      }
+    }
+
+    case Action.UpdateWidget: {
+      const updatedSpaces = state.spaces.map(space => ({
+        ...space,
+        widgets: space.widgets?.map(widget =>
+          widget.id === action.widgetId
+            ? {
+              ...widget,
+              pos: action.pos !== undefined ? action.pos : widget.pos,
+              content: {
+                ...widget.content,
+                text: action.text !== undefined ? action.text : widget.content.text
+              }
+            }
+            : widget
+        ) || []
+      }))
+
+      return {
+        ...state,
+        spaces: updatedSpaces
+      }
+    }
+
+    case Action.DeleteWidgets: {
+      return {
+        ...state,
+        selectedWidgetIds: state.selectedWidgetIds.filter(id => !action.widgetIds.includes(id)),
+        spaces: state.spaces.map(space => ({
+          ...space,
+          widgets: space.widgets?.filter(widget => !action.widgetIds.includes(widget.id)) || []
+        }))
+      }
+    }
+
+    case Action.BringToFront: {
+      return {
+        ...state,
+        spaces: state.spaces.map(space => {
+          if (space.id !== state.currentSpaceId) {
+            return space
+          }
+
+          const widgets = [...(space.widgets ?? [])]
+          const movingWidgets = widgets.filter(widget => action.widgetIds.includes(widget.id))
+          const remainingWidgets = widgets.filter(widget => !action.widgetIds.includes(widget.id))
+
+          return {
+            ...space,
+            widgets: [...remainingWidgets, ...movingWidgets] // Move selected widgets to the end
+          }
+        })
+      }
+    }
+
+    case Action.SendToBack: {
+      return {
+        ...state,
+        spaces: state.spaces.map(space => {
+          if (space.id !== state.currentSpaceId) {
+            return space
+          }
+
+          const widgets = [...(space.widgets ?? [])]
+          const movingWidgets = widgets.filter(widget => action.widgetIds.includes(widget.id))
+          const remainingWidgets = widgets.filter(widget => !action.widgetIds.includes(widget.id))
+
+          return {
+            ...space,
+            widgets: [...movingWidgets, ...remainingWidgets] // Move selected widgets to the beginning
+          }
+        })
+      }
+    }
+
+    /********************************************************
+     * Canvas API
+     ********************************************************/
+
+    case Action.SelectWidgets: {
+
+      let selectedWidgetIds = state.selectedWidgetIds
+      if (!isArraysEqual(state.selectedWidgetIds, action.widgetIds)) {
+        selectedWidgetIds = action.widgetIds
+      }
+
+      return {
+        ...state,
+        selectedWidgetIds,
+        editingWidgetId: undefined
+      }
+    }
+
+    case Action.SetEditingWidget: {
+      return {
+        ...state,
+        editingWidgetId: action.widgetId,
+        selectedWidgetIds: action.widgetId ? [action.widgetId] : state.selectedWidgetIds
+      }
+    }
+
+    case Action.DuplicateSelectedWidgets: {
+      if (state.selectedWidgetIds.length === 0) {
+        return state
+      }
+
+      const newWidgets = state.selectedWidgetIds.map((widgetId) => {
+        const currentSpace = findSpaceById(state, state.currentSpaceId)!
+        const originalWidget = (currentSpace.widgets ?? [])
+          .find((widget) => widget.id === widgetId)
+
+        if (!originalWidget) {
+          return null
+        }
+
+        return {
+          ...originalWidget,
+          id: genUniqLocalId(), // Generate a new unique ID
+          pos: {
+            x: originalWidget.pos.x + 20, // Offset slightly to avoid overlap
+            y: originalWidget.pos.y + 20
+          }
+        }
+      }).filter(Boolean) as IWidgetData[]
+
+      if (newWidgets.length === 0) {
+        return showErrorReducer("No valid widgets found to duplicate")
+      }
+
+      const spaces = updateSpace(state.spaces, state.currentSpaceId, (space) => ({
+        ...space,
+        widgets: [...space.widgets ?? [], ...newWidgets]
+      }))
+
+      return {
+        ...state,
+        spaces,
+        selectedWidgetIds: newWidgets.map(widget => widget.id) // Select new widgets
       }
     }
 

@@ -369,7 +369,7 @@ export function scrollElementIntoView(selector: string) {
   })
 }
 
-export function isSomeParentHaveClass(targetElement: HTMLElement | null, classOnParent: string): boolean {
+export function isSomeParentHaveClass(targetElement: Element | null, classOnParent: string): boolean {
   let el = targetElement
   while (el) {
     if (el.classList.contains(classOnParent)) {
@@ -380,11 +380,11 @@ export function isSomeParentHaveClass(targetElement: HTMLElement | null, classOn
   return false
 }
 
-export function findParentWithClass(targetElement: HTMLElement | null, classOnParent: string): HTMLElement | undefined {
+export function findParentWithClass(targetElement: any | null, classOnParent: string): HTMLElement | undefined {
   let el = targetElement
   while (el) {
     if (el.classList.contains(classOnParent)) {
-      return el
+      return el as HTMLElement
     }
     el = el.parentElement
   }
@@ -416,6 +416,14 @@ export function mergeObjects<T>(o1: T, o2: Partial<T>): T {
   }
 
   return merged
+}
+
+export function isArraysEqual(arr1: number[], arr2: number[]): boolean {
+  if (arr1.length !== arr2.length) {
+    return false
+  }
+
+  return arr1.every((value, index) => value === arr2[index])
 }
 
 export const IS_MAC_DEVICE: boolean = false// navigator.userAgent.indexOf("Mac OS X") != -1

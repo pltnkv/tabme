@@ -1,0 +1,75 @@
+.canvas-container {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 0;
+}
+
+.widget-sticker {
+    position: absolute;
+    top: 480px;
+    left: 160px;
+    width: 180px;
+    min-height: 180px;
+    height: fit-content;
+    border: 2px solid transparent;
+
+    &.selected .widget-sticker-bg {
+        border: 1px solid var(--active-control-color);
+        box-sizing: border-box;
+    }
+
+    .widget-sticker-text {
+        position: relative;
+        top: 0;
+        width: 100%;
+        padding: 12px;
+        font-size: 18px;
+        box-sizing: border-box;
+        min-height: 180px;
+    }
+
+    div.widget-sticker-text {
+        cursor: default;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        user-select: none;
+    }
+
+    textarea.widget-sticker-text {
+        display: block;
+        background-color: transparent;
+        resize: none;
+        border: none;
+        outline: none;
+        cursor: text;
+        word-wrap: break-word;
+        overflow-y: clip;
+    }
+
+    .widget-sticker-bg {
+        position: absolute;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, rgba(0, 0, 0, 0.02), 16%, rgba(0, 0, 0, 0), 30%, rgba(0, 0, 0, 0)), #FFF598;
+        filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.04));
+    }
+
+    .widget-sticker-shadow {
+        position: absolute;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url("./sticker-bg.png");
+        background-repeat: no-repeat;
+        background-position: right top;
+        background-size: contain;
+        transform: translateX(6%);
+    }
+}
+
+.widget-sticker2 {
+    top: 490px;
+    left: 260px;
+}

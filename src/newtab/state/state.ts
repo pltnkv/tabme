@@ -3,8 +3,9 @@ import { ColorTheme, IFolder, IFolderItem, IFolderItemToCreate, ISpace } from ".
 import { ISavingAppState } from "./storage"
 import Tab = chrome.tabs.Tab
 import HistoryItem = chrome.history.HistoryItem
+import { IPoint } from "../helpers/MathTypes"
 
-export type IAppStat = {
+export type IAppStats = {
   sessionNumber: number
   firstSessionDate: number
   lastVersion: string // need to update
@@ -73,11 +74,15 @@ export type IAppState = {
   sidebarCollapsed: boolean; // Stored in LS
   colorTheme?: ColorTheme; // Stored in LS
   sidebarHovered: boolean; // for hover effects
-  betaMode: boolean // IT MEANS SPACES & NETWORK ARE ENABLED
+  betaMode: boolean
+  betaStickers: boolean
   page: "default" | "import" | "welcome",
-  stat: IAppStat | undefined // Stored in LS
+  stat: IAppStats | undefined // Stored in LS
   achievements: IAppAchievements  // Stored in LS
   loaded: boolean
+
+  selectedWidgetIds: number[]
+  editingWidgetId: number | undefined
 
   // API
   apiCommandsQueue: APICommandPayloadFull[],
@@ -95,7 +100,7 @@ export type IAppState = {
    */
   folders: IFolder[]
   hiddenFeatureIsEnabled: boolean
-};
+}
 
 let initState: IAppState = {
   version: 2,
@@ -115,7 +120,10 @@ let initState: IAppState = {
   sidebarCollapsed: false, //should be named "sidebarCollapsable"
   sidebarHovered: false,
   betaMode: false,
+  betaStickers: !!localStorage.getItem("betaStickers"),
   loaded: false,
+  selectedWidgetIds: [],
+  editingWidgetId: undefined,
   page: "default",
   stat: {
     sessionNumber: 0,
@@ -199,6 +207,18 @@ export enum Action {
 
   SaveBookmarksToCloud = "save-bookmarks-to-cloud",
 
+  CreateWidget = "create-widget",
+  DeleteWidgets = "delete-widgets",
+  UpdateWidget = "update-widget",
+
+  // CanvasAPI
+
+  SelectWidgets = "select-widgets",
+  SetEditingWidget = "set-editing-widget",
+  DuplicateSelectedWidgets = "DuplicateSelectedWidgets",
+  BringToFront = "BringToFront",
+  SendToBack = "SendToBack",
+
   // API HELPERS
   APICommandResolved = "api-command-resolved",
   APIConfirmEntityCreated = "api-confirm-entity-created",
@@ -231,8 +251,8 @@ export type ActionPayload = (
   | { type: Action.UpdateShowArchivedItems; value: boolean }
   | { type: Action.UpdateShowNotUsedItems; value: boolean }
   | { type: Action.FixBrokenIcons }
-  | { type: Action.SelectSpace; spaceId?: number, spaceIndex?: number }
-  | { type: Action.SwipeSpace; direction: "left" | "right" }
+  | { type: Action.SelectSpace; spaceId?: number, spaceIndex?: number } // !!! стоить ли очищать стикеры когда свайпишься?
+  | { type: Action.SwipeSpace; direction: "left" | "right" } // !!! стоить ли очищать стикеры когда свайпишься?
   | { type: Action.UpdateAppState; newState: Partial<IAppState> }
 
   | { type: Action.CreateSpace; spaceId: number; title: string; position?: string }
@@ -252,6 +272,16 @@ export type ActionPayload = (
   | { type: Action.MoveFolderItems; itemIds: number[]; targetFolderId: number; insertBeforeItemId: number | undefined; }
 
   | { type: Action.SaveBookmarksToCloud; }
+
+  | { type: Action.CreateWidget; spaceId?: number; widgetId: number; pos: IPoint, text?: string }
+  | { type: Action.UpdateWidget; widgetId: number; pos?: IPoint, text?: string }
+  | { type: Action.DeleteWidgets; widgetIds: number[]; }
+
+  | { type: Action.SelectWidgets; widgetIds: number[]; }
+  | { type: Action.SetEditingWidget; widgetId: number | undefined; }
+  | { type: Action.DuplicateSelectedWidgets; }
+  | { type: Action.BringToFront; widgetIds: number[]; }
+  | { type: Action.SendToBack; widgetIds: number[]; }
 
   | { type: Action.APICommandResolved; commandId: number, }
   | { type: Action.APIConfirmEntityCreated; localId: number; remoteId: number; entityType: "folder" | "bookmark" }

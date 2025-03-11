@@ -5,9 +5,29 @@ import { Action } from "../state/state"
 import { showMessageWithUndo } from "../helpers/actionsHelpersWithDOM"
 import { isSomeModalOpened } from "./modals/Modal"
 
-export const KeyboardManager = React.memo((props: {
+let mouseX = 0
+let mouseY = 0
+
+export function getMouseX() {
+  return mouseX
+}
+
+export function getMouseY() {
+  return mouseY
+}
+
+export const KeyboardManager = React.memo((p: {
   search: string;
+  selectedWidgetIds: number[];
 }) => {
+
+  useEffect(() => {
+    document.addEventListener("mousemove", (e) => {
+      mouseX = e.screenX
+      mouseY = e.screenY
+    })
+  }, [])
+
   const dispatch = useContext(DispatchContext)
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -27,6 +47,60 @@ export const KeyboardManager = React.memo((props: {
             itemIds: getSelectedItemsIds()
           })
           showMessageWithUndo("Bookmark has been deleted", dispatch)
+          return
+        }
+      }
+
+      // IN CANVAS
+      if (p.selectedWidgetIds.length > 0) {
+        if ((e.code === "Backspace" || e.code === "Delete")) {
+          dispatch({
+            type: Action.DeleteWidgets,
+            widgetIds: p.selectedWidgetIds
+          })
+          return
+        }
+
+        if (p.selectedWidgetIds.length === 1 && e.code === "Enter") {
+          dispatch({
+            type: Action.SetEditingWidget,
+            widgetId: p.selectedWidgetIds[0]
+          })
+          e.preventDefault()
+          e.stopPropagation()
+          return
+        }
+
+        if (e.code === "KeyD" && (e.ctrlKey || e.metaKey)) {
+          dispatch({
+            type: Action.DuplicateSelectedWidgets
+          })
+          e.preventDefault()
+          e.stopPropagation()
+          return
+        }
+
+        if (e.code === "Escape") {
+          dispatch({
+            type: Action.SelectWidgets,
+            widgetIds: []
+          })
+          return
+        }
+
+        if (e.code === "BracketRight") {
+          dispatch({
+            type: Action.BringToFront,
+            widgetIds: p.selectedWidgetIds
+          })
+          return
+        }
+
+        if (e.code === "BracketLeft") {
+          dispatch({
+            type: Action.SendToBack,
+            widgetIds: p.selectedWidgetIds
+          })
           return
         }
       }
@@ -57,21 +131,22 @@ export const KeyboardManager = React.memo((props: {
         }
       }
 
-      const isLetterOrNumber = !!(e.key.length === 1 && e.key.match(/[a-z]|[а-я]|[0-9]/i))
-      if (isLetterOrNumber) {
+      // disable instant typing in search
+      // const isLetterOrNumber = !!(e.key.length === 1 && e.key.match(/[a-z]|[а-я]|[0-9]/i))
+      // if (isLetterOrNumber) {
         // dispatch({
         //   type: Action.UpdateSearch,
         //   value: props.search + e.key
         // })
-        ;(document.querySelector("input.search") as HTMLElement).focus()
-      }
+        // ;(document.querySelector("input.search") as HTMLElement).focus()
+      // }
     }
     document.addEventListener("keydown", onKeyDown)
 
     return () => {
       document.removeEventListener("keydown", onKeyDown)
     }
-  }, [])
+  }, [p.search, p.selectedWidgetIds])
   return null
 })
 

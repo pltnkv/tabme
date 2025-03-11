@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import { BookmarkImporter } from "./BookmarksImporter"
 import { Action, IAppState } from "../state/state"
 import { CL } from "../helpers/classNameHelper"
@@ -21,6 +21,10 @@ export function Welcome(p: {
 
   const dispatch = useContext(DispatchContext)
   const [screen, setScreen] = useState(SCREEN.FIRST)
+
+  useEffect(() => {
+    trackStat("welcomeShown", {})
+  }, [])
 
   const changeScreen = (screen: string) => {
     setScreen(screen)

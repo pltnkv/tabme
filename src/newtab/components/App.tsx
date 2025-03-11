@@ -6,7 +6,7 @@ import { KeyboardManager } from "./KeyboardManager"
 import { filterIrrelevantHistory } from "../helpers/utils"
 import { ImportBookmarksFromSettings } from "./ImportBookmarksFromSettings"
 import { createWelcomeFolder } from "../helpers/welcomeLogic"
-import { Action, getInitAppState, IAppStat, IAppState } from "../state/state"
+import { Action, getInitAppState, IAppStats, IAppState } from "../state/state"
 import { DispatchContext, stateReducer } from "../state/actions"
 import { getBC, getStateFromLS } from "../state/storage"
 import { executeAPICall } from "../../api/serverCommands"
@@ -29,6 +29,8 @@ function invalidateStats(newState: IAppState, prevState: IAppState | undefined) 
 
   statProps.zTotalSpacesCount = newState.spaces.length
   statProps.zSidebarCollapsed = newState.sidebarCollapsed
+  statProps.zIsBeta = newState.betaMode
+  statProps.zIsFirstTime = newState.stat?.sessionNumber === 1
 
   if (newState.tabs !== prevState?.tabs) {
     const uniqWinIds: number[] = []
@@ -202,7 +204,7 @@ export function App() {
           appState.page === "default" && <>
             <Sidebar appState={appState}/>
             <Bookmarks appState={appState}/>
-            <KeyboardManager search={appState.search}/>
+            <KeyboardManager search={appState.search} selectedWidgetIds={appState.selectedWidgetIds}/>
           </>
         }
       </div>

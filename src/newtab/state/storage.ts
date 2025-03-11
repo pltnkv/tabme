@@ -135,6 +135,16 @@ cmd.stopBeta = () => {
   location.reload()
 }
 
+cmd.startBetaStickers = () => {
+  localStorage.setItem("betaStickers", "true")
+  location.reload()
+}
+
+cmd.stopBetaStickers = () => {
+  localStorage.removeItem("betaStickers")
+  location.reload()
+}
+
 export function isBetaMode(): boolean {
   return !!localStorage.getItem("betaMode")
 }

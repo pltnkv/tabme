@@ -48,6 +48,7 @@ export const SidebarOpenTabs = memo((props: {
               itemInEdit: item.id
             }
           })
+          trackStat("tabsSaved", { source: "sidebar" })
         } else {
           console.error("ERROR: tab not found")
         }

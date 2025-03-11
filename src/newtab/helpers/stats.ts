@@ -77,6 +77,8 @@ export function initStats(): Promise<void> {
 // Error tracking
 
 export type CommonStatProps = {
+  zIsBeta: boolean
+  zIsFirstTime: boolean
   zTotalOpenTabsCount: number
   zTotalBookmarksCount: number
   zTotalFoldersCount: number
@@ -91,6 +93,7 @@ type EventOptionsMap = {
   appLoaded: {}
 
   // WELCOME
+  welcomeShown: {};
   welcomeStep: { welcomeStepName: string };
   welcomeCompleted: {};
 
@@ -105,12 +108,14 @@ type EventOptionsMap = {
   tabClosed: { source: string }
   tabsDeduplicated: { count: number };
   tabsStashed: { stashedTabsClosed: boolean };
+  tabsSaved: { source: string };
 
   // SPACES
   spaceCreated: { source: string }
 
   // BOOKMARKS
   bookmarksHidden: {}
+  bookmarksDragged: { count: number }
 
   // FOLDER
   folderCreated: { source: string }

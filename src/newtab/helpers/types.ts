@@ -7,6 +7,7 @@ export interface IObject {
 export interface ISpace extends IObject {
   title: string
   folders: IFolder[]
+  widgets?: IWidgetData[]
 }
 
 export interface IFolder extends IObject {
@@ -24,6 +25,21 @@ export interface IFolderItem extends IObject {
   archived?: boolean
   isSection?: boolean // todo - replace on "type later". not store bool on server
   inEdit?: boolean
+}
+
+export type WidgetType = "Sticker"
+
+export type IWidgetData = {
+  id: number
+  type: WidgetType
+  pos: {
+    x: number,
+    y: number
+  }
+  content: {
+    type: WidgetType
+    text: string
+  }
 }
 
 // Data for not yet created FolderItem

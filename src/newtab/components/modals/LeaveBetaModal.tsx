@@ -16,6 +16,10 @@ export const LeaveBetaModal = (p: {
   const leaveTheBeta = () => {
     trackStat("betaLeave", {})
     localStorage.removeItem("betaMode")
+    dispatch({
+      type: Action.UpdateAppState,
+      newState: {betaMode: false}
+    })
 
     const firstSpace = p.spaces[0]
     if (firstSpace) {
@@ -41,10 +45,6 @@ export const LeaveBetaModal = (p: {
     })
     p.setOpen(false)
     showMessage("Beta has been disabled and spaces merged", dispatch)
-
-    setTimeout(() => {
-      location.reload()
-    }, 2000)
   }
 
   const onClose = () => {

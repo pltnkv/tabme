@@ -90,7 +90,7 @@ export function SpacesList(p: {
 
       setEditingSpaceId(spaceId)
 
-      trackStat("spaceCreated", {source: 'new-space-button'})
+      trackStat("spaceCreated", { source: "new-space-button" })
     } else {
       setJoinBetaModalOpen(true)
     }
@@ -144,8 +144,8 @@ export function SpacesList(p: {
             />
             {
               space.id === p.itemInEdit && p.spaces.length > 1 && <button className="spaces-list__delete-button"
-                                                   title="Delete space"
-                                                   onMouseDown={() => deleteSpace(space)}
+                                                                          title="Delete space"
+                                                                          onMouseDown={() => deleteSpace(space)}
               >
                 <DeleteIcon/>
               </button>
@@ -167,7 +167,6 @@ export function SpacesList(p: {
           <PlusIcon/>
         </div>
       }
-
       <JoinBetaModal setOpen={setJoinBetaModalOpen} isOpen={isJoinBetaModalOpen}/>
     </div>
   )

@@ -1,33 +1,38 @@
-import React, { useEffect } from "react"
+import React, { useContext, useEffect } from "react"
 import { Modal } from "./Modal"
 import IconHelp from "../../icons/help.svg"
 import { trackStat } from "../../helpers/stats"
+import { Action } from "../../state/state"
+import { DispatchContext } from "../../state/actions"
 
 export const JoinBetaModal = (p: { isOpen: boolean, setOpen: (value: boolean) => void }) => {
+  const dispatch = useContext(DispatchContext)
+
   const [email, setEmail] = React.useState<string>("")
   const [screen, setScreen] = React.useState("first")
 
   useEffect(() => {
-    trackStat("betaModalShown", {})
-  }, [])
+    if (p.isOpen) {
+      trackStat("betaModalShown", {})
+    }
+  }, [p.isOpen])
 
   const joinBeta = () => {
     setScreen("second")
     trackStat("betaModalJoined", { email })
     localStorage.setItem("betaMode", "true")
-  }
-
-  const gotIt = () => {
-    location.reload()
+    localStorage.setItem("userEmail", email)
+    dispatch({
+      type: Action.UpdateAppState,
+      newState: { betaMode: true }
+    })
   }
 
   const onClose = () => {
-    if (screen === "second") {
-      gotIt()
-    } else {
-      p.setOpen(false)
+    if (screen === "first") {
       trackStat("betaModalClosed", {})
     }
+    p.setOpen(false)
   }
 
   return (
@@ -38,9 +43,9 @@ export const JoinBetaModal = (p: { isOpen: boolean, setOpen: (value: boolean) =>
             <h2>Be the First to Try Spaces — Join the Beta!</h2>
             <p>
               Tabme is free, and all existing features will <b><i>stay free forever</i></b>.<br/>
-              But I’m working on a Pro Version with exciting upgrades:<br/><br/>
+              But I’m working on a paid Pro Version with exciting upgrades:<br/><br/>
 
-              ✅ Spaces – Better folder organization (<b><i>Try it already in Beta!</i></b>)<br/>
+              ✅ Spaces – Better folder organization (<b><i>Try it already in Beta for free!</i></b>)<br/>
               🔄 Sync Across Devices (Coming Soon)<br/>
               👥 Team Sharing (Planned)<br/>
               💾 Daily Backups & more (Planned)<br/><br/>
@@ -77,7 +82,7 @@ export const JoinBetaModal = (p: { isOpen: boolean, setOpen: (value: boolean) =>
 
             Let me know what you think by "Send Feedback" in <IconHelp style={{ display: "inline-block", verticalAlign: "bottom" }}/> <br/>– your feedback is invaluable!<br/><br/>
           </p>
-          <button className="btn__setting primary" onClick={gotIt}>Got it!</button>
+          <button className="btn__setting primary" onClick={onClose}>Got it!</button>
         </div>}
       </>
     </Modal>

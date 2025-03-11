@@ -1,5 +1,7 @@
 import { getSelectedItemsElements, selectItems, unselectAll } from "./selectionUtils"
-import { isSomeParentHaveClass } from "./utils"
+import { findParentWithClass, isSomeParentHaveClass } from "./utils"
+import { areRectsOverlapping, normalizeRect } from "./mathUtils"
+import { IPoint } from "./MathTypes"
 
 const DAD_THRESHOLD = 4
 type DropArea = { objectId: number, element: HTMLElement, rect: DOMRect, itemRects: { thresholdY: number, itemTop: number, itemHeight: number }[] }
@@ -7,25 +9,37 @@ type DropArea = { objectId: number, element: HTMLElement, rect: DOMRect, itemRec
 let viewportWasScrolled = false //performance optimization
 let scrollByDummyClientY: number | undefined = undefined
 
+type ItemConfig = {
+  isFolderItem: boolean, // otherwise we drag-and-drop from sidebar
+  onDrop: (folderId: number, insertBeforeItemId: number | undefined, targetsIds: number[]) => void,
+  onCancel: () => void,
+  onClick: (targetId: number) => void,
+  onDragStarted: () => boolean // return false to prevent action. Previously was named canDrag()
+}
+
+type FolderConfig = {
+  onDrop: (draggedFolderId: number, targetSpaceId: number | undefined, insertBeforeFolderId: number | undefined) => void,
+  onCancel: () => void,
+  onChangeSpace: (spaceId: number) => void,
+  onDragStarted: () => boolean // return false to prevent action. Previously was named canDrag()
+}
+
+type WidgetsConfig = {
+  onWidgetsSelected: (widgetIds: number[]) => void,
+  onWidgetsMoved: (positions: { id: number, pos: IPoint }[]) => void,
+  onSetEditingWidget: (widgetId: number | undefined) => void,
+}
+
 export function bindDADItemEffect(
   mouseDownEvent: React.MouseEvent,
-  itemConfig: {
-    isFolderItem: boolean, // otherwise we drag-and-drop from sidebar
-    onDrop: (folderId: number, insertBeforeItemId: number | undefined, targetsIds: number[]) => void,
-    onCancel: () => void,
-    onClick: (targetId: number) => void,
-    onDragStarted: () => boolean // return false to prevent action. Previously was named canDrag()
-  },
-  folderConfig?: {
-    onDrop: (draggedFolderId: number, targetSpaceId: number | undefined, insertBeforeFolderId: number | undefined) => void,
-    onCancel: () => void,
-    onChangeSpace: (spaceId: number) => void,
-    onDragStarted: () => boolean // return false to prevent action. Previously was named canDrag()
-  },
+  itemConfig: ItemConfig,
+  folderConfig?: FolderConfig,
+  widgetsConfig?: WidgetsConfig,
   canvasEl?: HTMLCanvasElement
 ) {
-  const targetRoot = findRootOfDraggableItem(mouseDownEvent.target as HTMLElement)
-  const targetFolderHeader = findRootOfDraggableFolder(mouseDownEvent.target as HTMLElement)
+  const target = mouseDownEvent.target as HTMLElement
+  const targetRoot = findRootOfDraggableItem(target)
+  const targetFolderHeader = findRootOfDraggableFolder(target)
 
   if (targetRoot && mouseDownEvent.button === 0) {
     // checking if we start d&d one of selected item
@@ -38,14 +52,20 @@ export function bindDADItemEffect(
     unselectAll()
     return runFolderDragAndDrop(mouseDownEvent, targetFolderHeader.parentElement!, folderConfig.onDrop, folderConfig.onCancel, itemConfig.onDragStarted, folderConfig.onChangeSpace)
   } else {
-    const isInput = (mouseDownEvent.target as HTMLElement).tagName === "INPUT"
-    if (canvasEl && mouseDownEvent.button === 0 && !isInput) {
-      return runMultiselection(mouseDownEvent, canvasEl)
+    const isInput = (target).tagName === "INPUT"
+    if (canvasEl && mouseDownEvent.button === 0 && !isInput && widgetsConfig) {
+      if (isSomeParentHaveClass(target, "widget")) { // click widget
+        return runOverWidgets(mouseDownEvent, widgetsConfig)
+      } else { // click empty canvas
+        return runMultiselection(mouseDownEvent, canvasEl, widgetsConfig)
+      }
     }
   }
 }
 
-function runMultiselection(mouseDownEvent: React.MouseEvent, canvas: HTMLCanvasElement) {
+function runMultiselection(mouseDownEvent: React.MouseEvent,
+                           canvas: HTMLCanvasElement,
+                           widgetsConfig: WidgetsConfig) {
   let mouseMoved = false
   const rect = canvas.getBoundingClientRect()
   const startPos = {
@@ -63,6 +83,12 @@ function runMultiselection(mouseDownEvent: React.MouseEvent, canvas: HTMLCanvasE
 
   const itemElements = Array.from(document.querySelectorAll(".bookmarks .folder-item__inner")) as HTMLElement[]
   const itemsByRect = itemElements.map(el => ({
+    rect: el.getBoundingClientRect(),
+    element: el
+  }))
+
+  const widgetsElements = Array.from(document.querySelectorAll(".widget")) as HTMLElement[]
+  const widgetsByRect = widgetsElements.map(el => ({
     rect: el.getBoundingClientRect(),
     element: el
   }))
@@ -86,23 +112,38 @@ function runMultiselection(mouseDownEvent: React.MouseEvent, canvas: HTMLCanvasE
 
     // Draw the rectangle
     context.strokeStyle = "rgba(56, 89, 255, 1)"
-    context.lineWidth = 2
+    context.fillStyle = "rgba(56, 89, 255, 0.15)"
+    context.lineWidth = 1
+    context.fillRect(startPos.x, startPos.y, currentX - startPos.x, currentY - startPos.y)
     context.strokeRect(startPos.x, startPos.y, currentX - startPos.x, currentY - startPos.y)
 
-    const selectionRect: Rect = normalizeRect({
+    const selectionRect = normalizeRect({
       x: mouseDownEvent.clientX,
       y: mouseDownEvent.clientY,
       width: e.clientX - mouseDownEvent.clientX,
       height: e.clientY - mouseDownEvent.clientY
     })
 
-    const itemsToSelect: HTMLElement[] = []
-    itemsByRect.forEach(i => {
+    const selectedWidgetIds: number[] = []
+    widgetsByRect.forEach(i => {
       if (areRectsOverlapping(selectionRect, i.rect)) {
-        itemsToSelect.push(i.element)
+        selectedWidgetIds.push(getIdFromElement(i.element))
       }
     })
-    selectItems(itemsToSelect)
+
+    if (selectedWidgetIds.length > 0) {
+      widgetsConfig.onWidgetsSelected(selectedWidgetIds)
+      unselectAll()
+    } else {
+      const itemsToSelect: HTMLElement[] = []
+      itemsByRect.forEach(i => {
+        if (areRectsOverlapping(selectionRect, i.rect)) {
+          itemsToSelect.push(i.element)
+        }
+      })
+      widgetsConfig.onWidgetsSelected([])
+      selectItems(itemsToSelect)
+    }
   }
 
   const onMouseUp = (e: MouseEvent) => {
@@ -113,6 +154,7 @@ function runMultiselection(mouseDownEvent: React.MouseEvent, canvas: HTMLCanvasE
         // ideally we need to move selected-items management to store.
       } else {
         unselectAll()
+        widgetsConfig.onWidgetsSelected([])
       }
     }
     context.clearRect(0, 0, canvas.width * dpr, canvas.height * dpr)
@@ -131,44 +173,83 @@ function runMultiselection(mouseDownEvent: React.MouseEvent, canvas: HTMLCanvasE
   return unsubscribeEvents
 }
 
-interface Rect {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
+function runOverWidgets(mouseDownEvent: React.MouseEvent, widgetsConfig: WidgetsConfig) {
+  let mouseMoved = false
+  let isFirstMove = true
+  let selectedWidgets = Array.from(document.querySelectorAll<HTMLElement>(".widget.selected"))
+  let selectedWidgetIds = getIdsFromElements(selectedWidgets)
+  let movedWidgetIds = new Set<number>()
+  const initWidgetPositions = Array.from(document.querySelectorAll<HTMLElement>(".widget"))
+    .map(el => ({
+      element: el,
+      id: getIdFromElement(el),
+      pos: getPosFromElement(el)
+    }))
+  const targetWidget = findParentWithClass(mouseDownEvent.target, "widget")!
+  if (!targetWidget) {
+    return
+  }
+  const targetWidgetId = getIdFromElement(targetWidget)
 
-function areRectsOverlapping(rect1: Rect, rect2: Rect): boolean {
-  // Check if one rectangle is to the left of the other
-  if (rect1.x + rect1.width <= rect2.x || rect2.x + rect2.width <= rect1.x) {
-    return false
+  const onMouseMove = (e: MouseEvent) => {
+    if (!mouseMoved) {
+      const maxDelta = Math.max(Math.abs(mouseDownEvent.clientX - e.clientX), Math.abs(mouseDownEvent.clientY - e.clientY))
+      if (maxDelta < 3) {
+        return
+      }
+    }
+
+    if (isFirstMove) {
+      isFirstMove = false
+      if (!selectedWidgetIds.includes(targetWidgetId)) {
+        widgetsConfig.onWidgetsSelected([])
+        selectedWidgets = []
+        selectedWidgetIds = []
+      }
+
+    }
+
+    mouseMoved = true
+    let deltaX = mouseDownEvent.clientX - e.clientX
+    let deltaY = mouseDownEvent.clientY - e.clientY
+    initWidgetPositions.forEach(i => {
+      if (selectedWidgetIds.includes(i.id) || targetWidgetId === i.id) {
+        i.element.style.left = `${i.pos.x - deltaX}px`
+        i.element.style.top = `${i.pos.y - deltaY}px`
+        movedWidgetIds.add(i.id)
+      }
+    })
   }
 
-  // Check if one rectangle is above the other
-  if (rect1.y + rect1.height <= rect2.y || rect2.y + rect2.height <= rect1.y) {
-    return false
+  const onMouseUp = (e: MouseEvent) => {
+    if (!mouseMoved) {
+      if (selectedWidgetIds.includes(targetWidgetId)) {
+        widgetsConfig.onWidgetsSelected([targetWidgetId])
+        widgetsConfig.onSetEditingWidget(targetWidgetId)
+      } else {
+        widgetsConfig.onWidgetsSelected([targetWidgetId])
+        widgetsConfig.onSetEditingWidget(undefined)
+      }
+    } else {
+      const res = Array.from(movedWidgetIds).map(id => ({
+        id: id,
+        pos: getPosFromElement(document.querySelector(`.widget[data-id="${id}"]`)!)
+      }))
+      widgetsConfig.onWidgetsMoved(res)
+      widgetsConfig.onSetEditingWidget(undefined)
+    }
+    unsubscribeEvents()
   }
 
-  // If neither condition is true, the rectangles must overlap
-  return true
-}
+  document.addEventListener("mousemove", onMouseMove)
+  document.addEventListener("mouseup", onMouseUp)
 
-function normalizeRect(rect: Rect): Rect {
-  let normalizedRect = { ...rect }
-
-  // If width is negative, adjust the x coordinate and make width positive
-  if (normalizedRect.width < 0) {
-    normalizedRect.x += normalizedRect.width
-    normalizedRect.width = Math.abs(normalizedRect.width)
+  const unsubscribeEvents = () => {
+    document.removeEventListener("mousemove", onMouseMove)
+    document.removeEventListener("mouseup", onMouseUp)
   }
 
-  // If height is negative, adjust the y coordinate and make height positive
-  if (normalizedRect.height < 0) {
-    normalizedRect.y += normalizedRect.height
-    normalizedRect.height = Math.abs(normalizedRect.height)
-  }
-
-  return normalizedRect
+  return unsubscribeEvents
 }
 
 function runItemDragAndDrop(
@@ -264,13 +345,13 @@ function runItemDragAndDrop(
       if (prevBoxToDrop && !tryAddToOriginalPos) {
         const folderId = getFolderId(prevBoxToDrop)
         const insertBeforeItemId = getItemIdByIndex(prevBoxToDrop, indexToDrop)
-        onDrop(folderId, insertBeforeItemId, getDraggedItemsIds(targetRoots))
+        onDrop(folderId, insertBeforeItemId, getIdsFromElements(targetRoots))
       } else {
         onCancel()
       }
     } else {
       // we can click only by single element
-      onClick(getDraggedItemsIds(targetRoots)[0])
+      onClick(getIdsFromElements(targetRoots)[0])
     }
 
     unselectAll()
@@ -304,7 +385,7 @@ function runFolderDragAndDrop(mouseDownEvent: React.MouseEvent,
   const draggingFolderId = getFolderId(targetRoot)
   let targetInsertBeforeFolderId: number | undefined
   let lastSelectedSpaceId: number | undefined
-  console.log('!!! runFolderDragAndDrop')
+
   const onMouseMove = (e: MouseEvent) => {
     if (viewportWasScrolled) {
       // recalculate drop areas if viewport was scrolled
@@ -513,11 +594,18 @@ function getSpaceId(dropAreaElement: HTMLElement): number {
   return parseInt(dropAreaElement.dataset.spaceId!)
 }
 
-export function getDraggedItemsIds(targets: HTMLElement[]): number[] {
-  return targets.map(getDraggedItemId)
+function getPosFromElement(el: HTMLElement): IPoint {
+  return {
+    x: parseFloat(el.style.left),
+    y: parseFloat(el.style.top)
+  }
 }
 
-export function getDraggedItemId(target: HTMLElement): number {
+export function getIdsFromElements(targets: HTMLElement[]): number[] {
+  return targets.map(getIdFromElement)
+}
+
+export function getIdFromElement(target: HTMLElement): number {
   return parseInt(target.dataset.id!, 10)
 }
 
