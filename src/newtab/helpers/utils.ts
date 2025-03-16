@@ -369,10 +369,11 @@ export function scrollElementIntoView(selector: string) {
   })
 }
 
-export function isSomeParentHaveClass(targetElement: Element | null, classOnParent: string): boolean {
+export function isSomeParentHaveClass(targetElement: Element | null, classOnParent: string | string[]): boolean {
   let el = targetElement
+  classOnParent = Array.isArray(classOnParent) ? classOnParent : [classOnParent]
   while (el) {
-    if (el.classList.contains(classOnParent)) {
+    if (classOnParent.some(className => el!.classList.contains(className)) ) {
       return true
     }
     el = el.parentElement

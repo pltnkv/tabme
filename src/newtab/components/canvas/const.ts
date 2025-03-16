@@ -1,0 +1,1 @@
+export const sticker_size_half = 90

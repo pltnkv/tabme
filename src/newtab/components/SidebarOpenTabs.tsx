@@ -1,6 +1,6 @@
 import React, { memo, useContext, useEffect, useState } from "react"
 import { blurSearch, extractHostname, filterTabsBySearch, hlSearch, isTargetSupportsDragAndDrop, removeUselessProductName, scrollElementIntoView } from "../helpers/utils"
-import { bindDADItemEffect } from "../helpers/dragAndDropItem"
+import { bindDADItemEffect } from "../dragging/dragAndDrop"
 import { IFolderItem, ISpace } from "../helpers/types"
 import { DispatchContext, mergeStepsInHistory } from "../state/actions"
 import { Action } from "../state/state"
@@ -254,7 +254,7 @@ const TabItem = (p: {
       }
 
       {showMenu ? (
-        <DropdownMenu onClose={hideMenu} className="stop-dad-propagation" offset={{ top: -16, left: -8 }}>
+        <DropdownMenu onClose={hideMenu} className="stop-dad-propagation" offset={{ top: 8, left: -8 }}>
           {
             p.spaces.length === 1
               ? (<DropdownSubMenu

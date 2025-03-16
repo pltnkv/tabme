@@ -7,7 +7,7 @@ export interface IObject {
 export interface ISpace extends IObject {
   title: string
   folders: IFolder[]
-  widgets?: IWidgetData[]
+  widgets?: IWidget[]
 }
 
 export interface IFolder extends IObject {
@@ -29,17 +29,25 @@ export interface IFolderItem extends IObject {
 
 export type WidgetType = "Sticker"
 
-export type IWidgetData = {
-  id: number
-  type: WidgetType
-  pos: {
+
+export type IWidgetPos = {
+  point: {
     x: number,
     y: number
   }
-  content: {
-    type: WidgetType
-    text: string
-  }
+}
+
+export type IWidgetContent = {
+  contentType: "Sticker"
+  text: string
+  color: string
+  fontSize: number
+}
+
+export interface IWidget extends IObject {
+  widgetType: WidgetType
+  pos: IWidgetPos
+  content: IWidgetContent
 }
 
 // Data for not yet created FolderItem

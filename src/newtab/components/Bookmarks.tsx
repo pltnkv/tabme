@@ -1,18 +1,25 @@
 import React, { useContext, useEffect, useRef, useState } from "react"
 import { blurSearch, isContainsSearch, isTargetSupportsDragAndDrop } from "../helpers/utils"
-import { bindDADItemEffect } from "../helpers/dragAndDropItem"
+import { bindDADItemEffect } from "../dragging/dragAndDrop"
 import { Folder } from "./Folder"
 import { handleBookmarksKeyDown } from "../helpers/handleBookmarksKeyDown"
 import { Action, IAppState } from "../state/state"
 import { canShowArchived, DispatchContext, mergeStepsInHistory } from "../state/actions"
-import { IFolder, IWidgetData } from "../helpers/types"
-import { findSpaceById } from "../state/actionHelpers"
+import { IFolder, IWidget } from "../helpers/types"
+import { findSpaceById, genUniqLocalId } from "../state/actionHelpers"
 import { clickFolderItem, createFolderWithStat, getCanDragChecker } from "../helpers/actionsHelpersWithDOM"
 import { useSwipeAnimation } from "../helpers/bookmarksSwipes"
 import { Canvas } from "./Canvas"
 import { IPoint } from "../helpers/MathTypes"
 import { TopBar } from "./TopBar"
 import { trackStat } from "../helpers/stats"
+import { Toolbar } from "./Toolbar"
+import { hideWidgetsContextMenu } from "./canvas/widgetsContextMenu"
+import { hideWidgetsSelectionFrame } from "./canvas/widgetsSelectionFrame"
+import { canvasAPI } from "./canvas/canvasAPI"
+import { DropdownMenu } from "./dropdown/DropdownMenu"
+import { Options, OptionsConfig } from "./SettingsOptions"
+import { getCanvasMenuOption } from "./canvas/getCanvasMenuOptions"
 
 export function Bookmarks(p: {
   appState: IAppState;
@@ -20,11 +27,22 @@ export function Bookmarks(p: {
   const dispatch = useContext(DispatchContext)
   const [mouseDownEvent, setMouseDownEvent] = useState<React.MouseEvent | undefined>(undefined)
   const [isScrolled, setIsScrolled] = useState(false)
+  const [canvasMenuPos, setCanvasMenuPos] = useState<IPoint | undefined>(undefined)
+  const [canvasMenuType, setCanvasMenuType] = useState<"canvas" | "widgets">("canvas")
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const bookmarksRef = useRef<HTMLDivElement>(null)
 
   useSwipeAnimation(bookmarksRef, p.appState.currentSpaceId, p.appState.spaces.length)
+
+  useEffect(() => {
+    dispatch({
+      type: Action.SelectWidgets,
+      widgetIds: []
+    })
+    hideWidgetsContextMenu()
+    hideWidgetsSelectionFrame()
+  }, [p.appState.currentSpaceId, p.appState.search])
 
   useEffect(() => {
     const handleScroll = (e: any) => {
@@ -93,6 +111,41 @@ export function Bookmarks(p: {
         })
       }
 
+      const onChangeSpacePosition = (spaceId: number, newPosition: string) => {
+        dispatch({
+          type: Action.UpdateSpace,
+          spaceId: spaceId,
+          position: newPosition
+        })
+      }
+
+      const onCanvasDoubleClick = (point: IPoint) => {
+        if (p.appState.betaStickers) {
+          const widgetId = genUniqLocalId()
+          dispatch({
+            type: Action.CreateWidget,
+            spaceId: p.appState.currentSpaceId,
+            widgetId,
+            pos: { point: point }
+          })
+          canvasAPI.setEditingWidget(dispatch, widgetId)
+        }
+      }
+
+      const onWidgetsRightClick = (pos: IPoint, targetWidgetId: number) => {
+        if (!p.appState.selectedWidgetIds.includes(targetWidgetId)) {
+          canvasAPI.selectWidgets(dispatch, [targetWidgetId])
+        }
+        setCanvasMenuType("widgets")
+        setCanvasMenuPos(pos)
+      }
+
+      const onCanvasRightClick = (pos: IPoint) => {
+        setCanvasMenuType("canvas")
+        setCanvasMenuPos(pos)
+        canvasAPI.selectWidgets(dispatch, [])
+      }
+
       const canDrag = getCanDragChecker(p.appState.search, dispatch)
       return bindDADItemEffect(mouseDownEvent,
         {
@@ -109,21 +162,28 @@ export function Bookmarks(p: {
           onDragStarted: canDrag
         },
         {
+          canvasEl: canvasRef.current!,
           onWidgetsSelected: (widgetIds: number[]) => {
             // !!! TODO dont dispatch it if widgetIds has not changed
             dispatch({ type: Action.SelectWidgets, widgetIds })
           },
           onWidgetsMoved: (positions: { id: number, pos: IPoint }[]) => {
-            positions.forEach(p => {
-              dispatch({ type: Action.UpdateWidget, widgetId: p.id, pos: p.pos })
+            mergeStepsInHistory((historyStepId) => {
+              positions.forEach(p => {
+                dispatch({ type: Action.UpdateWidget, widgetId: p.id, pos: { point: p.pos }, historyStepId })
+              })
             })
           },
           onSetEditingWidget: (widgetId: number | undefined) => {
             dispatch({ type: Action.SetEditingWidget, widgetId })
-          }
+          },
+          onWidgetsRightClick,
+          onCanvasRightClick,
+          onCanvasDoubleClick
         },
-
-        canvasRef.current!
+        {
+          onChangeSpacePosition
+        }
       )
     }
   }, [mouseDownEvent])
@@ -135,6 +195,10 @@ export function Bookmarks(p: {
     }
   }
 
+  const getCanvasMenuOptionWrapper = () => {
+    return getCanvasMenuOption(dispatch, canvasMenuType, p.appState, folders, setCanvasMenuPos)
+  }
+
   function onCreateFolder() {
     const folderId = createFolderWithStat(dispatch, {}, "by-click-new-in-bookmarks")
     dispatch({
@@ -144,7 +208,7 @@ export function Bookmarks(p: {
   }
 
   let folders: IFolder[] = []
-  let widgets: IWidgetData[] = []
+  let widgets: IWidget[] = []
   if (p.appState.search === "") {
     const currentSpace = findSpaceById(p.appState, p.appState.currentSpaceId)
     if (currentSpace) {
@@ -166,10 +230,9 @@ export function Bookmarks(p: {
   }
 
   return (
-    <div className="bookmarks-box">
+    <div className="bookmarks-box" onMouseDown={onMouseDown}>
       <TopBar appState={p.appState} isScrolled={isScrolled}/>
       <div className="bookmarks"
-           onMouseDown={onMouseDown} //TODO move it on top later
            ref={bookmarksRef}
            onKeyDown={(e) => handleBookmarksKeyDown(e, p.appState, dispatch)}>
         <Canvas selectedWidgetIds={p.appState.selectedWidgetIds}
@@ -206,6 +269,15 @@ export function Bookmarks(p: {
             )
         }
       </div>
+      {
+        canvasMenuPos && <DropdownMenu onClose={() => {setCanvasMenuPos(undefined)}} absPosition={canvasMenuPos}>
+          <Options optionsConfig={getCanvasMenuOptionWrapper}/>
+        </DropdownMenu>
+      }
+      {
+        p.appState.betaStickers && <Toolbar folders={folders} currentSpaceId={p.appState.currentSpaceId}/>
+      }
     </div>
   )
 }
+

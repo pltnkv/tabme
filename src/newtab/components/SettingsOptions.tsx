@@ -11,7 +11,7 @@ import { LeaveBetaModal } from "./modals/LeaveBetaModal"
 
 type OnClickOption = { onClick: (e: any) => void; title: string; text: string; hidden?: boolean; isFile?: boolean }
 type OnToggleOption = { onToggle: () => void; value: boolean, title: string; text: string; hidden?: boolean }
-type OptionsConfig = Array<OnClickOption | OnToggleOption | { separator: true }>
+export type OptionsConfig = Array<OnClickOption | OnToggleOption | { separator: true }>
 
 export const BetaOptions = (props: {
   appState: IAppState;
@@ -258,7 +258,7 @@ export const SettingsOptions = (props: {
   </>
 }
 
-const Options = (props: { optionsConfig: OptionsConfig }) => {
+export const Options = (props: { optionsConfig: OptionsConfig | (() => OptionsConfig) }) => {
 
   function isSeparator(opt: any): opt is { separator: boolean } {
     return opt.hasOwnProperty("separator")
@@ -272,8 +272,10 @@ const Options = (props: { optionsConfig: OptionsConfig }) => {
     return opt.hasOwnProperty("onClick")
   }
 
+  const options = typeof props.optionsConfig === "function" ? props.optionsConfig() : props.optionsConfig
+
   return <>
-    {props.optionsConfig.map((option, index) => {
+    {options.map((option, index) => {
       if ((option as any).hidden) {
         return null
       }

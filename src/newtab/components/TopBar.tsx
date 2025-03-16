@@ -9,12 +9,10 @@ import IconHelp from "../icons/help.svg"
 import IconSettings from "../icons/settings.svg"
 import IconFind from "../icons/find.svg"
 import IconBeta from "../icons/beta.svg"
-import IconSticky from "../icons/sticky.svg"
 import { SpacesList } from "./SpacesList"
 import { OverrideModal } from "./modals/OverrideModal"
 import { ShortcutsModal } from "./modals/ShortcutsModal"
 import { loadFromNetwork } from "../../api/api"
-import { genUniqLocalId } from "../state/actionHelpers"
 
 export function TopBar(p: {
   appState: IAppState;
@@ -48,21 +46,6 @@ export function TopBar(p: {
     setBetaMenuVisibility(!betaMenuVisibility)
   }
 
-  function onCreateSticker() {
-    const x = document.body.clientWidth / 2 - 200
-    const y = document.body.clientHeight / 2 - 200
-    const widgetId = genUniqLocalId()
-    dispatch({
-      type: Action.CreateWidget,
-      spaceId: p.appState.currentSpaceId,
-      widgetId,
-      pos: { x, y }
-    })
-    dispatch({
-      type: Action.SetEditingWidget,
-      widgetId
-    })
-  }
 
   async function onLogout() {
     localStorage.removeItem("authToken")
@@ -82,12 +65,6 @@ export function TopBar(p: {
           itemInEdit={p.appState.itemInEdit}/>
       }
       <div className="menu-stretching-space"></div>
-      {
-        p.appState.betaStickers && <button className={`btn__icon`} onClick={onCreateSticker} style={{ marginRight: "4px" }}>
-          <IconSticky/>
-        </button>
-      }
-
       <div style={{ display: "flex", marginRight: "12px", position: "relative" }}>
         <IconFind className="search-icon"/>
         <input
@@ -115,7 +92,7 @@ export function TopBar(p: {
           p.appState.betaMode && <>
             <span className={CL("beta-mode-label", { "active": betaMenuVisibility })} onClick={toggleBetaMenu}> <IconBeta/> Beta </span>
             {
-              betaMenuVisibility && <DropdownMenu onClose={() => {setBetaMenuVisibility(false)}} noSmartPositioning={true} alignRight={true} offset={{ top: 14, right: 80 }}>
+              betaMenuVisibility && <DropdownMenu onClose={() => {setBetaMenuVisibility(false)}} noSmartPositioning={true} alignRight={true} offset={{ top: 38, right: 80 }}>
                 <BetaOptions appState={p.appState}/>
               </DropdownMenu>
             }
@@ -137,13 +114,13 @@ export function TopBar(p: {
           <IconSettings/>
         </button>
         {helpMenuVisibility ? (
-          <DropdownMenu onClose={() => {setHelpMenuVisibility(false)}} noSmartPositioning={true} alignRight={true} offset={{ top: 14, right: 48 }}>
+          <DropdownMenu onClose={() => {setHelpMenuVisibility(false)}} noSmartPositioning={true} alignRight={true} offset={{ top: 38, right: 48 }}>
             <HelpOptions appState={p.appState} onShortcutsModal={() => setShortcutsModalOpen(true)}/>
           </DropdownMenu>
         ) : null}
 
         {settingsMenuVisibility ? (
-          <DropdownMenu onClose={() => {setSettingsMenuVisibility(false)}} noSmartPositioning={true} alignRight={true} offset={{ top: 14 }}>
+          <DropdownMenu onClose={() => {setSettingsMenuVisibility(false)}} noSmartPositioning={true} alignRight={true} offset={{ top: 38 }}>
             <SettingsOptions appState={p.appState} onOverrideNewTabMenu={() => setOverrideModalOpen(true)}/>
           </DropdownMenu>
         ) : null}

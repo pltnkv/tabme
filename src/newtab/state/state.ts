@@ -1,5 +1,5 @@
 import { ActionDispatcher } from "./actions"
-import { ColorTheme, IFolder, IFolderItem, IFolderItemToCreate, ISpace } from "../helpers/types"
+import { ColorTheme, IFolder, IFolderItem, IFolderItemToCreate, ISpace, IWidgetContent, IWidgetPos } from "../helpers/types"
 import { ISavingAppState } from "./storage"
 import Tab = chrome.tabs.Tab
 import HistoryItem = chrome.history.HistoryItem
@@ -215,9 +215,10 @@ export enum Action {
 
   SelectWidgets = "select-widgets",
   SetEditingWidget = "set-editing-widget",
-  DuplicateSelectedWidgets = "DuplicateSelectedWidgets",
-  BringToFront = "BringToFront",
-  SendToBack = "SendToBack",
+  DuplicateWidgets = "duplicate-widgets",
+  BringToFront = "bring-to-front",
+  SendToBack = "send-to-back",
+  RestoreWidgetOrder = "restore-widget-order",
 
   // API HELPERS
   APICommandResolved = "api-command-resolved",
@@ -273,15 +274,16 @@ export type ActionPayload = (
 
   | { type: Action.SaveBookmarksToCloud; }
 
-  | { type: Action.CreateWidget; spaceId?: number; widgetId: number; pos: IPoint, text?: string }
-  | { type: Action.UpdateWidget; widgetId: number; pos?: IPoint, text?: string }
+  | { type: Action.CreateWidget; spaceId?: number; widgetId: number; position?: string, pos: IWidgetPos, content?: Partial<IWidgetContent> }
+  | { type: Action.UpdateWidget; widgetId: number; position?: string; pos?: IWidgetPos; content?: Partial<IWidgetContent> }
   | { type: Action.DeleteWidgets; widgetIds: number[]; }
 
   | { type: Action.SelectWidgets; widgetIds: number[]; }
   | { type: Action.SetEditingWidget; widgetId: number | undefined; }
-  | { type: Action.DuplicateSelectedWidgets; }
+  | { type: Action.DuplicateWidgets; widgetIds: number[] }
   | { type: Action.BringToFront; widgetIds: number[]; }
   | { type: Action.SendToBack; widgetIds: number[]; }
+  | { type: Action.RestoreWidgetOrder; data: { spaceId: number, orderedWidgetIds: number[] }[] }
 
   | { type: Action.APICommandResolved; commandId: number, }
   | { type: Action.APIConfirmEntityCreated; localId: number; remoteId: number; entityType: "folder" | "bookmark" }

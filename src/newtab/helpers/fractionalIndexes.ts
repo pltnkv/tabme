@@ -10,6 +10,7 @@
 
 import { IFolderItem, IFolderItemToCreate, IObject } from "./types"
 
+// VERY WIERD NAMING, it seems like "before" and "after" are mixed
 export function insertBetween(before: string, after: string): string {
   // This demo uses "0" as the first digit and "9" as the last digit for
   // ease of understanding. However, this algorithm is best done with as
@@ -97,7 +98,11 @@ export function insertBetween(before: string, after: string): string {
 // NOTE: Sort array in place
 // todo fix types it later
 // export function sortByPosition<T extends { position: string }>(foldersOrItems: T[]): T[] {
-export function sortByPosition<T>(foldersOrItems: T[]): T[] {
+export function sortByPosition<T>(foldersOrItems: T[], doSorting: boolean = true): T[] {
+  if (!doSorting) {
+    return foldersOrItems
+  }
+  console.log('!!!sortByPosition')
   return foldersOrItems.sort((a: any, b: any) => { //todo fix it also
     if (a.position < b.position) {
       return -1

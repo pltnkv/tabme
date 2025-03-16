@@ -7,7 +7,6 @@ import { DispatchContext } from "../state/actions"
 import { Action } from "../state/state"
 import { SimpleEditableTitle } from "./EditableTitle"
 import { DropdownMenu } from "./dropdown/DropdownMenu"
-import { bindDADSpaceEffect } from "../helpers/dragAndDropSpace"
 import { isTargetSupportsDragAndDrop } from "../helpers/utils"
 import { genUniqLocalId } from "../state/actionHelpers"
 import { insertBetween } from "../helpers/fractionalIndexes"
@@ -96,25 +95,6 @@ export function SpacesList(p: {
     }
   }
 
-  useEffect(() => {
-    if (mouseDownEvent) {
-
-      const onChangeSpacePosition = (spaceId: number, newPosition: string) => {
-        dispatch({
-          type: Action.UpdateSpace,
-          spaceId: spaceId,
-          position: newPosition
-        })
-      }
-
-      return bindDADSpaceEffect(mouseDownEvent,
-        {
-          onChangeSpacePosition
-        }
-      )
-    }
-  }, [mouseDownEvent])
-
   function onMouseDown(e: React.MouseEvent) {
     if (isTargetSupportsDragAndDrop(e, "spaces-list__delete-button") && p.spaces.length > 1) {
       setMouseDownEvent(e)
@@ -151,7 +131,7 @@ export function SpacesList(p: {
               </button>
             }
             {
-              menuSpaceId === space.id && <DropdownMenu onClose={() => {setMenuSpaceId(-1)}} className={"dropdown-menu--folder"} offset={{ top: -22, left: -16 }}>
+              menuSpaceId === space.id && <DropdownMenu onClose={() => {setMenuSpaceId(-1)}} className={"dropdown-menu--folder"} offset={{ top: 2, left: -16 }}>
                 <button className="dropdown-menu__button focusable" onClick={() => onRenameSpace(space.id)}>Rename space</button>
                 {
                   p.spaces.length > 1 && <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={() => deleteSpace(space)}>Delete space</button>
@@ -167,7 +147,9 @@ export function SpacesList(p: {
           <PlusIcon/>
         </div>
       }
-      <JoinBetaModal setOpen={setJoinBetaModalOpen} isOpen={isJoinBetaModalOpen}/>
+      {
+        isJoinBetaModalOpen && <JoinBetaModal setOpen={setJoinBetaModalOpen}/>
+      }
     </div>
   )
 }

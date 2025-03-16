@@ -129,7 +129,7 @@ export const FolderItemMenu = React.memo((p: {
   return <>
     {
       selectedItems.length > 1 ?
-        <DropdownMenu onClose={p.onClose} className={"dropdown-menu--folder-item"} offset={{ top: 5 , bottom: 32}}>
+        <DropdownMenu onClose={p.onClose} className={"dropdown-menu--folder-item"} offset={{ top: 29 , bottom: 32}}>
           <button className="dropdown-menu__button focusable" onClick={onOpenNewTab}>Open in New Tab</button>
           {
             p.hiddenFeatureIsEnabled ? (selectedItems.some(item => item.archived)
@@ -145,7 +145,7 @@ export const FolderItemMenu = React.memo((p: {
         :
         <>
           {p.item.isSection ?
-            <DropdownMenu onClose={onSaveAndClose} className={"dropdown-menu--folder-item dropdown-menu--folder-section"} offset={{ top: 13, bottom: 32 }}>
+            <DropdownMenu onClose={onSaveAndClose} className={"dropdown-menu--folder-item dropdown-menu--folder-section"} offset={{ top: 35, bottom: 32 }}>
               <label className="input-label">
                 <span>Title</span>
                 <input
@@ -165,7 +165,7 @@ export const FolderItemMenu = React.memo((p: {
               <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onDeleteItem}>Delete</button>
             </DropdownMenu>
             :
-            <DropdownMenu onClose={onSaveAndClose} className={"dropdown-menu--folder-item"} offset={{ top: 5, bottom: 32 }} width={334}>
+            <DropdownMenu onClose={onSaveAndClose} className={"dropdown-menu--folder-item"} offset={{ top: 29, bottom: 32 }} width={334}>
               <label className="input-label">
                 <span>Title</span>
                 <input type="text"

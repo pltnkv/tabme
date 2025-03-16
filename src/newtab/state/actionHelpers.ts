@@ -1,7 +1,7 @@
 /**
  * CAN NOT IMPORT REACT AS DEPENDENCY OR ANY DOM API
  */
-import { IFolder, IFolderItem, IFolderItemToCreate, ISpace } from "../helpers/types"
+import { IFolder, IFolderItem, IFolderItemToCreate, ISpace, IWidget } from "../helpers/types"
 import { sortByPosition } from "../helpers/fractionalIndexes"
 import { type IAppState } from "./state"
 import { SECTION_ICON_BASE64 } from "../helpers/utils"
@@ -92,6 +92,17 @@ export function findFolderByItemId(appState: Pick<IAppState, "spaces">, itemId: 
     })
     res = folder
     return !!folder
+  })
+
+  return res
+}
+
+export function findWidgetById(appState: Pick<IAppState, "spaces">, widgetId: number): IWidget | undefined {
+  let res: IWidget | undefined = undefined
+  appState.spaces.some(s => {
+    const widget = (s.widgets ?? []).find(w => w.id === widgetId)
+    res = widget
+    return !!widget
   })
 
   return res

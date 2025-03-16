@@ -9,7 +9,7 @@ const FIRST_SELECTOR = `folder-item--first-selected`
 const INNER_SELECTOR = `folder-item__inner--selected`
 
 export function selectItems(elements: HTMLElement[]) {
-  unselectAll()
+  unselectAllItems()
 
   elements.forEach((el: HTMLElement) => {
     el.classList.add(INNER_SELECTOR)
@@ -34,7 +34,7 @@ function unselectItemForced(el: HTMLElement) {
   document.querySelector(`.${FIRST_SELECTOR}`)?.classList.remove(FIRST_SELECTOR)
 }
 
-export function unselectAll() {
+export function unselectAllItems() {
   selectedItemsElements.forEach(item => unselectItemForced(item))
   selectedItemsElements.length = 0
 }

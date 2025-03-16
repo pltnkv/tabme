@@ -4,6 +4,9 @@ import { DispatchContext } from "../state/actions"
 import { Action } from "../state/state"
 import { showMessageWithUndo } from "../helpers/actionsHelpersWithDOM"
 import { isSomeModalOpened } from "./modals/Modal"
+import { canvasAPI } from "./canvas/canvasAPI"
+import { updateWidgetsSelectionFrameNonPerformant } from "./canvas/widgetsSelectionFrame"
+import { updateWidgetsContextMenu } from "./canvas/widgetsContextMenu"
 
 let mouseX = 0
 let mouseY = 0
@@ -23,8 +26,8 @@ export const KeyboardManager = React.memo((p: {
 
   useEffect(() => {
     document.addEventListener("mousemove", (e) => {
-      mouseX = e.screenX
-      mouseY = e.screenY
+      mouseX = e.clientX
+      mouseY = e.clientY
     })
   }, [])
 
@@ -54,53 +57,36 @@ export const KeyboardManager = React.memo((p: {
       // IN CANVAS
       if (p.selectedWidgetIds.length > 0) {
         if ((e.code === "Backspace" || e.code === "Delete")) {
-          dispatch({
-            type: Action.DeleteWidgets,
-            widgetIds: p.selectedWidgetIds
-          })
+          canvasAPI.deleteWidgets(dispatch, p.selectedWidgetIds)
           return
         }
 
         if (p.selectedWidgetIds.length === 1 && e.code === "Enter") {
-          dispatch({
-            type: Action.SetEditingWidget,
-            widgetId: p.selectedWidgetIds[0]
-          })
+          canvasAPI.setEditingWidget(dispatch, p.selectedWidgetIds[0])
           e.preventDefault()
           e.stopPropagation()
           return
         }
 
         if (e.code === "KeyD" && (e.ctrlKey || e.metaKey)) {
-          dispatch({
-            type: Action.DuplicateSelectedWidgets
-          })
+          canvasAPI.duplicateWidgets(dispatch, p.selectedWidgetIds)
           e.preventDefault()
           e.stopPropagation()
           return
         }
 
         if (e.code === "Escape") {
-          dispatch({
-            type: Action.SelectWidgets,
-            widgetIds: []
-          })
+          canvasAPI.selectWidgets(dispatch, [])
           return
         }
 
         if (e.code === "BracketRight") {
-          dispatch({
-            type: Action.BringToFront,
-            widgetIds: p.selectedWidgetIds
-          })
+          canvasAPI.bringToFront(dispatch, p.selectedWidgetIds)
           return
         }
 
         if (e.code === "BracketLeft") {
-          dispatch({
-            type: Action.SendToBack,
-            widgetIds: p.selectedWidgetIds
-          })
+          canvasAPI.sendToBack(dispatch, p.selectedWidgetIds)
           return
         }
       }
@@ -110,6 +96,8 @@ export const KeyboardManager = React.memo((p: {
           type: Action.Undo,
           dispatch
         })
+        updateWidgetsSelectionFrameNonPerformant()
+        updateWidgetsContextMenu()
         return
       }
 

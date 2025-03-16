@@ -1,4 +1,4 @@
-import { IRect } from "./MathTypes"
+import { IOffset, IRect } from "./MathTypes"
 
 export function areRectsOverlapping(rect1: IRect, rect2: IRect): boolean {
   // Check if one rectangle is to the left of the other
@@ -31,4 +31,33 @@ export function normalizeRect(rect: IRect): IRect {
   }
 
   return normalizedRect
+}
+
+export function uniteRects(rects: IOffset[]): IOffset {
+  if (rects.length > 0) {
+    const res = {
+      left: rects[0].left,
+      right: rects[0].right,
+      top: rects[0].top,
+      bottom: rects[0].bottom
+    }
+    for (let i = 1; i < rects.length; i++) {
+      res.left = Math.min(res.left, rects[i].left)
+      res.right = Math.max(res.right, rects[i].right)
+      res.top = Math.min(res.top, rects[i].top)
+      res.bottom = Math.max(res.bottom, rects[i].bottom)
+    }
+    return res
+  } else {
+    return {
+      left: 0,
+      right: 0,
+      top: 0,
+      bottom: 0
+    }
+  }
+}
+
+export function inRange(index: number, min: number, max: number) {
+  return index >= min && index <= max
 }

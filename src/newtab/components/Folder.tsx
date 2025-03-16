@@ -203,7 +203,7 @@ export const Folder = React.memo(function Folder(p: {
               onClick={() => setShowMenu(!showMenu)}><MenuIcon/></span>
 
         {showMenu ? (
-          <DropdownMenu onClose={() => setShowMenu(false)} className={"dropdown-menu--folder"} offset={{ top: -19, left: 150, bottom: 38 }}>
+          <DropdownMenu onClose={() => setShowMenu(false)} className={"dropdown-menu--folder"} offset={{ top: 5, left: 150, bottom: 38 }}>
             <div className="dropdown-menu__colors-row" style={{ marginTop: "4px" }}>
               <PresetColor color={PRESET_COLORS[0]} onClick={setColorConfirmed} currentColor={folderColor}/>
               <PresetColor color={PRESET_COLORS[1]} onClick={setColorConfirmed} currentColor={folderColor}/>

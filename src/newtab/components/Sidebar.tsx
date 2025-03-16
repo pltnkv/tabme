@@ -139,7 +139,7 @@ const StashButton = React.memo((props: { tabs: Tab[] }) => {
         <DropdownMenu onClose={() => setConfirmationOpened(false)}
                       className="stash-confirmation-popup"
                       width={240}
-                      offset={{ top: -12, left: 4 }}
+                      offset={{ top: 12, left: 4 }}
                       skipTabIndexes={true}>
           <div style={{ width: "100%" }}>
             <p>Place all open Tabs to a new Folder</p>

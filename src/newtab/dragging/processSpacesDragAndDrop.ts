@@ -1,19 +1,8 @@
-import { unselectAll } from "./selectionUtils"
-import { findParentWithClass } from "./utils"
-import { insertBetween } from "./fractionalIndexes"
-
-const DAD_THRESHOLD = 4
-
-export function bindDADSpaceEffect(
-  mouseDownEvent: React.MouseEvent,
-  config: {
-    onChangeSpacePosition: (spaceId: number, newPosition:string) => void,
-  }
-) {
-  if(mouseDownEvent.button === 0) {
-    runDragAndDrop(mouseDownEvent, config.onChangeSpacePosition)
-  }
-}
+import { PConfigSpaces } from "./dragAndDrop"
+import { subscribeMouseEvents } from "./dragAndDropUtils"
+import { findParentWithClass } from "../helpers/utils"
+import { insertBetween } from "../helpers/fractionalIndexes"
+import { unselectAllItems } from "../helpers/selectionUtils"
 
 type InitRes = {
   clonedSpacesList: HTMLElement,
@@ -23,9 +12,9 @@ type InitRes = {
   draggingItemStartLeft: number
 }
 
-function runDragAndDrop(
+export function processSpacesDragAndDrop(
   mouseDownEvent: React.MouseEvent,
-  onChangeSpacePosition: (spaceId: number, newPosition:string) => void,
+  config: PConfigSpaces
 ) {
   let dummy: InitRes | undefined
   let prevOverItem: HTMLElement | undefined = undefined
@@ -69,7 +58,7 @@ function runDragAndDrop(
     updateItemsOrder(dummy!.clonedItems, dummy!.draggingItem)
   }
 
-  const onMouseMove = (e: MouseEvent) => {
+  const onMouseMove = (e: MouseEvent, mouseMoved: boolean) => {
     if (dummy) {
       // move dummy
       const delta = mouseDownEvent.clientX - e.clientX
@@ -82,16 +71,10 @@ function runDragAndDrop(
           insertSpaceBetween(overItem, insertType)
         }
       }
-    } else {
-      if (
-        Math.abs(mouseDownEvent.clientX - e.clientX) > DAD_THRESHOLD ||
-        Math.abs(mouseDownEvent.clientY - e.clientY) > DAD_THRESHOLD
-      ) {
-
-        //create dummy
-        dummy = createClonedSpacesList(target)
-        document.body.appendChild(dummy.clonedSpacesList)
-      }
+    } else if (mouseMoved) {
+      //create dummy
+      dummy = createClonedSpacesList(target)
+      document.body.appendChild(dummy.clonedSpacesList)
     }
   }
   const onMouseUp = () => {
@@ -100,24 +83,16 @@ function runDragAndDrop(
       document.body.classList.remove("dragging")
       dummy.clonedSpacesList.remove()
       console.log(dummy.draggingItem.dataset.spaceId!, dummy.draggingItem.dataset.position!)
-      onChangeSpacePosition(parseInt(dummy.draggingItem.dataset.spaceId!, 10), dummy.draggingItem.dataset.position!)
+      config.onChangeSpacePosition(parseInt(dummy.draggingItem.dataset.spaceId!, 10), dummy.draggingItem.dataset.position!)
 
     } else {
       // do nothing here
     }
 
-    unselectAll()
-    unsubscribeEvents()
-  }
-  document.body.addEventListener("mousemove", onMouseMove)
-  document.body.addEventListener("mouseup", onMouseUp)
-
-  const unsubscribeEvents = () => {
-    document.body.removeEventListener("mousemove", onMouseMove)
-    document.body.removeEventListener("mouseup", onMouseUp)
+    unselectAllItems()
   }
 
-  return unsubscribeEvents
+  return subscribeMouseEvents(mouseDownEvent, onMouseMove, onMouseUp)
 }
 
 const ITEM_MARGIN_RIGHT = 12

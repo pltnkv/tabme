@@ -1,11 +1,21 @@
 import { createContext } from "react"
 import { Action, ActionPayload, APICommandPayload, APICommandPayloadFull, HistoryActionPayload, IAppState, UndoStep } from "./state"
-import { unselectAll } from "../helpers/selectionUtils"
-import { ColorTheme, IFolder, IFolderItem, ISpace, IWidgetData } from "../helpers/types"
+import { ColorTheme, IFolder, IFolderItem, ISpace, IWidget } from "../helpers/types"
 import { applyTheme, saveStateThrottled, savingStateKeys } from "./storage"
 import { addItemsToFolder, insertBetween, sortByPosition } from "../helpers/fractionalIndexes"
 import { loadFromNetwork } from "../../api/api"
-import { findFolderById, findFolderByItemId, findItemById, findSpaceByFolderId, findSpaceById, genUniqLocalId, updateFolder, updateFolderItem, updateSpace } from "./actionHelpers"
+import {
+  findFolderById,
+  findFolderByItemId,
+  findItemById,
+  findSpaceByFolderId,
+  findSpaceById,
+  findWidgetById,
+  genUniqLocalId,
+  updateFolder,
+  updateFolderItem,
+  updateSpace
+} from "./actionHelpers"
 import { genNextRuntimeId, getRandomHEXColor, isArraysEqual } from "../helpers/utils"
 
 type ObjectWithRemoteId = {
@@ -315,6 +325,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       }
 
       const lastFolder = currentSpace.folders.at(-1)
+      console.log("!!!!")
       const newFolder: IFolder = {
         id: action.newFolderId ?? genUniqLocalId(),
         title: action.title ?? "New folder",
@@ -702,102 +713,240 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         return showErrorReducer(`Space not found`)
       }
 
-      const newWidget: IWidgetData = {
+      let topWidget = currentSpace.widgets?.at(-1)
+
+      console.log('Action.CreateWidget', action)
+      const newWidget: IWidget = {
         id: action.widgetId ?? genUniqLocalId(),
-        type: "Sticker",
+        widgetType: "Sticker",
+        position: action.position ?? insertBetween(topWidget?.position ?? "", ""),
         pos: action.pos,
-        content: {
-          type: "Sticker",
-          text: "Sticky note"
-        }
+        content: Object.assign({
+          contentType: "Sticker",
+          text: "Sticky note",
+          color: "#FFF598",
+          fontSize: 18
+        }, action.content)
       }
+
+      const undoActions = getUndoAction(action, state, () => ({
+        type: Action.DeleteWidgets,
+        widgetIds: [newWidget.id]
+      }))
 
       return {
         ...state,
         spaces: state.spaces.map(space =>
           space.id === action.spaceId
-            ? { ...space, widgets: [...(space.widgets || []), newWidget] }
+            ? { ...space, widgets: sortByPosition([...(space.widgets || []), newWidget]) }
             : space
-        )
+        ),
+        undoSteps: undoActions
       }
     }
 
     case Action.UpdateWidget: {
+      const originalWidget = findWidgetById(state, action.widgetId)
+      if (!originalWidget) {
+        return showErrorReducer("Widget was not found")
+      }
+
+      const doSorting = !!action.position
       const updatedSpaces = state.spaces.map(space => ({
         ...space,
-        widgets: space.widgets?.map(widget =>
+        widgets: sortByPosition(space.widgets?.map(widget =>
           widget.id === action.widgetId
             ? {
               ...widget,
               pos: action.pos !== undefined ? action.pos : widget.pos,
-              content: {
+              position: action.position !== undefined ? action.position : widget.position,
+              content: action.content ? {
                 ...widget.content,
-                text: action.text !== undefined ? action.text : widget.content.text
-              }
+                ...action.content
+              } : widget.content
             }
             : widget
-        ) || []
+        ) || [], doSorting)
+      }))
+
+      const undoActions = getUndoAction(action, state, () => ({
+        type: Action.UpdateWidget,
+        widgetId: action.widgetId,
+        position: originalWidget.position,
+        pos: originalWidget.pos, // todo optimize
+        content: action.content
       }))
 
       return {
         ...state,
-        spaces: updatedSpaces
+        spaces: updatedSpaces,
+        undoSteps: undoActions
       }
     }
 
     case Action.DeleteWidgets: {
+      // Capture the deleted widgets along with their original space IDs
+      const deletedWidgetsBySpace: Array<{ spaceId: number, widget: IWidget }> = []
+      const updatedSpaces = state.spaces.map(space => {
+        const remainingWidgets = (space.widgets || []).filter(widget => {
+          if (action.widgetIds.includes(widget.id)) {
+            deletedWidgetsBySpace.push({ spaceId: space.id, widget })
+            return false
+          }
+          return true
+        })
+        return { ...space, widgets: remainingWidgets }
+      })
+
+      console.log('deletedWidgetsBySpace', deletedWidgetsBySpace)
+
+      // Register an undo action that will restore the deleted widgets
+      const undoActions = getUndoAction(action, state, () => {
+        return deletedWidgetsBySpace.map(deletedWidgetBySpace => ({
+          type: Action.CreateWidget,
+          spaceId: deletedWidgetBySpace.spaceId,
+          widgetId: deletedWidgetBySpace.widget.id,
+          ...deletedWidgetBySpace.widget
+        }))
+      })
+
       return {
         ...state,
         selectedWidgetIds: state.selectedWidgetIds.filter(id => !action.widgetIds.includes(id)),
-        spaces: state.spaces.map(space => ({
-          ...space,
-          widgets: space.widgets?.filter(widget => !action.widgetIds.includes(widget.id)) || []
-        }))
+        spaces: updatedSpaces,
+        undoSteps: undoActions
       }
     }
 
     case Action.BringToFront: {
+      const currentSpace = findSpaceById(state, state.currentSpaceId)
+      if (!currentSpace) {
+        return showErrorReducer("Current space not found")
+      }
+      if (!currentSpace.widgets || currentSpace.widgets.length === 0) {
+        return state
+      }
+
+      // Record original positions for undo
+      const originalPositions = currentSpace.widgets
+        .filter(widget => action.widgetIds.includes(widget.id))
+        .map(widget => ({ widgetId: widget.id, position: widget.position }))
+
+      let maxWidgetPosition = currentSpace.widgets.at(-1)?.position ?? ""
+      const updatedWidgets = currentSpace.widgets.map(widget => {
+        if (action.widgetIds.includes(widget.id)) {
+          maxWidgetPosition = insertBetween(maxWidgetPosition, "") // compute a new position higher than current newPos
+          return { ...widget, position: maxWidgetPosition }
+        }
+        return widget
+      })
+
+      // Register undo steps to revert the widget positions
+      const undoActions = getUndoAction(action, state, () =>
+        originalPositions.map(item => ({
+          type: Action.UpdateWidget,
+          widgetId: item.widgetId,
+          position: item.position
+        }))
+      )
+
       return {
         ...state,
-        spaces: state.spaces.map(space => {
-          if (space.id !== state.currentSpaceId) {
-            return space
-          }
-
-          const widgets = [...(space.widgets ?? [])]
-          const movingWidgets = widgets.filter(widget => action.widgetIds.includes(widget.id))
-          const remainingWidgets = widgets.filter(widget => !action.widgetIds.includes(widget.id))
-
-          return {
-            ...space,
-            widgets: [...remainingWidgets, ...movingWidgets] // Move selected widgets to the end
-          }
-        })
+        spaces: updateSpace(state.spaces, currentSpace.id, {
+          widgets: sortByPosition(updatedWidgets)
+        }),
+        undoSteps: undoActions
       }
     }
 
     case Action.SendToBack: {
+      const currentSpace = findSpaceById(state, state.currentSpaceId)
+      if (!currentSpace) {
+        return showErrorReducer("Current space not found")
+      }
+      if (!currentSpace.widgets || currentSpace.widgets.length === 0) {
+        return state
+      }
+
+      // Record original positions for undo
+      const originalPositions = currentSpace.widgets
+        .filter(widget => action.widgetIds.includes(widget.id))
+        .map(widget => ({ widgetId: widget.id, position: widget.position }))
+
+      let minWidgetPosition = currentSpace.widgets.at(0)?.position ?? ""
+      const updatedWidgets = currentSpace.widgets.map(widget => {
+        if (action.widgetIds.includes(widget.id)) {
+          minWidgetPosition = insertBetween("", minWidgetPosition) // compute a new position lower than current newPos
+          return { ...widget, position: minWidgetPosition }
+        }
+        return widget
+      })
+
+      // Register undo steps to revert the widget positions
+      const undoActions = getUndoAction(action, state, () =>
+        originalPositions.map(item => ({
+          type: Action.UpdateWidget,
+          widgetId: item.widgetId,
+          position: item.position
+        }))
+      )
+
       return {
         ...state,
-        spaces: state.spaces.map(space => {
-          if (space.id !== state.currentSpaceId) {
-            return space
-          }
+        spaces: updateSpace(state.spaces, currentSpace.id, {
+          widgets: sortByPosition(updatedWidgets)
+        }),
+        undoSteps: undoActions
+      }
+    }
 
-          const widgets = [...(space.widgets ?? [])]
-          const movingWidgets = widgets.filter(widget => action.widgetIds.includes(widget.id))
-          const remainingWidgets = widgets.filter(widget => !action.widgetIds.includes(widget.id))
+    case Action.DuplicateWidgets: {
+      const newWidgets = action.widgetIds.map((widgetId) => {
+        const currentSpace = findSpaceById(state, state.currentSpaceId)!
+        const originalWidget = (currentSpace.widgets ?? [])
+          .find((widget) => widget.id === widgetId)
 
-          return {
-            ...space,
-            widgets: [...movingWidgets, ...remainingWidgets] // Move selected widgets to the beginning
+        if (!originalWidget) {
+          return null
+        }
+
+        return {
+          ...originalWidget,
+          id: genUniqLocalId(), // Generate a new unique ID
+          pos: {
+            point: {
+              x: originalWidget.pos.point.x + 20, // Offset slightly to avoid overlap
+              y: originalWidget.pos.point.y + 20
+            }
           }
-        })
+        }
+      }).filter(Boolean) as IWidget[]
+
+      if (newWidgets.length === 0) {
+        return showErrorReducer("No valid widgets found to duplicate")
+      }
+
+      const spaces = updateSpace(state.spaces, state.currentSpaceId, (space) => ({
+        ...space,
+        widgets: [...space.widgets ?? [], ...newWidgets]
+      }))
+
+      // Create an undo action to remove the duplicated widgets
+      const undoActions = getUndoAction(action, state, () => ({
+        type: Action.DeleteWidgets,
+        widgetIds: newWidgets.map(widget => widget.id)
+      }))
+
+      return {
+        ...state,
+        spaces,
+        selectedWidgetIds: newWidgets.map(widget => widget.id), // Select new widgets
+        undoSteps: undoActions
       }
     }
 
     /********************************************************
-     * Canvas API
+     * Canvas API (dont send updates to server)
      ********************************************************/
 
     case Action.SelectWidgets: {
@@ -822,45 +971,6 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       }
     }
 
-    case Action.DuplicateSelectedWidgets: {
-      if (state.selectedWidgetIds.length === 0) {
-        return state
-      }
-
-      const newWidgets = state.selectedWidgetIds.map((widgetId) => {
-        const currentSpace = findSpaceById(state, state.currentSpaceId)!
-        const originalWidget = (currentSpace.widgets ?? [])
-          .find((widget) => widget.id === widgetId)
-
-        if (!originalWidget) {
-          return null
-        }
-
-        return {
-          ...originalWidget,
-          id: genUniqLocalId(), // Generate a new unique ID
-          pos: {
-            x: originalWidget.pos.x + 20, // Offset slightly to avoid overlap
-            y: originalWidget.pos.y + 20
-          }
-        }
-      }).filter(Boolean) as IWidgetData[]
-
-      if (newWidgets.length === 0) {
-        return showErrorReducer("No valid widgets found to duplicate")
-      }
-
-      const spaces = updateSpace(state.spaces, state.currentSpaceId, (space) => ({
-        ...space,
-        widgets: [...space.widgets ?? [], ...newWidgets]
-      }))
-
-      return {
-        ...state,
-        spaces,
-        selectedWidgetIds: newWidgets.map(widget => widget.id) // Select new widgets
-      }
-    }
 
     /********************************************************
      * API HELPERS

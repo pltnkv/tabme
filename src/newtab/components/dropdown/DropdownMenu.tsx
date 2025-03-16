@@ -3,7 +3,7 @@ import { createContext } from "react"
 import { CL } from "../../helpers/classNameHelper"
 import ReactDOM from "react-dom"
 import { isSomeParentHaveClass } from "../../helpers/utils"
-import { IOffset } from "../../helpers/MathTypes"
+import { IOffset, IPoint } from "../../helpers/MathTypes"
 
 export const DropdownSetMenuIdContext = createContext((id: number) => {})
 export const DropdownMenuIdContext = createContext(-1)
@@ -102,6 +102,7 @@ export const DropdownSubMenu = ({ menuId, title, submenuContent }: DropdownSubMe
 export function DropdownMenu(p: {
   className?: string;
   offset?: Partial<IOffset>,
+  absPosition?: IPoint,
   width?: number,
   alignRight?: boolean,
   children: any; //todo fix types
@@ -165,24 +166,32 @@ export function DropdownMenu(p: {
   useEffect(() => {
     if (menuRef.current && anchorRef.current) {
       const { innerWidth, innerHeight } = window
-      const anchorRect = anchorRef.current.getBoundingClientRect()
       const menuRect = menuRef.current.getBoundingClientRect()
-
+      const anchorRect = anchorRef.current.getBoundingClientRect()
+      const pos = { top: 0, left: 0 }
       const offset = getOffsets(p.offset)
-
-      let top = anchorRect.top + offset.top
-      let left = anchorRect.left + offset.left
+      if (p.absPosition) {
+        pos.top = p.absPosition.y
+        pos.left = p.absPosition.x
+      } else {
+        pos.top = anchorRect.top + offset.top
+        pos.left = anchorRect.left + offset.left
+      }
 
       // Adjust positioning if submenu overflows the viewport
-      if (left + menuRect.width > innerWidth) {
-        left = anchorRect.left - menuRect.width - offset.right
+      if (pos.left + menuRect.width > innerWidth) {
+        if (p.absPosition) {
+          pos.left = innerWidth - menuRect.width - offset.right
+        } else {
+          pos.left = anchorRect.left - menuRect.width - offset.right
+        }
       }
 
-      if (top + menuRect.height > innerHeight) {
-        top = top - (menuRect.height + offset.bottom)
+      if (pos.top + menuRect.height > innerHeight) {
+        pos.top = pos.top - (menuRect.height + offset.bottom)
       }
 
-      setMenuPos({ top, left })
+      setMenuPos(pos)
     }
   }, [])
 
@@ -212,8 +221,3 @@ export function DropdownMenu(p: {
     </>
   )
 }
-
-//  return child ? React.cloneElement(child as any, {
-//           // Clone each child and modify it to be focusable
-//           //tabIndex: p.skipTabIndexes ? undefined : 0,
-//         }) : null
