@@ -206,7 +206,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       const lastSpace = state.spaces.at(-1)
       // todo add network later !!!
 
-      const undoActions = getUndoAction(action, state, () => ({
+      const undoSteps = getUndoSteps(action, state, () => ({
         type: Action.DeleteSpace,
         spaceId: action.spaceId
       }))
@@ -224,7 +224,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
           ...state.spaces,
           newSpace
         ]),
-        undoSteps: undoActions
+        undoSteps
       }
     }
 
@@ -237,7 +237,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       }
 
       // todo can be different when network supported
-      // const undoActions = getUndoAction(action, state, () => ({
+      // const undoSteps = getUndoSteps(action, state, () => ({
       //   type: Action.CreateSpace,
       //   spaceId: deletingSpace.id,
       //   ...deletingSpace // todo !!! support restoring folders with UNDO in space
@@ -247,7 +247,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         ...state,
         currentSpaceId: state.currentSpaceId !== action.spaceId ? state.currentSpaceId : state.spaces[0].id,
         spaces: state.spaces.filter((s) => s.id !== action.spaceId)
-        // undoSteps: undoActions
+        // undoSteps
       }
     }
 
@@ -267,7 +267,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         return showErrorReducer("Updating space not found")
       }
 
-      const undoActions = getUndoAction(action, state, () => ({
+      const undoSteps = getUndoSteps(action, state, () => ({
         type: Action.UpdateSpace,
         spaceId: action.spaceId,
         title: targetSpace.title,
@@ -277,7 +277,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       return {
         ...state,
         spaces: updateSpace(state.spaces, action.spaceId, newProps),
-        undoSteps: undoActions
+        undoSteps
       }
     }
 
@@ -300,7 +300,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         // todo !!! impl later
       }
 
-      const undoActions = getUndoAction(action, state, () => ({
+      const undoSteps = getUndoSteps(action, state, () => ({
         type: Action.UpdateSpace,
         spaceId: movingSpace.id,
         position: movingSpace.position
@@ -310,7 +310,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         ...state,
         spaces: spaces,
         apiCommandsQueue,
-        undoSteps: undoActions
+        undoSteps
       }
     }
 
@@ -341,7 +341,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         })
       }
 
-      const undoActions = getUndoAction(action, state, () => ({
+      const undoSteps = getUndoSteps(action, state, () => ({
         type: Action.DeleteFolder,
         folderId: newFolder.id
       }))
@@ -355,7 +355,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
           ])
         }),
         apiCommandsQueue,
-        undoSteps: undoActions
+        undoSteps
       }
     }
 
@@ -379,7 +379,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       }
 
       //todo can be different when network supported
-      const undoActions = getUndoAction(action, state, () => ({
+      const undoSteps = getUndoSteps(action, state, () => ({
         type: Action.CreateFolder,
         ...deletingFolder
       }))
@@ -393,7 +393,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
           }
         }),
         apiCommandsQueue,
-        undoSteps: undoActions
+        undoSteps
       }
     }
 
@@ -432,7 +432,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         })
       }
 
-      const undoActions = getUndoAction(action, state, () => ({
+      const undoSteps = getUndoSteps(action, state, () => ({
         type: Action.UpdateFolder,
         folderId: action.folderId,
         title: targetFolder.title,
@@ -445,7 +445,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         ...state,
         spaces: updateFolder(state.spaces, action.folderId, newProps, !!newProps.position),
         apiCommandsQueue,
-        undoSteps: undoActions
+        undoSteps
       }
     }
 
@@ -492,7 +492,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         //todo !!!
       }
 
-      const undoActions = getUndoAction(action, state, () => ({
+      const undoSteps = getUndoSteps(action, state, () => ({
         type: Action.UpdateFolder,
         folderId: movingFolder.id,
         position: movingFolder.position
@@ -502,7 +502,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         ...state,
         spaces,
         apiCommandsQueue,
-        undoSteps: undoActions
+        undoSteps
       }
     }
 
@@ -534,7 +534,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         })
       }
 
-      const undoActions = getUndoAction(action, state, () => ({
+      const undoSteps = getUndoSteps(action, state, () => ({
         type: Action.DeleteFolderItems,
         itemIds: [action.item.id]
       }))
@@ -543,7 +543,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         ...state,
         spaces: spaces,
         apiCommandsQueue,
-        undoSteps: undoActions
+        undoSteps
       }
     }
 
@@ -561,7 +561,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       }
 
       // TODO: Undo for deleting folders for network should be different
-      const undoActions = getUndoAction(action, state, () => ({
+      const undoSteps = getUndoSteps(action, state, () => ({
         type: Action.InitDashboard,
         spaces: state.spaces
       }))
@@ -584,7 +584,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         ...state,
         spaces: action.itemIds.reduce(deleteItemsFromFolders, state.spaces),
         apiCommandsQueue,
-        undoSteps: undoActions
+        undoSteps
       }
     }
 
@@ -622,7 +622,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         })
       }
 
-      const undoActions = getUndoAction(action, state, () => ({
+      const undoSteps = getUndoSteps(action, state, () => ({
         type: Action.UpdateFolderItem,
         itemId: originalItem.id,
         ...originalItem
@@ -637,7 +637,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
           folderId
         ),
         apiCommandsQueue,
-        undoSteps: undoActions
+        undoSteps
       }
     }
 
@@ -688,7 +688,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       }
 
       //todo Generate undo actions to restore each item to its original folder and position
-      const undoActions = getUndoAction(action, state, () => ({
+      const undoSteps = getUndoSteps(action, state, () => ({
         type: Action.InitDashboard,
         spaces: state.spaces
       }))
@@ -697,7 +697,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         ...state,
         spaces: spaces,
         apiCommandsQueue,
-        undoSteps: undoActions
+        undoSteps
       }
     }
 
@@ -728,7 +728,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         }, action.content)
       }
 
-      const undoActions = getUndoAction(action, state, () => ({
+      const undoSteps = getUndoSteps(action, state, () => ({
         type: Action.DeleteWidgets,
         widgetIds: [newWidget.id]
       }))
@@ -740,7 +740,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
             ? { ...space, widgets: sortByPosition([...(space.widgets || []), newWidget]) }
             : space
         ),
-        undoSteps: undoActions
+        undoSteps
       }
     }
 
@@ -768,7 +768,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         ) || [], doSorting)
       }))
 
-      const undoActions = getUndoAction(action, state, () => ({
+      const undoSteps = getUndoSteps(action, state, () => ({
         type: Action.UpdateWidget,
         widgetId: action.widgetId,
         position: originalWidget.position,
@@ -779,7 +779,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       return {
         ...state,
         spaces: updatedSpaces,
-        undoSteps: undoActions
+        undoSteps
       }
     }
 
@@ -800,7 +800,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       console.log("deletedWidgetsBySpace", deletedWidgetsBySpace)
 
       // Register an undo action that will restore the deleted widgets
-      const undoActions = getUndoAction(action, state, () => {
+      const undoSteps = getUndoSteps(action, state, () => {
         return deletedWidgetsBySpace.map(deletedWidgetBySpace => ({
           type: Action.CreateWidget,
           spaceId: deletedWidgetBySpace.spaceId,
@@ -813,7 +813,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         ...state,
         selectedWidgetIds: state.selectedWidgetIds.filter(id => !action.widgetIds.includes(id)),
         spaces: updatedSpaces,
-        undoSteps: undoActions
+        undoSteps
       }
     }
 
@@ -841,7 +841,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       })
 
       // Register undo steps to revert the widget positions
-      const undoActions = getUndoAction(action, state, () =>
+      const undoSteps = getUndoSteps(action, state, () =>
         originalPositions.map(item => ({
           type: Action.UpdateWidget,
           widgetId: item.widgetId,
@@ -854,7 +854,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         spaces: updateSpace(state.spaces, currentSpace.id, {
           widgets: sortByPosition(updatedWidgets)
         }),
-        undoSteps: undoActions
+        undoSteps
       }
     }
 
@@ -882,7 +882,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       })
 
       // Register undo steps to revert the widget positions
-      const undoActions = getUndoAction(action, state, () =>
+      const undoSteps = getUndoSteps(action, state, () =>
         originalPositions.map(item => ({
           type: Action.UpdateWidget,
           widgetId: item.widgetId,
@@ -895,7 +895,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         spaces: updateSpace(state.spaces, currentSpace.id, {
           widgets: sortByPosition(updatedWidgets)
         }),
-        undoSteps: undoActions
+        undoSteps
       }
     }
 
@@ -931,7 +931,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       }))
 
       // Create an undo action to remove the duplicated widgets
-      const undoActions = getUndoAction(action, state, () => ({
+      const undoSteps = getUndoSteps(action, state, () => ({
         type: Action.DeleteWidgets,
         widgetIds: newWidgets.map(widget => widget.id)
       }))
@@ -940,7 +940,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         ...state,
         spaces,
         selectedWidgetIds: newWidgets.map(widget => widget.id), // Select new widgets
-        undoSteps: undoActions
+        undoSteps
       }
     }
 
@@ -1029,7 +1029,7 @@ export function mergeStepsInHistory(callback: (historyStepId: number) => void): 
   callback(genNextRuntimeId())
 }
 
-function getUndoAction(currentAction: HistoryActionPayload, state: IAppState, callback: () => ActionPayload | ActionPayload[]): UndoStep[] {
+function getUndoSteps(currentAction: HistoryActionPayload, state: IAppState, callback: () => ActionPayload | ActionPayload[]): UndoStep[] {
   const MAX_HISTORY_LENGTH = 50
 
   if (currentAction.byUndo) {

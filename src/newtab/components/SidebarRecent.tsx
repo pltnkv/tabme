@@ -140,12 +140,9 @@ export const SidebarRecent = React.memo((p: {
 
   const itemsFilteredBySearch = filterHistoryItemsBySearch(p.historyItems, p.search)
 
-  const t1 = performance.now()
   const itemsFilteredBySearchAndFilter = filterByDomainEnabled && enabledFiltersCount
     ? getFilteredHistoryItems(itemsFilteredBySearch, enabledFilers)
     : getBaseFilteredHistoryItems(itemsFilteredBySearch)
-  const t2 = performance.now()
-  console.log("PERFORMANCE", t2 - t1)
 
   const moreSearchResultsCount = p.search !== "" && enabledFiltersCount > 0 ? itemsFilteredBySearch.length - itemsFilteredBySearchAndFilter.length : 0
 
