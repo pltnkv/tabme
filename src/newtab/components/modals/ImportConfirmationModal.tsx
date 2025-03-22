@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import { Modal } from "./Modal"
 
-export const ImportConfirmationModal = (p: { isModalOpen: boolean, onClose: (opt: string) => void }) => {
+export const ImportConfirmationModal = (p: { onClose: (opt: string) => void }) => {
   const [importOption, setImportOption] = useState("add")
 
   // todo improve this logic later
@@ -14,7 +14,7 @@ export const ImportConfirmationModal = (p: { isModalOpen: boolean, onClose: (opt
   }
 
   return (
-    <Modal className="spaces-settings-modal" isOpen={p.isModalOpen} onClose={() => p.onClose(importOption)}>
+    <Modal className="spaces-settings-modal" isOpen={true} onClose={() => p.onClose(importOption)}>
       {/*<h2>How to add imported bookmarks?</h2>*/}
       {/*<p>*/}
       {/*  <label>*/}

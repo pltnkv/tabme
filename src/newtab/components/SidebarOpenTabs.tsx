@@ -8,10 +8,10 @@ import IconSaved from "../icons/saved.svg"
 import { DropdownMenu, DropdownSubMenu } from "./dropdown/DropdownMenu"
 import { CL } from "../helpers/classNameHelper"
 import { getFoldersList } from "./dropdown/moveToHelpers"
-import { convertTabToItem, findSpaceByFolderId } from "../state/actionHelpers"
+import { convertTabToItem } from "../state/actionHelpers"
 import { createFolderWithStat, getCanDragChecker, showMessage } from "../helpers/actionsHelpersWithDOM"
-import Tab = chrome.tabs.Tab
 import { trackStat } from "../helpers/stats"
+import Tab = chrome.tabs.Tab
 
 export const SidebarOpenTabs = memo((props: {
   search: string;
@@ -127,7 +127,7 @@ export const SidebarOpenTabs = memo((props: {
           })
 
       }
-      {tabsCount === 0 && props.search === "" ? <p className="no-opened-tabs">No open tabs.<br/> Pinned tabs are filtered out.</p> : null}
+      {tabsCount === 0 && props.search === "" ? <p className="sidebar-message">No open tabs.<br/> Pinned tabs are filtered out.</p> : null}
       {
         /* disabled it because it looks wierd with several Windows */
         /*{props.search === "" ? SectionItem : null}*/

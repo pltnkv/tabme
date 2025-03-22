@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react"
+import React, { useContext, useState } from "react"
 import PlusIcon from "../icons/plus.svg"
 import DeleteIcon from "../icons/delete.svg"
 import { ISpace } from "../helpers/types"
@@ -7,7 +7,6 @@ import { DispatchContext } from "../state/actions"
 import { Action } from "../state/state"
 import { SimpleEditableTitle } from "./EditableTitle"
 import { DropdownMenu } from "./dropdown/DropdownMenu"
-import { isTargetSupportsDragAndDrop } from "../helpers/utils"
 import { genUniqLocalId } from "../state/actionHelpers"
 import { insertBetween } from "../helpers/fractionalIndexes"
 import { JoinBetaModal } from "./modals/JoinBetaModal"
@@ -22,7 +21,6 @@ export function SpacesList(p: {
   const dispatch = useContext(DispatchContext)
 
   const [menuSpaceId, setMenuSpaceId] = useState(-1)
-  const [mouseDownEvent, setMouseDownEvent] = useState<React.MouseEvent | undefined>(undefined)
   const [isJoinBetaModalOpen, setJoinBetaModalOpen] = useState(false)
 
   const setEditingSpaceId = (spaceId: number | undefined) => {
@@ -95,15 +93,8 @@ export function SpacesList(p: {
     }
   }
 
-  function onMouseDown(e: React.MouseEvent) {
-    if (isTargetSupportsDragAndDrop(e, "spaces-list__delete-button") && p.spaces.length > 1) {
-      setMouseDownEvent(e)
-    }
-  }
-
   return (
-    <div className="spaces-list"
-         onMouseDown={onMouseDown}>
+    <div className="spaces-list">
       {
         p.spaces.length === 0 && <span style={{ padding: "8px" }}>no spaces</span>
       }

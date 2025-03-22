@@ -1,12 +1,12 @@
 import React from "react"
 import { Modal } from "./Modal"
 
-export const OverrideModal = ({ isOverrideModalOpen, setOverrideModalOpen }:
-                                { isOverrideModalOpen: boolean, setOverrideModalOpen: (value: boolean) => void }) => {
+export const OverrideModal = ({ setOpen }:
+                                { setOpen: (value: boolean) => void }) => {
   return (
     __OVERRIDE_NEWTAB
       ?
-      <Modal isOpen={isOverrideModalOpen} onClose={() => setOverrideModalOpen(false)}>
+      <Modal isOpen={true} onClose={() => setOpen(false)}>
         <div className="modal-no-override">
           <h2>How to remove Tabme from the new tab?</h2>
           <p>If you want to use Tabme without it taking over your new tab, <br/>try the "<a
@@ -26,11 +26,11 @@ export const OverrideModal = ({ isOverrideModalOpen, setOverrideModalOpen }:
               <span>Settings → Import from JSON</span></li>
           </ol>
           <p>Sorry for the complex steps. Chrome doesn't support easy new tab customization.</p>
-          <button className="btn__setting" onClick={() => setOverrideModalOpen(false)}>Close</button>
+          <button className="btn__setting" onClick={() => setOpen(false)}>Close</button>
         </div>
       </Modal>
       :
-      <Modal isOpen={isOverrideModalOpen} onClose={() => setOverrideModalOpen(false)}>
+      <Modal isOpen={true} onClose={() => setOpen(false)}>
         <div className="modal-no-override">
           <h2>How to open Tabme in the every new tab?</h2>
           <p>If you want Tabme was open every new tab, try the regular Tabme extension.
@@ -47,7 +47,7 @@ export const OverrideModal = ({ isOverrideModalOpen, setOverrideModalOpen }:
               <span>Settings → Advanced mode → Import</span></li>
           </ol>
           <p>Sorry for the complex steps. Chrome doesn't support easy new tab customization.</p>
-          <button className="btn__setting" onClick={() => setOverrideModalOpen(false)}>Close</button>
+          <button className="btn__setting" onClick={() => setOpen(false)}>Close</button>
         </div>
       </Modal>
   )

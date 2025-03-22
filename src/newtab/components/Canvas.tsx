@@ -60,6 +60,13 @@ function StickerWidget(p: {
 
   const bgColor = `linear-gradient(to bottom, rgba(0, 0, 0, 0.02), 16%, rgba(0, 0, 0, 0), 30%, rgba(0, 0, 0, 0)), ${p.data.content.color ?? "#FFF598"}`
 
+  // TEMP HACK
+  if(!p.data.pos.point) {
+    p.data.pos.point = {
+      x: 100 , y:100
+    }
+  }
+
   return <div data-id={p.data.id}
               className={CL("widget widget-sticker", {
                 "selected": p.selected

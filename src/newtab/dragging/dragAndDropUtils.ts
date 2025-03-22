@@ -73,7 +73,7 @@ export function isViewportWasScrolled(): boolean {
 }
 
 export function setViewportWasScrolled(val: boolean): void {
-  viewportWasScrolled = false
+  viewportWasScrolled = val
 }
 
 export function getScrollByDummyClientY(): number | undefined {

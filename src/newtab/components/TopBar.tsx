@@ -23,9 +23,6 @@ export function TopBar(p: {
   const [settingsMenuVisibility, setSettingsMenuVisibility] = useState<boolean>(false)
   const [helpMenuVisibility, setHelpMenuVisibility] = useState<boolean>(false)
 
-  const [isOverrideModalOpen, setOverrideModalOpen] = useState(false)
-  const [isShortcutsModalOpen, setShortcutsModalOpen] = useState(false)
-
   function onToggleHelpSettings() {
     setHelpMenuVisibility(!helpMenuVisibility)
   }
@@ -45,7 +42,6 @@ export function TopBar(p: {
   function toggleBetaMenu() {
     setBetaMenuVisibility(!betaMenuVisibility)
   }
-
 
   async function onLogout() {
     localStorage.removeItem("authToken")
@@ -96,16 +92,7 @@ export function TopBar(p: {
                 <BetaOptions appState={p.appState}/>
               </DropdownMenu>
             }
-
           </>
-        }
-        {
-          loadFromNetwork() ?
-            <>
-              {/*todo move to menu. and replace to leave feedback button or something like this*/}
-              <button className={"btn__setting"} onClick={onLogout}>Logout</button>
-            </>
-            : null
         }
         <button className={`btn__icon ${helpMenuVisibility ? "active" : ""}`} onClick={onToggleHelpSettings}>
           <IconHelp/>
@@ -113,21 +100,18 @@ export function TopBar(p: {
         <button className={`btn__icon ${settingsMenuVisibility ? "active" : ""}`} onClick={onToggleSettings}>
           <IconSettings/>
         </button>
-        {helpMenuVisibility ? (
-          <DropdownMenu onClose={() => {setHelpMenuVisibility(false)}} noSmartPositioning={true} alignRight={true} offset={{ top: 38, right: 48 }}>
-            <HelpOptions appState={p.appState} onShortcutsModal={() => setShortcutsModalOpen(true)}/>
+        {
+          helpMenuVisibility && <DropdownMenu onClose={() => {setHelpMenuVisibility(false)}} noSmartPositioning={true} alignRight={true} offset={{ top: 38, right: 48 }}>
+            <HelpOptions appState={p.appState}/>
           </DropdownMenu>
-        ) : null}
-
-        {settingsMenuVisibility ? (
-          <DropdownMenu onClose={() => {setSettingsMenuVisibility(false)}} noSmartPositioning={true} alignRight={true} offset={{ top: 38 }}>
-            <SettingsOptions appState={p.appState} onOverrideNewTabMenu={() => setOverrideModalOpen(true)}/>
+        }
+        {
+          settingsMenuVisibility && <DropdownMenu onClose={() => {setSettingsMenuVisibility(false)}} noSmartPositioning={true} alignRight={true} offset={{ top: 38 }}>
+            <SettingsOptions appState={p.appState}/>
           </DropdownMenu>
-        ) : null}
-
+        }
       </div>
-      <OverrideModal isOverrideModalOpen={isOverrideModalOpen} setOverrideModalOpen={setOverrideModalOpen}/>
-      <ShortcutsModal isShortcutsModalOpen={isShortcutsModalOpen} setShortcutsModalOpen={setShortcutsModalOpen}/>
+
     </div>
   )
 }

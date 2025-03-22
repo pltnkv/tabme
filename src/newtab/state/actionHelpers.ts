@@ -6,9 +6,19 @@ import { sortByPosition } from "../helpers/fractionalIndexes"
 import { type IAppState } from "./state"
 import { SECTION_ICON_BASE64 } from "../helpers/utils"
 import Tab = chrome.tabs.Tab
+import HistoryItem = chrome.history.HistoryItem
 
 export function genUniqLocalId(): number {
   return (new Date()).valueOf() + Math.round(Math.random() * 10000000)
+}
+
+export function convertHistoryItemToItem(item: HistoryItem): IFolderItemToCreate {
+  return {
+    id: genUniqLocalId(),
+    favIconUrl: getTempFavIconUrl(item.url),
+    title: item.title || "",
+    url: item.url || ""
+  }
 }
 
 export function convertTabToItem(item: Tab): IFolderItemToCreate {
@@ -66,19 +76,28 @@ export function findSpaceById(state: Pick<IAppState, "spaces">, spaceId: number 
 export function createNewFolderItem(url?: string, title?: string, favIconUrl?: string): IFolderItemToCreate {
   return {
     id: genUniqLocalId(),
-    favIconUrl: favIconUrl ?? getFavIconUrl(url),
+    favIconUrl: favIconUrl ?? getTempFavIconUrl(url),
     title: title ?? "",
     url: url ?? ""
   }
 }
 
-export function getFavIconUrl(val?: string): string {
-  if (val) {
-    try {
-      return (new URL(val)).origin + "/favicon.ico"
-    } catch (e) {
-      return ""
-    }
+export function convertToURL(val?: string | URL): URL | undefined {
+  if (typeof val === "object") {
+    return val
+  } else if (typeof val === "undefined") {
+    return undefined
+  } else if (URL.canParse(val)) { //todo !!! measure performance, maybe throw error is faster
+    return new URL(val)
+  } else {
+    return undefined
+  }
+}
+
+export function getTempFavIconUrl(val?: string | URL): string {
+  const url = convertToURL(val)
+  if (url) {
+    return url.origin + "/favicon.ico#by-tabme"
   } else {
     return ""
   }

@@ -33,7 +33,7 @@ const savingStateDefaultValues = { // if was not saved to LS yet
   "spaces": [],
   "currentSpaceId": undefined,
   "sidebarCollapsed": false,
-  "openBookmarksInNewTab": false,
+  "openBookmarksInNewTab": !__OVERRIDE_NEWTAB,
   "colorTheme": "light", // todo I don't use system because it's not ready to used by default
   "stat": undefined,
   "showArchived": false,

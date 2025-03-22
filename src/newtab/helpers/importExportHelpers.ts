@@ -1,7 +1,7 @@
 import { IFolder, ISpace } from "./types"
 import { Action } from "../state/state"
 import { ActionDispatcher } from "../state/actions"
-import { createNewFolderItem, genUniqLocalId, getFavIconUrl } from "../state/actionHelpers"
+import { createNewFolderItem, genUniqLocalId, getTempFavIconUrl } from "../state/actionHelpers"
 import { showMessage } from "./actionsHelpersWithDOM"
 import { getTopVisitedFromHistory } from "./utils"
 import HistoryItem = chrome.history.HistoryItem
@@ -114,7 +114,7 @@ export function onImportFromToby(event: any, dispatch: ActionDispatcher, onReady
               id: genUniqLocalId(),
               title: card.title,
               url: card.url,
-              favIconUrl: getFavIconUrl(card.url)
+              favIconUrl: getTempFavIconUrl(card.url)
             }))
           })
           count += tobyFolder.cards.length
@@ -228,7 +228,7 @@ export function importBrowserBookmarks(records: BookmarksAsPlainList, dispatch: 
     if (skipChecked || rec.folder.checked) {
       const items = rec.folder.children
         ?.filter(item => (skipChecked || item.checked) && item.url)
-        .map(item => createNewFolderItem(item.url, item.title, getFavIconUrl(item.url)))
+        .map(item => createNewFolderItem(item.url, item.title, getTempFavIconUrl(item.url)))
       count += items?.length ?? 0
 
       const newFolderId = genUniqLocalId()

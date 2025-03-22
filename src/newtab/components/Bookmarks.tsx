@@ -18,7 +18,7 @@ import { hideWidgetsContextMenu } from "./canvas/widgetsContextMenu"
 import { hideWidgetsSelectionFrame } from "./canvas/widgetsSelectionFrame"
 import { canvasAPI } from "./canvas/canvasAPI"
 import { DropdownMenu } from "./dropdown/DropdownMenu"
-import { Options, OptionsConfig } from "./SettingsOptions"
+import { Options } from "./SettingsOptions"
 import { getCanvasMenuOption } from "./canvas/getCanvasMenuOptions"
 
 export function Bookmarks(p: {
@@ -182,7 +182,8 @@ export function Bookmarks(p: {
           onCanvasDoubleClick
         },
         {
-          onChangeSpacePosition
+          onChangeSpacePosition,
+          canSortSpaces: () => p.appState.spaces.length > 1
         }
       )
     }
@@ -265,7 +266,7 @@ export function Bookmarks(p: {
               </div>
             )
             : (
-              folders.length === 0 ? <div style={{ marginLeft: "58px" }}>Nothing found</div> : null
+              folders.length === 0 ? <div style={{ marginLeft: "58px" }}>No bookmarks found</div> : null
             )
         }
       </div>

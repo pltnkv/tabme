@@ -7,7 +7,6 @@ import { ISpace } from "../../helpers/types"
 import { Action } from "../../state/state"
 
 export const LeaveBetaModal = (p: {
-  isOpen: boolean,
   setOpen: (value: boolean) => void
   spaces: ISpace[]
 }) => {
@@ -52,7 +51,7 @@ export const LeaveBetaModal = (p: {
   }
 
   return (
-    <Modal isOpen={p.isOpen} onClose={onClose}>
+    <Modal isOpen={true} onClose={onClose}>
       <div className="modal-no-override">
         <h2>Leaving the Beta Program</h2>
         <p>

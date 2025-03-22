@@ -3,7 +3,7 @@ import { ColorTheme, IFolder, IFolderItem, IFolderItemToCreate, ISpace, IWidgetC
 import { ISavingAppState } from "./storage"
 import Tab = chrome.tabs.Tab
 import HistoryItem = chrome.history.HistoryItem
-import { IPoint } from "../helpers/MathTypes"
+import { FilteredHistoryItem } from "../helpers/recentHistoryUtils"
 
 export type IAppStats = {
   sessionNumber: number
@@ -59,6 +59,7 @@ export type IAppState = {
   tabs: Tab[];
   currentWindowId: number | undefined
   historyItems: HistoryItem[];
+  filteredHistoryItems: FilteredHistoryItem[];
   notification: {
     visible: boolean;
     message: string;
@@ -108,6 +109,7 @@ let initState: IAppState = {
   spaces: [],
   currentSpaceId: -1,
   historyItems: [],
+  filteredHistoryItems: [],
   tabs: [],
   currentWindowId: undefined,
   notification: { visible: false, message: "" },
@@ -261,7 +263,7 @@ export type ActionPayload = (
   | { type: Action.MoveSpace; spaceId: number; insertBeforeSpaceId: number | undefined; }
   | { type: Action.UpdateSpace; spaceId: number; title?: string; position?: string; }
 
-  | { type: Action.CreateFolder; newFolderId?: number; title?: string; color?: string; position?: string; items?: IFolderItemToCreate[]; spaceId?: number }
+  | { type: Action.CreateFolder; newFolderId?: number; title?: string; color?: string; position?: string; items?: IFolderItemToCreate[]; spaceId?: number, folderType?:string }
   | { type: Action.DeleteFolder; folderId: number; }
   | { type: Action.UpdateFolder; folderId: number; title?: string; color?: string; archived?: boolean; twoColumn?: boolean; position?: string }
   | { type: Action.MoveFolder; folderId: number; targetSpaceId: number, insertBeforeFolderId: number | undefined; }

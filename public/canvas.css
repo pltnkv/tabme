@@ -78,22 +78,40 @@
     }
 }
 
-
-.toolbar {
+.toolbar-wrapper {
+    pointer-events: none;
     position: fixed;
     z-index: 1;
+    display: flex;
+    bottom: 4px;
+    width: 100%;
+    justify-content: center;
+    left: 0;
+    right: 0;
+    /*padding-left: 360px;*/
+    box-sizing: border-box;
+}
+
+.collapsible-sidebar .toolbar-wrapper {
+    padding-left: 0;
+}
+
+.toolbar {
+    pointer-events: auto;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-around;
-    left: calc(50% - 96px);
-    bottom: 4px;
     width: 168px;
     height: 48px;
     padding: 0 14px;
     border-radius: 8px;
     background-color: var(--popup-background-color);
     filter: drop-shadow(2px 0px 8px rgba(0, 0, 0, 0.1));
+
+    .dropdown-menu__anchor {
+        left: 0;
+    }
 }
 
 .toolbar-button {
@@ -150,6 +168,7 @@
 
     &.disabled {
         pointer-events: none;
+
         svg {
             opacity: 0.3;
         }
@@ -173,6 +192,7 @@
     &.sticker-size {
         width: 50px;
         box-sizing: border-box;
+
         span {
             color: #d8d8d8;
         }
@@ -180,6 +200,7 @@
 
     &.sticker-link {
         width: 48px;
+
         svg {
             color: #d8d8d8;
         }

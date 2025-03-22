@@ -1,5 +1,5 @@
 import { getSelectedItemsElements, unselectAllItems } from "../helpers/selectionUtils"
-import { findParentWithClass, isSomeParentHaveClass } from "../helpers/utils"
+import { findParentWithClass, isSomeParentHaveClass, isTargetSupportsDragAndDrop } from "../helpers/utils"
 import { IPoint } from "../helpers/MathTypes"
 import { processMultiselection } from "./processMultiselection"
 import { processWidgetsDragAndDrop } from "./processWidgetsDragAndDrop"
@@ -36,6 +36,7 @@ export type PConfigWidgets = {
 
 export type PConfigSpaces = {
   onChangeSpacePosition: (spaceId: number, newPosition: string) => void,
+  canSortSpaces: () => boolean,
 }
 
 export function bindDADItemEffect(
@@ -66,7 +67,9 @@ export function bindDADItemEffect(
       unselectAllItems()
       return processFolderDragAndDrop(mouseDownEvent, folderConfig, targetFolderHeader.parentElement!)
     } else if (spacesConfig && isSomeParentHaveClass(target, "spaces-list__item")) {
-      processSpacesDragAndDrop(mouseDownEvent, spacesConfig)
+      if(!isSomeParentHaveClass(target, "spaces-list__delete-button") && spacesConfig.canSortSpaces()) {
+        processSpacesDragAndDrop(mouseDownEvent, spacesConfig)
+      }
     } else if (widgetsConfig) {
       if (isSomeParentHaveClass(target, "widget")) {
         return processWidgetsDragAndDrop(mouseDownEvent, widgetsConfig)

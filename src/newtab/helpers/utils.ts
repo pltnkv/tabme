@@ -75,6 +75,19 @@ export function filterTabsBySearch(
   })
 }
 
+export function filterHistoryItemsBySearch(
+  list: HistoryItem[],
+  searchValue: string
+): HistoryItem[] {
+  if (searchValue === "") {
+    return list
+  }
+  const searchValueLC = searchValue.toLowerCase()
+  return list.filter(item => {
+    return isContainsSearch(item, searchValueLC)
+  })
+}
+
 export function hasArchivedItems(spaces: ISpace[]): boolean {
   return spaces.some(s => {
     return s.folders.some(f => f.archived || f.items.some(i => i.archived))
@@ -145,12 +158,11 @@ export function filterIrrelevantHistory(
 ): HistoryItem[] {
   const res: HistoryItem[] = []
   list.forEach(item => {
-    if (!item.url) {
+    if (!item.url || !item.title) {
       return
     }
 
-    const url = new URL(item.url)
-    if (url.host === "translate.google.ru" || url.host === "translate.google.com" || url.host === "www.deepl.com") {
+    if (item.url.includes("translate.google.") || item.url.includes("www.deepl.com")) {
       return
     }
 
@@ -373,7 +385,7 @@ export function isSomeParentHaveClass(targetElement: Element | null, classOnPare
   let el = targetElement
   classOnParent = Array.isArray(classOnParent) ? classOnParent : [classOnParent]
   while (el) {
-    if (classOnParent.some(className => el!.classList.contains(className)) ) {
+    if (classOnParent.some(className => el!.classList.contains(className))) {
       return true
     }
     el = el.parentElement

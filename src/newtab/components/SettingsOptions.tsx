@@ -8,6 +8,10 @@ import { onExportJson, onImportFromToby, importFromJson } from "../helpers/impor
 import { ImportConfirmationModal } from "./modals/ImportConfirmationModal"
 import { trackStat } from "../helpers/stats"
 import { LeaveBetaModal } from "./modals/LeaveBetaModal"
+import { loadFaviconUrl } from "../helpers/faviconUtils"
+import { JoinBetaModal } from "./modals/JoinBetaModal"
+import { ShortcutsModal } from "./modals/ShortcutsModal"
+import { OverrideModal } from "./modals/OverrideModal"
 
 type OnClickOption = { onClick: (e: any) => void; title: string; text: string; hidden?: boolean; isFile?: boolean }
 type OnToggleOption = { onToggle: () => void; value: boolean, title: string; text: string; hidden?: boolean }
@@ -46,14 +50,18 @@ export const BetaOptions = (props: {
 
   return <>
     <Options optionsConfig={options}/>
-    <LeaveBetaModal isOpen={leavingBetaModalOpen} setOpen={setLeavingBetaModalOpen} spaces={props.appState.spaces}/>
+    {
+      leavingBetaModalOpen && <LeaveBetaModal setOpen={setLeavingBetaModalOpen} spaces={props.appState.spaces}/>
+    }
   </>
 }
 
-export const HelpOptions = (props: {
-  appState: IAppState;
-  onShortcutsModal: () => void
+export const HelpOptions = (p: {
+  appState: IAppState
 }) => {
+
+  const [isJoinBetaModalOpen, setJoinBetaModalOpen] = useState(false)
+  const [isShortcutsModalOpen, setShortcutsModalOpen] = useState(false)
 
   function onSendFeedback() {
     chrome.tabs.create({ url: "https://docs.google.com/forms/d/e/1FAIpQLSeA-xs3GjBVNQQEzSbHiGUs1y9_XIo__pQBJKQth737VqAEOw/formResponse", active: true })
@@ -74,6 +82,16 @@ export const HelpOptions = (props: {
     trackStat("settingsClicked", { settingName: "HowToUse" })
   }
 
+  function showShortcutsModal() {
+    setShortcutsModalOpen(true)
+    trackStat("settingsClicked", { settingName: "shortcuts" })
+  }
+
+  function tryBeta() {
+    setJoinBetaModalOpen(true)
+    trackStat("settingsClicked", { settingName: "tryBeta" })
+  }
+
   type OnClickOption = { onClick: (e: any) => void; title: string; text: string; hidden?: boolean; isFile?: boolean }
   type OnToggleOption = { onToggle: () => void; value: boolean, title: string; text: string; hidden?: boolean }
   const settingsOptions: Array<OnClickOption | OnToggleOption | { separator: true }> = [
@@ -83,10 +101,7 @@ export const HelpOptions = (props: {
       text: "Guide: How to use"
     },
     {
-      onClick: () => {
-        props.onShortcutsModal()
-        trackStat("settingsClicked", { settingName: "shortcuts" })
-      },
+      onClick: showShortcutsModal,
       title: "Keyboard shortcuts",
       text: "Keyboard shortcuts"
     },
@@ -97,28 +112,45 @@ export const HelpOptions = (props: {
     },
     {
       onClick: onSendFeedback,
-      title: "I appreciate honest feedback on what needs to be improved or bug reports. Thanks for your time and support!",
+      title: "I appreciate any feedback, ideas and bug reports.",
       text: "Send feedback"
+    },
+    {
+      separator: true,
+      hidden: p.appState.betaMode
+    },
+    {
+      onClick: tryBeta,
+      title: "Join Beta",
+      text: "Try new functionality [Beta]",
+      hidden: p.appState.betaMode
     }
   ]
 
   return <>
     <Options optionsConfig={settingsOptions}/>
+    {
+      isJoinBetaModalOpen && <JoinBetaModal setOpen={setJoinBetaModalOpen}/>
+    }
+    {
+      isShortcutsModalOpen && <ShortcutsModal setOpen={setShortcutsModalOpen}/>
+    }
   </>
 }
 
-export const SettingsOptions = (props: {
+export const SettingsOptions = (p: {
   appState: IAppState;
-  onOverrideNewTabMenu: () => void
 }) => {
   const [importConfirmationOpen, setImportConfirmationOpen] = useState(false)
   const fileEvent = useRef(null)
   const dispatch = useContext(DispatchContext)
 
+  const [isOverrideModalOpen, setOverrideModalOpen] = useState(false)
+
   function onToggleNotUsed() {
-    if (hasItemsToHighlight(props.appState.spaces, props.appState.historyItems)) {
-      dispatch({ type: Action.UpdateShowNotUsedItems, value: !props.appState.showNotUsed })
-      const message = !props.appState.showNotUsed ? "Unused items for the past 60 days are highlighted" : "Highlighting canceled"
+    if (hasItemsToHighlight(p.appState.spaces, p.appState.historyItems)) {
+      dispatch({ type: Action.UpdateShowNotUsedItems, value: !p.appState.showNotUsed })
+      const message = !p.appState.showNotUsed ? "Unused items for the past 60 days are highlighted" : "Highlighting canceled"
       showMessage(message, dispatch)
     } else {
       showMessage(`There are no unused items to highlight`, dispatch)
@@ -127,9 +159,9 @@ export const SettingsOptions = (props: {
   }
 
   function onToggleHidden() {
-    if (hasArchivedItems(props.appState.spaces)) {
-      dispatch({ type: Action.UpdateShowArchivedItems, value: !props.appState.showArchived })
-      const message = !props.appState.showArchived ? "Hidden items are visible" : "Hidden items are hidden"
+    if (hasArchivedItems(p.appState.spaces)) {
+      dispatch({ type: Action.UpdateShowArchivedItems, value: !p.appState.showArchived })
+      const message = !p.appState.showArchived ? "Hidden items are visible" : "Hidden items are hidden"
       showMessage(message, dispatch)
     } else {
       showMessage(`There are no hidden items`, dispatch)
@@ -148,7 +180,7 @@ export const SettingsOptions = (props: {
   }
 
   function onToggleOpenInTheNewTab() {
-    dispatch({ type: Action.UpdateAppState, newState: { openBookmarksInNewTab: !props.appState.openBookmarksInNewTab } })
+    dispatch({ type: Action.UpdateAppState, newState: { openBookmarksInNewTab: !p.appState.openBookmarksInNewTab } })
     trackStat("settingsClicked", { settingName: "ToggleOpenInTheNewTab" })
   }
 
@@ -166,43 +198,54 @@ export const SettingsOptions = (props: {
   }
 
   function tryFixBrokenIcons() {
-    dispatch({ type: Action.FixBrokenIcons })
+    loadFaviconUrl("https://www.google.com/maps").then((res) => {
+      console.log("https://www.google.com/maps", res)
+    })
+
+    loadFaviconUrl("https://miro.com").then((res) => {
+      console.log("https://miro.com", res)
+    })
+
+    loadFaviconUrl("https://docs.google.com/spreadsheets/u/1/?tgif=d").then((res) => {
+      console.log("https://docs.google.com/spreadsheets/u/1/?tgif=d", res)
+    })
+    // dispatch({ type: Action.FixBrokenIcons })
     showMessage("Broken favicons are updated", dispatch)
   }
 
   const settingsOptions: OptionsConfig = [
     {
       onToggle: onToggleNotUsed,
-      value: props.appState.showNotUsed,
+      value: p.appState.showNotUsed,
       title: "Highlight not used in past 60 days to archive them. It helps to keep workspace clean.",
-      text: props.appState.showNotUsed ? "Unhighlight not used" : "Highlight not used"
+      text: p.appState.showNotUsed ? "Unhighlight not used" : "Highlight not used"
     },
     {
       onToggle: onToggleHidden,
-      value: props.appState.showArchived,
+      value: p.appState.showArchived,
       title: "You can hide unused folders and bookmarks to keep space clean",
       text: "Show hidden items",
-      hidden: !props.appState.hiddenFeatureIsEnabled
+      hidden: !p.appState.hiddenFeatureIsEnabled
     },
     {
       separator: true
     },
     {
       onToggle: onToggleMode,
-      value: props.appState.colorTheme === "dark",
+      value: p.appState.colorTheme === "dark",
       title: "Change your Color Schema",
       text: "Use Dark Theme"
     },
     {
       onToggle: onToggleOpenInTheNewTab,
-      value: !props.appState.openBookmarksInNewTab,
+      value: !p.appState.openBookmarksInNewTab,
       title: "You can also open bookmarks on the new tab with pressed CMD or CTRL",
       text: "Open bookmarks on the same tab"
     },
     {
       title: "Manage browser new tab override by Tabme",
       onToggle: () => {
-        props.onOverrideNewTabMenu()
+        setOverrideModalOpen(true)
         trackStat("settingsClicked", { settingName: "toggleShowTabmeOnEachNewTab" })
       },
       value: __OVERRIDE_NEWTAB,
@@ -212,7 +255,7 @@ export const SettingsOptions = (props: {
     // {
     //   onClick: tryFixBrokenIcons,
     //   title: "Sometimes favicons are not showing, this option may help to fix it",
-    //   text: "Try reload broken favicons"
+    //   text: "Reload broken favicons"
     // },
     {
       separator: true
@@ -244,7 +287,7 @@ export const SettingsOptions = (props: {
     },
     {
       onClick: () => {
-        onExportJson(props.appState.spaces)
+        onExportJson(p.appState.spaces)
         trackStat("settingsClicked", { settingName: "ExportToJson" })
       },
       title: "Export all Folders and Bookmarks to JSON file",
@@ -254,7 +297,12 @@ export const SettingsOptions = (props: {
 
   return <>
     <Options optionsConfig={settingsOptions}/>
-    <ImportConfirmationModal isModalOpen={importConfirmationOpen} onClose={onImportTypeConfirmed}/>
+    {
+      importConfirmationOpen && <ImportConfirmationModal onClose={onImportTypeConfirmed}/>
+    }
+    {
+      isOverrideModalOpen && <OverrideModal setOpen={setOverrideModalOpen}/>
+    }
   </>
 }
 
@@ -287,7 +335,7 @@ export const Options = (props: { optionsConfig: OptionsConfig | (() => OptionsCo
           <Switch className={"switch"}
                   height={16}
                   width={28}
-                  onColor={"#599ef2"}
+                  onColor={"#0066FF"}
                   offColor={"#cbcbcb"}
                   checkedIcon={false}
                   uncheckedIcon={false}

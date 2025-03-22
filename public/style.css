@@ -276,20 +276,45 @@ input.search {
     opacity: 0;
 }
 
-
 .app-sidebar__header {
-    display: flex;
-    width: 332px;
+    position: sticky;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    width: 349px;
+    padding-left: 18px;
     padding-top: 20px;
     padding-bottom: 16px;
+    background-color: var(--popup-background-color);
+    box-sizing: border-box;
+    margin-left: -19px;
+    transition: opacity 50ms;
+    transition-delay: 100ms;
+
+    &.app-sidebar__header--open-tabs {
+        margin-left: -20px;
+        display: flex;
+        align-items: center;
+    }
+
+    &.app-sidebar__header--recent {
+        margin-left: -16px;
+
+        &.filters-opened {
+            height: 100px;
+        }
+
+        .inner-header {
+            display: flex;
+            align-items: center;
+        }
+    }
 
     .app-sidebar__header__text {
         flex-grow: 1;
         font-size: 16px;
         vertical-align: middle;
         white-space: nowrap;
-        transition: opacity 50ms;
-        transition-delay: 100ms;
         font-weight: 600;
     }
 
@@ -317,7 +342,7 @@ input.search {
     }
 }
 
-.app-sidebar.collapsed .app-sidebar__header__text {
+.app-sidebar.collapsed .app-sidebar__header {
     opacity: 0;
 }
 
@@ -350,9 +375,58 @@ input.search {
     text-align: center;
 }
 
-.inbox-box {
+.inbox-box, .recent-list {
     margin-left: -8px;
     width: 338px; /* This is fix of jumping widget of 'inbox-box' element when scrollbar appears */
+}
+
+.recent-list::before {
+    content: '';
+    display: block;
+    position: relative;
+    width: 100%;
+    height: 1px;
+    background-color: var(--colors-gray-400);
+    margin-top: 24px;
+    margin-left: 6px;
+}
+
+.recent-filter-panel {
+    position: absolute;
+    display: flex;
+    width: 100%;
+    margin: 48px 0 0 17px;
+    top: 0;
+    left: 0;
+}
+
+.recent-list-panel__btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    margin: 2px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    background-color: var(--colors-gray-300);
+
+    &:hover {
+        opacity: 1;
+    }
+
+    &.active {
+        border-color: var(--active-control-color);
+        background-color: var(--colors-gray-300);
+        opacity: 1;
+    }
+
+    img, svg {
+        max-width: 16px;
+        max-height: 16px;
+        pointer-events: none;
+    }
 }
 
 .app-sidebar.collapsed .inbox-box {
@@ -390,7 +464,7 @@ input.search {
 .window-name {
     margin-top: 12px;
     margin-bottom: 8px;
-    margin-left: 7px;
+    margin-left: 8px;
     white-space: nowrap;
     transition: width 50ms;
     transition-delay: 100ms;
@@ -500,19 +574,15 @@ input.search {
     text-overflow: ellipsis;
 }
 
-.no-opened-tabs {
-    padding-left: 30px;
+.sidebar-message {
+    padding: 20px;
+    text-align: center;
     color: var(--colors-gray-600);
-    min-width: 200px;
-    opacity: 1;
-    transition: opacity 50ms;
-    transition-delay: 100ms;
 }
 
-.app-sidebar.collapsed {
-    .no-opened-tabs {
-        opacity: 0;
-    }
+.sidebar-message__btn {
+    cursor: pointer;
+    text-decoration: underline;
 }
 
 /* Bookmarks styles */

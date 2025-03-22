@@ -8,6 +8,7 @@ import { getFirstSortedByPosition, insertBetween, regeneratePositions } from "./
 import { ISpace } from "./helpers/types"
 import { genUniqLocalId } from "./state/actionHelpers"
 import { initStats } from "./helpers/stats"
+import { faviconsStorage } from "./helpers/faviconUtils"
 
 if (loadFromNetwork()) {
   // todo: Always start from LS. rendering should happen without loaded cloud data
@@ -92,6 +93,18 @@ function preprocessLoadedState(state: ISavingAppState): void {
       state.currentSpaceId = firstSortedSpace.id
     }
   }
+
+  ////////////////////////////////////////////////////////////
+  // Process FavIcons
+  ////////////////////////////////////////////////////////////
+
+  state.spaces.forEach(s => {
+    s.folders.forEach(f => {
+      f.items.forEach(i => {
+        faviconsStorage.register(i.favIconUrl, i)
+      })
+    })
+  })
 
   ////////////////////////////////////////////////////////////
   // Check if I beta

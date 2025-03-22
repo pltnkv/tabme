@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react"
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react"
 import { SidebarHistory } from "./SidebarHistory"
 import { SidebarOpenTabs } from "./SidebarOpenTabs"
 import { isTabmeTab } from "../helpers/isTabmeTab"
@@ -14,6 +14,7 @@ import Tab = chrome.tabs.Tab
 import { convertTabToItem } from "../state/actionHelpers"
 import { createFolderWithStat, showMessage } from "../helpers/actionsHelpersWithDOM"
 import { trackStat } from "../helpers/stats"
+import { SidebarRecent } from "./SidebarRecent"
 
 export function Sidebar(props: {
   appState: IAppState;
@@ -22,6 +23,8 @@ export function Sidebar(props: {
   const dispatch = useContext(DispatchContext)
   const keepSidebarOpened = !props.appState.sidebarCollapsed || props.appState.sidebarHovered
   const sidebarClassName = keepSidebarOpened ? "" : "collapsed"
+  const sidebarRef = useRef<HTMLDivElement | null>(null)
+  const openTabsHeaderRef = useRef<HTMLDivElement | null>(null)
 
   const onSidebarMouseEnter = () => {
     if (!props.appState.sidebarCollapsed) {
@@ -59,8 +62,12 @@ export function Sidebar(props: {
   }
 
   return (
-    <div className={"app-sidebar " + sidebarClassName} onMouseEnter={onSidebarMouseEnter} onMouseLeave={onSidebarMouseLeave}>
-      <div className="app-sidebar__header">
+    <div className={"app-sidebar " + sidebarClassName}
+         ref={sidebarRef}
+         onMouseEnter={onSidebarMouseEnter}
+         onMouseLeave={onSidebarMouseLeave}
+    >
+      <div className="app-sidebar__header app-sidebar__header--open-tabs" ref={openTabsHeaderRef}>
         <span className="app-sidebar__header__text">Open tabs</span>
         <CleanupButton tabs={props.appState.tabs}/>
         <StashButton tabs={props.appState.tabs}/>
@@ -80,7 +87,11 @@ export function Sidebar(props: {
         lastActiveTabIds={props.appState.lastActiveTabIds}
         currentWindowId={props.appState.currentWindowId}
       />
-      <SidebarHistory search={props.appState.search} historyItems={props.appState.historyItems}/>
+      {
+        props.appState.betaStickers
+          ? <SidebarRecent search={props.appState.search} historyItems={props.appState.historyItems}></SidebarRecent>
+          : <SidebarHistory search={props.appState.search} historyItems={props.appState.historyItems}/>
+      }
     </div>
   )
 }
@@ -116,7 +127,7 @@ const StashButton = React.memo((props: { tabs: Tab[] }) => {
 
       const items = tabsToShelve.map(convertTabToItem)
       const title = `Saved ${getCurrentData()}`
-      const folderId = createFolderWithStat(dispatch, {title, items}, 'by-stash')
+      const folderId = createFolderWithStat(dispatch, { title, items }, "by-stash")
 
       dispatch({ type: Action.ShowNotification, message: "All Tabs has been saved" })
       trackStat("tabsStashed", { stashedTabsClosed: shouldCloseTabs })
@@ -142,7 +153,7 @@ const StashButton = React.memo((props: { tabs: Tab[] }) => {
                       offset={{ top: 12, left: 4 }}
                       skipTabIndexes={true}>
           <div style={{ width: "100%" }}>
-            <p>Place all open Tabs to a new Folder</p>
+            <p>Save all open Tabs to a new Folder</p>
             <p>
               <label>
                 <input
@@ -164,7 +175,9 @@ const StashButton = React.memo((props: { tabs: Tab[] }) => {
   </div>
 })
 
-const CleanupButton = React.memo((props: { tabs: Tab[] }) => {
+const CleanupButton = React.memo((props: {
+  tabs: Tab[]
+}) => {
   const [duplicateTabsCount, setDuplicateTabsCount] = useState(0)
   const dispatch = useContext(DispatchContext)
 

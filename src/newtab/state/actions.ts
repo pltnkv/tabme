@@ -325,7 +325,6 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       }
 
       const lastFolder = currentSpace.folders.at(-1)
-      console.log("!!!!")
       const newFolder: IFolder = {
         id: action.newFolderId ?? genUniqLocalId(),
         title: action.title ?? "New folder",
@@ -715,7 +714,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
 
       let topWidget = currentSpace.widgets?.at(-1)
 
-      console.log('Action.CreateWidget', action)
+      console.log("Action.CreateWidget", action)
       const newWidget: IWidget = {
         id: action.widgetId ?? genUniqLocalId(),
         widgetType: "Sticker",
@@ -798,7 +797,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         return { ...space, widgets: remainingWidgets }
       })
 
-      console.log('deletedWidgetsBySpace', deletedWidgetsBySpace)
+      console.log("deletedWidgetsBySpace", deletedWidgetsBySpace)
 
       // Register an undo action that will restore the deleted widgets
       const undoActions = getUndoAction(action, state, () => {

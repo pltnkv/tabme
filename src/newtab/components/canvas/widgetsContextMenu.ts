@@ -1,6 +1,4 @@
-import { RefObject, useEffect } from "react"
-import { OptionsConfig } from "../SettingsOptions"
-import { canvasAPI } from "./canvasAPI"
+import { RefObject } from "react"
 
 let menuElement: HTMLDivElement | null = null
 
