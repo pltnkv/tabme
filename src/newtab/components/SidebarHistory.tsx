@@ -1,6 +1,7 @@
 import React from "react"
 import { extractHostname, hlSearch, isContainsSearch, removeUselessProductName } from "../helpers/utils"
 import HistoryItem = chrome.history.HistoryItem
+import { trackStat } from "../helpers/stats"
 
 // function uniqHistory(items: HistoryItem[]): HistoryItem[] {
 // return items //seems like it useless
@@ -20,6 +21,7 @@ function applySearchToHistory<T extends { title?: string; url?: string }>(
 function HistoryList(props: { items: HistoryItem[]; search: string }) {
   const onClick = (url: string | undefined) => {
     chrome.tabs.create({ url })
+    trackStat("tabOpened", { inNewTab: true, source: "old-history" })
   }
 
   const historyList = applySearchToHistory(props.items, props.search)

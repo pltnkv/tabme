@@ -1,5 +1,8 @@
 import HistoryItem = chrome.history.HistoryItem
 import { faviconsStorage } from "./faviconUtils"
+import { ActionDispatcher } from "../state/actions"
+import { Action } from "../state/state"
+import { filterIrrelevantHistory } from "./utils"
 
 export const miroHashRegExp = /\/board\/([^/?]+)/
 
@@ -20,7 +23,7 @@ export const loomHashRegExp = /\/share\/([^/?]+)/
 
 export function hashGetterFactory(regexes: RegExp[]): (url: string) => string {
   return (url: string) => {
-    let res = ''
+    let res = ""
 
     regexes.some(regex => {
       const match = url.match(regex)
@@ -102,4 +105,30 @@ export function getBaseFilteredHistoryItems(historyItems: HistoryItem[]): Filter
   })
 
   return res
+}
+
+let moreHistoryAlreadyLoaded = false
+// TODO !!! update when user focus the tab
+export function tryLoadMoreHistory(dispatch: ActionDispatcher) {
+  if (moreHistoryAlreadyLoaded) {
+    return
+  }
+  moreHistoryAlreadyLoaded = true
+
+  getHistory(false).then(historyItems => {
+    dispatch({
+      type: Action.SetTabsOrHistory,
+      history: historyItems
+    })
+  })
+}
+
+export function getHistory(firstTime = true) {
+  return new Promise<HistoryItem[]>((res) => {
+    const offset = 1000 * 60 * 60 * 24 * 60 //1000ms * 60sec *  60min * 24h * 60d
+    const startTime = Date.now() - offset
+    chrome.history.search({ text: "", maxResults: firstTime ? 100 : 10000, startTime }, function(data) {
+      res(filterIrrelevantHistory(data))
+    })
+  })
 }

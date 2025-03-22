@@ -103,7 +103,7 @@ type EventOptionsMap = {
   importedTabmeBookmarks: { version: string };
 
   // TABS
-  tabOpened: { inNewTab: boolean }; // it means bookmark clicked
+  tabOpened: { inNewTab: boolean, source: string }; // it means bookmark clicked
   tabFocused: { source: string }
   tabClosed: { source: string }
   tabsDeduplicated: { count: number };
@@ -126,6 +126,7 @@ type EventOptionsMap = {
   // UI SETTINGS
   "toggleSidebar": { sidebarCollapsed: boolean };
   "settingsClicked": { settingName: string },
+  "searchUsed": {}
 
   // BETA
   "betaModalShown": {},

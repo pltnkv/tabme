@@ -14,6 +14,7 @@ import HistoryItem = chrome.history.HistoryItem
 import Tab = chrome.tabs.Tab
 import { showMessageWithUndo } from "../helpers/actionsHelpersWithDOM"
 import { createNewSection, findSpaceByFolderId } from "../state/actionHelpers"
+import { trackStat } from "../helpers/stats"
 
 export const Folder = React.memo(function Folder(p: {
   spaces: ISpace[];
@@ -115,6 +116,7 @@ export const Folder = React.memo(function Folder(p: {
         chrome.tabs.create({ url: item.url, active: false })
       }
     })
+    trackStat("tabOpened", { inNewTab: true, source: "folder-menu-open-all" })
 
     setShowMenu(false)
   }

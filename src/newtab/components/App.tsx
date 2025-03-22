@@ -16,6 +16,7 @@ import HistoryItem = chrome.history.HistoryItem
 import { CL } from "../helpers/classNameHelper"
 import { Welcome } from "./Welcome"
 import { CommonStatProps, setCommonStatProps, trackStat } from "../helpers/stats"
+import { getHistory, tryLoadMoreHistory } from "../helpers/recentHistoryUtils"
 
 let notificationTimeout: number | undefined
 let globalAppState: IAppState
@@ -76,7 +77,6 @@ export function App() {
   }, [appState.loaded])
 
   useEffect(function() {
-
     Promise.all([
       getTabs(),
       getHistory(), // TODO: now history updated only once, when app loaded. Fix it next time
@@ -95,6 +95,10 @@ export function App() {
 
       requestAnimationFrame(() => { // raf needed to invalidate number of tabs and windows in stat
         trackStat("appLoaded", {})
+
+        setTimeout(() => { // preload more history
+          tryLoadMoreHistory(dispatch)
+        }, 2000)
       })
 
       // first open time
@@ -119,7 +123,6 @@ export function App() {
     chrome.tabs.onUpdated.addListener(onTabUpdated)
 
     getBC().onmessage = function(ev: MessageEvent) {
-      console.log(ev)
       if (ev.data?.type === "folders-updated") {
         getStateFromLS((res) => {
           if (globalAppState.sidebarCollapsed !== res.sidebarCollapsed) {
@@ -190,39 +193,28 @@ export function App() {
 
   return (
     <DispatchContext.Provider value={dispatch}>
-      <div className={CL("app", {
-        "collapsible-sidebar": appState.sidebarCollapsed
-      })}>
-        <Notification notification={appState.notification}/>
-        {
-          appState.page === "welcome" && <Welcome appState={appState}/>
-        }
-        {
-          appState.page === "import" && <ImportBookmarksFromSettings appState={appState}/>
-        }
-        {
-          appState.page === "default" && <>
-            <Sidebar appState={appState}/>
-            <Bookmarks appState={appState}/>
-            <KeyboardManager search={appState.search} selectedWidgetIds={appState.selectedWidgetIds}/>
-          </>
-        }
-      </div>
+      {
+        appState.loaded && <div className={CL("app", {
+          "collapsible-sidebar": appState.sidebarCollapsed
+        })}>
+          <Notification notification={appState.notification}/>
+          {
+            appState.page === "welcome" && <Welcome appState={appState}/>
+          }
+          {
+            appState.page === "import" && <ImportBookmarksFromSettings appState={appState}/>
+          }
+          {
+            appState.page === "default" && <>
+              <Sidebar appState={appState}/>
+              <Bookmarks appState={appState}/>
+              <KeyboardManager search={appState.search} selectedWidgetIds={appState.selectedWidgetIds}/>
+            </>
+          }
+        </div>
+      }
     </DispatchContext.Provider>
   )
-}
-
-function getHistory() {
-  return new Promise<HistoryItem[]>((res) => {
-    const offset = 1000 * 60 * 60 * 24 * 60 //1000ms * 60sec *  60min * 24h * 60d
-    const startTime = Date.now() - offset
-    chrome.history.search({ text: "", maxResults: 10000, startTime }, function(data) {
-      // logging top 3 visited sides
-      // console.log(data.slice(0, 3))
-      const historyItems = filterIrrelevantHistory(data)
-      res(historyItems)
-    })
-  })
 }
 
 function getTabs() {

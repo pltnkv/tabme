@@ -65,7 +65,7 @@ export function clickFolderItem(targetId: number, appState: IAppState, dispatch:
     if (openInNewTab) {
       // open in new tab
       chrome.tabs.create({ url: targetItem.url, active: false })
-      trackStat("tabOpened", { inNewTab: true })
+      trackStat("tabOpened", { inNewTab: true, source: "bookmarks" })
       //TODO fix bug of not updating bold items when move to new tab in new window
     } else {
       // open in the same tab or switch to already opened
@@ -81,7 +81,7 @@ export function clickFolderItem(targetId: number, appState: IAppState, dispatch:
           } else {
             chrome.tabs.update(t?.id!, { url: targetItem.url })
           }
-          trackStat("tabOpened", { inNewTab: false })
+          trackStat("tabOpened", { inNewTab: false, source: "bookmarks" })
         })
       }
     }

@@ -39,7 +39,7 @@ export const FolderItemMenu = React.memo((p: {
         chrome.tabs.create({ url: item.url })
       }
     })
-
+    trackStat("tabOpened", { inNewTab: true, source: "bookmark-menu" })
     p.onClose()
   }
 

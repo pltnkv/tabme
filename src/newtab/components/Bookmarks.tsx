@@ -21,6 +21,9 @@ import { DropdownMenu } from "./dropdown/DropdownMenu"
 import { Options } from "./SettingsOptions"
 import { getCanvasMenuOption } from "./canvas/getCanvasMenuOptions"
 
+let __prevCurrentSpaceId: number | undefined = undefined
+let __prevSearch: string | undefined = undefined
+
 export function Bookmarks(p: {
   appState: IAppState;
 }) {
@@ -36,13 +39,20 @@ export function Bookmarks(p: {
   useSwipeAnimation(bookmarksRef, p.appState.currentSpaceId, p.appState.spaces.length)
 
   useEffect(() => {
-    dispatch({
-      type: Action.SelectWidgets,
-      widgetIds: []
-    })
-    hideWidgetsContextMenu()
-    hideWidgetsSelectionFrame()
-  }, [p.appState.currentSpaceId, p.appState.search])
+    // This condition help to not dispatch Action.SelectWidgets when it is not nessesary, for example when load app
+    if (__prevCurrentSpaceId !== p.appState.currentSpaceId || __prevSearch !== p.appState.search) {
+      __prevCurrentSpaceId = p.appState.currentSpaceId
+      __prevSearch = p.appState.search
+      if (p.appState.selectedWidgetIds.length > 0) {
+        dispatch({
+          type: Action.SelectWidgets,
+          widgetIds: []
+        })
+      }
+      hideWidgetsContextMenu()
+      hideWidgetsSelectionFrame()
+    }
+  }, [p.appState.currentSpaceId, p.appState.search, p.appState.selectedWidgetIds])
 
   useEffect(() => {
     const handleScroll = (e: any) => {

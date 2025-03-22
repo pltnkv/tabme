@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import { DropdownMenu } from "./dropdown/DropdownMenu"
 import { handleSearchKeyDown } from "../helpers/handleBookmarksKeyDown"
 import { Action, IAppState } from "../state/state"
@@ -10,9 +10,6 @@ import IconSettings from "../icons/settings.svg"
 import IconFind from "../icons/find.svg"
 import IconBeta from "../icons/beta.svg"
 import { SpacesList } from "./SpacesList"
-import { OverrideModal } from "./modals/OverrideModal"
-import { ShortcutsModal } from "./modals/ShortcutsModal"
-import { loadFromNetwork } from "../../api/api"
 
 export function TopBar(p: {
   appState: IAppState;

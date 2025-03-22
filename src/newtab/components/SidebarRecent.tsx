@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react"
+import React, { useCallback, useContext, useEffect, useState } from "react"
 import { extractHostname, filterHistoryItemsBySearch, hlSearch, removeUselessProductName } from "../helpers/utils"
 import { CL } from "../helpers/classNameHelper"
 import {
@@ -13,13 +13,15 @@ import {
   googleDocHashRegExp, googleFormsHashRegExp, googlePresentationHashRegExp, googleSpreadsheetsHashRegExp,
   hashGetterFactory, IFilter, jiraHashRegExp,
   loomHashRegExp,
-  miroHashRegExp,
+  miroHashRegExp, tryLoadMoreHistory,
   youtubeHashRegExp
 } from "../helpers/recentHistoryUtils"
 import IconFilter from "../icons/filter.svg"
 import IconNonFilter from "../icons/no-filter-thin.svg"
 import HistoryItem = chrome.history.HistoryItem
 import { getTempFavIconUrl } from "../state/actionHelpers"
+import { DispatchContext } from "../state/actions"
+import { trackStat } from "../helpers/stats"
 
 function formatDate(d: Date): string {
   const today = new Date()
@@ -51,6 +53,7 @@ const RecentItem = (p: { item: FilteredHistoryItem, search: string }) => {
 
   const onClick = (url: string | undefined) => {
     chrome.tabs.create({ url })
+    trackStat("tabOpened", { inNewTab: true, source: "sidebar-recent" })
   }
 
   return <div
@@ -74,7 +77,7 @@ const RecentItem = (p: { item: FilteredHistoryItem, search: string }) => {
 const PAGE_SIZE = 100
 
 const RecentList = (p: { items: FilteredHistoryItem[]; search: string }) => {
-
+  const dispatch = useContext(DispatchContext)
   const [displayedItems, setDisplayedItems] = useState<FilteredHistoryItem[]>([])
   const [page, setPage] = useState<number>(1)
 
@@ -92,14 +95,14 @@ const RecentList = (p: { items: FilteredHistoryItem[]; search: string }) => {
       setDisplayedItems(nextItems)
       setPage(nextPage)
     }
+    tryLoadMoreHistory(dispatch)
   }, [page, p.items, displayedItems])
 
   const handleScroll = useCallback(() => {
     const sidebar = document.querySelector(".app-sidebar")!
     if (sidebar) {
       const { scrollTop, scrollHeight, clientHeight } = sidebar
-      // Trigger loadMore when scrolled within 100px of the bottom.
-      if (scrollTop + clientHeight >= scrollHeight - 100) {
+      if (scrollTop + clientHeight >= scrollHeight - 200) {
         loadMore()
       }
     }
@@ -134,7 +137,8 @@ export const SidebarRecent = React.memo((p: {
   historyItems: HistoryItem[];
   search: string;
 }) => {
-  const [filterByDomainEnabled, setFilterByDomainEnabled] = React.useState(true)
+  const dispatch = useContext(DispatchContext)
+  const [filterByDomainEnabled, setFilterByDomainEnabled] = React.useState(false)
   const [enabledFilers, setEnabledFilters] = useState<IFilter[]>(historyFilters)
   const enabledFiltersCount = enabledFilers.reduce((prevVal, filter) => prevVal + (filter.enabled ? 1 : 0), 0)
 
@@ -148,6 +152,7 @@ export const SidebarRecent = React.memo((p: {
 
   const onFiltersPanelClick = () => {
     setFilterByDomainEnabled(!filterByDomainEnabled)
+    tryLoadMoreHistory(dispatch)
   }
 
   const onFilterClick = (filter: IFilter) => {

@@ -3,6 +3,7 @@ import { IAppState } from "../state/state"
 import { ActionDispatcher } from "../state/actions"
 import { clickFolderItem } from "./actionsHelpersWithDOM"
 import { findFolderByItemId } from "../state/actionHelpers"
+import { trackStat } from "./stats"
 
 const FOLDER_ITEM_SELECTOR = "a.folder-item__inner"
 
@@ -158,6 +159,8 @@ function convertItemsIntoHorizontalList(currentItem: HTMLElement, appState: IApp
   return resItems
 }
 
+let trackSearchUsedTimeout: ReturnType<typeof setTimeout> | null = null
+
 export function handleSearchKeyDown(event: React.KeyboardEvent) {
   if (event.code === "ArrowDown") {
     const firstFolderItem = document.querySelector(FOLDER_ITEM_SELECTOR) as HTMLElement
@@ -165,5 +168,12 @@ export function handleSearchKeyDown(event: React.KeyboardEvent) {
       firstFolderItem.focus()
       event.preventDefault()
     }
+  } else {
+    if (trackSearchUsedTimeout) {
+      clearTimeout(trackSearchUsedTimeout)
+    }
+    trackSearchUsedTimeout = setTimeout(() => {
+      trackStat("searchUsed", {})
+    }, 600)
   }
 }

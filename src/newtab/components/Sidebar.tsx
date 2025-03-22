@@ -19,7 +19,6 @@ import { SidebarRecent } from "./SidebarRecent"
 export function Sidebar(props: {
   appState: IAppState;
 }) {
-
   const dispatch = useContext(DispatchContext)
   const keepSidebarOpened = !props.appState.sidebarCollapsed || props.appState.sidebarHovered
   const sidebarClassName = keepSidebarOpened ? "" : "collapsed"
