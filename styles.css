@@ -9,12 +9,6 @@ body {
     background-color: #f4f4f4;
 }
 
-.hidden {
-    visibility: hidden;
-}
-
-
-
 .not-home {
     padding-top: 40px;
 
@@ -64,7 +58,7 @@ header {
 
 
     h1 {
-        font-size: 3.8em;
+        font-size: 2.4em;
         font-weight: normal;
 
         margin-top: 0;
@@ -72,7 +66,7 @@ header {
     }
 
     .goal-text {
-        font-size: 2em;
+        font-size: 1.8em;
         font-weight: 300;
         margin-top: 0;
     }
@@ -88,6 +82,7 @@ header {
     align-items: center;
     width: 100%;
 }
+
 .content__inner {
     padding: 0 60px;
     min-height: 100%;
@@ -175,6 +170,7 @@ p {
 
 .guide-block video {
     border: 1px solid #bbb;
+    border-radius: 8px;
 }
 
 .guide-block .text {
@@ -186,7 +182,7 @@ p {
 
 /** END guide.html */
 
-.faq h3, .toby h3  {
+.faq h3, .toby h3 {
     margin-top: 44px;
     font-size: 20px;
     font-weight: normal;
