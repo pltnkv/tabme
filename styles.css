@@ -65,6 +65,12 @@ header {
         margin-bottom: 0;
     }
 
+    .main-message {
+        color: #fff;
+        font-size: 38px;
+        margin: 0 0 6px 0;
+    }
+
     .goal-text {
         font-size: 1.8em;
         font-weight: 300;
