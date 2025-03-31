@@ -1,5 +1,5 @@
 import { unselectAllItems } from "../helpers/selectionUtils"
-import { isViewportWasScrolled, setScrollByDummyClientY, setViewportWasScrolled, subscribeMouseEvents } from "./dragAndDropUtils"
+import { setScrollByDummyClientY, subscribeMouseEvents } from "./dragAndDropUtils"
 import {
   calculateFoldersDropAreas,
   createPlaceholder,
@@ -28,14 +28,12 @@ export function processItemDragAndDrop(
   let indexToDrop: number
   let targetFolderId: number
 
-  const onMouseMove = (e: MouseEvent, mouseMoved: boolean) => {
-    if (isViewportWasScrolled()) {
-      // recalculate drop areas if viewport was scrolled
-      dropAreas = calculateFoldersDropAreas(folderEls, true)
-    }
-    setViewportWasScrolled(false)
-    setScrollByDummyClientY(undefined)
+  const onViewportScrolled = () => {
+    // recalculate drop areas if viewport was scrolled
+    dropAreas = calculateFoldersDropAreas(folderEls, true)
+  }
 
+  const onMouseMove = (e: MouseEvent, mouseMoved: boolean) => {
     if (dummy) {
       // move dummy
       dummy.style.transform = `translateX(${e.clientX + "px"}) translateY(${e.clientY + "px"})`
@@ -87,8 +85,6 @@ export function processItemDragAndDrop(
     }
   }
   const onMouseUp = () => {
-    setScrollByDummyClientY(undefined)
-
     if (dummy) {
       document.body.classList.remove("dragging")
       dummy.remove()
@@ -110,6 +106,6 @@ export function processItemDragAndDrop(
     unselectAllItems()
   }
 
-  const unsubscribeEvents = subscribeMouseEvents(mouseDownEvent, onMouseMove, onMouseUp)
+  const unsubscribeEvents = subscribeMouseEvents(mouseDownEvent, onMouseMove, onMouseUp, onViewportScrolled)
   return unsubscribeEvents
 }

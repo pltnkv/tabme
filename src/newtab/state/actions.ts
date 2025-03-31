@@ -646,11 +646,11 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       const movingItems = action.itemIds.map(itemId => findItemById(state, itemId)!)
 
       // Store the original folder IDs and positions for undo purposes
-      const originalPositions = movingItems.map(item => ({
-        itemId: item.id,
-        originalFolderId: findFolderByItemId(state, item.id)!.id,
-        originalPosition: item.position
-      }))
+      // const originalPositions = movingItems.map(item => ({
+      //   itemId: item.id,
+      //   originalFolderId: findFolderByItemId(state, item.id)!.id,
+      //   originalPosition: item.position
+      // }))
 
       const spaceWithFolderWithRemovedItems: ISpace[] = movingItems.reduce((spaces, movingItem) => {
         const folder = findFolderByItemId({ spaces }, movingItem.id)!
@@ -714,7 +714,6 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
 
       let topWidget = currentSpace.widgets?.at(-1)
 
-      console.log("Action.CreateWidget", action)
       const newWidget: IWidget = {
         id: action.widgetId ?? genUniqLocalId(),
         widgetType: "Sticker",
@@ -773,7 +772,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         widgetId: action.widgetId,
         position: originalWidget.position,
         pos: originalWidget.pos, // todo optimize
-        content: action.content
+        content: originalWidget.content
       }))
 
       return {

@@ -1,8 +1,9 @@
 import { findParentWithClass } from "../helpers/utils"
 import { hideWidgetsContextMenu, updateWidgetsContextMenu } from "../components/canvas/widgetsContextMenu"
-import { hideWidgetsSelectionFrame, updateWidgetsSelectionFrameNonPerformant } from "../components/canvas/widgetsSelectionFrame"
-import { subscribeMouseEvents } from "./dragAndDropUtils"
+import { updateWidgetsSelectionFrame_RAF_NotPerformant } from "../components/canvas/widgetsSelectionFrame"
+import { setScrollByDummyClientY, subscribeMouseEvents } from "./dragAndDropUtils"
 import { getIdFromElement, getIdsFromElements, getPosFromElement, PConfigWidgets } from "./dragAndDrop"
+import { round10 } from "../helpers/mathUtils"
 
 export function processWidgetsDragAndDrop(mouseDownEvent: React.MouseEvent, widgetsConfig: PConfigWidgets) {
   let selectedWidgets = Array.from(document.querySelectorAll<HTMLElement>(".widget.selected"))
@@ -19,6 +20,8 @@ export function processWidgetsDragAndDrop(mouseDownEvent: React.MouseEvent, widg
     return
   }
   const targetWidgetId = getIdFromElement(targetWidget)
+  const bookmarksElement = document.querySelector(".bookmarks")!
+  const initScrollTop = bookmarksElement.scrollTop
 
   const onMouseMove = (e: MouseEvent, mouseMoved: boolean, mouseMovedFirstTime: boolean) => {
     if (!mouseMoved) {
@@ -34,16 +37,17 @@ export function processWidgetsDragAndDrop(mouseDownEvent: React.MouseEvent, widg
       hideWidgetsContextMenu()
     }
 
-    let deltaX = mouseDownEvent.clientX - e.clientX
-    let deltaY = mouseDownEvent.clientY - e.clientY
+    let deltaX = round10(mouseDownEvent.clientX - e.clientX)
+    let deltaY = round10(mouseDownEvent.clientY - e.clientY + initScrollTop - bookmarksElement.scrollTop)
     initWidgetPositions.forEach(i => {
       if (selectedWidgetIds.includes(i.id) || targetWidgetId === i.id) {
-        i.element.style.left = `${i.pos.x - deltaX}px`
-        i.element.style.top = `${i.pos.y - deltaY}px`
+        i.element.style.left = `${round10(i.pos.x - deltaX)}px`
+        i.element.style.top = `${round10(i.pos.y - deltaY)}px`
         movedWidgetIds.add(i.id)
       }
     })
-    updateWidgetsSelectionFrameNonPerformant()
+    updateWidgetsSelectionFrame_RAF_NotPerformant()
+    setScrollByDummyClientY(e.clientY)
   }
 
   const onMouseUp = (e: MouseEvent, mouseMoved: boolean) => {
@@ -55,18 +59,28 @@ export function processWidgetsDragAndDrop(mouseDownEvent: React.MouseEvent, widg
       widgetsConfig.onWidgetsMoved(res)
       widgetsConfig.onSetEditingWidget(undefined)
     } else {
-      if (selectedWidgetIds.includes(targetWidgetId)) {
-        widgetsConfig.onWidgetsSelected([targetWidgetId])
-        widgetsConfig.onSetEditingWidget(targetWidgetId)
+      if (e.shiftKey) {
+        if (selectedWidgetIds.includes(targetWidgetId)) {
+          // Deselect if already selected
+          selectedWidgetIds = selectedWidgetIds.filter(id => id !== targetWidgetId)
+        } else {
+          // Add to selection
+          selectedWidgetIds.push(targetWidgetId)
+        }
+        widgetsConfig.onWidgetsSelected(selectedWidgetIds)
+        widgetsConfig.onSetEditingWidget(undefined)
       } else {
         widgetsConfig.onWidgetsSelected([targetWidgetId])
-        widgetsConfig.onSetEditingWidget(undefined)
+        if (selectedWidgetIds.includes(targetWidgetId)) {
+          widgetsConfig.onSetEditingWidget(targetWidgetId)
+        } else {
+          widgetsConfig.onSetEditingWidget(undefined)
+        }
       }
-      hideWidgetsSelectionFrame()
+      updateWidgetsSelectionFrame_RAF_NotPerformant()
     }
     updateWidgetsContextMenu()
   }
 
   return subscribeMouseEvents(mouseDownEvent, onMouseMove, onMouseUp)
 }
-

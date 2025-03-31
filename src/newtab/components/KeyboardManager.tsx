@@ -5,7 +5,7 @@ import { Action } from "../state/state"
 import { showMessageWithUndo } from "../helpers/actionsHelpersWithDOM"
 import { isSomeModalOpened } from "./modals/Modal"
 import { canvasAPI } from "./canvas/canvasAPI"
-import { updateWidgetsSelectionFrameNonPerformant } from "./canvas/widgetsSelectionFrame"
+import { updateWidgetsSelectionFrame_RAF_NotPerformant } from "./canvas/widgetsSelectionFrame"
 import { updateWidgetsContextMenu } from "./canvas/widgetsContextMenu"
 
 let mouseX = 0
@@ -96,7 +96,7 @@ export const KeyboardManager = React.memo((p: {
           type: Action.Undo,
           dispatch
         })
-        updateWidgetsSelectionFrameNonPerformant()
+        updateWidgetsSelectionFrame_RAF_NotPerformant()
         updateWidgetsContextMenu()
         return
       }

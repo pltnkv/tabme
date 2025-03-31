@@ -42,11 +42,12 @@ export type IWidgetContent = {
   text: string
   color: string
   fontSize: number
+  strikethrough?: boolean
 }
 
 export interface IWidget extends IObject {
   widgetType: WidgetType
-  pos: IWidgetPos
+  pos: IWidgetPos // this is actual {x,y} position for widgets
   content: IWidgetContent
 }
 

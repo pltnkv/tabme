@@ -61,3 +61,7 @@ export function uniteRects(rects: IOffset[]): IOffset {
 export function inRange(index: number, min: number, max: number) {
   return index >= min && index <= max
 }
+
+export function round10(val:number):number {
+  return Math.round(val / 10) * 10;
+}

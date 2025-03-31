@@ -8,7 +8,6 @@ import { canShowArchived, DispatchContext, mergeStepsInHistory } from "../state/
 import { IFolder, IWidget } from "../helpers/types"
 import { findSpaceById, genUniqLocalId } from "../state/actionHelpers"
 import { clickFolderItem, createFolderWithStat, getCanDragChecker } from "../helpers/actionsHelpersWithDOM"
-import { useSwipeAnimation } from "../helpers/bookmarksSwipes"
 import { Canvas } from "./Canvas"
 import { IPoint } from "../helpers/MathTypes"
 import { TopBar } from "./TopBar"
@@ -36,7 +35,7 @@ export function Bookmarks(p: {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const bookmarksRef = useRef<HTMLDivElement>(null)
 
-  useSwipeAnimation(bookmarksRef, p.appState.currentSpaceId, p.appState.spaces.length)
+  // useSwipeAnimation(bookmarksRef, p.appState.currentSpaceId, p.appState.spaces.length)
 
   useEffect(() => {
     // This condition help to not dispatch Action.SelectWidgets when it is not nessesary, for example when load app
@@ -55,7 +54,7 @@ export function Bookmarks(p: {
   }, [p.appState.currentSpaceId, p.appState.search, p.appState.selectedWidgetIds])
 
   useEffect(() => {
-    const handleScroll = (e: any) => {
+    const handleScroll = () => {
       if (bookmarksRef.current) {
         setIsScrolled(bookmarksRef.current.scrollTop > 0)
       }
@@ -139,6 +138,7 @@ export function Bookmarks(p: {
             pos: { point: point }
           })
           canvasAPI.setEditingWidget(dispatch, widgetId)
+          trackStat("widgetCreated", { type: "sticker", source: "double-click" })
         }
       }
 
@@ -281,12 +281,16 @@ export function Bookmarks(p: {
         }
       </div>
       {
-        canvasMenuPos && <DropdownMenu onClose={() => {setCanvasMenuPos(undefined)}} absPosition={canvasMenuPos}>
+        canvasMenuPos
+        && p.appState.search === ""
+        && <DropdownMenu onClose={() => {setCanvasMenuPos(undefined)}} absPosition={canvasMenuPos}>
           <Options optionsConfig={getCanvasMenuOptionWrapper}/>
         </DropdownMenu>
       }
       {
-        p.appState.betaStickers && <Toolbar folders={folders} currentSpaceId={p.appState.currentSpaceId}/>
+        p.appState.betaStickers
+        && p.appState.search === ""
+        && <Toolbar folders={folders} currentSpaceId={p.appState.currentSpaceId}/>
       }
     </div>
   )

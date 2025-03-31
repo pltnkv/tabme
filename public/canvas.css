@@ -102,9 +102,8 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-around;
-    width: 168px;
     height: 48px;
-    padding: 0 14px;
+    padding: 0 4px;
     border-radius: 8px;
     background-color: var(--popup-background-color);
     filter: drop-shadow(2px 0px 8px rgba(0, 0, 0, 0.1));
@@ -119,6 +118,7 @@
     height: 100%;
     display: flex;
     align-items: center;
+    justify-content: center;
     border: none;
     background: no-repeat;
     cursor: pointer;
@@ -155,6 +155,8 @@
     justify-content: center;
     cursor: pointer;
     user-select: none;
+    background-color: transparent;
+    border: none;
 
     &:first-child {
         border-top-left-radius: 8px;
@@ -195,14 +197,23 @@
 
         span {
             color: #d8d8d8;
+            font-size: 18px;
         }
     }
 
-    &.sticker-link {
+    &.sticker-strike {
         width: 48px;
 
         svg {
             color: #d8d8d8;
+        }
+    }
+
+    &.active {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+
+        svg {
+            color: #fff;
         }
     }
 }

@@ -60,7 +60,13 @@ export function SpacesList(p: {
   }
 
   const deleteSpace = (space: ISpace) => {
-    const res = confirm(`Are you sure you want to delete '${space.title}' Space with all its Bookmarks?`)
+    const bookmarksCount = space.folders.reduce((count, f) => count + f.items.length, 0)
+    const stickersCount = space.widgets?.length ?? 0
+    const totalCount = bookmarksCount + stickersCount
+    let res = true
+    if (totalCount > 0) {
+      res = confirm(`Delete the space '${space.title}'?`)
+    }
     if (res) {
       dispatch({
         type: Action.DeleteSpace,

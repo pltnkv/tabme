@@ -3,7 +3,9 @@ const DAD_THRESHOLD = 4
 export function subscribeMouseEvents(
   mouseDownEvent: React.MouseEvent,
   onMouseMove: (e: MouseEvent, mouseMoved: boolean, mouseMovedFirstTime: boolean) => void,
-  onMouseUp: (e: MouseEvent, mouseMoved: boolean) => void): () => void {
+  onMouseUp: (e: MouseEvent, mouseMoved: boolean) => void,
+  onViewportScrolled?: () => void // invoked before onMouseMove
+): () => void {
   let mouseMoved = false
   let mouseMovedFirstTimeReported = false
 
@@ -12,13 +14,19 @@ export function subscribeMouseEvents(
       mouseMoved = Math.abs(mouseDownEvent.clientX - e.clientX) > DAD_THRESHOLD || Math.abs(mouseDownEvent.clientY - e.clientY) > DAD_THRESHOLD
     }
     const mouseMovedFirstTime = mouseMoved && !mouseMovedFirstTimeReported
-    if(mouseMovedFirstTime) {
+    if (mouseMovedFirstTime) {
       mouseMovedFirstTimeReported = true
     }
+    if (onViewportScrolled && viewportWasScrolled) {
+      onViewportScrolled()
+    }
+    viewportWasScrolled = false
+    setScrollByDummyClientY(undefined)
     onMouseMove(e, mouseMoved, mouseMovedFirstTime)
   }
 
   function onMouseUpWrapper(e: MouseEvent) {
+    setScrollByDummyClientY(undefined)
     unsubscribeEvents()
     onMouseUp(e, mouseMoved)
   }
@@ -34,7 +42,6 @@ export function subscribeMouseEvents(
   return unsubscribeEvents
 }
 
-
 ////////////////////////////////////////////////////////
 // VIEWPORT SCROLLING
 ////////////////////////////////////////////////////////
@@ -42,7 +49,7 @@ export function subscribeMouseEvents(
 let viewportWasScrolled = false //performance optimization
 let scrollByDummyClientY: number | undefined = undefined
 
-const MAX_SCROLL_SPEED = 22
+const MAX_SCROLL_SPEED = 18
 const SCROLL_THRESHOLD = 60
 
 function getBookmarksElement(): HTMLElement {
@@ -66,18 +73,6 @@ function tryToScrollViewport() {
   }
 
   requestAnimationFrame(tryToScrollViewport)
-}
-
-export function isViewportWasScrolled(): boolean {
-  return viewportWasScrolled
-}
-
-export function setViewportWasScrolled(val: boolean): void {
-  viewportWasScrolled = val
-}
-
-export function getScrollByDummyClientY(): number | undefined {
-  return scrollByDummyClientY
 }
 
 export function setScrollByDummyClientY(val: number | undefined) {

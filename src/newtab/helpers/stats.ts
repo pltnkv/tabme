@@ -30,6 +30,7 @@ export function initStats(): Promise<void> {
       })
 
       getUserStatId().then(id => {
+        console.log("mixpanel.identify", id)
         mixpanel.identify(id)
         resolve()
       })
@@ -119,9 +120,9 @@ type EventOptionsMap = {
 
   // FOLDER
   folderCreated: { source: string }
-  // todo add more later
 
-  // BOOKMARKS EDITING
+  // STICKERS
+  widgetCreated: { source: string, type: string }
 
   // UI SETTINGS
   "toggleSidebar": { sidebarCollapsed: boolean };

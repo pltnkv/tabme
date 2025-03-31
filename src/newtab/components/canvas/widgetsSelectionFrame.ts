@@ -8,7 +8,7 @@ export type WidgetInfo = {
   element: HTMLElement,
 }
 
-export function updateWidgetsSelectionFrameNonPerformant() {
+export function updateWidgetsSelectionFrame_RAF_NotPerformant() {
   requestAnimationFrame(() => {
     const widgetsElements = Array.from(document.querySelectorAll(".widget.selected")) as HTMLElement[]
     const selectedWidgetsInfos: WidgetInfo[] = widgetsElements.map(el => ({

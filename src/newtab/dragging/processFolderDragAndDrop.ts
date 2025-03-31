@@ -6,7 +6,7 @@ import {
   getFolderId, getOverlappedDropArea, getOverlappedSpaceDropArea,
   PConfigFolder
 } from "./dragAndDrop"
-import { isViewportWasScrolled, setScrollByDummyClientY, setViewportWasScrolled, subscribeMouseEvents } from "./dragAndDropUtils"
+import { setScrollByDummyClientY, subscribeMouseEvents } from "./dragAndDropUtils"
 
 export function processFolderDragAndDrop(mouseDownEvent: React.MouseEvent,
                                          config: PConfigFolder,
@@ -23,16 +23,12 @@ export function processFolderDragAndDrop(mouseDownEvent: React.MouseEvent,
   let targetInsertBeforeFolderId: number | undefined
   let lastSelectedSpaceId: number | undefined
 
+  const onViewportScrolled = () => {
+    const folderEls = Array.from(document.querySelectorAll(".folder:not(.folder--new)"))
+    dropFoldersAreas = calculateFoldersDropAreas(folderEls)
+  }
+
   const onMouseMove = (e: MouseEvent, mouseMoved: boolean) => {
-    if (isViewportWasScrolled()) {
-      // recalculate drop areas if viewport was scrolled
-      const folderEls = Array.from(document.querySelectorAll(".folder:not(.folder--new)"))
-      dropFoldersAreas = calculateFoldersDropAreas(folderEls)
-    }
-
-    setViewportWasScrolled(false)
-    setScrollByDummyClientY(undefined)
-
     if (dummy) {
       // move dummy
       dummy.style.transform = `translateX(${e.clientX + "px"}) translateY(${e.clientY + "px"})`
@@ -44,9 +40,7 @@ export function processFolderDragAndDrop(mouseDownEvent: React.MouseEvent,
           prevSpaceDropArea = spaceDropArea
           config.onChangeSpace(spaceDropArea.objectId)
           lastSelectedSpaceId = spaceDropArea.objectId
-          requestAnimationFrame(() => {
-            setViewportWasScrolled(true)
-          })
+          requestAnimationFrame(onViewportScrolled) // to recalculate dropFoldersAreas
         }
         placeholder.remove()
         dropArea = undefined
@@ -56,7 +50,6 @@ export function processFolderDragAndDrop(mouseDownEvent: React.MouseEvent,
         if (dropArea) {
           const insertBefore = e.clientX < dropArea.rect.left + dropArea.rect.width / 2
           targetInsertBeforeFolderId = calculateTargetInsertBeforeFolderId(dropFoldersAreas, dropArea, insertBefore)
-          console.log("targetInsertBeforeFolderId", targetInsertBeforeFolderId)
 
           if (dropArea.objectId !== draggingFolderId) {
             const leftShift = 10
@@ -90,8 +83,6 @@ export function processFolderDragAndDrop(mouseDownEvent: React.MouseEvent,
     }
   }
   const onMouseUp = () => {
-    setScrollByDummyClientY(undefined)
-
     if (dummy) {
       document.body.classList.remove("dragging")
       dummy.remove()
@@ -105,6 +96,6 @@ export function processFolderDragAndDrop(mouseDownEvent: React.MouseEvent,
     }
   }
 
-  const unsubscribeEvents = subscribeMouseEvents(mouseDownEvent, onMouseMove, onMouseUp)
+  const unsubscribeEvents = subscribeMouseEvents(mouseDownEvent, onMouseMove, onMouseUp, onViewportScrolled)
   return unsubscribeEvents
 }

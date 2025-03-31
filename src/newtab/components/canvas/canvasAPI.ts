@@ -1,13 +1,15 @@
 import { Action } from "../../state/state"
 import { hideWidgetsContextMenu, updateWidgetsContextMenu } from "./widgetsContextMenu"
 import { ActionDispatcher } from "../../state/actions"
-import { getCanvasScrolledOffset, hideWidgetsSelectionFrame, updateWidgetsSelectionFrameNonPerformant } from "./widgetsSelectionFrame"
+import { getCanvasScrolledOffset, hideWidgetsSelectionFrame, updateWidgetsSelectionFrame_RAF_NotPerformant } from "./widgetsSelectionFrame"
 import { createFolderWithStat } from "../../helpers/actionsHelpersWithDOM"
 import { genUniqLocalId } from "../../state/actionHelpers"
 import { IFolder } from "../../helpers/types"
 import { insertBetween } from "../../helpers/fractionalIndexes"
 import { getMouseX, getMouseY } from "../KeyboardManager"
 import { sticker_size_half } from "./const"
+import { round10 } from "../../helpers/mathUtils"
+import { trackStat } from "../../helpers/stats"
 
 let newStickerShift = 0
 
@@ -26,7 +28,7 @@ export const canvasAPI = {
       type: Action.DuplicateWidgets,
       widgetIds
     })
-    updateWidgetsSelectionFrameNonPerformant()
+    updateWidgetsSelectionFrame_RAF_NotPerformant()
     updateWidgetsContextMenu()
   },
   selectWidgets: (dispatch: ActionDispatcher, widgetIds: number[]) => {
@@ -34,7 +36,7 @@ export const canvasAPI = {
       type: Action.SelectWidgets,
       widgetIds
     })
-    updateWidgetsSelectionFrameNonPerformant()
+    updateWidgetsSelectionFrame_RAF_NotPerformant()
     updateWidgetsContextMenu()
   },
   setEditingWidget: (dispatch: ActionDispatcher, widgetId: number) => {
@@ -78,8 +80,8 @@ export const canvasAPI = {
     if (newStickerShift > 60) {
       newStickerShift = 0
     }
-    const x = document.body.clientWidth / 2 - 200 + canvasOffset.x + newStickerShift
-    const y = document.body.clientHeight / 2 - 200 + canvasOffset.y + newStickerShift
+    const x = round10(document.body.clientWidth / 2 - 200 + canvasOffset.x + newStickerShift)
+    const y = round10(document.body.clientHeight / 2 - 200 + canvasOffset.y + newStickerShift)
     const widgetId = genUniqLocalId()
     dispatch({
       type: Action.CreateWidget,
@@ -88,6 +90,7 @@ export const canvasAPI = {
       pos: { point: { x, y } }
     })
     canvasAPI.selectWidgets(dispatch, [widgetId])
+    trackStat("widgetCreated", { type: "sticker", source: "toolbar" })
   },
   createStickerUnderCursor: (dispatch: ActionDispatcher, spaceId: number) => {
     const canvasOffset = getCanvasScrolledOffset()
@@ -100,12 +103,14 @@ export const canvasAPI = {
       widgetId,
       pos: {
         point: {
-          x: mouseX + canvasOffset.x - sticker_size_half,
-          y: mouseY + canvasOffset.y - sticker_size_half
+          x: round10(mouseX + canvasOffset.x - sticker_size_half),
+          y: round10(mouseY + canvasOffset.y - sticker_size_half)
         }
       }
     })
     canvasAPI.selectWidgets(dispatch, [widgetId])
+    canvasAPI.setEditingWidget(dispatch, widgetId)
+    trackStat("widgetCreated", { type: "sticker", source: "canvas-context-menu" })
   }
 }
 
