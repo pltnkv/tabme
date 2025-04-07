@@ -9,6 +9,7 @@ import { ISpace } from "./helpers/types"
 import { genUniqLocalId } from "./state/actionHelpers"
 import { initStats } from "./helpers/stats"
 import { faviconsStorage } from "./helpers/faviconUtils"
+import { getAvailableWhatsNew } from "./helpers/whats-new"
 
 if (loadFromNetwork()) {
   // todo: Always start from LS. rendering should happen without loaded cloud data
@@ -107,9 +108,14 @@ function preprocessLoadedState(state: ISavingAppState): void {
   })
 
   ////////////////////////////////////////////////////////////
-  // Check if I beta
+  // Check if user in betaMode
   ////////////////////////////////////////////////////////////
   state.betaMode = isBetaMode()
+
+  ////////////////////////////////////////////////////////////
+  // Init available "Whats new"
+  ////////////////////////////////////////////////////////////
+  state.currentWhatsNew = getAvailableWhatsNew(state.betaMode)
 
   ////////////////////////////////////////////////////////////
   // Apply Dark Light Themes

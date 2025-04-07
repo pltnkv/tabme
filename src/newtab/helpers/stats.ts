@@ -134,6 +134,9 @@ type EventOptionsMap = {
   "betaModalClosed": {},
   "betaModalJoined": { email: string },
   "betaLeave": {},
+
+  // OTHER
+  "whatsNewOpened": { key: string },
 };
 
 let commonProps: Partial<CommonStatProps> = {

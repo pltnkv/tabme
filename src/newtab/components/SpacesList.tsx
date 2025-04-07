@@ -145,7 +145,7 @@ export function SpacesList(p: {
         </div>
       }
       {
-        isJoinBetaModalOpen && <JoinBetaModal setOpen={setJoinBetaModalOpen}/>
+        isJoinBetaModalOpen && <JoinBetaModal onClose={() => setJoinBetaModalOpen(false)}/>
       }
     </div>
   )

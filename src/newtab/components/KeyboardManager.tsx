@@ -7,6 +7,7 @@ import { isSomeModalOpened } from "./modals/Modal"
 import { canvasAPI } from "./canvas/canvasAPI"
 import { updateWidgetsSelectionFrame_RAF_NotPerformant } from "./canvas/widgetsSelectionFrame"
 import { updateWidgetsContextMenu } from "./canvas/widgetsContextMenu"
+import { getGlobalAppState } from "./App"
 
 let mouseX = 0
 let mouseY = 0
@@ -54,7 +55,25 @@ export const KeyboardManager = React.memo((p: {
         }
       }
 
+      if (e.code === "KeyF" && (e.ctrlKey || e.metaKey)) {
+        ;(document.querySelector("input.search") as HTMLElement).focus()
+        e.preventDefault()
+        return
+      }
+
+      //////////////////////////////////////////////////////
       // IN CANVAS
+      //////////////////////////////////////////////////////
+
+      if (e.code === "KeyA" && (e.ctrlKey || e.metaKey)) {
+        const state = getGlobalAppState()
+        const widgets = state.spaces.find(s => s.id === state.currentSpaceId)?.widgets || []
+        canvasAPI.selectWidgets(dispatch, widgets.map(w => w.id))
+        e.preventDefault()
+        e.stopPropagation()
+        return
+      }
+
       if (p.selectedWidgetIds.length > 0) {
         if ((e.code === "Backspace" || e.code === "Delete")) {
           canvasAPI.deleteWidgets(dispatch, p.selectedWidgetIds)
@@ -122,11 +141,11 @@ export const KeyboardManager = React.memo((p: {
       // disable instant typing in search
       // const isLetterOrNumber = !!(e.key.length === 1 && e.key.match(/[a-z]|[а-я]|[0-9]/i))
       // if (isLetterOrNumber) {
-        // dispatch({
-        //   type: Action.UpdateSearch,
-        //   value: props.search + e.key
-        // })
-        // ;(document.querySelector("input.search") as HTMLElement).focus()
+      // dispatch({
+      //   type: Action.UpdateSearch,
+      //   value: props.search + e.key
+      // })
+      // ;(document.querySelector("input.search") as HTMLElement).focus()
       // }
     }
     document.addEventListener("keydown", onKeyDown)

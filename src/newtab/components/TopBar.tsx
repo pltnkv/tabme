@@ -9,7 +9,10 @@ import IconHelp from "../icons/help.svg"
 import IconSettings from "../icons/settings.svg"
 import IconFind from "../icons/find.svg"
 import IconBeta from "../icons/beta.svg"
+import IconGift from "../icons/gift.svg"
 import { SpacesList } from "./SpacesList"
+import { WhatsNewModal } from "./modals/WhatsNewModal"
+import { WhatsNew } from "../helpers/whats-new"
 
 export function TopBar(p: {
   appState: IAppState;
@@ -19,6 +22,7 @@ export function TopBar(p: {
   const [betaMenuVisibility, setBetaMenuVisibility] = useState<boolean>(false)
   const [settingsMenuVisibility, setSettingsMenuVisibility] = useState<boolean>(false)
   const [helpMenuVisibility, setHelpMenuVisibility] = useState<boolean>(false)
+  const [whatsNewForModal, setWhatsNewForModal] = useState<WhatsNew | undefined>(undefined)
 
   function onToggleHelpSettings() {
     setHelpMenuVisibility(!helpMenuVisibility)
@@ -40,6 +44,10 @@ export function TopBar(p: {
     setBetaMenuVisibility(!betaMenuVisibility)
   }
 
+  function onWhatsNewClick() {
+    setWhatsNewForModal(p.appState.currentWhatsNew)
+  }
+
   async function onLogout() {
     localStorage.removeItem("authToken")
     alert("Logout successful")
@@ -58,6 +66,12 @@ export function TopBar(p: {
           itemInEdit={p.appState.itemInEdit}/>
       }
       <div className="menu-stretching-space"></div>
+      {
+        p.appState.currentWhatsNew && <div className="whats-new" onClick={onWhatsNewClick}>
+          <IconGift/>
+          <div className="whats-new__text">{p.appState.currentWhatsNew.buttonText}</div>
+        </div>
+      }
       <div style={{ display: "flex", marginRight: "12px", position: "relative" }}>
         <IconFind className="search-icon"/>
         <input
@@ -106,6 +120,11 @@ export function TopBar(p: {
           settingsMenuVisibility && <DropdownMenu onClose={() => {setSettingsMenuVisibility(false)}} noSmartPositioning={true} alignRight={true} offset={{ top: 38 }}>
             <SettingsOptions appState={p.appState}/>
           </DropdownMenu>
+        }
+
+        {
+          whatsNewForModal &&
+          <WhatsNewModal onClose={() => setWhatsNewForModal(undefined)} whatsNew={whatsNewForModal} isBeta={p.appState.betaMode}/>
         }
       </div>
 

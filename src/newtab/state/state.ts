@@ -4,6 +4,7 @@ import { ISavingAppState } from "./storage"
 import Tab = chrome.tabs.Tab
 import HistoryItem = chrome.history.HistoryItem
 import { FilteredHistoryItem } from "../helpers/recentHistoryUtils"
+import { getAvailableWhatsNew, WhatsNew, WhatsNewKey } from "../helpers/whats-new"
 
 export type IAppStats = {
   sessionNumber: number
@@ -75,8 +76,8 @@ export type IAppState = {
   sidebarCollapsed: boolean; // Stored in LS
   colorTheme?: ColorTheme; // Stored in LS
   sidebarHovered: boolean; // for hover effects
+  alphaMode: boolean
   betaMode: boolean
-  betaStickers: boolean
   page: "default" | "import" | "welcome",
   stat: IAppStats | undefined // Stored in LS
   achievements: IAppAchievements  // Stored in LS
@@ -84,6 +85,8 @@ export type IAppState = {
 
   selectedWidgetIds: number[]
   editingWidgetId: number | undefined
+
+  currentWhatsNew: WhatsNew | undefined
 
   // API
   apiCommandsQueue: APICommandPayloadFull[],
@@ -122,10 +125,14 @@ let initState: IAppState = {
   sidebarCollapsed: false, //should be named "sidebarCollapsable"
   sidebarHovered: false,
   betaMode: false,
-  betaStickers: !!localStorage.getItem("betaStickers"),
+  alphaMode: !!localStorage.getItem("betaStickers"),
   loaded: false,
+
   selectedWidgetIds: [],
   editingWidgetId: undefined,
+
+  currentWhatsNew: undefined,
+
   page: "default",
   stat: {
     sessionNumber: 0,
@@ -263,7 +270,7 @@ export type ActionPayload = (
   | { type: Action.MoveSpace; spaceId: number; insertBeforeSpaceId: number | undefined; }
   | { type: Action.UpdateSpace; spaceId: number; title?: string; position?: string; }
 
-  | { type: Action.CreateFolder; newFolderId?: number; title?: string; color?: string; position?: string; items?: IFolderItemToCreate[]; spaceId?: number, folderType?:string }
+  | { type: Action.CreateFolder; newFolderId?: number; title?: string; color?: string; position?: string; items?: IFolderItemToCreate[]; spaceId?: number, folderType?: string }
   | { type: Action.DeleteFolder; folderId: number; }
   | { type: Action.UpdateFolder; folderId: number; title?: string; color?: string; archived?: boolean; twoColumn?: boolean; position?: string }
   | { type: Action.MoveFolder; folderId: number; targetSpaceId: number, insertBeforeFolderId: number | undefined; }

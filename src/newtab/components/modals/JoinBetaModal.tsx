@@ -5,7 +5,7 @@ import { trackStat } from "../../helpers/stats"
 import { Action } from "../../state/state"
 import { DispatchContext } from "../../state/actions"
 
-export const JoinBetaModal = (p: {setOpen: (value: boolean) => void }) => {
+export const JoinBetaModal = (p: {onClose: () => void }) => {
   const dispatch = useContext(DispatchContext)
 
   const [email, setEmail] = React.useState<string>("")
@@ -30,11 +30,11 @@ export const JoinBetaModal = (p: {setOpen: (value: boolean) => void }) => {
     if (screen === "first") {
       trackStat("betaModalClosed", {})
     }
-    p.setOpen(false)
+    p.onClose()
   }
 
   return (
-    <Modal isOpen={true} onClose={onClose}>
+    <Modal onClose={onClose}>
       <>
         {
           screen === "first" && <div className="modal-no-override">

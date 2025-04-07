@@ -51,7 +51,7 @@ export const BetaOptions = (props: {
   return <>
     <Options optionsConfig={options}/>
     {
-      leavingBetaModalOpen && <LeaveBetaModal setOpen={setLeavingBetaModalOpen} spaces={props.appState.spaces}/>
+      leavingBetaModalOpen && <LeaveBetaModal onClose={() => setLeavingBetaModalOpen(false)} spaces={props.appState.spaces}/>
     }
   </>
 }
@@ -130,7 +130,7 @@ export const HelpOptions = (p: {
   return <>
     <Options optionsConfig={settingsOptions}/>
     {
-      isJoinBetaModalOpen && <JoinBetaModal setOpen={setJoinBetaModalOpen}/>
+      isJoinBetaModalOpen && <JoinBetaModal onClose={() => setJoinBetaModalOpen(false)}/>
     }
     {
       isShortcutsModalOpen && <ShortcutsModal setOpen={setShortcutsModalOpen}/>

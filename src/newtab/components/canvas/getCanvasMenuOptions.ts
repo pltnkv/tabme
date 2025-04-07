@@ -22,7 +22,6 @@ export function getCanvasMenuOption(
         },
         title: "Create Sticky Note",
         text: "Create Sticky Note",
-        hidden: !appState.betaStickers
       },
       {
         onClick: () => {

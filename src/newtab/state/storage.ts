@@ -2,6 +2,7 @@ import { IAppState } from "./state"
 import { throttle } from "../helpers/utils"
 import { ColorTheme, IFolder } from "../helpers/types"
 import { setCommonStatProps } from "../helpers/stats"
+import { WhatsNew } from "../helpers/whats-new"
 
 /**
  * SAVING STATE AND BROADCASTING CHANGES
@@ -46,7 +47,7 @@ export const savingStateKeys = Object.keys(savingStateDefaultValues) as SavingSt
 
 export type ISavingAppState = {
   [key in SavingStateKeys]: IAppState[key]
-} & { hiddenFeatureIsEnabled: boolean, betaMode: boolean; folders: IFolder[] }
+} & { hiddenFeatureIsEnabled: boolean, betaMode: boolean; folders: IFolder[], currentWhatsNew:WhatsNew|undefined }
 
 export function getStateFromLS(callback: (state: ISavingAppState) => void): void {
   chrome.storage.local.get(savingStateKeys, (res) => {
@@ -135,12 +136,12 @@ cmd.stopBeta = () => {
   location.reload()
 }
 
-cmd.startBetaStickers = () => {
+cmd.startAlpha = () => {
   localStorage.setItem("betaStickers", "true")
   location.reload()
 }
 
-cmd.stopBetaStickers = () => {
+cmd.stopAlpha = () => {
   localStorage.removeItem("betaStickers")
   location.reload()
 }

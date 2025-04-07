@@ -14,7 +14,7 @@ export const ImportConfirmationModal = (p: { onClose: (opt: string) => void }) =
   }
 
   return (
-    <Modal className="spaces-settings-modal" isOpen={true} onClose={() => p.onClose(importOption)}>
+    <Modal className="spaces-settings-modal" onClose={() => p.onClose(importOption)}>
       {/*<h2>How to add imported bookmarks?</h2>*/}
       {/*<p>*/}
       {/*  <label>*/}

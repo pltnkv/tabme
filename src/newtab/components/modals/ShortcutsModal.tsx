@@ -8,7 +8,7 @@ export const ShortcutsModal = ({setOpen }:
   const cmdOrCtrl = IS_MAC_DEVICE ? `⌘` : `CTRL`
 
   return (
-    <Modal isOpen={true} onClose={() => setOpen(false)}>
+    <Modal onClose={() => setOpen(false)}>
       <div className="modal-no-override">
         <h2>Keyboard shortcuts</h2>
         <p>

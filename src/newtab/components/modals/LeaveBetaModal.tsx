@@ -7,7 +7,7 @@ import { ISpace } from "../../helpers/types"
 import { Action } from "../../state/state"
 
 export const LeaveBetaModal = (p: {
-  setOpen: (value: boolean) => void
+  onClose: () => void
   spaces: ISpace[]
 }) => {
   const dispatch = useContext(DispatchContext)
@@ -42,16 +42,12 @@ export const LeaveBetaModal = (p: {
       type: Action.SelectSpace,
       spaceId: -1
     })
-    p.setOpen(false)
+    p.onClose()
     showMessage("Beta has been disabled and spaces merged", dispatch)
   }
 
-  const onClose = () => {
-    p.setOpen(false)
-  }
-
   return (
-    <Modal isOpen={true} onClose={onClose}>
+    <Modal onClose={p.onClose}>
       <div className="modal-no-override">
         <h2>Leaving the Beta Program</h2>
         <p>

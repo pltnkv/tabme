@@ -129,17 +129,15 @@ export function Bookmarks(p: {
       }
 
       const onCanvasDoubleClick = (point: IPoint) => {
-        if (p.appState.betaStickers) {
-          const widgetId = genUniqLocalId()
-          dispatch({
-            type: Action.CreateWidget,
-            spaceId: p.appState.currentSpaceId,
-            widgetId,
-            pos: { point: point }
-          })
-          canvasAPI.setEditingWidget(dispatch, widgetId)
-          trackStat("widgetCreated", { type: "sticker", source: "double-click" })
-        }
+        const widgetId = genUniqLocalId()
+        dispatch({
+          type: Action.CreateWidget,
+          spaceId: p.appState.currentSpaceId,
+          widgetId,
+          pos: { point: point }
+        })
+        canvasAPI.setEditingWidget(dispatch, widgetId)
+        trackStat("widgetCreated", { type: "sticker", source: "double-click" })
       }
 
       const onWidgetsRightClick = (pos: IPoint, targetWidgetId: number) => {
@@ -288,8 +286,7 @@ export function Bookmarks(p: {
         </DropdownMenu>
       }
       {
-        p.appState.betaStickers
-        && p.appState.search === ""
+        p.appState.search === ""
         && <Toolbar folders={folders} currentSpaceId={p.appState.currentSpaceId}/>
       }
     </div>

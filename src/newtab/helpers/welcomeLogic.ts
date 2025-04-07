@@ -10,13 +10,14 @@ export function createWelcomeFolder(dispatch: ActionDispatcher) {
 
     const items: IFolderItemToCreate[] = []
     const favIconUrl = chrome.runtime.getURL("icon_32.png")
-    items.push(createNewFolderItem("https://www.youtube.com/watch?v=kxb0zG4a5MM", "Watch 30-second video to learn key Tabme&nbsp;features", 'https://www.gstatic.com/youtube/img/creator/favicon/favicon_32_v2.png'))
+    items.push(createNewFolderItem("https://www.youtube.com/watch?v=kxb0zG4a5MM", "Watch key features overview", 'https://www.gstatic.com/youtube/img/creator/favicon/favicon_32_v2.png'))
+    items.push(createNewFolderItem("https://www.youtube.com/watch?v=9jZCsg8lF8o", "How to use Sticky Notes", 'https://www.gstatic.com/youtube/img/creator/favicon/favicon_32_v2.png'))
     items.push(createNewFolderItem("https://gettabme.com/faq.html", "Tabme FAQ", favIconUrl))
     items.push(createNewSection("HOW TO USE: \n\n"
-      + "✅ Drag and drop Tabs from the sidebar \n"
+      + "— Drag and drop Tabs from the sidebar \n"
       + "into a Folder to save \n\n"
-      + "✅ Drag and drop Folders by title to sort\n\n"
-      + "✅ Multiselect bookmarks by click and drag \nstarting empty space \n\n"
-      + "✅ Use context menu by right mouse click \nto see more options"))
+      + "— Drag and drop Folders by title to sort\n\n"
+      + "— Multiselect bookmarks by click and drag \nstarting empty space \n\n"
+      + "— Use context menu by right mouse click \nto see more options"))
     dispatch({ type: Action.CreateFolder, newFolderId: genUniqLocalId(), title: "Welcome to Tabme", items, color: "#A0F3A2" })
 }

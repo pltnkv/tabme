@@ -6,7 +6,7 @@ export const OverrideModal = ({ setOpen }:
   return (
     __OVERRIDE_NEWTAB
       ?
-      <Modal isOpen={true} onClose={() => setOpen(false)}>
+      <Modal onClose={() => setOpen(false)}>
         <div className="modal-no-override">
           <h2>How to remove Tabme from the new tab?</h2>
           <p>If you want to use Tabme without it taking over your new tab, <br/>try the "<a
@@ -30,7 +30,7 @@ export const OverrideModal = ({ setOpen }:
         </div>
       </Modal>
       :
-      <Modal isOpen={true} onClose={() => setOpen(false)}>
+      <Modal onClose={() => setOpen(false)}>
         <div className="modal-no-override">
           <h2>How to open Tabme in the every new tab?</h2>
           <p>If you want Tabme was open every new tab, try the regular Tabme extension.

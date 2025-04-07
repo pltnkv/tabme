@@ -2,7 +2,6 @@ import React, { useEffect } from "react"
 import ReactDOM from "react-dom"
 
 export const Modal = (props: {
-  isOpen: boolean,
   onClose: () => void,
   className?: string,
   children: React.ReactChild | React.ReactChild[];
@@ -19,12 +18,11 @@ export const Modal = (props: {
   }, [props.onClose])
 
   useEffect(() => {
-    someModalOpened = props.isOpen
-  }, [props.isOpen])
-
-  if (!props.isOpen) {
-    return null
-  }
+    someModalOpened = true
+    return () => {
+      someModalOpened = false
+    }
+  }, [])
 
   return ReactDOM.createPortal(
     <div

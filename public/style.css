@@ -621,6 +621,28 @@ input.search {
     opacity: 0.7;
 }
 
+.whats-new {
+    display: flex;
+    color: #FF00DD;
+    align-items: center;
+    margin-right: 16px;
+    cursor: pointer;
+
+    svg {
+        color: #FF00DD;
+        transition: transform .2s ease;
+    }
+
+    .whats-new__text {
+        font-size: 16px;
+        padding-left: 6px;
+    }
+
+    &:hover svg {
+        transform: scale(1.20) rotate(5deg);
+    }
+}
+
 .btn__icon {
     appearance: none;
     cursor: pointer;
@@ -2038,6 +2060,28 @@ label.input-label {
             color: var(--second-text-color);
             font-size: 14px;
         }
+    }
+}
+
+.modal-whats-new {
+    overflow: auto;
+    max-height: 100%;
+    max-width: 820px;
+
+    h2 {
+        font-weight: normal;
+        font-size: 36px;
+        margin-top: 0;
+    }
+
+    iframe {
+        width: 100%;
+        height: 480px;
+        border-radius: 8px;
+    }
+
+    .btn__setting {
+        margin-top: 16px;
     }
 }
 

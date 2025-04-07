@@ -87,7 +87,7 @@ export function Sidebar(props: {
         currentWindowId={props.appState.currentWindowId}
       />
       {
-        props.appState.betaStickers
+        props.appState.alphaMode
           ? <SidebarRecent search={props.appState.search} historyItems={props.appState.historyItems}></SidebarRecent>
           : <SidebarHistory search={props.appState.search} historyItems={props.appState.historyItems}/>
       }
