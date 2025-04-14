@@ -6,21 +6,10 @@ const STORAGE_KEY = "faviconsStorage"
 type FaviconInfo = {
   faviconUrl: string,
   pathParts: string[],
-  folderItem: IFolderItem,
 }
 
 // Load initial data from localStorage
 let cache = new Map<string, FaviconInfo[]>()
-
-// try {
-//   const stored = localStorage.getItem(STORAGE_KEY)
-//   if (stored) {
-//     cache = JSON.parse(stored) || {}
-//   }
-// } catch (e) {
-//   console.error("Error parsing faviconsStorage:", e)
-//   cache = {}
-// }
 
 let debounceTimer: number | null = null
 const DEBOUNCE_DELAY = 200
@@ -46,7 +35,7 @@ function compareParts(infoParts: string[], siteParts: string[]): number {
   return i
 }
 
-function getBySiteURL(siteUrl: string | URL): string | undefined {
+function findInCache(siteUrl: string | URL, useFallback = true): string | undefined {
   const url = convertToURL(siteUrl)
   if (url?.host) {
     const infos = cache.get(url?.host)
@@ -54,10 +43,7 @@ function getBySiteURL(siteUrl: string | URL): string | undefined {
       if (infos.length === 1) {
         return infos[0].faviconUrl
       } else {
-        // Here we use smart strategy.
-        // And return "faviconUrl" that matches them most number of parts in pathname of bookmarkUrl.
         const siteUrlParts = url.pathname.split("/").filter(p => p !== "")
-        // console.log("AAA", siteUrl, siteUrlParts)
         let bestMatchedInfo = undefined
         let bestMatchedScore = 0
         for (let i = 0; i < infos.length; i++) {
@@ -65,87 +51,70 @@ function getBySiteURL(siteUrl: string | URL): string | undefined {
           if (score > bestMatchedScore) {
             bestMatchedScore = score
             bestMatchedInfo = infos[i]
-            if(score === MAX_SCORE) {
+            if (score === MAX_SCORE) {
               break
             }
           }
         }
-        // console.log('bestMatchedInfo', bestMatchedInfo, bestMatchedScore)
-        return bestMatchedInfo?.faviconUrl ?? getTempFavIconUrl(url)
+        return bestMatchedInfo?.faviconUrl ?? (useFallback ? getTempFavIconUrl(url) : undefined)
       }
     } else {
-      return getTempFavIconUrl(url)
+      return useFallback ? getTempFavIconUrl(url) : undefined
     }
   } else {
     return undefined
   }
 }
 
-function register(faviconUrl: string, folderItem: IFolderItem): void {
-  const itemUrl = convertToURL(folderItem.url)
+function registerInCache(faviconUrl: string, siteUrl?: string | URL): void {
+  const itemUrl = convertToURL(siteUrl)
   if (itemUrl?.host) {
     const infos = cache.get(itemUrl.host) ?? []
     if (!infos.some(info => info.faviconUrl === faviconUrl)) {
       const newInfo: FaviconInfo = {
         faviconUrl,
-        folderItem,
         pathParts: itemUrl.pathname.split("/").filter(p => p !== "")
       }
       infos?.push(newInfo)
       cache.set(itemUrl.host, infos)
     }
   }
-
-  // Saving to LS is disabled for now
-
-  // if (debounceTimer !== null) {
-  //   clearTimeout(debounceTimer)
-  // }
-  // debounceTimer = window.setTimeout(() => {
-  //   flushCache()
-  //   debounceTimer = null
-  // }, DEBOUNCE_DELAY)
 }
+registerInCache('https://calendar.google.com/googlecalendar/images/favicons_2020q4/calendar_2.ico', 'https://calendar.google.com/calendar/')
+registerInCache('https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico', 'https://mail.google.com/mail/')
+registerInCache('https://ssl.gstatic.com/docs/spreadsheets/forms/favicon_qp2.png', 'https://docs.google.com/forms/')
+registerInCache('https://ssl.gstatic.com/docs/presentations/images/favicon-2023q4.ico', 'https://docs.google.com/presentation/')
+registerInCache('https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico', 'https://docs.google.com/document/')
 
 export const faviconsStorage = {
-  getByURL: getBySiteURL,
-  register
+  findInCache,
+  registerInCache
 }
 
-/**
- * Returns the favicon URL for a given bookmark URL.
- * It fetches the HTML, looks for a <link rel="icon"> (or similar) element,
- * and resolves it to an absolute URL. If not found, it defaults to /favicon.ico.
- *
- * @param bookmarkUrl - The URL of the bookmarked website.
- * @returns A promise that resolves to the favicon URL.
- */
-export async function loadFaviconUrl(bookmarkUrl: string): Promise<string> {
-  // Create a URL object to extract the origin (protocol + host)
-  const urlObj = new URL(bookmarkUrl)
-  const origin = urlObj.origin
+export async function loadFaviconUrl(bookmarkUrl: string, searchInCache = true): Promise<string> {
 
-  try {
-    // Fetch the HTML content of the page
-    const response = await fetch(bookmarkUrl)
-    const htmlText = await response.text()
+  return findInCache(bookmarkUrl, true) ?? ''
 
-    // Parse the HTML using DOMParser (available in browsers)
-    const parser = new DOMParser()
-    const doc = parser.parseFromString(htmlText, "text/html")
-
-    // Look for a <link> element with a rel attribute that includes "icon"
-    const iconLink = doc.querySelector("link[rel~=\"icon\"]")
-    if (iconLink && iconLink.getAttribute("href")) {
-      const href = iconLink.getAttribute("href")!
-
-      // Resolve relative URLs to absolute URLs using the page origin as the base
-      return new URL(href, origin).href
-    }
-  } catch (error) {
-    console.error("Error fetching or parsing HTML:", error)
-  }
-
-  // Fallback: assume the default favicon location at the site’s root
-  return `${origin}/favicon.ico`
+  // todo TEMP DISABLED
+  //
+  // if (searchInCache) {
+  //   const res = findInCache(bookmarkUrl, false)
+  //   if (res) {
+  //     return res
+  //   }
+  // }
+  //
+  // try {
+  //   const encodedUrl = encodeURIComponent(bookmarkUrl)
+  //   const response = await fetch(`https://gettabme.com/app/?url=${encodedUrl}`)
+  //   const data = await response.json()
+  //   if (data?.favicon) {
+  //     registerInCache(data.favicon, bookmarkUrl)
+  //     return data.favicon
+  //   }
+  // } catch (error) {
+  //   console.error("Error fetching favicon from gettabme.com:", error)
+  // }
+  //
+  // return getTempFavIconUrl(bookmarkUrl)
 }

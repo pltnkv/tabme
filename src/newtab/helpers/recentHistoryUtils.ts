@@ -64,6 +64,7 @@ export type FilteredHistoryItem = {
 } & HistoryItem
 
 export function getFilteredHistoryItems(historyItems: HistoryItem[], filters: IFilter[]): FilteredHistoryItem[] {
+
   const res: FilteredHistoryItem[] = []
   const deduplicatedHistoryItemsHashes = new Set<string>()
   historyItems.forEach((item) => {
@@ -73,7 +74,8 @@ export function getFilteredHistoryItems(historyItems: HistoryItem[], filters: IF
       if (!deduplicatedHistoryItemsHashes.has(hash)) {
         deduplicatedHistoryItemsHashes.add(hash)
         item.title = filter.cleanTitle(item.title);
-        (item as FilteredHistoryItem).favIconUrl = faviconsStorage.getByURL(item.url) ?? "" // todo draw default rect
+        (item as FilteredHistoryItem).favIconUrl = faviconsStorage.findInCache(item.url) ?? "" // todo draw default rect
+
         res.push(item as FilteredHistoryItem)
       }
     }
@@ -87,17 +89,16 @@ export function getBaseFilteredHistoryItems(historyItems: HistoryItem[]): Filter
   const deduplicatedHistoryItemsHashesByTitle = new Map<string, Set<string>>();
   (historyItems as FilteredHistoryItem[]).forEach((item) => {
     if (item.url && item.title) {
+      const urlObj = new URL(item.url)
       const hashesByPathName = deduplicatedHistoryItemsHashesByTitle.get(item.title)
       if (!hashesByPathName) {
-        const urlObj = new URL(item.url)
         deduplicatedHistoryItemsHashesByTitle.set(item.title, new Set(urlObj.pathname))
-        item.favIconUrl = faviconsStorage.getByURL(urlObj) ?? ""
+        item.favIconUrl = faviconsStorage.findInCache(urlObj) ?? ""
         res.push(item)
       } else {
-        const urlObj = new URL(item.url)
         if (!hashesByPathName.has(urlObj.pathname)) {
           hashesByPathName.add(urlObj.pathname)
-          item.favIconUrl = faviconsStorage.getByURL(urlObj) ?? ""
+          item.favIconUrl = faviconsStorage.findInCache(urlObj) ?? ""
           res.push(item)
         }
       }

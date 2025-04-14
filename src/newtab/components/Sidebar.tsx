@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useRef, useState } from "react"
+import React, { useContext, useEffect, useRef, useState } from "react"
 import { SidebarHistory } from "./SidebarHistory"
 import { SidebarOpenTabs } from "./SidebarOpenTabs"
 import { isTabmeTab } from "../helpers/isTabmeTab"

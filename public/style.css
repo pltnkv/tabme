@@ -1680,6 +1680,12 @@ label.input-label {
     right: 0;
 }
 
+@keyframes rotate {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
 /* Notification styles */
 .notification-box {
     position: absolute;
@@ -1693,7 +1699,10 @@ label.input-label {
 }
 
 .notification {
-    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 20px;
     background-color: var(--notification-background-color);
     color: var(--notification-text-color);
     min-width: 80px;
@@ -1701,6 +1710,13 @@ label.input-label {
     border-radius: 8px;
     font-size: 14px;
     pointer-events: auto;
+    height: 48px;
+
+    svg {
+        color: var(--notification-text-color);
+        margin-right: 8px;
+        animation: rotate 2s linear infinite;
+    }
 }
 
 .notification__error {

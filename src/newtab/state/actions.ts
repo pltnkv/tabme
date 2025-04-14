@@ -91,7 +91,8 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
           visible: true,
           message: action.message,
           button: action.button,
-          isError: action.isError
+          isError: action.isError,
+          isLoading: action.isLoading,
         }
       }
     }
@@ -598,6 +599,9 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       }
       if (typeof action.url !== "undefined") {
         newProps.url = action.url
+      }
+      if (typeof action.favIconUrl !== "undefined") {
+        newProps.favIconUrl = action.favIconUrl
       }
 
       const originalItem = findItemById(state, action.itemId)

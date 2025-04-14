@@ -60,6 +60,9 @@ export const FolderItemMenu = React.memo((p: {
 
   // support multiple
   function onArchive() {
+    alert('The “Hiding” feature will be deprecated soon due to very low usage.\n'
+      + 'All previously hidden bookmarks will became visible again.\n'
+      + 'Sorry for the inconvenience, and thank you for understanding!')
     mergeStepsInHistory((historyStepId) => {
       selectedItems.forEach((item) => {
         dispatch({

@@ -4,7 +4,7 @@ import { Action, IAppState } from "../state/state"
 import { DispatchContext } from "../state/actions"
 import Switch from "react-switch"
 import { showMessage } from "../helpers/actionsHelpersWithDOM"
-import { onExportJson, onImportFromToby, importFromJson } from "../helpers/importExportHelpers"
+import { importFromJson, onExportJson, onImportFromToby } from "../helpers/importExportHelpers"
 import { ImportConfirmationModal } from "./modals/ImportConfirmationModal"
 import { trackStat } from "../helpers/stats"
 import { LeaveBetaModal } from "./modals/LeaveBetaModal"
@@ -12,6 +12,7 @@ import { loadFaviconUrl } from "../helpers/faviconUtils"
 import { JoinBetaModal } from "./modals/JoinBetaModal"
 import { ShortcutsModal } from "./modals/ShortcutsModal"
 import { OverrideModal } from "./modals/OverrideModal"
+import { IFolderItem } from "../helpers/types"
 
 type OnClickOption = { onClick: (e: any) => void; title: string; text: string; hidden?: boolean; isFile?: boolean }
 type OnToggleOption = { onToggle: () => void; value: boolean, title: string; text: string; hidden?: boolean }
@@ -60,6 +61,7 @@ export const HelpOptions = (p: {
   appState: IAppState
 }) => {
 
+  const dispatch = useContext(DispatchContext)
   const [isJoinBetaModalOpen, setJoinBetaModalOpen] = useState(false)
   const [isShortcutsModalOpen, setShortcutsModalOpen] = useState(false)
 
@@ -92,6 +94,42 @@ export const HelpOptions = (p: {
     trackStat("settingsClicked", { settingName: "tryBeta" })
   }
 
+
+  function invalidateFavicon(folderItem: IFolderItem): Promise<void> {
+    if (folderItem.url) {
+      return loadFaviconUrl(folderItem.url, false).then(newFaviconUrl => {
+        if (newFaviconUrl !== folderItem.favIconUrl) {
+          dispatch({
+            type: Action.UpdateFolderItem,
+            itemId: folderItem.id,
+            favIconUrl: newFaviconUrl
+          })
+        }
+      })
+    } else {
+      return Promise.resolve()
+    }
+  }
+
+  function minTimeoutPromise() {
+    return new Promise(resolve => setTimeout(resolve, 500))
+  }
+
+  function invalidateBrokenIcons() {
+    const promises: Promise<unknown>[] = [minTimeoutPromise()]
+    const currentSpace = p.appState.spaces.find(s => s.id === p.appState.currentSpaceId)
+    if (currentSpace) {
+      currentSpace.folders.forEach(f => {
+        promises.push(...f.items.map(invalidateFavicon))
+      })
+    }
+
+    showMessage("updating...", dispatch, true)
+    Promise.all(promises).then(() => {
+      showMessage("Favicons are updated", dispatch)
+    })
+  }
+
   type OnClickOption = { onClick: (e: any) => void; title: string; text: string; hidden?: boolean; isFile?: boolean }
   type OnToggleOption = { onToggle: () => void; value: boolean, title: string; text: string; hidden?: boolean }
   const settingsOptions: Array<OnClickOption | OnToggleOption | { separator: true }> = [
@@ -104,6 +142,12 @@ export const HelpOptions = (p: {
       onClick: showShortcutsModal,
       title: "Keyboard shortcuts",
       text: "Keyboard shortcuts"
+    },
+    {
+      onClick: invalidateBrokenIcons,
+      title: "Sometimes favicons are not showing, this option may help to fix it. Applied only for bookmarks in the current space.",
+      text: "Reload favicons",
+      hidden: !p.appState.alphaMode
     },
     {
       onClick: onRateInStore,
@@ -197,22 +241,6 @@ export const SettingsOptions = (p: {
     }
   }
 
-  function tryFixBrokenIcons() {
-    loadFaviconUrl("https://www.google.com/maps").then((res) => {
-      console.log("https://www.google.com/maps", res)
-    })
-
-    loadFaviconUrl("https://miro.com").then((res) => {
-      console.log("https://miro.com", res)
-    })
-
-    loadFaviconUrl("https://docs.google.com/spreadsheets/u/1/?tgif=d").then((res) => {
-      console.log("https://docs.google.com/spreadsheets/u/1/?tgif=d", res)
-    })
-    // dispatch({ type: Action.FixBrokenIcons })
-    showMessage("Broken favicons are updated", dispatch)
-  }
-
   const settingsOptions: OptionsConfig = [
     {
       onToggle: onToggleNotUsed,
@@ -251,12 +279,6 @@ export const SettingsOptions = (p: {
       value: __OVERRIDE_NEWTAB,
       text: "Show Tabme on each new tab"
     },
-    // fix later maybe
-    // {
-    //   onClick: tryFixBrokenIcons,
-    //   title: "Sometimes favicons are not showing, this option may help to fix it",
-    //   text: "Reload broken favicons"
-    // },
     {
       separator: true
     },

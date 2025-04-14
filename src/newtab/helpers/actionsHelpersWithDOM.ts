@@ -4,10 +4,19 @@ import { Action, IAppState } from "../state/state"
 import { findItemById, genUniqLocalId, isCustomActionItem } from "../state/actionHelpers"
 import { trackStat } from "./stats"
 
-export function showMessage(message: string, dispatch: ActionDispatcher): void {
+export function showMessage(message: string, dispatch: ActionDispatcher, isLoading = false): void {
   dispatch({
     type: Action.ShowNotification,
-    message: message
+    message: message,
+    isLoading
+  })
+}
+
+export function showErrorMessage(errorMessage: string, dispatch: ActionDispatcher): void {
+  dispatch({
+    type: Action.ShowNotification,
+    message: errorMessage,
+    isError: true
   })
 }
 
@@ -62,6 +71,12 @@ export function clickFolderItem(targetId: number, appState: IAppState, dispatch:
   } else if (isCustomActionItem(targetItem) && targetItem?.url) {
     executeCustomAction(targetItem.url, dispatch)
   } else if (targetItem) {
+
+    if (!targetItem.url) {
+      showErrorMessage("Bookmark URL is empty", dispatch)
+      return
+    }
+
     if (openInNewTab) {
       // open in new tab
       chrome.tabs.create({ url: targetItem.url, active: false })

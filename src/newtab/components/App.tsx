@@ -164,7 +164,7 @@ export function App() {
       notificationTimeout = undefined
     }
 
-    if (appState.notification.visible) {
+    if (appState.notification.visible && !appState.notification.isLoading) {
       notificationTimeout = window.setTimeout(() => {
         dispatch({ type: Action.HideNotification })
       }, 3500)

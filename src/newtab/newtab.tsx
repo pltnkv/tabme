@@ -102,7 +102,7 @@ function preprocessLoadedState(state: ISavingAppState): void {
   state.spaces.forEach(s => {
     s.folders.forEach(f => {
       f.items.forEach(i => {
-        faviconsStorage.register(i.favIconUrl, i)
+        faviconsStorage.registerInCache(i.favIconUrl, i.url)
       })
     })
   })

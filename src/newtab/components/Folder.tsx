@@ -13,7 +13,7 @@ import { getSpacesList } from "./dropdown/moveToHelpers"
 import HistoryItem = chrome.history.HistoryItem
 import Tab = chrome.tabs.Tab
 import { showMessageWithUndo } from "../helpers/actionsHelpersWithDOM"
-import { createNewSection, findSpaceByFolderId } from "../state/actionHelpers"
+import { createNewFolderItem, createNewSection, findSpaceByFolderId } from "../state/actionHelpers"
 import { trackStat } from "../helpers/stats"
 
 export const Folder = React.memo(function Folder(p: {
@@ -66,6 +66,10 @@ export const Folder = React.memo(function Folder(p: {
   }
 
   function onArchiveOrRestore() {
+    alert("The “Hiding” feature will be deprecated soon due to very low usage.\n"
+      + "All previously hidden folders will became visible again.\n"
+      + "Sorry for the inconvenience, and thank you for understanding!")
+
     const newArchiveState = !p.folder.archived
     dispatch({
       type: Action.UpdateFolder,
@@ -95,6 +99,29 @@ export const Folder = React.memo(function Folder(p: {
     setShowMenu(false)
 
     scrollElementIntoView(`[data-id="${newSection.id}"]`)
+  }
+
+  function onAddBookmark() {
+
+    const newBookmark = createNewFolderItem(undefined, "New bookmark")
+    dispatch({
+      type: Action.CreateFolderItem,
+      folderId: p.folder.id,
+      insertBeforeItemId: undefined,
+      item: newBookmark
+    })
+
+    requestAnimationFrame(() => {
+      const bookmarkElement = document.querySelector(`[data-id="${newBookmark.id}"]`)
+      const menuButton = bookmarkElement?.parentElement?.querySelector(".folder-item__menu") as HTMLButtonElement
+      if (menuButton) {
+        menuButton.click()
+      }
+    })
+
+    setShowMenu(false)
+
+    scrollElementIntoView(`[data-id="${newBookmark.id}"]`)
   }
 
   function setColorLocally(color: string) {
@@ -219,7 +246,8 @@ export const Folder = React.memo(function Folder(p: {
               <CustomColorInput onChange={setColorLocally} onBlur={setColorConfirmed} currentColor={folderColor}/>
             </div>
             <button className="dropdown-menu__button focusable" onClick={onOpenAll}>Open All</button>
-            <button className="dropdown-menu__button focusable" onClick={onRename}>Rename</button>
+            <button className="dropdown-menu__button focusable" onClick={onAddBookmark}>Add Bookmark</button>
+            <button className="dropdown-menu__button focusable" onClick={onAddSection}>Add Section</button>
             {
               p.hiddenFeatureIsEnabled && <button className="dropdown-menu__button focusable" onClick={onArchiveOrRestore}>{p.folder.archived ? "Unhide" : "Hide"}</button>
             }
@@ -232,7 +260,7 @@ export const Folder = React.memo(function Folder(p: {
                 /> : null
             }
 
-            <button className="dropdown-menu__button focusable" onClick={onAddSection}>Add Section</button>
+            <button className="dropdown-menu__button focusable" onClick={onRename}>Rename</button>
             <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onDelete}>Delete</button>
           </DropdownMenu>
         ) : null}

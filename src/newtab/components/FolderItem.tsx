@@ -11,6 +11,7 @@ import { FolderItemMenu } from "./dropdown/FolderItemMenu"
 import Tab = chrome.tabs.Tab
 import HistoryItem = chrome.history.HistoryItem
 import { trackStat } from "../helpers/stats"
+import { loadFaviconUrl } from "../helpers/faviconUtils"
 
 export const FolderItem = React.memo((p: {
   spaces: ISpace[];
@@ -32,13 +33,25 @@ export const FolderItem = React.memo((p: {
   }, [p.item.title])
 
   function trySaveTitleAndURL(newTitle: string, newUrl?: string) {
-    if (p.item.title !== newTitle || (newUrl && p.item.url !== newUrl)) {
+    const titleChanged = p.item.title !== newTitle
+    const urlChanged = newUrl && p.item.url !== newUrl
+    if (titleChanged || urlChanged) {
       dispatch({
         type: Action.UpdateFolderItem,
         itemId: p.item.id,
         title: newTitle,
         url: newUrl ?? p.item.url
       })
+
+      if (urlChanged) {
+        loadFaviconUrl(newUrl).then(faviconUrl => {
+          dispatch({
+            type: Action.UpdateFolderItem,
+            itemId: p.item.id,
+            favIconUrl: faviconUrl
+          })
+        })
+      }
     }
   }
 
@@ -61,7 +74,7 @@ export const FolderItem = React.memo((p: {
       type: Action.CloseTabs,
       tabIds: tabIds
     })
-    trackStat('tabClosed', {source: 'bookmarks'})
+    trackStat("tabClosed", { source: "bookmarks" })
   }
 
   function handleImageError(e: React.SyntheticEvent) {

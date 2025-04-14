@@ -65,6 +65,7 @@ export type IAppState = {
     visible: boolean;
     message: string;
     isError?: boolean;
+    isLoading?: boolean;
     button?: { onClick?: () => void; text: string };
   };
   lastActiveTabIds: number[]
@@ -250,7 +251,7 @@ export type APICommandPayloadFull = APICommandPayload & { commandId: number, rol
 export type HistoryActionPayload = { byUndo?: boolean, historyStepId?: number }
 export type ActionPayload = (
   | { type: Action.Undo, dispatch: ActionDispatcher }
-  | { type: Action.ShowNotification; message: string; button?: { onClick?: () => void; text: string }; isError?: boolean }
+  | { type: Action.ShowNotification; message: string; button?: { onClick?: () => void; text: string }; isError?: boolean, isLoading?: boolean }
   | { type: Action.HideNotification }
   | { type: Action.UpdateSearch; value: string }
   | { type: Action.InitDashboard; spaces?: ISpace[], sidebarCollapsed?: boolean, saveToLS?: boolean, init?: boolean }
@@ -278,7 +279,7 @@ export type ActionPayload = (
   | { type: Action.CreateFolderItem; folderId: number; insertBeforeItemId: number | undefined; item: IFolderItemToCreate; }
   | { type: Action.CreateFolderItems; folderId: number; items: IFolderItemToCreate[]; }
   | { type: Action.DeleteFolderItems; itemIds: number[] }
-  | { type: Action.UpdateFolderItem; itemId: number; title?: string; archived?: boolean; url?: string }
+  | { type: Action.UpdateFolderItem; itemId: number; title?: string; archived?: boolean; url?: string; favIconUrl?: string }
   | { type: Action.MoveFolderItems; itemIds: number[]; targetFolderId: number; insertBeforeItemId: number | undefined; }
 
   | { type: Action.SaveBookmarksToCloud; }

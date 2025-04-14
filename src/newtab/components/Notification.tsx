@@ -2,6 +2,7 @@ import React, { useRef } from "react"
 import { CSSTransition } from "react-transition-group"
 import { IAppState } from "../state/state"
 import { CL } from "../helpers/classNameHelper"
+import IconProgress from "../icons/progress.svg"
 
 export const Notification = React.memo((props: {
   notification: IAppState["notification"];
@@ -20,6 +21,9 @@ export const Notification = React.memo((props: {
         <div className={CL("notification", {
           "notification__error": props.notification.isError
         })} ref={refEl}>
+          {
+            props.notification.isLoading && <IconProgress/>
+          }
           {props.notification.message}
           {
             props.notification.button
