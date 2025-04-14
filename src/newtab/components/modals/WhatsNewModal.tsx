@@ -8,6 +8,7 @@ import { trackStat } from "../../helpers/stats"
 export const WhatsNewModal = (p: {
   whatsNew: WhatsNew
   isBeta: boolean
+  firstSessionDate?: number
   onClose: () => void
 }) => {
   const dispatch = useContext(DispatchContext)
@@ -15,7 +16,7 @@ export const WhatsNewModal = (p: {
   useEffect(() => {
     markWhatsNewAsSeen(p.whatsNew.key)
     dispatch({
-      type: Action.UpdateAppState, newState: { currentWhatsNew: getAvailableWhatsNew(p.isBeta) }
+      type: Action.UpdateAppState, newState: { currentWhatsNew: getAvailableWhatsNew(p.firstSessionDate, p.isBeta) }
     })
 
     trackStat("whatsNewOpened", { key: p.whatsNew.key })

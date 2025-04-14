@@ -124,7 +124,7 @@ export function TopBar(p: {
 
         {
           whatsNewForModal &&
-          <WhatsNewModal onClose={() => setWhatsNewForModal(undefined)} whatsNew={whatsNewForModal} isBeta={p.appState.betaMode}/>
+          <WhatsNewModal onClose={() => setWhatsNewForModal(undefined)} whatsNew={whatsNewForModal} isBeta={p.appState.betaMode} firstSessionDate={p.appState.stat?.firstSessionDate}/>
         }
       </div>
 

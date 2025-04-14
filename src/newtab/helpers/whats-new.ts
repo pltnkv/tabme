@@ -7,7 +7,7 @@ export type WhatsNew = {
   buttonText: string
   bodyTitle: string
   bodyHtml: string
-  minDate: string
+  approxReleaseDate: string
   availableForBetaOnly?: boolean
 }
 
@@ -18,7 +18,7 @@ export const WhatsNewConfig: { [x in WhatsNewKey]: WhatsNew } = {
     bodyTitle: "🆕 Meet the Sticky Notes Update",
     bodyHtml: `<p>Now you can quickly jot down ideas, to-dos, or anything on your mind with <b>Sticky Notes</b>!<br>Just <b>double-click anywhere</b> to create a note and keep your thoughts right where you need them.</p>${getYoutubeIframe(
       "https://www.youtube.com/embed/9jZCsg8lF8o?si=8skWdiBN2FY8HqQb")}`,
-    minDate: "10.4.2025",
+    approxReleaseDate: "10.4.2025"
   }
 }
 
@@ -41,12 +41,13 @@ function getSeenWhatsNewKeys(): WhatsNewKey[] {
  *
  * If none is available, it returns undefined.
  */
-export function getAvailableWhatsNew(isBeta: boolean): WhatsNew | undefined {
+export function getAvailableWhatsNew(firstSessionDate: number | undefined, isBeta: boolean): WhatsNew | undefined {
   const seen = getSeenWhatsNewKeys()
   const now = new Date()
   return Object.values(WhatsNewConfig).find(whatsNew => {
-    const minDate = parseDate(whatsNew.minDate)
-    return now >= minDate
+    const releaseDate = parseDate(whatsNew.approxReleaseDate)
+    return now >= releaseDate
+      && (firstSessionDate === undefined || firstSessionDate <= releaseDate.getTime())
       && (!whatsNew.availableForBetaOnly || isBeta)
       && !seen.includes(whatsNew.key)
   })

@@ -1,10 +1,10 @@
 import { ActionDispatcher } from "./actions"
 import { ColorTheme, IFolder, IFolderItem, IFolderItemToCreate, ISpace, IWidgetContent, IWidgetPos } from "../helpers/types"
 import { ISavingAppState } from "./storage"
+import { FilteredHistoryItem } from "../helpers/recentHistoryUtils"
+import { WhatsNew } from "../helpers/whats-new"
 import Tab = chrome.tabs.Tab
 import HistoryItem = chrome.history.HistoryItem
-import { FilteredHistoryItem } from "../helpers/recentHistoryUtils"
-import { getAvailableWhatsNew, WhatsNew, WhatsNewKey } from "../helpers/whats-new"
 
 export type IAppStats = {
   sessionNumber: number

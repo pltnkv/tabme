@@ -115,7 +115,7 @@ function preprocessLoadedState(state: ISavingAppState): void {
   ////////////////////////////////////////////////////////////
   // Init available "Whats new"
   ////////////////////////////////////////////////////////////
-  state.currentWhatsNew = getAvailableWhatsNew(state.betaMode)
+  state.currentWhatsNew = getAvailableWhatsNew(state.stat.firstSessionDate, state.betaMode)
 
   ////////////////////////////////////////////////////////////
   // Apply Dark Light Themes
