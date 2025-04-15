@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react"
+import React, { CSSProperties, useContext, useEffect, useRef, useState } from "react"
 import { createContext } from "react"
 import { CL } from "../../helpers/classNameHelper"
 import ReactDOM from "react-dom"
@@ -11,6 +11,7 @@ export const DropdownMenuIdContext = createContext(-1)
 interface DropdownSubMenuProps {
   menuId: number;
   title: string;
+  style?: CSSProperties | undefined
   submenuContent: React.ReactNode //todo make is a function to calc it lazily
 }
 
@@ -23,7 +24,7 @@ function getOffsets(o?: Partial<IOffset>): IOffset {
   }
 }
 
-export const DropdownSubMenu = ({ menuId, title, submenuContent }: DropdownSubMenuProps) => {
+export const DropdownSubMenu = ({ menuId, title, submenuContent, style }: DropdownSubMenuProps) => {
 
   const [activeSubmenuId, setActiveSubmenuId] = useState(-1)
   const [submenuPosition, setSubmenuPosition] = useState({ top: 0, left: 0 })
@@ -67,7 +68,8 @@ export const DropdownSubMenu = ({ menuId, title, submenuContent }: DropdownSubMe
     <>
       <button
         ref={buttonRef}
-        className={CL("dropdown-menu__button sub-menu__button focusable", {
+        style={style}
+        className={CL(`dropdown-menu__button sub-menu__button focusable`, {
           active: menuId === currentMenuId
         })}
         onClick={onClick}

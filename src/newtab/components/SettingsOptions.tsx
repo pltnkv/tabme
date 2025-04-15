@@ -1,5 +1,5 @@
 import React, { useContext, useRef, useState } from "react"
-import { hasArchivedItems, hasItemsToHighlight } from "../helpers/utils"
+import { hasItemsToHighlight } from "../helpers/utils"
 import { Action, IAppState } from "../state/state"
 import { DispatchContext } from "../state/actions"
 import Switch from "react-switch"
@@ -268,8 +268,8 @@ export const SettingsOptions = (p: {
     {
       onToggle: onToggleRecentVisibility,
       value: p.appState.showRecent,
-      title: "Toggle recently closed Tabs always visible in the sidebar",
-      text: "Always show Recent in Sidebar"
+      title: "Show recently closed tabs in the sidebar. When off, they appear only during search.",
+      text: "Show Recent in Sidebar"
     },
     {
       onToggle: onToggleMode,

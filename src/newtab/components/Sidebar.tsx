@@ -11,11 +11,10 @@ import IconStash from "../icons/stash.svg"
 import IconPin from "../icons/pin.svg"
 import Tab = chrome.tabs.Tab
 import { convertTabOrRecentToItem, convertTabToItem } from "../state/actionHelpers"
-import { createFolderWithStat, getCanDragChecker, showMessage } from "../helpers/actionsHelpersWithDOM"
+import { createFolderWithStat,  showMessage } from "../helpers/actionsHelpersWithDOM"
 import { trackStat } from "../helpers/stats"
 import { SidebarRecent } from "./SidebarRecent"
 import { bindDADItemEffect } from "../dragging/dragAndDrop"
-import HistoryItem = chrome.history.HistoryItem
 import { RecentItem } from "../helpers/recentHistoryUtils"
 
 export function Sidebar(p: {
@@ -83,7 +82,7 @@ export function Sidebar(p: {
         }
       }
       const onDragStarted = () => {
-        return getCanDragChecker(p.appState.search, dispatch)()
+        return true
       }
 
       return bindDADItemEffect(mouseDownEvent,

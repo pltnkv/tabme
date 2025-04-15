@@ -1,18 +1,12 @@
-import React, { memo, useContext, useEffect, useState } from "react"
-import { blurSearch, extractHostname, filterTabsBySearch, hlSearch, isTargetSupportsDragAndDrop, removeUselessProductName, scrollElementIntoView } from "../helpers/utils"
-import { bindDADItemEffect } from "../dragging/dragAndDrop"
-import { IFolderItem, ISpace } from "../helpers/types"
-import { DispatchContext, mergeStepsInHistory } from "../state/actions"
+import React, { memo, useContext } from "react"
+import { filterTabsBySearch } from "../helpers/utils"
+import { ISpace } from "../helpers/types"
+import { DispatchContext } from "../state/actions"
 import { Action } from "../state/state"
-import IconSaved from "../icons/saved.svg"
-import { DropdownMenu, DropdownSubMenu } from "./dropdown/DropdownMenu"
-import { CL } from "../helpers/classNameHelper"
-import { getFoldersList } from "./dropdown/moveToHelpers"
-import { convertTabToItem } from "../state/actionHelpers"
-import { createFolderWithStat, getCanDragChecker, showMessage } from "../helpers/actionsHelpersWithDOM"
+import { showMessage } from "../helpers/actionsHelpersWithDOM"
 import { trackStat } from "../helpers/stats"
-import Tab = chrome.tabs.Tab
 import { TabOrRecentItem } from "./SidebarItem"
+import Tab = chrome.tabs.Tab
 
 export const SidebarOpenTabs = memo((p: {
   search: string;

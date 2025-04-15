@@ -60,9 +60,9 @@ export const FolderItemMenu = React.memo((p: {
 
   // support multiple
   function onArchive() {
-    alert('The “Hiding” feature will be deprecated soon due to very low usage.\n'
-      + 'All previously hidden bookmarks will became visible again.\n'
-      + 'Sorry for the inconvenience, and thank you for understanding!')
+    alert("The “Hiding” feature will be deprecated soon due to very low usage.\n"
+      + "All previously hidden bookmarks will became visible again.\n"
+      + "Sorry for the inconvenience, and thank you for understanding!")
     mergeStepsInHistory((historyStepId) => {
       selectedItems.forEach((item) => {
         dispatch({
@@ -74,7 +74,7 @@ export const FolderItemMenu = React.memo((p: {
       })
     })
     showMessageWithUndo("Bookmark has been hidden", dispatch)
-    trackStat('bookmarksHidden', {})
+    trackStat("bookmarksHidden", {})
   }
 
   function onRestore() {
@@ -97,10 +97,9 @@ export const FolderItemMenu = React.memo((p: {
   }
 
   const moveToFolder = (folderId: number) => {
-
     dispatch({
       type: Action.MoveFolderItems,
-      itemIds: [p.item.id],
+      itemIds: selectedItems.map(item => item.id),
       targetFolderId: folderId,
       insertBeforeItemId: undefined
     })
@@ -114,10 +113,10 @@ export const FolderItemMenu = React.memo((p: {
 
   const moveToNewFolder = (spaceId: number) => {
     mergeStepsInHistory((historyStepId) => {
-      const folderId = createFolderWithStat(dispatch, {historyStepId, spaceId}, 'by-move-to-new-folder')
+      const folderId = createFolderWithStat(dispatch, { historyStepId, spaceId }, "by-move-to-new-folder")
       dispatch({
         type: Action.MoveFolderItems,
-        itemIds: [p.item.id],
+        itemIds: selectedItems.map(item => item.id),
         targetFolderId: folderId,
         insertBeforeItemId: undefined,
         historyStepId
@@ -132,7 +131,7 @@ export const FolderItemMenu = React.memo((p: {
   return <>
     {
       selectedItems.length > 1 ?
-        <DropdownMenu onClose={p.onClose} className={"dropdown-menu--folder-item"} offset={{ top: 29 , bottom: 32}}>
+        <DropdownMenu onClose={p.onClose} className={"dropdown-menu--folder-item"} offset={{ top: 29, bottom: 32 }}>
           <button className="dropdown-menu__button focusable" onClick={onOpenNewTab}>Open in New Tab</button>
           {
             p.hiddenFeatureIsEnabled ? (selectedItems.some(item => item.archived)
@@ -142,7 +141,11 @@ export const FolderItemMenu = React.memo((p: {
                 <button className="dropdown-menu__button focusable" onClick={onArchive}>Hide</button>
             ) : null
           }
-
+          <DropdownSubMenu
+            menuId={1}
+            title={"Move to"}
+            submenuContent={getSpacesWithNestedFoldersList(p.spaces, moveToFolder, moveToNewFolder, findFolderByItemId(p, p.item.id)?.id)}
+          />
           <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onDeleteItem}>Delete</button>
         </DropdownMenu>
         :

@@ -40,6 +40,7 @@ export function getSpacesList(
     {spaces.map(space => (
       <button
         key={space.id}
+        style={{ marginLeft: "8px" }}
         className="dropdown-menu__button focusable"
         disabled={currentSpaceId === space.id}
         onClick={() => onSpaceClick(space.id)}
@@ -66,6 +67,7 @@ export function getSpacesWithNestedFoldersList(
           {spaces.map(space => (
             <DropdownSubMenu
               key={space.id}
+              style={{ marginLeft: "8px" }}
               menuId={space.id}
               title={space.title}
               submenuContent={getFoldersList(space, onFolderClick, onCreateFolderClick, currentFolderId)}
