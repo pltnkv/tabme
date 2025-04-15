@@ -37,10 +37,11 @@ const savingStateDefaultValues = { // if was not saved to LS yet
   "openBookmarksInNewTab": !__OVERRIDE_NEWTAB,
   "colorTheme": "light", // todo I don't use system because it's not ready to used by default
   "stat": undefined,
+  "showRecent": false,
   "showArchived": false,
   "showNotUsed": false,
   "version": 1,
-  "folders": undefined // folders is legacy. Dont delete it until all users are migrated
+  "folders": undefined // "folders" is legacy. Dont delete it until all users are migrated
 }
 type SavingStateKeys = keyof typeof savingStateDefaultValues
 export const savingStateKeys = Object.keys(savingStateDefaultValues) as SavingStateKeys[]

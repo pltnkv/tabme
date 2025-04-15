@@ -3,16 +3,14 @@ import { Bookmarks } from "./Bookmarks"
 import { Sidebar } from "./Sidebar"
 import { Notification } from "./Notification"
 import { KeyboardManager } from "./KeyboardManager"
-import { filterIrrelevantHistory } from "../helpers/utils"
 import { ImportBookmarksFromSettings } from "./ImportBookmarksFromSettings"
 import { createWelcomeFolder } from "../helpers/welcomeLogic"
-import { Action, getInitAppState, IAppStats, IAppState } from "../state/state"
+import { Action, getInitAppState, IAppState } from "../state/state"
 import { DispatchContext, stateReducer } from "../state/actions"
 import { getBC, getStateFromLS } from "../state/storage"
 import { executeAPICall } from "../../api/serverCommands"
 import Tab = chrome.tabs.Tab
 import { apiGetToken } from "../../api/api"
-import HistoryItem = chrome.history.HistoryItem
 import { CL } from "../helpers/classNameHelper"
 import { Welcome } from "./Welcome"
 import { CommonStatProps, setCommonStatProps, trackStat } from "../helpers/stats"
@@ -79,14 +77,14 @@ export function App() {
   useEffect(function() {
     Promise.all([
       getTabs(),
-      getHistory(), // TODO: now history updated only once, when app loaded. Fix it next time
+      getHistory(), // TODO: !!!! now history updated only once, when app loaded. Fix it next time
       getLastActiveTabsIds(),
       getCurrentWindow()
     ]).then(([tabs, historyItems, lastActiveTabIds, currentWindowId]) => {
       dispatch({
         type: Action.SetTabsOrHistory,
         tabs: tabs,
-        history: historyItems
+        recentItems: historyItems
       })
       dispatch({ type: Action.UpdateAppState, newState: { lastActiveTabIds } })
       dispatch({ type: Action.UpdateAppState, newState: { currentWindowId } })

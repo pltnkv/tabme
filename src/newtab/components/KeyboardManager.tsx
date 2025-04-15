@@ -8,6 +8,7 @@ import { canvasAPI } from "./canvas/canvasAPI"
 import { updateWidgetsSelectionFrame_RAF_NotPerformant } from "./canvas/widgetsSelectionFrame"
 import { updateWidgetsContextMenu } from "./canvas/widgetsContextMenu"
 import { getGlobalAppState } from "./App"
+import { isTargetInputOrTextArea } from "../helpers/utils"
 
 let mouseX = 0
 let mouseY = 0
@@ -40,7 +41,7 @@ export const KeyboardManager = React.memo((p: {
         return
       }
 
-      if (document.activeElement !== document.body) {
+      if (document.activeElement && isTargetInputOrTextArea(document.activeElement)) {
         return
       }
 

@@ -46,7 +46,7 @@ export function Welcome(p: {
     getBrowserBookmarks((records) => {
       importBrowserBookmarks(records, dispatch, true)
       setScreen(SCREEN.READY_TO_USE)
-    }, p.appState.historyItems, dispatch)
+    }, p.appState.recentItems, dispatch)
   }
 
   return (

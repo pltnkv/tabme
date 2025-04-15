@@ -4,6 +4,7 @@ import { IAppState } from "../state/state"
 import { showMessage } from "../helpers/actionsHelpersWithDOM"
 import { BookmarksAsPlainList, CustomBookmarkTreeNode, getBrowserBookmarks, importBrowserBookmarks, PlainListRecord } from "../helpers/importExportHelpers"
 import HistoryItem = chrome.history.HistoryItem
+import { RecentItem } from "../helpers/recentHistoryUtils"
 
 const recordToTitle = (rec: PlainListRecord) => {
   const res = rec.breadcrumbs.map(r => r.title).join(" / ")
@@ -11,7 +12,7 @@ const recordToTitle = (rec: PlainListRecord) => {
 }
 
 const BookmarkList = (p: {
-  historyItems: HistoryItem[],
+  recentItems: RecentItem[],
   onClose: () => void
   onBack?: () => void
 }) => {
@@ -24,7 +25,7 @@ const BookmarkList = (p: {
   useEffect(() => {
     getBrowserBookmarks((plain) => {
       setPlainRecords(plain)
-    }, p.historyItems, dispatch)
+    }, p.recentItems, dispatch)
   }, [])
 
   const handleFolderCheckChange = (recIndex: number, isChecked: boolean) => {
@@ -203,7 +204,7 @@ export function BookmarkImporter(p: {
       }
       <h1>Importing browser bookmarks 📦</h1>
       <h2>Select the bookmarks you'd like to import</h2>
-      <BookmarkList historyItems={p.appState.historyItems} onClose={p.onClose} onBack={p.onBack}/>
+      <BookmarkList recentItems={p.appState.recentItems} onClose={p.onClose} onBack={p.onBack}/>
     </div>
   )
 }

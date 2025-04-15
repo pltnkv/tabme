@@ -162,7 +162,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       return {
         ...state,
         tabs: action.tabs ?? state.tabs,
-        historyItems: action.history ?? state.historyItems
+        recentItems: action.recentItems ?? state.recentItems
       }
     }
 

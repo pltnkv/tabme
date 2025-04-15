@@ -118,3 +118,16 @@ export async function loadFaviconUrl(bookmarkUrl: string, searchInCache = true):
   //
   // return getTempFavIconUrl(bookmarkUrl)
 }
+
+
+let brokenImgSVG: string | undefined = undefined
+
+export function getBrokenImgSVG() {
+  if (!brokenImgSVG) {
+    const svg = document.querySelector("#non-loaded-icon")!
+    const xml = (new XMLSerializer).serializeToString(svg)
+    brokenImgSVG = "data:image/svg+xml;base64," + btoa(xml)
+  }
+
+  return brokenImgSVG
+}

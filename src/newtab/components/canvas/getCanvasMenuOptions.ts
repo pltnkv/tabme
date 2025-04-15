@@ -5,7 +5,6 @@ import { IAppState } from "../../state/state"
 import { IPoint } from "../../helpers/MathTypes"
 import { IFolder } from "../../helpers/types"
 
-// todo !!!! stats
 export function getCanvasMenuOption(
   dispatch: ActionDispatcher,
   canvasMenuType: "canvas" | "widgets",
@@ -65,7 +64,8 @@ export function getCanvasMenuOption(
           setCanvasMenuPos(undefined)
         },
         title: "Delete selected widgets",
-        text: "Delete"
+        text: "Delete",
+        dangerStyle: true
       }
     ]
   }

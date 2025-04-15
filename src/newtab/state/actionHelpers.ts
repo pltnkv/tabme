@@ -7,18 +7,17 @@ import { type IAppState } from "./state"
 import { SECTION_ICON_BASE64 } from "../helpers/utils"
 import Tab = chrome.tabs.Tab
 import HistoryItem = chrome.history.HistoryItem
+import { RecentItem } from "../helpers/recentHistoryUtils"
 
 export function genUniqLocalId(): number {
   return (new Date()).valueOf() + Math.round(Math.random() * 10000000)
 }
 
-export function convertHistoryItemToItem(item: HistoryItem): IFolderItemToCreate {
-  return {
-    id: genUniqLocalId(),
-    favIconUrl: getTempFavIconUrl(item.url),
-    title: item.title || "",
-    url: item.url || ""
-  }
+
+export type ITabOrRecentItem = (Tab | RecentItem)
+
+export function isTabData(data: ITabOrRecentItem): data is Tab {
+  return !(data as RecentItem).isRecent
 }
 
 export function convertTabToItem(item: Tab): IFolderItemToCreate {
@@ -27,6 +26,23 @@ export function convertTabToItem(item: Tab): IFolderItemToCreate {
     favIconUrl: item.favIconUrl || "",
     title: item.title || "",
     url: item.url || ""
+  }
+}
+
+export function convertRecentToItem(item: RecentItem): IFolderItemToCreate {
+  return {
+    id: genUniqLocalId(),
+    favIconUrl: item.favIconUrl ?? getTempFavIconUrl(item.url),
+    title: item.title ?? "",
+    url: item.url ?? ""
+  }
+}
+
+export function convertTabOrRecentToItem(item: ITabOrRecentItem): IFolderItemToCreate {
+  if (isTabData(item)) {
+    return convertTabToItem(item)
+  } else {
+    return convertRecentToItem(item)
   }
 }
 

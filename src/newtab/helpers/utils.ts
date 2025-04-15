@@ -3,6 +3,8 @@ import HistoryItem = chrome.history.HistoryItem
 import { IFolderItem, ISpace } from "./types"
 import type React from "react"
 import { isTabmeTab } from "./isTabmeTab"
+import { RecentItem } from "./recentHistoryUtils"
+import { getTempFavIconUrl } from "../state/actionHelpers"
 
 export const SECTION_ICON_BASE64 = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIj4KICA8cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2ZmZiIgLz4KPC9zdmc+Cg==`
 
@@ -75,10 +77,10 @@ export function filterTabsBySearch(
   })
 }
 
-export function filterHistoryItemsBySearch(
-  list: HistoryItem[],
+export function filterRecentItemsBySearch(
+  list: RecentItem[],
   searchValue: string
-): HistoryItem[] {
+): RecentItem[] {
   if (searchValue === "") {
     return list
   }
@@ -94,9 +96,9 @@ export function hasArchivedItems(spaces: ISpace[]): boolean {
   })
 }
 
-export function hasItemsToHighlight(spaces: ISpace[], historyItems: HistoryItem[]): boolean {
+export function hasItemsToHighlight(spaces: ISpace[], recentItems: RecentItem[]): boolean {
   return spaces.some(s => {
-    return s.folders.some(f => f.items.some(i => isFolderItemNotUsed(i, historyItems)))
+    return s.folders.some(f => f.items.some(i => isFolderItemNotUsed(i, recentItems)))
   })
 }
 
@@ -152,24 +154,6 @@ export function isContainsSearch<T extends { title?: string, url?: string }>(
 // function isDistinctURL(url: URL): boolean {
 //   return hostWithIgnoredSearchAndHash.some(h => h === url.host)
 // }
-
-export function filterIrrelevantHistory(
-  list: HistoryItem[]
-): HistoryItem[] {
-  const res: HistoryItem[] = []
-  list.forEach(item => {
-    if (!item.url || !item.title) {
-      return
-    }
-
-    if (item.url.includes("translate.google.") || item.url.includes("www.deepl.com")) {
-      return
-    }
-
-    res.push(item)
-  })
-  return res
-}
 
 export const colors = [
   "#82E9DE",
@@ -262,7 +246,7 @@ export function findTabsByURL(url: string | undefined, tabs: Tab[]): Tab[] {
   return tabs.filter(t => t.url === url || t.pendingUrl === url)
 }
 
-export function isFolderItemNotUsed(item: IFolderItem, historyItems: HistoryItem[]): boolean {
+export function isFolderItemNotUsed(item: IFolderItem, historyItems: RecentItem[]): boolean {
   if (item.isSection) {
     return false
   }
@@ -304,11 +288,14 @@ export function blurSearch(e: React.MouseEvent) {
 
 export function isTargetSupportsDragAndDrop(e: React.MouseEvent, ignoreElementWithClass?: string): boolean {
   const target = e.target as HTMLElement
-  const tagName = target?.tagName
   if (ignoreElementWithClass && target.classList.contains(ignoreElementWithClass)) {
     return false
   }
-  return tagName !== "INPUT" && tagName !== "TEXTAREA"
+  return !isTargetInputOrTextArea(target)
+}
+
+export function isTargetInputOrTextArea(target: Element): boolean {
+  return target.tagName === "INPUT" || target.tagName === "TEXTAREA"
 }
 
 export function debounce(f: any, ms: number): (...attrs: any[]) => void {
@@ -362,7 +349,7 @@ export function throttle(func: any, ms: number): (...attrs: any[]) => void {
   return wrapper
 }
 
-export function getTopVisitedFromHistory(history: HistoryItem[], limit = 20) {
+export function getTopVisitedFromHistory(history: RecentItem[], limit = 20) {
   const sortedHistory = Array.from(history)
   sortedHistory.sort((a, b) => (b.visitCount || 0) - (a.visitCount || 0))
   return sortedHistory.slice(0, limit)

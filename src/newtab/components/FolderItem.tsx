@@ -8,17 +8,17 @@ import { CL } from "../helpers/classNameHelper"
 import IconClose from "../icons/close.svg"
 import IconMore from "../icons/more.svg"
 import { FolderItemMenu } from "./dropdown/FolderItemMenu"
-import Tab = chrome.tabs.Tab
-import HistoryItem = chrome.history.HistoryItem
 import { trackStat } from "../helpers/stats"
-import { loadFaviconUrl } from "../helpers/faviconUtils"
+import { getBrokenImgSVG, loadFaviconUrl } from "../helpers/faviconUtils"
+import { RecentItem } from "../helpers/recentHistoryUtils"
+import Tab = chrome.tabs.Tab
 
 export const FolderItem = React.memo((p: {
   spaces: ISpace[];
   item: IFolderItem;
   inEdit: boolean
   tabs: Tab[];
-  historyItems: HistoryItem[];
+  recentItems: RecentItem[];
   showNotUsed: boolean;
   search: string;
   hiddenFeatureIsEnabled: boolean
@@ -123,7 +123,7 @@ export const FolderItem = React.memo((p: {
          onContextMenu={onContextMenu}>
         <img src={p.item.favIconUrl} alt="" onError={handleImageError}/>
         <EditableTitle className={CL("folder-item__inner__title", {
-          "not-used": p.showNotUsed && isFolderItemNotUsed(p.item, p.historyItems)
+          "not-used": p.showNotUsed && isFolderItemNotUsed(p.item, p.recentItems)
         })}
                        inEdit={p.inEdit}
                        setEditing={setEditing}
@@ -144,15 +144,3 @@ export const FolderItem = React.memo((p: {
     </div>
   )
 })
-
-let brokenImgSVG: string | undefined = undefined
-
-function getBrokenImgSVG() {
-  if (!brokenImgSVG) {
-    const svg = document.querySelector("#non-loaded-icon")!
-    const xml = (new XMLSerializer).serializeToString(svg)
-    brokenImgSVG = "data:image/svg+xml;base64," + btoa(xml)
-  }
-
-  return brokenImgSVG
-}

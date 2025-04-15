@@ -1,10 +1,9 @@
 import { ActionDispatcher } from "./actions"
 import { ColorTheme, IFolder, IFolderItem, IFolderItemToCreate, ISpace, IWidgetContent, IWidgetPos } from "../helpers/types"
 import { ISavingAppState } from "./storage"
-import { FilteredHistoryItem } from "../helpers/recentHistoryUtils"
+import { RecentItem } from "../helpers/recentHistoryUtils"
 import { WhatsNew } from "../helpers/whats-new"
 import Tab = chrome.tabs.Tab
-import HistoryItem = chrome.history.HistoryItem
 
 export type IAppStats = {
   sessionNumber: number
@@ -59,8 +58,7 @@ export type IAppState = {
 
   tabs: Tab[];
   currentWindowId: number | undefined
-  historyItems: HistoryItem[];
-  filteredHistoryItems: FilteredHistoryItem[];
+  recentItems: RecentItem[];
   notification: {
     visible: boolean;
     message: string;
@@ -71,6 +69,7 @@ export type IAppState = {
   lastActiveTabIds: number[]
   search: string;
   itemInEdit: undefined | number, //can be item or folder or space
+  showRecent: boolean; // Stored in LS
   showArchived: boolean; // Stored in LS
   showNotUsed: boolean; // Stored in LS
   openBookmarksInNewTab: boolean;
@@ -112,14 +111,14 @@ let initState: IAppState = {
   folders: [],
   spaces: [],
   currentSpaceId: -1,
-  historyItems: [],
-  filteredHistoryItems: [],
+  recentItems: [],
   tabs: [],
   currentWindowId: undefined,
   notification: { visible: false, message: "" },
   lastActiveTabIds: [],
   search: "",
   itemInEdit: undefined,
+  showRecent: false,
   showArchived: false,
   showNotUsed: false,
   openBookmarksInNewTab: false,
@@ -257,7 +256,7 @@ export type ActionPayload = (
   | { type: Action.InitDashboard; spaces?: ISpace[], sidebarCollapsed?: boolean, saveToLS?: boolean, init?: boolean }
   | { type: Action.UpdateTab; tabId: number; opt: Tab; }
   | { type: Action.CloseTabs; tabIds: number[] }
-  | { type: Action.SetTabsOrHistory; tabs?: Tab[]; history?: HistoryItem[] }
+  | { type: Action.SetTabsOrHistory; tabs?: Tab[]; recentItems?: RecentItem[] }
   | { type: Action.ToggleDarkMode }
   | { type: Action.UpdateShowArchivedItems; value: boolean }
   | { type: Action.UpdateShowNotUsedItems; value: boolean }

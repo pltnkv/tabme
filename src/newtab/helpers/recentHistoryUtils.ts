@@ -2,7 +2,7 @@ import HistoryItem = chrome.history.HistoryItem
 import { faviconsStorage } from "./faviconUtils"
 import { ActionDispatcher } from "../state/actions"
 import { Action } from "../state/state"
-import { filterIrrelevantHistory } from "./utils"
+import { getTempFavIconUrl } from "../state/actionHelpers"
 
 export const miroHashRegExp = /\/board\/([^/?]+)/
 
@@ -59,24 +59,27 @@ export type IFilter = {
   enabled?: boolean
 }
 
-export type FilteredHistoryItem = {
-  favIconUrl: string
-} & HistoryItem
+export type RecentItem = {
+  id: number;
+  isRecent: boolean;
+  favIconUrl: string;
+  title?: string;
+  url?: string;
+  lastVisitTime?: number;
+  visitCount?: number;
+}
 
-export function getFilteredHistoryItems(historyItems: HistoryItem[], filters: IFilter[]): FilteredHistoryItem[] {
-
-  const res: FilteredHistoryItem[] = []
+export function getFilteredRecentItems(historyItems: RecentItem[], filters: IFilter[]): RecentItem[] {
+  const res: RecentItem[] = []
   const deduplicatedHistoryItemsHashes = new Set<string>()
-  historyItems.forEach((item) => {
-    const filter = filters.find(f => item.url?.includes(f.pattern))
-    if (filter && filter.enabled && item.url && item.title) {
-      const hash = filter.getHash(item.url)
+  historyItems.forEach((ri) => {
+    const filter = filters.find(f => ri.url?.includes(f.pattern))
+    if (filter && filter.enabled && ri.url && ri.title) {
+      const hash = filter.getHash(ri.url)
       if (!deduplicatedHistoryItemsHashes.has(hash)) {
         deduplicatedHistoryItemsHashes.add(hash)
-        item.title = filter.cleanTitle(item.title);
-        (item as FilteredHistoryItem).favIconUrl = faviconsStorage.findInCache(item.url) ?? "" // todo draw default rect
-
-        res.push(item as FilteredHistoryItem)
+        ri.title = filter.cleanTitle(ri.title)
+        res.push(ri)
       }
     }
   })
@@ -84,22 +87,20 @@ export function getFilteredHistoryItems(historyItems: HistoryItem[], filters: IF
   return res
 }
 
-export function getBaseFilteredHistoryItems(historyItems: HistoryItem[]): FilteredHistoryItem[] {
-  const res: FilteredHistoryItem[] = []
-  const deduplicatedHistoryItemsHashesByTitle = new Map<string, Set<string>>();
-  (historyItems as FilteredHistoryItem[]).forEach((item) => {
-    if (item.url && item.title) {
-      const urlObj = new URL(item.url)
-      const hashesByPathName = deduplicatedHistoryItemsHashesByTitle.get(item.title)
+export function getBaseFilteredRecentItems(historyItems: RecentItem[]): RecentItem[] {
+  const res: RecentItem[] = []
+  const deduplicatedHistoryItemsHashesByTitle = new Map<string, Set<string>>()
+  historyItems.forEach((ri) => {
+    if (ri.url && ri.title) {
+      const urlObj = new URL(ri.url)
+      const hashesByPathName = deduplicatedHistoryItemsHashesByTitle.get(ri.title)
       if (!hashesByPathName) {
-        deduplicatedHistoryItemsHashesByTitle.set(item.title, new Set(urlObj.pathname))
-        item.favIconUrl = faviconsStorage.findInCache(urlObj) ?? ""
-        res.push(item)
+        deduplicatedHistoryItemsHashesByTitle.set(ri.title, new Set(urlObj.pathname))
+        res.push(ri)
       } else {
         if (!hashesByPathName.has(urlObj.pathname)) {
           hashesByPathName.add(urlObj.pathname)
-          item.favIconUrl = faviconsStorage.findInCache(urlObj) ?? ""
-          res.push(item)
+          res.push(ri)
         }
       }
     }
@@ -109,6 +110,7 @@ export function getBaseFilteredHistoryItems(historyItems: HistoryItem[]): Filter
 }
 
 let moreHistoryAlreadyLoaded = false
+
 // TODO !!! update when user focus the tab
 export function tryLoadMoreHistory(dispatch: ActionDispatcher) {
   if (moreHistoryAlreadyLoaded) {
@@ -116,20 +118,46 @@ export function tryLoadMoreHistory(dispatch: ActionDispatcher) {
   }
   moreHistoryAlreadyLoaded = true
 
-  getHistory(false).then(historyItems => {
+  getHistory(false).then(recentItems => {
     dispatch({
       type: Action.SetTabsOrHistory,
-      history: historyItems
+      recentItems: recentItems
     })
   })
 }
 
-export function getHistory(firstTime = true) {
-  return new Promise<HistoryItem[]>((res) => {
+export function getHistory(firstTime = true): Promise<RecentItem[]> {
+  return new Promise((res) => {
     const offset = 1000 * 60 * 60 * 24 * 60 //1000ms * 60sec *  60min * 24h * 60d
     const startTime = Date.now() - offset
     chrome.history.search({ text: "", maxResults: firstTime ? 100 : 10000, startTime }, function(data) {
-      res(filterIrrelevantHistory(data))
+      res(mapHistoryToRecentAndFilterIrrelevant(data))
     })
   })
+}
+
+function mapHistoryToRecentAndFilterIrrelevant(
+  list: HistoryItem[]
+): RecentItem[] {
+  const res: RecentItem[] = []
+  list.forEach(item => {
+    if (!item.url || !item.title) {
+      return
+    }
+
+    if (item.url.includes("translate.google.") || item.url.includes("www.deepl.com")) {
+      return
+    }
+
+    res.push({
+      id: parseInt(item.id, 10),
+      isRecent: true,
+      favIconUrl: faviconsStorage.findInCache(item.url) ?? "",
+      title: item.title,
+      url: item.url,
+      lastVisitTime: item.lastVisitTime,
+      visitCount: item.visitCount
+    })
+  })
+  return res
 }

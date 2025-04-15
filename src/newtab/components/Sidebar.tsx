@@ -1,8 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react"
-import { SidebarHistory } from "./SidebarHistory"
 import { SidebarOpenTabs } from "./SidebarOpenTabs"
 import { isTabmeTab } from "../helpers/isTabmeTab"
-import { getCurrentData, scrollElementIntoView } from "../helpers/utils"
+import { blurSearch, getCurrentData, isTargetSupportsDragAndDrop, scrollElementIntoView } from "../helpers/utils"
 import { DropdownMenu } from "./dropdown/DropdownMenu"
 import { CL } from "../helpers/classNameHelper"
 import { Action, IAppState } from "../state/state"
@@ -11,22 +10,103 @@ import IconClean from "../icons/clean.svg"
 import IconStash from "../icons/stash.svg"
 import IconPin from "../icons/pin.svg"
 import Tab = chrome.tabs.Tab
-import { convertTabToItem } from "../state/actionHelpers"
-import { createFolderWithStat, showMessage } from "../helpers/actionsHelpersWithDOM"
+import { convertTabOrRecentToItem, convertTabToItem } from "../state/actionHelpers"
+import { createFolderWithStat, getCanDragChecker, showMessage } from "../helpers/actionsHelpersWithDOM"
 import { trackStat } from "../helpers/stats"
 import { SidebarRecent } from "./SidebarRecent"
+import { bindDADItemEffect } from "../dragging/dragAndDrop"
+import HistoryItem = chrome.history.HistoryItem
+import { RecentItem } from "../helpers/recentHistoryUtils"
 
-export function Sidebar(props: {
+export function Sidebar(p: {
   appState: IAppState;
 }) {
   const dispatch = useContext(DispatchContext)
-  const keepSidebarOpened = !props.appState.sidebarCollapsed || props.appState.sidebarHovered
+  const keepSidebarOpened = !p.appState.sidebarCollapsed || p.appState.sidebarHovered
   const sidebarClassName = keepSidebarOpened ? "" : "collapsed"
   const sidebarRef = useRef<HTMLDivElement | null>(null)
   const openTabsHeaderRef = useRef<HTMLDivElement | null>(null)
 
+  const [mouseDownEvent, setMouseDownEvent] = useState<React.MouseEvent | undefined>(undefined)
+
+  useEffect(() => {
+    if (mouseDownEvent) {
+      // todo technically TabsIds and RecentIds can have collisions
+      const onDrop = (folderId: number, insertBeforeItemId: number | undefined, targetTabsOrRecentIds: number[]) => {
+        const targetTabId = targetTabsOrRecentIds[0] // we support D&D only single element from sidebar
+        let tabOrRecentItem: Tab | RecentItem | undefined = p.appState.tabs.find((t) => t.id === targetTabId)
+
+        if (!tabOrRecentItem) {
+          tabOrRecentItem = p.appState.recentItems.find(hi => hi.id === targetTabId)
+        }
+
+        if (folderId === -1) { // we need to create new folder first
+          folderId = createFolderWithStat(dispatch, {}, "by-drag-in-new-folder--sidebar")
+        }
+
+        if (tabOrRecentItem && tabOrRecentItem.id) { // Add existing Tab
+          const item = convertTabOrRecentToItem(tabOrRecentItem)
+          dispatch({
+            type: Action.CreateFolderItem,
+            folderId,
+            insertBeforeItemId,
+            item
+          })
+
+          dispatch({
+            type: Action.UpdateAppState,
+            newState: {
+              itemInEdit: item.id
+            }
+          })
+          trackStat("tabsSaved", { source: "sidebar-open-tabs" })
+        } else {
+          console.error("ERROR: tab not found")
+        }
+        setMouseDownEvent(undefined)
+      }
+      const onCancel = () => {
+        setMouseDownEvent(undefined)
+      }
+      const onClick = (tabOrRecentId: number) => {
+        const tab = p.appState.tabs.find(t => t.id === tabOrRecentId)
+        if (tab) {
+          chrome.tabs.update(tabOrRecentId, { active: true })
+          chrome.windows.update(tab.windowId, { focused: true })
+          trackStat("tabFocused", { source: "sidebar-open-tabs" })
+        } else {
+          const recent = p.appState.recentItems.find(ri => ri.id === tabOrRecentId)
+          if (recent && recent.url) {
+            chrome.tabs.create({ url: recent.url, active: true })
+            trackStat("tabFocused", { source: "sidebar-recent" })
+          }
+        }
+      }
+      const onDragStarted = () => {
+        return getCanDragChecker(p.appState.search, dispatch)()
+      }
+
+      return bindDADItemEffect(mouseDownEvent,
+        {
+          isFolderItem: false,
+          onDrop,
+          onCancel,
+          onClick,
+          onDragStarted
+        }
+      )
+    }
+  }, [mouseDownEvent])
+
+  function onMouseDown(e: React.MouseEvent) {
+    if (isTargetSupportsDragAndDrop(e)) {
+      blurSearch(e)
+      setMouseDownEvent(e)
+    }
+  }
+
   const onSidebarMouseEnter = () => {
-    if (!props.appState.sidebarCollapsed) {
+    if (!p.appState.sidebarCollapsed) {
       return
     }
 
@@ -38,7 +118,7 @@ export function Sidebar(props: {
 
   const onSidebarMouseLeave = (e: any) => {
 
-    if (!props.appState.sidebarCollapsed) {
+    if (!p.appState.sidebarCollapsed) {
       return
     }
 
@@ -51,10 +131,10 @@ export function Sidebar(props: {
   }
 
   function onToggleSidebar() {
-    trackStat("toggleSidebar", { sidebarCollapsed: !props.appState.sidebarCollapsed })
+    trackStat("toggleSidebar", { sidebarCollapsed: !p.appState.sidebarCollapsed })
     dispatch({
       type: Action.UpdateAppState, newState: {
-        sidebarCollapsed: !props.appState.sidebarCollapsed,
+        sidebarCollapsed: !p.appState.sidebarCollapsed,
         sidebarHovered: false
       }
     })
@@ -65,31 +145,35 @@ export function Sidebar(props: {
          ref={sidebarRef}
          onMouseEnter={onSidebarMouseEnter}
          onMouseLeave={onSidebarMouseLeave}
+         onMouseDown={onMouseDown}
     >
       <div className="app-sidebar__header app-sidebar__header--open-tabs" ref={openTabsHeaderRef}>
         <span className="app-sidebar__header__text">Open tabs</span>
-        <CleanupButton tabs={props.appState.tabs}/>
-        <StashButton tabs={props.appState.tabs}/>
+        <CleanupButton tabs={p.appState.tabs}/>
+        <StashButton tabs={p.appState.tabs}/>
         <button id="toggle-sidebar-btn"
-                className={CL("btn__icon", { "active": !props.appState.sidebarCollapsed })}
+                className={CL("btn__icon", { "active": !p.appState.sidebarCollapsed })}
                 onClick={onToggleSidebar}
-                style={props.appState.sidebarCollapsed ? { transform: "rotate(180deg)" } : {}}
-                title={props.appState.sidebarCollapsed ? "Pin" : "Collapse"}>
+                style={p.appState.sidebarCollapsed ? { transform: "rotate(180deg)" } : {}}
+                title={p.appState.sidebarCollapsed ? "Pin" : "Collapse"}>
           <IconPin/>
         </button>
       </div>
 
       <SidebarOpenTabs
-        tabs={props.appState.tabs}
-        spaces={props.appState.spaces}
-        search={props.appState.search}
-        lastActiveTabIds={props.appState.lastActiveTabIds}
-        currentWindowId={props.appState.currentWindowId}
+        tabs={p.appState.tabs}
+        spaces={p.appState.spaces}
+        search={p.appState.search}
+        lastActiveTabIds={p.appState.lastActiveTabIds}
+        currentWindowId={p.appState.currentWindowId}
       />
       {
-        props.appState.alphaMode
-          ? <SidebarRecent search={props.appState.search} historyItems={props.appState.historyItems}></SidebarRecent>
-          : <SidebarHistory search={props.appState.search} historyItems={props.appState.historyItems}/>
+        (p.appState.showRecent || p.appState.search) && <SidebarRecent
+          search={p.appState.search}
+          alphaMode={p.appState.alphaMode}
+          recentItems={p.appState.recentItems}
+          spaces={p.appState.spaces}
+        ></SidebarRecent>
       }
     </div>
   )

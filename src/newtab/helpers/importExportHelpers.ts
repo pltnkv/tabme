@@ -6,6 +6,7 @@ import { showMessage } from "./actionsHelpersWithDOM"
 import { getTopVisitedFromHistory } from "./utils"
 import HistoryItem = chrome.history.HistoryItem
 import { trackStat } from "./stats"
+import { RecentItem } from "./recentHistoryUtils"
 
 type IBackup = {
   isTabme: true,
@@ -188,8 +189,8 @@ export type PlainListRecord = {
 }
 export type BookmarksAsPlainList = PlainListRecord[]
 
-export function getBrowserBookmarks(onReady: (res: BookmarksAsPlainList) => void, historyItems: HistoryItem[], dispatch: ActionDispatcher): void {
-  const history = getTopVisitedFromHistory(historyItems, 1000)
+export function getBrowserBookmarks(onReady: (res: BookmarksAsPlainList) => void, recentItems: RecentItem[], dispatch: ActionDispatcher): void {
+  const history = getTopVisitedFromHistory(recentItems, 1000)
 
   // Fetch bookmark folders from Chrome API
   chrome.bookmarks.getTree((bookmarks) => {
@@ -208,7 +209,7 @@ export function getBrowserBookmarks(onReady: (res: BookmarksAsPlainList) => void
   })
 }
 
-function traverseTree(nodes: CustomBookmarkTreeNode[], plainList: BookmarksAsPlainList, breadcrumbs: CustomBookmarkTreeNode[], history: HistoryItem[]) {
+function traverseTree(nodes: CustomBookmarkTreeNode[], plainList: BookmarksAsPlainList, breadcrumbs: CustomBookmarkTreeNode[], history: RecentItem[]) {
   nodes.forEach(node => {
     if (node.children && node.children.length > 0) {
       plainList.push({

@@ -3,7 +3,7 @@ import { hasArchivedItems, hasItemsToHighlight } from "../helpers/utils"
 import { Action, IAppState } from "../state/state"
 import { DispatchContext } from "../state/actions"
 import Switch from "react-switch"
-import { showMessage } from "../helpers/actionsHelpersWithDOM"
+import { showErrorMessage, showMessage } from "../helpers/actionsHelpersWithDOM"
 import { importFromJson, onExportJson, onImportFromToby } from "../helpers/importExportHelpers"
 import { ImportConfirmationModal } from "./modals/ImportConfirmationModal"
 import { trackStat } from "../helpers/stats"
@@ -13,8 +13,9 @@ import { JoinBetaModal } from "./modals/JoinBetaModal"
 import { ShortcutsModal } from "./modals/ShortcutsModal"
 import { OverrideModal } from "./modals/OverrideModal"
 import { IFolderItem } from "../helpers/types"
+import { CL } from "../helpers/classNameHelper"
 
-type OnClickOption = { onClick: (e: any) => void; title: string; text: string; hidden?: boolean; isFile?: boolean }
+type OnClickOption = { onClick: (e: any) => void; title: string; text: string; hidden?: boolean; isFile?: boolean, dangerStyle?: boolean }
 type OnToggleOption = { onToggle: () => void; value: boolean, title: string; text: string; hidden?: boolean }
 export type OptionsConfig = Array<OnClickOption | OnToggleOption | { separator: true }>
 
@@ -93,7 +94,6 @@ export const HelpOptions = (p: {
     setJoinBetaModalOpen(true)
     trackStat("settingsClicked", { settingName: "tryBeta" })
   }
-
 
   function invalidateFavicon(folderItem: IFolderItem): Promise<void> {
     if (folderItem.url) {
@@ -192,30 +192,37 @@ export const SettingsOptions = (p: {
   const [isOverrideModalOpen, setOverrideModalOpen] = useState(false)
 
   function onToggleNotUsed() {
-    if (hasItemsToHighlight(p.appState.spaces, p.appState.historyItems)) {
-      dispatch({ type: Action.UpdateShowNotUsedItems, value: !p.appState.showNotUsed })
-      const message = !p.appState.showNotUsed ? "Unused items for the past 60 days are highlighted" : "Highlighting canceled"
-      showMessage(message, dispatch)
+    if (p.appState.showNotUsed) {
+      dispatch({ type: Action.UpdateShowNotUsedItems, value: false })
+      showMessage("Highlighting canceled", dispatch)
     } else {
-      showMessage(`There are no unused items to highlight`, dispatch)
+      if (hasItemsToHighlight(p.appState.spaces, p.appState.recentItems)) {
+        dispatch({ type: Action.UpdateShowNotUsedItems, value: true })
+        showMessage("Unused items for the past 60 days are highlighted", dispatch)
+      } else {
+        showErrorMessage(`There are no unused items to highlight`, dispatch)
+      }
     }
+
     trackStat("settingsClicked", { settingName: "ToggleNotUsed" })
   }
 
   function onToggleHidden() {
-    if (hasArchivedItems(p.appState.spaces)) {
-      dispatch({ type: Action.UpdateShowArchivedItems, value: !p.appState.showArchived })
-      const message = !p.appState.showArchived ? "Hidden items are visible" : "Hidden items are hidden"
-      showMessage(message, dispatch)
-    } else {
-      showMessage(`There are no hidden items`, dispatch)
-    }
+    dispatch({ type: Action.UpdateShowArchivedItems, value: !p.appState.showArchived })
+    const message = !p.appState.showArchived ? "Hidden items are visible" : "Hidden items are hidden"
+    showMessage(message, dispatch)
+
     trackStat("settingsClicked", { settingName: "ToggleHidden" })
   }
 
   function onImportExistingBookmarks() {
     dispatch({ type: Action.UpdateAppState, newState: { page: "import" } })
     trackStat("settingsClicked", { settingName: "ImportExistingBookmarks" })
+  }
+
+  function onToggleRecentVisibility() {
+    dispatch({ type: Action.UpdateAppState, newState: { showRecent: !p.appState.showRecent } })
+    trackStat("settingsClicked", { settingName: "ToggleRecentVisibility" })
   }
 
   function onToggleMode() {
@@ -257,6 +264,12 @@ export const SettingsOptions = (p: {
     },
     {
       separator: true
+    },
+    {
+      onToggle: onToggleRecentVisibility,
+      value: p.appState.showRecent,
+      title: "Toggle recently closed Tabs always visible in the sidebar",
+      text: "Always show Recent in Sidebar"
     },
     {
       onToggle: onToggleMode,
@@ -370,7 +383,7 @@ export const Options = (props: { optionsConfig: OptionsConfig | (() => OptionsCo
       } else if (isClick(option)) {
         if (option.isFile) {
           return <label key={index}
-                        className="dropdown-menu__button focusable"
+                        className={CL("dropdown-menu__button focusable")}
                         style={{ position: "relative" }}
                         title={option.title}
                         tabIndex={0}>
@@ -380,7 +393,9 @@ export const Options = (props: { optionsConfig: OptionsConfig | (() => OptionsCo
         } else {
           return <button
             key={index}
-            className="dropdown-menu__button focusable"
+            className={CL("dropdown-menu__button focusable", {
+              "dropdown-menu__button--dander": option.dangerStyle
+            })}
             onClick={option.onClick}
             title={option.title}
           >{option.text}</button>

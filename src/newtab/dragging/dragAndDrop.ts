@@ -1,5 +1,5 @@
 import { getSelectedItemsElements, unselectAllItems } from "../helpers/selectionUtils"
-import { findParentWithClass, isSomeParentHaveClass, isTargetSupportsDragAndDrop } from "../helpers/utils"
+import { findParentWithClass, isSomeParentHaveClass, isTargetInputOrTextArea, isTargetSupportsDragAndDrop } from "../helpers/utils"
 import { IPoint } from "../helpers/MathTypes"
 import { processMultiselection } from "./processMultiselection"
 import { processWidgetsDragAndDrop } from "./processWidgetsDragAndDrop"
@@ -51,7 +51,7 @@ export function bindDADItemEffect(
   const clickOnUIElement = isSomeParentHaveClass(target, ["widgets-hor-menu", "dropdown-menu", "modal-wrapper", "toolbar"])
   const targetFolderHeader = findRootOfDraggableFolder(target)
 
-  if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || clickOnUIElement) {
+  if (isTargetInputOrTextArea(target) || clickOnUIElement) {
     return
   }
 

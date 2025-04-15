@@ -256,7 +256,7 @@ export function Bookmarks(p: {
             spaces={p.appState.spaces}
             folder={folder}
             tabs={p.appState.tabs}
-            historyItems={p.appState.historyItems}
+            recentItems={p.appState.recentItems}
             showNotUsed={p.appState.showNotUsed}
             showArchived={p.appState.showArchived}
             search={p.appState.search}

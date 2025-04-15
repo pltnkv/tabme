@@ -1,14 +1,14 @@
 import React, { useCallback, useContext, useEffect, useState } from "react"
-import { extractHostname, filterHistoryItemsBySearch, hlSearch, removeUselessProductName } from "../helpers/utils"
+import { extractHostname, filterRecentItemsBySearch, hlSearch, removeUselessProductName } from "../helpers/utils"
 import { CL } from "../helpers/classNameHelper"
 import {
   confluenceHashRegExp, figmaBoardRegExp, figmaDesignHashRegExp,
   figmaSlidesRegExp,
-  FilteredHistoryItem,
-  getBaseFilteredHistoryItems,
+  RecentItem,
+  getBaseFilteredRecentItems,
   getCleanMiroTitle,
   getCleanTitle,
-  getFilteredHistoryItems,
+  getFilteredRecentItems,
   githubPRHashRegExp,
   googleDocHashRegExp, googleFormsHashRegExp, googlePresentationHashRegExp, googleSpreadsheetsHashRegExp,
   hashGetterFactory, IFilter, jiraHashRegExp,
@@ -22,63 +22,19 @@ import HistoryItem = chrome.history.HistoryItem
 import { getTempFavIconUrl } from "../state/actionHelpers"
 import { DispatchContext } from "../state/actions"
 import { trackStat } from "../helpers/stats"
-
-function formatDate(d: Date): string {
-  const today = new Date()
-  // Strip out the time part by creating new dates at midnight.
-  const inputDate = new Date(d.getFullYear(), d.getMonth(), d.getDate())
-  const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate())
-  const yesterdayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1)
-
-  if (inputDate.getTime() === todayDate.getTime()) {
-    return "Today"
-  } else if (inputDate.getTime() === yesterdayDate.getTime()) {
-    return "Yesterday"
-  } else {
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    let formatted = d.getDate() + " " + months[d.getMonth()]
-    // Optionally, include the year if it is not the current year:
-    if (d.getFullYear() !== today.getFullYear()) {
-      formatted += " " + d.getFullYear()
-    }
-    return formatted
-  }
-}
-
-const RecentItem = (p: { item: FilteredHistoryItem, search: string }) => {
-  let shortenedTitle = removeUselessProductName(p.item.title)
-  let domain = extractHostname(p.item.url)
-
-  const domainAndDate = extractHostname(p.item.url) + ", " + formatDate(new Date(p.item.lastVisitTime || 0))
-
-  const onClick = (url: string | undefined) => {
-    chrome.tabs.create({ url })
-    trackStat("tabOpened", { inNewTab: true, source: "sidebar-recent" })
-  }
-
-  return <div
-    onClick={() => onClick(p.item.url)}
-    // style={{ backgroundColor: getBgColor(p.tab.id) }}
-    className={CL("inbox-item draggable-item")}
-    // data-id={p.tab.id}
-    // onContextMenu={onTabContextMenu}
-  >
-    <img src={p.item.favIconUrl} alt=""/>
-    <div className="inbox-item__text">
-      <div className="inbox-item__title"
-           title={p.item.title}
-           dangerouslySetInnerHTML={hlSearch(shortenedTitle, p.search)}/>
-      <div className="inbox-item__url"
-           title={p.item.url}>{domainAndDate}</div>
-    </div>
-  </div>
-}
+import { getBrokenImgSVG } from "../helpers/faviconUtils"
+import { TabOrRecentItem } from "./SidebarItem"
+import { ISpace } from "../helpers/types"
 
 const PAGE_SIZE = 100
 
-const RecentList = (p: { items: FilteredHistoryItem[]; search: string }) => {
+const RecentList = React.memo((p: {
+  items: RecentItem[];
+  spaces: ISpace[];
+  search: string
+}) => {
   const dispatch = useContext(DispatchContext)
-  const [displayedItems, setDisplayedItems] = useState<FilteredHistoryItem[]>([])
+  const [displayedItems, setDisplayedItems] = useState<RecentItem[]>([])
   const [page, setPage] = useState<number>(1)
 
   // Load initial page whenever the filteredHistoryItems change.
@@ -123,32 +79,38 @@ const RecentList = (p: { items: FilteredHistoryItem[]; search: string }) => {
   return <div>
     {
       displayedItems.map((item) => {
-          return <RecentItem
+          return <TabOrRecentItem
+            lastActiveTabId={0}
             key={item.id}
-            item={item}
+            data={item}
+            spaces={p.spaces}
             search={p.search}/>
         }
       )
     }
   </div>
-}
+})
 
 export const SidebarRecent = React.memo((p: {
-  historyItems: HistoryItem[];
+  recentItems: RecentItem[];
+  alphaMode: boolean,
   search: string;
+  spaces: ISpace[];
 }) => {
   const dispatch = useContext(DispatchContext)
   const [filterByDomainEnabled, setFilterByDomainEnabled] = React.useState(false)
   const [enabledFilers, setEnabledFilters] = useState<IFilter[]>(historyFilters)
   const enabledFiltersCount = enabledFilers.reduce((prevVal, filter) => prevVal + (filter.enabled ? 1 : 0), 0)
 
-  const itemsFilteredBySearch = filterHistoryItemsBySearch(p.historyItems, p.search)
+  const itemsFilteredBySearch = filterRecentItemsBySearch(p.recentItems, p.search)
 
   const itemsFilteredBySearchAndFilter = filterByDomainEnabled && enabledFiltersCount
-    ? getFilteredHistoryItems(itemsFilteredBySearch, enabledFilers)
-    : getBaseFilteredHistoryItems(itemsFilteredBySearch)
+    ? getFilteredRecentItems(itemsFilteredBySearch, enabledFilers)
+    : getBaseFilteredRecentItems(itemsFilteredBySearch)
 
-  const moreSearchResultsCount = p.search !== "" && enabledFiltersCount > 0 ? itemsFilteredBySearch.length - itemsFilteredBySearchAndFilter.length : 0
+  const moreSearchResultsCount = p.search !== "" && p.alphaMode && enabledFiltersCount > 0
+    ? itemsFilteredBySearch.length - itemsFilteredBySearchAndFilter.length
+    : 0
 
   const onFiltersPanelClick = () => {
     setFilterByDomainEnabled(!filterByDomainEnabled)
@@ -186,12 +148,14 @@ export const SidebarRecent = React.memo((p: {
     })}>
       <div className="inner-header">
         <span className="app-sidebar__header__text">Recent</span>
-        <button className={CL("btn__icon", { "active": filterByDomainEnabled })}
-                style={{ position: "relative" }}
-                title="Filter recent by domain"
-                onClick={onFiltersPanelClick}>
-          <IconFilter/>
-        </button>
+        {
+          p.alphaMode && <button className={CL("btn__icon", { "active": filterByDomainEnabled })}
+                                 style={{ position: "relative" }}
+                                 title="Filter recent by domain"
+                                 onClick={onFiltersPanelClick}>
+            <IconFilter/>
+          </button>
+        }
       </div>
 
       {
@@ -220,6 +184,7 @@ export const SidebarRecent = React.memo((p: {
     <RecentList
       items={itemsFilteredBySearchAndFilter}
       search={p.search}
+      spaces={p.spaces}
     ></RecentList>
     {
       Boolean(moreSearchResultsCount)

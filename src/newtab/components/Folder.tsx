@@ -15,12 +15,13 @@ import Tab = chrome.tabs.Tab
 import { showMessageWithUndo } from "../helpers/actionsHelpersWithDOM"
 import { createNewFolderItem, createNewSection, findSpaceByFolderId } from "../state/actionHelpers"
 import { trackStat } from "../helpers/stats"
+import { RecentItem } from "../helpers/recentHistoryUtils"
 
 export const Folder = React.memo(function Folder(p: {
   spaces: ISpace[];
   folder: IFolder;
   tabs: Tab[];
-  historyItems: HistoryItem[];
+  recentItems: RecentItem[];
   showNotUsed: boolean;
   showArchived: boolean;
   search: string;
@@ -283,7 +284,7 @@ export const Folder = React.memo(function Folder(p: {
                 item={item}
                 inEdit={item.id === p.itemInEdit}
                 tabs={p.tabs}
-                historyItems={p.historyItems}
+                recentItems={p.recentItems}
                 showNotUsed={p.showNotUsed}
                 search={p.search}
                 hiddenFeatureIsEnabled={p.hiddenFeatureIsEnabled}
