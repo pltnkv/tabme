@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
   "short_name": "Tabme",
-  "name": "Bookmark Manager | Tabme for New Tab",
-  "description": "The most easy to use Tab and Bookmark manager with Sticky Notes",
-  "version": "1.35.0",
+  "name": "Bookmark Manager for New Tab | Tabme",
+  "description": "The easiest Tab and Bookmark Manager with built-in Sticky Notes.",
+  "version": "1.36.0",
   "author": "gettabme@gmail.com",
   "icons": {
     "16": "icon_16.png",

@@ -246,9 +246,9 @@ export const Folder = React.memo(function Folder(p: {
               <PresetColor color={PRESET_COLORS[6]} onClick={setColorConfirmed} currentColor={folderColor}/>
               <CustomColorInput onChange={setColorLocally} onBlur={setColorConfirmed} currentColor={folderColor}/>
             </div>
+            <button className="dropdown-menu__button focusable" onClick={onAddBookmark}>+ Add Bookmark</button>
+            <button className="dropdown-menu__button focusable" onClick={onAddSection}>+ Add Section</button>
             <button className="dropdown-menu__button focusable" onClick={onOpenAll}>Open All</button>
-            <button className="dropdown-menu__button focusable" onClick={onAddBookmark}>Add Bookmark</button>
-            <button className="dropdown-menu__button focusable" onClick={onAddSection}>Add Section</button>
             {
               p.hiddenFeatureIsEnabled && <button className="dropdown-menu__button focusable" onClick={onArchiveOrRestore}>{p.folder.archived ? "Unhide" : "Hide"}</button>
             }
