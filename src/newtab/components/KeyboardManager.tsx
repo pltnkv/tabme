@@ -121,33 +121,27 @@ export const KeyboardManager = React.memo((p: {
         return
       }
 
-      if (e.code === "ArrowDown") {
-        ;(document.querySelector("input.search") as HTMLElement).focus()
-        return
-      }
+      if (document.activeElement === document.body) {
 
-      if (e.code.startsWith("Digit")) {
-        if (e.ctrlKey || e.altKey) {
-          const spaceIndex = parseInt(e.code.at(5) ?? "", 10)
-          if (spaceIndex > 0 && spaceIndex < 10) {
-            dispatch({
-              type: Action.SelectSpace,
-              spaceIndex: spaceIndex - 1
-            })
-            return
+        if (e.code === "ArrowDown") {
+          ;(document.querySelector("input.search") as HTMLElement).focus()
+          return
+        }
+
+        if (e.code.startsWith("Digit")) {
+          if (e.ctrlKey || e.altKey) {
+            const spaceIndex = parseInt(e.code.at(5) ?? "", 10)
+            if (spaceIndex > 0 && spaceIndex < 10) {
+              dispatch({
+                type: Action.SelectSpace,
+                spaceIndex: spaceIndex - 1
+              })
+              return
+            }
           }
         }
       }
 
-      // disable instant typing in search
-      // const isLetterOrNumber = !!(e.key.length === 1 && e.key.match(/[a-z]|[а-я]|[0-9]/i))
-      // if (isLetterOrNumber) {
-      // dispatch({
-      //   type: Action.UpdateSearch,
-      //   value: props.search + e.key
-      // })
-      // ;(document.querySelector("input.search") as HTMLElement).focus()
-      // }
     }
     document.addEventListener("keydown", onKeyDown)
 
