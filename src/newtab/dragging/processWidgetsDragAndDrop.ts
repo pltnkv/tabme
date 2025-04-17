@@ -41,8 +41,10 @@ export function processWidgetsDragAndDrop(mouseDownEvent: React.MouseEvent, widg
     let deltaY = round10(mouseDownEvent.clientY - e.clientY + initScrollTop - bookmarksElement.scrollTop)
     initWidgetPositions.forEach(i => {
       if (selectedWidgetIds.includes(i.id) || targetWidgetId === i.id) {
-        i.element.style.left = `${round10(i.pos.x - deltaX)}px`
-        i.element.style.top = `${round10(i.pos.y - deltaY)}px`
+        const newLeft = Math.max(0, round10(i.pos.x - deltaX))
+        const newTop = Math.max(0, round10(i.pos.y - deltaY))
+        i.element.style.left = `${newLeft}px`
+        i.element.style.top = `${newTop}px`
         movedWidgetIds.add(i.id)
       }
     })

@@ -161,13 +161,15 @@ function convertItemsIntoHorizontalList(currentItem: HTMLElement, appState: IApp
 
 let trackSearchUsedTimeout: ReturnType<typeof setTimeout> | null = null
 
-export function handleSearchKeyDown(event: React.KeyboardEvent) {
+export function handleSearchKeyDown(event: React.KeyboardEvent, onClearSearch: () => void) {
   if (event.code === "ArrowDown") {
     const firstFolderItem = document.querySelector(FOLDER_ITEM_SELECTOR) as HTMLElement
     if (firstFolderItem) {
       firstFolderItem.focus()
       event.preventDefault()
     }
+  } else if (event.code === "Escape") {
+    onClearSearch()
   } else {
     if (trackSearchUsedTimeout) {
       clearTimeout(trackSearchUsedTimeout)

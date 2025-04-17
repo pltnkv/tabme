@@ -81,7 +81,7 @@ export function TopBar(p: {
           placeholder="Search in Tabme"
           value={p.appState.search}
           onChange={onSearchChange}
-          onKeyDown={handleSearchKeyDown}
+          onKeyDown={e => handleSearchKeyDown(e, onClearSearch)}
         />
         {
           p.appState.search !== ""
@@ -124,7 +124,8 @@ export function TopBar(p: {
 
         {
           whatsNewForModal &&
-          <WhatsNewModal onClose={() => setWhatsNewForModal(undefined)} whatsNew={whatsNewForModal} isBeta={p.appState.betaMode} firstSessionDate={p.appState.stat?.firstSessionDate}/>
+          <WhatsNewModal onClose={() => setWhatsNewForModal(undefined)} whatsNew={whatsNewForModal} isBeta={p.appState.betaMode}
+                         firstSessionDate={p.appState.stat?.firstSessionDate}/>
         }
       </div>
 
