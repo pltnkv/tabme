@@ -21,7 +21,7 @@ export function getMouseY() {
   return mouseY
 }
 
-export const KeyboardManager = React.memo((p: {
+export const KeyboardAndMouseManager = React.memo((p: {
   search: string;
   selectedWidgetIds: number[];
 }) => {
@@ -75,6 +75,14 @@ export const KeyboardManager = React.memo((p: {
         return
       }
 
+      if (e.code === "KeyV" && (e.ctrlKey || e.metaKey)) {
+        const state = getGlobalAppState()
+        canvasAPI.pasteWidgets(dispatch, state.currentSpaceId)
+        e.preventDefault()
+        e.stopPropagation()
+        return
+      }
+
       if (p.selectedWidgetIds.length > 0) {
         if ((e.code === "Backspace" || e.code === "Delete")) {
           canvasAPI.deleteWidgets(dispatch, p.selectedWidgetIds)
@@ -90,6 +98,20 @@ export const KeyboardManager = React.memo((p: {
 
         if (e.code === "KeyD" && (e.ctrlKey || e.metaKey)) {
           canvasAPI.duplicateWidgets(dispatch, p.selectedWidgetIds)
+          e.preventDefault()
+          e.stopPropagation()
+          return
+        }
+
+        if (e.code === "KeyC" && (e.ctrlKey || e.metaKey)) {
+          canvasAPI.copyWidgets(dispatch, p.selectedWidgetIds)
+          e.preventDefault()
+          e.stopPropagation()
+          return
+        }
+
+        if (e.code === "KeyX" && (e.ctrlKey || e.metaKey)) {
+          canvasAPI.cutWidgets(dispatch, p.selectedWidgetIds)
           e.preventDefault()
           e.stopPropagation()
           return

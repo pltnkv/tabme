@@ -10,62 +10,88 @@ export function getCanvasMenuOption(
   canvasMenuType: "canvas" | "widgets",
   appState: IAppState,
   currentFolders: IFolder[],
-  setCanvasMenuPos: (point: IPoint | undefined) => void
+  onClose: () => void,
 ): OptionsConfig {
+  // todo add stat for each action + move onClose in a single place
+
   if (canvasMenuType === "canvas") {
     return [
       {
+        text: "Paste",
+        title: "Paste Sticky Notes from clipboard",
         onClick: () => {
-          canvasAPI.createStickerUnderCursor(dispatch, appState.currentSpaceId)
-          setCanvasMenuPos(undefined)
-        },
-        title: "Create Sticky Note",
-        text: "Create Sticky Note",
+          canvasAPI.pasteWidgets(dispatch, appState.currentSpaceId)
+          onClose()
+        }
       },
       {
+        text: "Add Sticky Note",
+        title: "Create Sticky Note",
+        onClick: () => {
+          canvasAPI.createStickerUnderCursor(dispatch, appState.currentSpaceId)
+          onClose()
+        }
+      },
+      {
+        text: "Add Folder",
+        title: "Create new Folder in the current viewport",
         onClick: () => {
           canvasAPI.createFolderInCurrentViewport(dispatch, currentFolders)
-          setCanvasMenuPos(undefined)
-        },
-        title: "Create new Folder in the current viewport",
-        text: "Create Folder"
+          onClose()
+        }
       }
     ]
   } else {
     return [
       {
+        text: "Cut",
+        title: "Cut selected Sticky Notes to clipboard",
+        onClick: () => {
+          canvasAPI.cutWidgets(dispatch, appState.selectedWidgetIds)
+          onClose()
+        }
+      },
+      {
+        text: "Copy",
+        title: "Copy selected Sticky Notes to clipboard",
+        onClick: () => {
+          canvasAPI.copyWidgets(dispatch, appState.selectedWidgetIds)
+          onClose()
+        }
+      },
+      {
+        text: "Bring to front",
+        title: "Bring selected Sticky Notes to front",
         onClick: () => {
           canvasAPI.bringToFront(dispatch, appState.selectedWidgetIds)
-          setCanvasMenuPos(undefined)
-        },
-        title: "Bring selected widgets to front",
-        text: "Bring to front"
+          onClose()
+        }
       },
       {
+        text: "Send to back",
+        title: "Send selected Sticky Notes to back",
         onClick: () => {
           canvasAPI.sendToBack(dispatch, appState.selectedWidgetIds)
-          setCanvasMenuPos(undefined)
-        },
-        title: "Send selected widgets to back",
-        text: "Send to back"
+          onClose()
+        }
       },
       {
+        text: "Duplicate",
+        title: "Duplicate selected Sticky Notes",
         onClick: () => {
           canvasAPI.duplicateWidgets(dispatch, appState.selectedWidgetIds)
-          setCanvasMenuPos(undefined)
-        },
-        title: "Duplicate selected widgets",
-        text: "Duplicate"
+          onClose()
+        }
       }
       ,
       {
+        text: "Delete",
+        title: "Delete selected Sticky Notes",
+        dangerStyle: true,
         onClick: () => {
           canvasAPI.deleteWidgets(dispatch, appState.selectedWidgetIds)
-          setCanvasMenuPos(undefined)
-        },
-        title: "Delete selected widgets",
-        text: "Delete",
-        dangerStyle: true
+          onClose()
+        }
       }
     ]
   }

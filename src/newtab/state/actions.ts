@@ -17,6 +17,7 @@ import {
   updateSpace
 } from "./actionHelpers"
 import { genNextRuntimeId, getRandomHEXColor, isArraysEqual } from "../helpers/utils"
+import { defaultStickerColor, stickerSizeM } from "../components/canvas/WidgetsHorMenu"
 
 type ObjectWithRemoteId = {
   remoteId: number
@@ -726,8 +727,8 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         content: Object.assign({
           contentType: "Sticker",
           text: "Sticky note",
-          color: "#FFF598",
-          fontSize: 18
+          color: defaultStickerColor,
+          fontSize: stickerSizeM
         }, action.content)
       }
 

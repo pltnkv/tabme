@@ -205,7 +205,7 @@ export function Bookmarks(p: {
   }
 
   const getCanvasMenuOptionWrapper = () => {
-    return getCanvasMenuOption(dispatch, canvasMenuType, p.appState, folders, setCanvasMenuPos)
+    return getCanvasMenuOption(dispatch, canvasMenuType, p.appState, folders, () => setCanvasMenuPos(undefined))
   }
 
   function onCreateFolder() {

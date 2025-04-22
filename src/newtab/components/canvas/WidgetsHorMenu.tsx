@@ -20,6 +20,10 @@ const SizeToLabel: { [x: string]: string } = {
   "26": "L"
 }
 
+export const defaultStickerColor = Colors[0]
+export const stickerSizeM = LabelToSize['M']
+export const stickerSizeS = LabelToSize['S']
+
 function getNextVal(color: string | undefined, arr: string[]): string | undefined {
   const currentIndex = arr.indexOf(color!)
   if (currentIndex === -1) {

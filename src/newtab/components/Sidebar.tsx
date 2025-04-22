@@ -151,7 +151,7 @@ export function Sidebar(p: {
         <CleanupButton tabs={p.appState.tabs}/>
         <StashButton tabs={p.appState.tabs}/>
         <button id="toggle-sidebar-btn"
-                className={CL("btn__icon", { "active": !p.appState.sidebarCollapsed })}
+                className={CL("btn__icon")}
                 onClick={onToggleSidebar}
                 style={p.appState.sidebarCollapsed ? { transform: "rotate(180deg)" } : {}}
                 title={p.appState.sidebarCollapsed ? "Pin" : "Collapse"}>

@@ -2,7 +2,7 @@ import React, { useEffect, useReducer } from "react"
 import { Bookmarks } from "./Bookmarks"
 import { Sidebar } from "./Sidebar"
 import { Notification } from "./Notification"
-import { KeyboardManager } from "./KeyboardManager"
+import { KeyboardAndMouseManager } from "./KeyboardAndMouseManager"
 import { ImportBookmarksFromSettings } from "./ImportBookmarksFromSettings"
 import { createWelcomeFolder } from "../helpers/welcomeLogic"
 import { Action, getInitAppState, IAppState } from "../state/state"
@@ -206,7 +206,7 @@ export function App() {
             appState.page === "default" && <>
               <Sidebar appState={appState}/>
               <Bookmarks appState={appState}/>
-              <KeyboardManager search={appState.search} selectedWidgetIds={appState.selectedWidgetIds}/>
+              <KeyboardAndMouseManager search={appState.search} selectedWidgetIds={appState.selectedWidgetIds}/>
             </>
           }
         </div>
