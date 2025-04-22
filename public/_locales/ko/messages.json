@@ -1,0 +1,11 @@
+{
+  "extName": {
+    "message": "새 탭을 위한 즐겨찾기 및 탭 관리자 | Tabme"
+  },
+  "extDesc": {
+    "message": "메모 기능이 내장된 가장 쉬운 탭 및 북마크 관리자."
+  },
+  "extDefaultTitle": {
+    "message": "Tabme 열기"
+  }
+}

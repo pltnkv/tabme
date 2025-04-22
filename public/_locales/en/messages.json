@@ -1,0 +1,11 @@
+{
+  "extName": {
+    "message": "Bookmark Manager for New Tab | Tabme"
+  },
+  "extDesc": {
+    "message": "The easiest Tab and Bookmark Manager with built-in Sticky Notes."
+  },
+  "extDefaultTitle": {
+    "message": "Open Tabme"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "extName": {
+    "message": "新分頁書籤與分頁管理器 | Tabme"
+  },
+  "extDesc": {
+    "message": "最簡單的分頁與書籤管理工具，內建便利貼功能。"
+  },
+  "extDefaultTitle": {
+    "message": "打開 Tabme"
+  }
+}

@@ -8,6 +8,7 @@
     "watch2": "webpack --config webpack/webpack.dev.js --watch --env BUILD_TYPE=overrideless",
     "build": "webpack --config webpack/webpack.prod.js",
     "publish": "node webpack/publish.js",
+    "publish-patch": "node webpack/publish.js --patch",
     "clean": "rimraf dist",
     "test": "npx jest",
     "style": "prettier --write \"src/**/*.{ts,tsx}\""

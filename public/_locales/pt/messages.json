@@ -1,0 +1,11 @@
+{
+  "extName": {
+    "message": "Gerenciador de Favoritos e Abas para Nova Guia | Tabme"
+  },
+  "extDesc": {
+    "message": "O gerenciador de abas e favoritos mais fácil com notas adesivas embutidas."
+  },
+  "extDefaultTitle": {
+    "message": "Abrir Tabme"
+  }
+}
