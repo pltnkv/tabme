@@ -4,9 +4,9 @@ import { bindDADItemEffect } from "../dragging/dragAndDrop"
 import { Folder } from "./Folder"
 import { handleBookmarksKeyDown } from "../helpers/handleBookmarksKeyDown"
 import { Action, IAppState } from "../state/state"
-import { canShowArchived, DispatchContext, mergeStepsInHistory } from "../state/actions"
+import { DispatchContext, mergeStepsInHistory } from "../state/actions"
 import { IFolder, IWidget } from "../helpers/types"
-import { findSpaceById, genUniqLocalId } from "../state/actionHelpers"
+import { findFolderById, findFolderByItemId, findSpaceById, genUniqLocalId } from "../state/actionHelpers"
 import { clickFolderItem, createFolderWithStat, getCanDragChecker } from "../helpers/actionsHelpersWithDOM"
 import { Canvas } from "./Canvas"
 import { IPoint } from "../helpers/MathTypes"
@@ -19,6 +19,7 @@ import { canvasAPI } from "./canvas/canvasAPI"
 import { DropdownMenu } from "./dropdown/DropdownMenu"
 import { Options } from "./SettingsOptions"
 import { getCanvasMenuOption } from "./canvas/getCanvasMenuOptions"
+import { GetProPlanModal } from "./modals/GetProPlanModal"
 
 let __prevCurrentSpaceId: number | undefined = undefined
 let __prevSearch: string | undefined = undefined
@@ -31,6 +32,7 @@ export function Bookmarks(p: {
   const [isScrolled, setIsScrolled] = useState(false)
   const [canvasMenuPos, setCanvasMenuPos] = useState<IPoint | undefined>(undefined)
   const [canvasMenuType, setCanvasMenuType] = useState<"canvas" | "widgets">("canvas")
+  const [isJoinProModalOpen, setJoinProModalOpen] = useState(false)
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const bookmarksRef = useRef<HTMLDivElement>(null)
@@ -82,6 +84,8 @@ export function Bookmarks(p: {
             folderId = createFolderWithStat(dispatch, { historyStepId }, "by-drag-in-new-folder--bookmarks")
           }
 
+          targetsIds = addSectionChildrenIfNeeded(targetsIds, p.appState)
+
           // todo !!! support switching spaces like for folders
           dispatch({
             type: Action.MoveFolderItems,
@@ -110,7 +114,9 @@ export function Bookmarks(p: {
       }
       const onClick = (targetId: number) => {
         const meta = mouseDownEvent.metaKey || mouseDownEvent.ctrlKey || mouseDownEvent.button === 1
-        clickFolderItem(targetId, p.appState, dispatch, meta, p.appState.openBookmarksInNewTab)
+        clickFolderItem(targetId, p.appState, dispatch, meta, p.appState.openBookmarksInNewTab, () => {
+          setJoinProModalOpen(true)
+        })
       }
 
       const onChangeSpace = (spaceId: number) => {
@@ -221,10 +227,7 @@ export function Bookmarks(p: {
   if (p.appState.search === "") {
     const currentSpace = findSpaceById(p.appState, p.appState.currentSpaceId)
     if (currentSpace) {
-      folders = p.appState.showArchived
-        ? currentSpace.folders ?? [] // just in case of broken data
-        : currentSpace.folders.filter(f => canShowArchived(p.appState) || !f.archived)
-
+      folders = currentSpace.folders ?? [] // just in case of broken data
       widgets = currentSpace.widgets ?? []
     }
   } else {
@@ -233,6 +236,7 @@ export function Bookmarks(p: {
       s.folders.forEach(f => {
         if (isContainsSearch(f, searchValueLC) || f.items.some(i => isContainsSearch(i, searchValueLC))) {
           folders.push(f)
+          // todo !! support search for stickers
         }
       })
     })
@@ -258,10 +262,9 @@ export function Bookmarks(p: {
             tabs={p.appState.tabs}
             recentItems={p.appState.recentItems}
             showNotUsed={p.appState.showNotUsed}
-            showArchived={p.appState.showArchived}
             search={p.appState.search}
             itemInEdit={p.appState.itemInEdit}
-            hiddenFeatureIsEnabled={p.appState.hiddenFeatureIsEnabled}
+            isBeta={p.appState.betaMode}
           />
         ))}
 
@@ -289,7 +292,36 @@ export function Bookmarks(p: {
         p.appState.search === ""
         && <Toolbar folders={folders} currentSpaceId={p.appState.currentSpaceId}/>
       }
+      {
+        isJoinProModalOpen && <GetProPlanModal onClose={() => setJoinProModalOpen(false)} reason={"Collapsing"}/>
+      }
     </div>
   )
 }
 
+function addSectionChildrenIfNeeded(targetItemIds: number[], appState: IAppState): number[] {
+  const resultIds: number[] = []
+  targetItemIds.forEach(itemId => {
+    const parentFolder = findFolderByItemId(appState, itemId)!
+    let addChildrenToResults = false
+    for (let i = 0; i < parentFolder.items.length; i++) {
+      const item = parentFolder.items[i]
+      if (addChildrenToResults) {
+        if (item.isSection) { // we found the next section and need to stop here
+          break
+        } else {
+          resultIds.push(item.id) // add child of collapsed Section
+        }
+      } else if (item.id === itemId) {
+        resultIds.push(item.id)
+        if (item.isSection && item.collapsed) {
+          addChildrenToResults = true // adding all Section children from the same folder
+        } else {
+          break // do nothing in that case
+        }
+      }
+    }
+  })
+
+  return resultIds
+}

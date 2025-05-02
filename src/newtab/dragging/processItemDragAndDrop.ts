@@ -1,15 +1,18 @@
-import { unselectAllItems } from "../helpers/selectionUtils"
+import { selectItems, unselectAllItems } from "../helpers/selectionUtils"
 import { setScrollByDummyClientY, subscribeMouseEvents } from "./dragAndDropUtils"
 import {
   calculateFoldersDropAreas,
   createPlaceholder,
   createTabDummy,
-  getFolderId,
+  getFolderId, getIdFromElement,
   getIdsFromElements,
   getItemIdByIndex, getNewPlacementForItem,
-  getOverlappedDropArea, PConfigItem,
+  getOverlappedDropArea, PConfigItem
 } from "./dragAndDrop"
 import { inRange } from "../helpers/mathUtils"
+import { getGlobalAppState } from "../components/App"
+import { findFolderByItemId, findItemById } from "../state/actionHelpers"
+import { IFolderItem } from "../helpers/types"
 
 export function processItemDragAndDrop(
   mouseDownEvent: React.MouseEvent,
@@ -69,6 +72,11 @@ export function processItemDragAndDrop(
           unsubscribeEvents()
           return
         }
+
+        if (targetRoots.length === 1) {
+          targetRoots = selectSectionChildrenIfNeeded(targetRoots[0])
+        }
+
         //create dummy
         dummy = createTabDummy(targetRoots, mouseDownEvent, config.isFolderItem)
         dummy.style.transform = `translateX(${e.clientX + "px"}) translateY(${e.clientY + "px"})`
@@ -108,4 +116,35 @@ export function processItemDragAndDrop(
 
   const unsubscribeEvents = subscribeMouseEvents(mouseDownEvent, onMouseMove, onMouseUp, onViewportScrolled)
   return unsubscribeEvents
+}
+
+
+function selectSectionChildrenIfNeeded(element: HTMLElement): HTMLElement[] {
+  const id = getIdFromElement(element)
+  const state = getGlobalAppState()
+  const item = findItemById(state, id)
+  if (item?.isSection && !item.collapsed) {
+    const folder = findFolderByItemId(state, id)
+    if (folder) {
+      const sectionIndex = folder.items.findIndex(i => i.id === id)
+      const children:IFolderItem[] = []
+      for (let i = sectionIndex + 1; i < folder.items.length; i++) {
+        const nextItem = folder.items[i]
+        if(nextItem.isSection) {
+          break
+        }else{
+          children.push(nextItem)
+        }
+      }
+
+      const childrenElements = children.map(childItem => document.querySelector(`[data-id="${childItem.id}"]`) as HTMLElement)
+      childrenElements.unshift(element)
+      selectItems(childrenElements)
+      return childrenElements
+    }else{
+      return [element]
+    }
+  } else {
+    return [element]
+  }
 }

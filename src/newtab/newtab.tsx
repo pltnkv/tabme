@@ -35,7 +35,6 @@ async function runLocally() {
   getStateFromLS((res) => {
     migrateToSpaces(res)
     preprocessLoadedState(res)
-    disableHideItemFunctionality(res)
     setInitAppState(res)
     mountApp()
   })
@@ -126,8 +125,4 @@ function preprocessLoadedState(state: ISavingAppState): void {
   // save updated stat in state
   ////////////////////////////////////////////////////////////
   saveStateThrottled(state)
-}
-
-function disableHideItemFunctionality(res: ISavingAppState) {
-  res.hiddenFeatureIsEnabled = res.spaces.some(s => s.folders.some(f => f.archived || f.items.some(i => i.archived)))
 }

@@ -1,21 +1,25 @@
 import React, { useContext, useEffect, useState } from "react"
-import { IFolder, ISpace } from "../helpers/types"
-import { colors, DEFAULT_FOLDER_COLOR, filterItemsBySearch, scrollElementIntoView } from "../helpers/utils"
+import { IFolder, IFolderItem, ISpace } from "../helpers/types"
+import { colors, DEFAULT_FOLDER_COLOR, filterItemsBySearch, isFolderItemNotUsed, scrollElementIntoView } from "../helpers/utils"
 import { DropdownMenu, DropdownSubMenu } from "./dropdown/DropdownMenu"
 import { FolderItem } from "./FolderItem"
 import { EditableTitle } from "./EditableTitle"
 import { CL } from "../helpers/classNameHelper"
 import { Action } from "../state/state"
-import { canShowArchived, DispatchContext } from "../state/actions"
+import { DispatchContext } from "../state/actions"
 import { Color } from "../helpers/Color"
 import MenuIcon from "../icons/menu.svg"
+import CollapseIcon from "../icons/collapse.svg"
+import ExpandIcon from "../icons/expand.svg"
+import ArrowRightIcon from "../icons/arrow-right.svg"
+
 import { getSpacesList } from "./dropdown/moveToHelpers"
-import HistoryItem = chrome.history.HistoryItem
-import Tab = chrome.tabs.Tab
 import { showMessageWithUndo } from "../helpers/actionsHelpersWithDOM"
 import { createNewFolderItem, createNewSection, findSpaceByFolderId } from "../state/actionHelpers"
 import { trackStat } from "../helpers/stats"
 import { RecentItem } from "../helpers/recentHistoryUtils"
+import Tab = chrome.tabs.Tab
+import { GetProPlanModal } from "./modals/GetProPlanModal"
 
 export const Folder = React.memo(function Folder(p: {
   spaces: ISpace[];
@@ -23,31 +27,35 @@ export const Folder = React.memo(function Folder(p: {
   tabs: Tab[];
   recentItems: RecentItem[];
   showNotUsed: boolean;
-  showArchived: boolean;
   search: string;
   itemInEdit: undefined | number,
-  hiddenFeatureIsEnabled: boolean
+  isBeta: boolean
 }) {
   const dispatch = useContext(DispatchContext)
   const [showMenu, setShowMenu] = useState<boolean>(false)
   const [localColor, setLocalColor] = useState<string | undefined>(undefined)
   const [localTitle, setLocalTitle] = useState<string>(p.folder.title)
+  const [isGetProModalOpen, setGetProModalOpen] = useState(false)
 
   useEffect(() => {
     // to support UNDO operation
     setLocalTitle(p.folder.title)
   }, [p.folder.title])
 
-  function onDelete() {
-    const archivedItemsCount = p.folder.items.filter(item => item.archived).length
-    if (archivedItemsCount > 0) {
-      const itemsText = archivedItemsCount > 1 ? "items" : "item"
-      const res = confirm(`Folder contains ${archivedItemsCount} hidden ${itemsText}. Do you still want to delete it?`)
-      if (!res) {
-        return
-      }
+  function collapseFolder() {
+    if (p.isBeta) {
+      dispatch({ type: Action.UpdateFolder, folderId: p.folder.id, collapsed: true })
+      trackStat('collapseFolder', {})
+    } else {
+      setGetProModalOpen(true)
     }
+  }
 
+  function expandFolder() {
+      dispatch({ type: Action.UpdateFolder, folderId: p.folder.id, collapsed: false })
+  }
+
+  function onDelete() {
     dispatch({
       type: Action.DeleteFolder,
       folderId: p.folder.id
@@ -64,23 +72,6 @@ export const Folder = React.memo(function Folder(p: {
       })
     }
     setEditing(false)
-  }
-
-  function onArchiveOrRestore() {
-    alert("The “Hiding” feature will be deprecated soon due to very low usage.\n"
-      + "All previously hidden folders will became visible again.\n"
-      + "Sorry for the inconvenience, and thank you for understanding!")
-
-    const newArchiveState = !p.folder.archived
-    dispatch({
-      type: Action.UpdateFolder,
-      folderId: p.folder.id,
-      archived: newArchiveState
-    })
-
-    const message = `Folder has been ${newArchiveState ? "hidden" : "restored"}`
-    showMessageWithUndo(message, dispatch)
-    setShowMenu(false)
   }
 
   function onAddSection() {
@@ -100,6 +91,7 @@ export const Folder = React.memo(function Folder(p: {
     setShowMenu(false)
 
     scrollElementIntoView(`[data-id="${newSection.id}"]`)
+    trackStat('createSection', {})
   }
 
   function onAddBookmark() {
@@ -123,6 +115,7 @@ export const Folder = React.memo(function Folder(p: {
     setShowMenu(false)
 
     scrollElementIntoView(`[data-id="${newBookmark.id}"]`)
+    trackStat('createEmptyBookmark', {})
   }
 
   function setColorLocally(color: string) {
@@ -140,7 +133,7 @@ export const Folder = React.memo(function Folder(p: {
 
   function onOpenAll() {
     p.folder.items.forEach(item => {
-      if (!item.archived && !item.isSection) {
+      if (!item.isSection) {
         chrome.tabs.create({ url: item.url, active: false })
       }
     })
@@ -162,21 +155,39 @@ export const Folder = React.memo(function Folder(p: {
   }
 
   const folderItems = filterItemsBySearch(p.folder.items, p.search)
-    .filter(i => canShowArchived(p) || !i.archived)
+  const collapsedChildrenCountBySectionId = new Map<number, number>()
 
-  const folderIsEmptyDuringSearch = p.search != "" && folderItems.length === 0
+  let visibleFolderItems: IFolderItem[] = []
+  if (p.search === "") {
+    let lastCollapsedSectionId: number | undefined = undefined
+    let hiddenItemsCount = 0
+    folderItems.forEach((item) => {
+      if (item.isSection) {
+        visibleFolderItems.push(item)
+        if (item.collapsed) {
+          collapsedChildrenCountBySectionId.set(item.id, 0)
+          lastCollapsedSectionId = item.id
+          hiddenItemsCount = 0
+        } else {
+          lastCollapsedSectionId = undefined
+        }
+      } else {
+        if (lastCollapsedSectionId) {
+          collapsedChildrenCountBySectionId.set(lastCollapsedSectionId, ++hiddenItemsCount)
+        } else {
+          visibleFolderItems.push(item)
+        }
+      }
+    })
+  } else {
+    visibleFolderItems = folderItems
+  }
 
-  const folderClassName = `folder 
-  ${p.folder.twoColumn ? "two-column" : ""}
-  ${folderIsEmptyDuringSearch ? "folder--empty" : ""}
-  ${p.folder.archived ? "archived" : ""}
-  `
-  // const folderColor = folderIsEmptyDuringSearch ? EMPTY_FOLDER_COLOR : props.folder.color || DEFAULT_FOLDER_COLOR
   const folderColor = localColor ?? p.folder.color
   const color = new Color()
   const color2 = new Color()
   color.setColor(localColor ?? p.folder.color ?? DEFAULT_FOLDER_COLOR)
-  color.setAlpha(p.folder.archived ? 0.2 : 1)
+  color.setAlpha(1)
   color2.value = { ...color.value }
   color2.setSaturation(color2.value.s + 0.1)
   color2.value.h = color2.value.h + 0.05
@@ -210,27 +221,34 @@ export const Folder = React.memo(function Folder(p: {
   }
 
   return (
-    <div className={folderClassName} data-folder-id={p.folder.id}>
+    <div className={CL("folder", { "two-column": p.folder.twoColumn })} data-folder-id={p.folder.id}>
       <h2 style={{
-        background: folderGradientColor,
-        outline: p.folder.archived ? "1px solid rgba(0, 0, 0, 0.3)" : "none"
+        background: folderGradientColor
       }} className="draggable-folder" onContextMenu={onHeaderContextMenu}>
         {
           <EditableTitle
             className="folder-title__text"
             inEdit={p.folder.id === p.itemInEdit}
-            localTitle={localTitle}
-            setLocalTitle={setLocalTitle}
+            value={localTitle}
+            setNewValue={setLocalTitle}
             onSaveTitle={saveFolderTitle}
             search={p.search}
             onClick={() => setEditing(true)}
           />
         }
-        {p.folder.archived ? <span> [hidden]</span> : ""}
-        <span className={CL("folder-title__button", {
-          "folder-title__button--visible": showMenu
-        })}
-              onClick={() => setShowMenu(!showMenu)}><MenuIcon/></span>
+
+        <button
+          title="Show menu"
+          className={CL("folder-title__button", { "visible": showMenu || p.folder.collapsed })}
+          onClick={() => setShowMenu(!showMenu)}><MenuIcon/>
+        </button>
+        {
+          p.search === "" ?
+            p.folder.collapsed
+              ? <button title="Expand" className={CL("folder-title__button visible")} onClick={expandFolder}><ExpandIcon/></button>
+              : <button title="Collaps" className={CL("folder-title__button")} onClick={collapseFolder}><CollapseIcon/></button>
+            : null
+        }
 
         {showMenu ? (
           <DropdownMenu onClose={() => setShowMenu(false)} className={"dropdown-menu--folder"} offset={{ top: 5, left: 150, bottom: 38 }}>
@@ -250,9 +268,6 @@ export const Folder = React.memo(function Folder(p: {
             <button className="dropdown-menu__button focusable" onClick={onAddSection}>+ Add Section</button>
             <button className="dropdown-menu__button focusable" onClick={onOpenAll}>Open All</button>
             {
-              p.hiddenFeatureIsEnabled && <button className="dropdown-menu__button focusable" onClick={onArchiveOrRestore}>{p.folder.archived ? "Unhide" : "Hide"}</button>
-            }
-            {
               p.spaces.length > 1 ?
                 <DropdownSubMenu
                   menuId={1}
@@ -267,7 +282,7 @@ export const Folder = React.memo(function Folder(p: {
         ) : null}
       </h2>
       {
-        folderItems.length === 0 && !folderIsEmptyDuringSearch ?
+        folderItems.length === 0 && !p.folder.collapsed ?
           <div className="folder-empty-tip">
             To add bookmark, drop an item form the sidebar
           </div>
@@ -276,22 +291,31 @@ export const Folder = React.memo(function Folder(p: {
 
       <div className="folder-items-box" data-folder-id={p.folder.id}>
         {
-          folderItems.map(
-            (item) => (
-              <FolderItem
-                key={item.id}
-                spaces={p.spaces}
-                item={item}
-                inEdit={item.id === p.itemInEdit}
-                tabs={p.tabs}
-                recentItems={p.recentItems}
-                showNotUsed={p.showNotUsed}
-                search={p.search}
-                hiddenFeatureIsEnabled={p.hiddenFeatureIsEnabled}
-              />
-            )
-          )}
+          p.folder.collapsed && p.search === ""
+            ? <div className={CL("folder-item-all-collapsed")}>
+              <div className={CL("folder-item-all__inner")} onClick={expandFolder}>
+                <ArrowRightIcon/>
+                <span>Collapsed ({folderItems.length})</span>
+              </div>
+            </div>
+            : visibleFolderItems.map((item) => (
+                <FolderItem
+                  key={item.id}
+                  spaces={p.spaces}
+                  item={item}
+                  inEdit={item.id === p.itemInEdit}
+                  tabs={p.tabs}
+                  recentItems={p.recentItems}
+                  showNotUsed={p.showNotUsed}
+                  search={p.search}
+                  collapsedChildrenCount={collapsedChildrenCountBySectionId.get(item.id) ?? 1}
+                />
+              )
+            )}
       </div>
+      {
+        isGetProModalOpen && <GetProPlanModal onClose={() => setGetProModalOpen(false)} reason={"Collapsing"}/>
+      }
     </div>
   )
 })

@@ -1035,8 +1035,11 @@ input.search {
     .folder-title__text {
         display: inline-block;
         cursor: text;
-        max-width: calc(100% - 32px);
+        max-width: calc(100% - 78px);
         font-weight: 600;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
     }
 
     textarea {
@@ -1045,7 +1048,7 @@ input.search {
         background: none;
         flex-grow: 1;
         height: 0;
-        width: calc(100% - 28px);
+        width: calc(100% - 78px);
         box-sizing: border-box;
         resize: none;
         border: 1px solid var(--colors-blue-300);
@@ -1128,28 +1131,38 @@ input.search {
     cursor: pointer;
 }
 
-.folder .folder-title__button {
-    cursor: pointer;
-    padding: 0 6px;
-    float: right;
-    visibility: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
+.folder {
+    .folder-title__button {
+        cursor: pointer;
+        padding: 0 4px;
+        float: right;
+        visibility: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        background: none;
+        border: none;
 
-    svg {
-        color: #000;
-        opacity: 0.7;
+        svg {
+            color: #000;
+            opacity: 0.7;
+        }
+
+        &.visible {
+            visibility: visible;
+        }
+
+        &:hover {
+            svg {
+                opacity: 1;
+            }
+        }
     }
-}
 
-.folder .folder-title__button--visible {
-    visibility: visible;
-}
-
-.folder:hover .folder-title__button {
-    visibility: visible;
+    &:hover .folder-title__button {
+        visibility: visible;
+    }
 }
 
 .folder.folder--empty .folder-title__button {
@@ -1205,10 +1218,6 @@ input.search {
 
 .folder-item.selected .folder-item__menu {
     visibility: visible;
-}
-
-.folder-item.archived .folder-item__inner {
-    opacity: 0.4;
 }
 
 .folder-item__inner {
@@ -1301,7 +1310,7 @@ input.search {
 }
 
 .folder-item.section {
-    margin-top: 8px;
+    margin-top: 12px;
 }
 
 .folder-item__inner.section {
@@ -1311,14 +1320,34 @@ input.search {
         text-decoration: none;
     }
 
-    img {
-        display: none;
+    svg {
+        color: var(--section-text-color);
     }
 
     .folder-item__inner__title {
         color: var(--section-text-color);
         font-size: 14px;
         font-weight: normal;
+        padding-top: 1px;
+    }
+}
+
+.folder-item-all-collapsed {
+    padding-left: 24px;
+
+    .folder-item-all__inner {
+        display: flex;
+        cursor: pointer;
+    }
+
+    span {
+        font-size: 14px;
+        padding-top: 1px;
+        color: var(--second-text-color);
+    }
+
+    svg {
+        color: var(--second-text-color);
     }
 }
 
@@ -1525,6 +1554,20 @@ label.input-label {
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+
+    &.justify-content-start {
+        justify-content: start;
+    }
+
+    svg.icon {
+        margin-right: 8px;
+        color: var(--main-text-color);
+    }
+
+    svg.icon.active {
+        margin-right: 8px;
+        color: #0066FF;
+    }
 
     span {
         white-space: nowrap;
@@ -2044,6 +2087,8 @@ label.input-label {
     max-width: 640px;
     width: 100%;
     font-size: 16px;
+    max-height: 100%;
+    overflow-y: auto;
 }
 
 .modal-close-x {
@@ -2120,4 +2165,69 @@ label.input-label {
 .description-text {
     font-size: 14px;
     color: var(--colors-gray-700);
+}
+
+.get-pro-plan-modal {
+    .container {
+        width: 600px;
+        margin: auto;
+    }
+
+    .title {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .feature-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .feature-name {
+        svg {
+            margin-right: 8px;
+            color: var(--main-text-color);
+        }
+    }
+
+    span.highlighted {
+        background-color: var(--colors-blue-200);
+    }
+
+    tr.highlighted {
+        background-color: var(--colors-blue-200);
+    }
+
+    .feature-table th {
+        text-align: center;
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .feature-table td {
+        border-bottom: 1px solid #ddd;
+    }
+
+    .beta-label {
+        position: absolute;
+        font-size: 12px;
+        font-style: italic;
+        vertical-align: top;
+        margin-left: 4px;
+        margin-top: -4px;
+    }
+
+    .status {
+        text-align: center;
+    }
+
+    .upgrade {
+        color: #1a73e8;
+    }
+
+    .trial {
+        font-size: 14px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
 }

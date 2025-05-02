@@ -12,6 +12,7 @@ import { trackStat } from "../helpers/stats"
 import { getBrokenImgSVG, loadFaviconUrl } from "../helpers/faviconUtils"
 import { RecentItem } from "../helpers/recentHistoryUtils"
 import Tab = chrome.tabs.Tab
+import ArrowRightIcon from "../icons/arrow-right.svg"
 
 export const FolderItem = React.memo((p: {
   spaces: ISpace[];
@@ -21,7 +22,7 @@ export const FolderItem = React.memo((p: {
   recentItems: RecentItem[];
   showNotUsed: boolean;
   search: string;
-  hiddenFeatureIsEnabled: boolean
+  collapsedChildrenCount?: number
 }) => {
   const dispatch = useContext(DispatchContext)
   const [showMenu, setShowMenu] = useState<boolean>(false)
@@ -84,18 +85,20 @@ export const FolderItem = React.memo((p: {
 
   const folderItemOpened = findTabsByURL(p.item.url, p.tabs).length !== 0
 
+  const numberOfHiddenItems = p.item.collapsed
+    ? (Number(p.collapsedChildrenCount) >= 0 ? ` (${p.collapsedChildrenCount})` : "")
+    : ""
+
   return (
     <div className={
       CL("folder-item", {
         "section": p.item.isSection,
-        "selected": showMenu,
-        "archived": p.item.archived
+        "selected": showMenu
       })}>
       {showMenu
         ? <FolderItemMenu
           spaces={p.spaces}
           item={p.item}
-          hiddenFeatureIsEnabled={p.hiddenFeatureIsEnabled}
           localTitle={localTitle}
           setLocalTitle={setLocalTitle}
           onSave={trySaveTitleAndURL}
@@ -121,14 +124,19 @@ export const FolderItem = React.memo((p: {
          title={p.item.url}
          href={p.item.url}
          onContextMenu={onContextMenu}>
-        <img src={p.item.favIconUrl} alt="" onError={handleImageError}/>
+        {
+          p.item.isSection
+            ? <ArrowRightIcon style={{ transform: p.item.collapsed ? undefined : "rotate(90deg)" }}/>
+            : <img src={p.item.favIconUrl} alt="" onError={handleImageError}/>
+        }
+
         <EditableTitle className={CL("folder-item__inner__title", {
           "not-used": p.showNotUsed && isFolderItemNotUsed(p.item, p.recentItems)
         })}
                        inEdit={p.inEdit}
                        setEditing={setEditing}
-                       localTitle={localTitle}
-                       setLocalTitle={setLocalTitle}
+                       value={localTitle + numberOfHiddenItems}
+                       setNewValue={setLocalTitle}
                        onSaveTitle={trySaveTitleAndURL}
                        search={p.search}
         />

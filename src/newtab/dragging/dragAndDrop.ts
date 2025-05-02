@@ -1,4 +1,4 @@
-import { getSelectedItemsElements, unselectAllItems } from "../helpers/selectionUtils"
+import { getSelectedItemsElements, getSelectedItemsIds, selectItems, unselectAllItems } from "../helpers/selectionUtils"
 import { findParentWithClass, isSomeParentHaveClass, isTargetInputOrTextArea, isTargetSupportsDragAndDrop } from "../helpers/utils"
 import { IPoint } from "../helpers/MathTypes"
 import { processMultiselection } from "./processMultiselection"
@@ -6,6 +6,9 @@ import { processWidgetsDragAndDrop } from "./processWidgetsDragAndDrop"
 import { processFolderDragAndDrop } from "./processFolderDragAndDrop"
 import { processItemDragAndDrop } from "./processItemDragAndDrop"
 import { processSpacesDragAndDrop } from "./processSpacesDragAndDrop"
+import { getGlobalAppState } from "../components/App"
+import { findFolderByItemId, findItemById } from "../state/actionHelpers"
+import { IFolderItem } from "../helpers/types"
 
 export type DropArea = { objectId: number, element: HTMLElement, rect: DOMRect, itemRects: { thresholdY: number, itemTop: number, itemHeight: number }[] }
 
@@ -67,7 +70,7 @@ export function bindDADItemEffect(
       unselectAllItems()
       return processFolderDragAndDrop(mouseDownEvent, folderConfig, targetFolderHeader.parentElement!)
     } else if (spacesConfig && isSomeParentHaveClass(target, "spaces-list__item")) {
-      if(!isSomeParentHaveClass(target, "spaces-list__delete-button") && spacesConfig.canSortSpaces()) {
+      if (!isSomeParentHaveClass(target, "spaces-list__delete-button") && spacesConfig.canSortSpaces()) {
         processSpacesDragAndDrop(mouseDownEvent, spacesConfig)
       }
     } else if (widgetsConfig) {
@@ -220,19 +223,19 @@ export function getSpaceId(dropAreaElement: HTMLElement): number {
   return parseInt(dropAreaElement.dataset.spaceId!)
 }
 
-export function getPosFromElement(el: HTMLElement): IPoint {
-  return {
-    x: parseFloat(el.style.left),
-    y: parseFloat(el.style.top)
-  }
+export function getIdFromElement(target: HTMLElement): number {
+  return parseInt(target.dataset.id!, 10)
 }
 
 export function getIdsFromElements(targets: HTMLElement[]): number[] {
   return targets.map(getIdFromElement)
 }
 
-export function getIdFromElement(target: HTMLElement): number {
-  return parseInt(target.dataset.id!, 10)
+export function getPosFromElement(el: HTMLElement): IPoint {
+  return {
+    x: parseFloat(el.style.left),
+    y: parseFloat(el.style.top)
+  }
 }
 
 export function getItemIdByIndex(currentBoxToDrop: HTMLElement, index: number): number | undefined {

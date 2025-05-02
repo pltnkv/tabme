@@ -11,6 +11,7 @@ import { genUniqLocalId } from "../state/actionHelpers"
 import { insertBetween } from "../helpers/fractionalIndexes"
 import { JoinBetaModal } from "./modals/JoinBetaModal"
 import { trackStat } from "../helpers/stats"
+import { GetProPlanModal } from "./modals/GetProPlanModal"
 
 export function SpacesList(p: {
   betaMode: boolean
@@ -145,7 +146,7 @@ export function SpacesList(p: {
         </div>
       }
       {
-        isJoinBetaModalOpen && <JoinBetaModal onClose={() => setJoinBetaModalOpen(false)}/>
+        isJoinBetaModalOpen && <GetProPlanModal onClose={() => setJoinBetaModalOpen(false)} reason={'Spaces'}/>
       }
     </div>
   )

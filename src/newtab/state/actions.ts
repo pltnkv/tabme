@@ -126,12 +126,6 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       return { ...state, colorTheme: nextMode }
     }
 
-    case Action.UpdateShowArchivedItems: {
-      return {
-        ...state, showArchived: action.value
-      }
-    }
-
     case Action.UpdateShowNotUsedItems: {
       return {
         ...state, showNotUsed: action.value
@@ -197,6 +191,25 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       return {
         ...state,
         currentSpaceId: state.spaces[newIndex].id
+      }
+    }
+
+    case Action.SetCollapsedAllFoldersInCurSpace: {
+      const currentSpace = findSpaceById(state, state.currentSpaceId)
+      if (!currentSpace) {
+        return showErrorReducer("Current space not found")
+      }
+
+      const updatedFolders = currentSpace.folders.map(folder => ({
+        ...folder,
+        collapsed: action.collapsedValue
+      }))
+
+      return {
+        ...state,
+        spaces: updateSpace(state.spaces, currentSpace.id, {
+          folders: updatedFolders
+        })
       }
     }
 
@@ -404,9 +417,6 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       if (typeof action.title !== "undefined") {
         newProps.title = action.title
       }
-      if (typeof action.archived !== "undefined") {
-        newProps.archived = action.archived
-      }
       if (typeof action.color !== "undefined") {
         newProps.color = action.color
       }
@@ -415,6 +425,9 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       }
       if (typeof action.position !== "undefined") {
         newProps.position = action.position
+      }
+      if (typeof action.collapsed !== "undefined") {
+        newProps.collapsed = action.collapsed
       }
 
       const targetFolder = findFolderById(state, action.folderId)
@@ -438,9 +451,9 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         type: Action.UpdateFolder,
         folderId: action.folderId,
         title: targetFolder.title,
-        archived: targetFolder.archived,
         color: targetFolder.color,
-        position: targetFolder.position
+        position: targetFolder.position,
+        collapsed: targetFolder.collapsed
       }))
 
       return {
@@ -595,14 +608,14 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       if (typeof action.title !== "undefined") {
         newProps.title = action.title
       }
-      if (typeof action.archived !== "undefined") {
-        newProps.archived = action.archived
-      }
       if (typeof action.url !== "undefined") {
         newProps.url = action.url
       }
       if (typeof action.favIconUrl !== "undefined") {
         newProps.favIconUrl = action.favIconUrl
+      }
+      if (typeof action.collapsed !== "undefined") {
+        newProps.collapsed = action.collapsed
       }
 
       const originalItem = findItemById(state, action.itemId)
@@ -1015,10 +1028,6 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
 //////////////////////////////////////////////////////////////////////
 // UTILS
 //////////////////////////////////////////////////////////////////////
-
-export function canShowArchived(appState: Pick<IAppState, "search" | "showArchived">) {
-  return appState.showArchived || appState.search.length > 0
-}
 
 export function executeCustomAction(actionUrl: string, dispatch: ActionDispatcher): void {
   const cAction: string = actionUrl.split("//")[1] || ""

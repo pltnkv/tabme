@@ -38,7 +38,6 @@ const savingStateDefaultValues = { // if was not saved to LS yet
   "colorTheme": "light", // todo I don't use system because it's not ready to used by default
   "stat": undefined,
   "showRecent": false,
-  "showArchived": false,
   "showNotUsed": false,
   "version": 1,
   "folders": undefined // "folders" is legacy. Dont delete it until all users are migrated

@@ -34,12 +34,25 @@ export function initStats(): Promise<void> {
         mixpanel.identify(id)
         resolve()
       })
+
+      if (!__OVERRIDE_NEWTAB) {
+        initJSErrorsTracking()
+      }
     } catch (e) {
       console.error(e)
       resolve()
     }
   })
 
+}
+
+function initJSErrorsTracking() {
+  window.onerror = function(message, file, line) {
+    trackStat("jsError", {
+      message: message.toString(),
+      line
+    })
+  }
 }
 
 //Key flows
@@ -115,11 +128,14 @@ type EventOptionsMap = {
   spaceCreated: { source: string }
 
   // BOOKMARKS
-  bookmarksHidden: {}
   bookmarksDragged: { count: number }
+  collapseSection: {},
+  createEmptyBookmark: {},
+  createSection: {},
 
   // FOLDER
   folderCreated: { source: string }
+  collapseFolder: {},
 
   // STICKERS
   widgetCreated: { source: string, type: string }
@@ -137,6 +153,10 @@ type EventOptionsMap = {
 
   // OTHER
   "whatsNewOpened": { key: string },
+  "jsError": {
+    message: string | undefined
+    line: number | undefined
+  }
 };
 
 let commonProps: Partial<CommonStatProps> = {

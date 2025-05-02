@@ -34,9 +34,6 @@ export type IAppAchievements = {
   // cleanup
   cleanupUsed: number
 
-  // showArchived
-  archivedItemsShowed: number
-
   // todo add more
 }
 
@@ -70,7 +67,6 @@ export type IAppState = {
   search: string;
   itemInEdit: undefined | number, //can be item or folder or space
   showRecent: boolean; // Stored in LS
-  showArchived: boolean; // Stored in LS
   showNotUsed: boolean; // Stored in LS
   openBookmarksInNewTab: boolean;
   sidebarCollapsed: boolean; // Stored in LS
@@ -119,7 +115,6 @@ let initState: IAppState = {
   search: "",
   itemInEdit: undefined,
   showRecent: false,
-  showArchived: false,
   showNotUsed: false,
   openBookmarksInNewTab: false,
   sidebarCollapsed: false, //should be named "sidebarCollapsable"
@@ -162,10 +157,7 @@ let initState: IAppState = {
     sectionAddedFromFolder: 0,
 
     // cleanup
-    cleanupUsed: 0,
-
-    // showArchived
-    archivedItemsShowed: 0
+    cleanupUsed: 0
   }
 }
 
@@ -187,12 +179,12 @@ export enum Action {
   CloseTabs = "close-tab",
   SetTabsOrHistory = "set-tab-or-history",
   ToggleDarkMode = "toggle-dark-mode",
-  UpdateShowArchivedItems = "update-show-hidden-items",
   UpdateShowNotUsedItems = "update-show-not-used-items",
   SelectSpace = "select-space",
   SwipeSpace = "swipe-space",
   FixBrokenIcons = "fix-broken-icons",
   UpdateAppState = "update-app-state", // generic way to set simple value into AppState
+  SetCollapsedAllFoldersInCurSpace = "toggle-collapse-all-folders",
 
   // CRUD OPERATIONS — causes saving on server
   CreateSpace = "create-space",
@@ -258,11 +250,11 @@ export type ActionPayload = (
   | { type: Action.CloseTabs; tabIds: number[] }
   | { type: Action.SetTabsOrHistory; tabs?: Tab[]; recentItems?: RecentItem[] }
   | { type: Action.ToggleDarkMode }
-  | { type: Action.UpdateShowArchivedItems; value: boolean }
   | { type: Action.UpdateShowNotUsedItems; value: boolean }
   | { type: Action.FixBrokenIcons }
-  | { type: Action.SelectSpace; spaceId?: number, spaceIndex?: number } // !!! стоить ли очищать стикеры когда свайпишься?
-  | { type: Action.SwipeSpace; direction: "left" | "right" } // !!! стоить ли очищать стикеры когда свайпишься?
+  | { type: Action.SelectSpace; spaceId?: number, spaceIndex?: number }
+  | { type: Action.SwipeSpace; direction: "left" | "right" }
+  | { type: Action.SetCollapsedAllFoldersInCurSpace; collapsedValue: boolean }
   | { type: Action.UpdateAppState; newState: Partial<IAppState> }
 
   | { type: Action.CreateSpace; spaceId: number; title: string; position?: string }
@@ -272,13 +264,13 @@ export type ActionPayload = (
 
   | { type: Action.CreateFolder; newFolderId?: number; title?: string; color?: string; position?: string; items?: IFolderItemToCreate[]; spaceId?: number, folderType?: string }
   | { type: Action.DeleteFolder; folderId: number; }
-  | { type: Action.UpdateFolder; folderId: number; title?: string; color?: string; archived?: boolean; twoColumn?: boolean; position?: string }
+  | { type: Action.UpdateFolder; folderId: number; title?: string; color?: string; twoColumn?: boolean; position?: string, collapsed?: boolean }
   | { type: Action.MoveFolder; folderId: number; targetSpaceId: number, insertBeforeFolderId: number | undefined; }
 
   | { type: Action.CreateFolderItem; folderId: number; insertBeforeItemId: number | undefined; item: IFolderItemToCreate; }
   | { type: Action.CreateFolderItems; folderId: number; items: IFolderItemToCreate[]; }
   | { type: Action.DeleteFolderItems; itemIds: number[] }
-  | { type: Action.UpdateFolderItem; itemId: number; title?: string; archived?: boolean; url?: string; favIconUrl?: string }
+  | { type: Action.UpdateFolderItem; itemId: number; title?: string; url?: string; favIconUrl?: string, collapsed?: boolean }
   | { type: Action.MoveFolderItems; itemIds: number[]; targetFolderId: number; insertBeforeItemId: number | undefined; }
 
   | { type: Action.SaveBookmarksToCloud; }

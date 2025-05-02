@@ -15,20 +15,19 @@ export interface IFolder extends IObject {
   items: IFolderItem[]
   color?: string
   twoColumn?: boolean
-  archived?: boolean
+  collapsed?: boolean
 }
 
 export interface IFolderItem extends IObject {
   favIconUrl: string
   title: string
   url: string
-  archived?: boolean
   isSection?: boolean // todo - replace on "type later". not store bool on server
+  collapsed?: boolean
   inEdit?: boolean
 }
 
 export type WidgetType = "Sticker"
-
 
 export type IWidgetPos = {
   point: {

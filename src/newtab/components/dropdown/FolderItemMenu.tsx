@@ -17,7 +17,6 @@ export const FolderItemMenu = React.memo((p: {
   onSave: (title: string, url: string) => void,
   onClose: () => void,
   item: IFolderItem;
-  hiddenFeatureIsEnabled: boolean
 }) => {
   const dispatch = useContext(DispatchContext)
   const [selectedItems, setSelectedItems] = useState<IFolderItem[]>([])
@@ -56,39 +55,6 @@ export const FolderItemMenu = React.memo((p: {
     navigator.clipboard.writeText(p.item.url)
     p.onClose()
     showMessage("URL has been copied", dispatch)
-  }
-
-  // support multiple
-  function onArchive() {
-    alert("The “Hiding” feature will be deprecated soon due to very low usage.\n"
-      + "All previously hidden bookmarks will became visible again.\n"
-      + "Sorry for the inconvenience, and thank you for understanding!")
-    mergeStepsInHistory((historyStepId) => {
-      selectedItems.forEach((item) => {
-        dispatch({
-          type: Action.UpdateFolderItem,
-          itemId: item.id,
-          archived: true,
-          historyStepId
-        })
-      })
-    })
-    showMessageWithUndo("Bookmark has been hidden", dispatch)
-    trackStat("bookmarksHidden", {})
-  }
-
-  function onRestore() {
-    mergeStepsInHistory((historyStepId) => {
-      selectedItems.forEach((item) => {
-        dispatch({
-          type: Action.UpdateFolderItem,
-          itemId: item.id,
-          archived: false,
-          historyStepId
-        })
-      })
-    })
-    showMessage("Bookmark has been restored", dispatch)
   }
 
   function onSaveAndClose() {
@@ -133,14 +99,6 @@ export const FolderItemMenu = React.memo((p: {
       selectedItems.length > 1 ?
         <DropdownMenu onClose={p.onClose} className={"dropdown-menu--folder-item"} offset={{ top: 29, bottom: 32 }}>
           <button className="dropdown-menu__button focusable" onClick={onOpenNewTab}>Open in New Tab</button>
-          {
-            p.hiddenFeatureIsEnabled ? (selectedItems.some(item => item.archived)
-                ?
-                <button className="dropdown-menu__button focusable" onClick={onRestore}>Unhide</button>
-                :
-                <button className="dropdown-menu__button focusable" onClick={onArchive}>Hide</button>
-            ) : null
-          }
           <DropdownSubMenu
             menuId={1}
             title={"Move to"}
@@ -161,13 +119,6 @@ export const FolderItemMenu = React.memo((p: {
                   value={p.localTitle}
                   onChange={e => p.setLocalTitle(e.target.value)}/>
               </label>
-              {
-                p.hiddenFeatureIsEnabled ? (
-                  p.item.archived
-                    ? <button className="dropdown-menu__button focusable" onClick={onRestore}>Unhide</button>
-                    : <button className="dropdown-menu__button focusable" onClick={onArchive}>Hide</button>
-                ) : null
-              }
               <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onDeleteItem}>Delete</button>
             </DropdownMenu>
             :
@@ -189,13 +140,6 @@ export const FolderItemMenu = React.memo((p: {
               </label>
               <button className="dropdown-menu__button focusable" onClick={onOpenNewTab}>Open in New Tab</button>
               <button className="dropdown-menu__button focusable" onClick={onCopyUrl}>Copy url</button>
-              {
-                p.hiddenFeatureIsEnabled ? (
-                  p.item.archived
-                    ? <button className="dropdown-menu__button focusable" onClick={onRestore}>Unhide</button>
-                    : <button className="dropdown-menu__button focusable" onClick={onArchive}>Hide</button>
-                ) : null
-              }
               <DropdownSubMenu
                 menuId={1}
                 title={"Move to"}

@@ -90,12 +90,6 @@ export function filterRecentItemsBySearch(
   })
 }
 
-export function hasArchivedItems(spaces: ISpace[]): boolean {
-  return spaces.some(s => {
-    return s.folders.some(f => f.archived || f.items.some(i => i.archived))
-  })
-}
-
 export function hasItemsToHighlight(spaces: ISpace[], recentItems: RecentItem[]): boolean {
   return spaces.some(s => {
     return s.folders.some(f => f.items.some(i => isFolderItemNotUsed(i, recentItems)))
@@ -426,4 +420,4 @@ export function isArraysEqual(arr1: number[], arr2: number[]): boolean {
   return arr1.every((value, index) => value === arr2[index])
 }
 
-export const IS_MAC_DEVICE: boolean = false// navigator.userAgent.indexOf("Mac OS X") != -1
+export const IS_MAC_DEVICE: boolean = navigator.userAgent.indexOf("Mac OS X") != -1

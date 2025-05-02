@@ -64,10 +64,22 @@ export function getCanDragChecker(search: string, dispatch: ActionDispatcher): (
   }
 }
 
-export function clickFolderItem(targetId: number, appState: IAppState, dispatch: ActionDispatcher, openInNewTab: boolean, openBookmarksInNewTab: boolean) {
+export function clickFolderItem(targetId: number,
+                                appState: IAppState,
+                                dispatch: ActionDispatcher,
+                                openInNewTab: boolean,
+                                openBookmarksInNewTab: boolean,
+                                showProPlan?: () => void) {
   const targetItem = findItemById(appState, targetId)
   if (targetItem?.isSection) {
-    onRenameSection(targetItem)
+    if (appState.betaMode || targetItem.collapsed) {
+      dispatch({ type: Action.UpdateFolderItem, itemId: targetItem.id, collapsed: !targetItem.collapsed })
+      if (!targetItem.collapsed) {
+        trackStat("collapseSection", {})
+      }
+    } else if (showProPlan) {
+      showProPlan()
+    }
   } else if (isCustomActionItem(targetItem) && targetItem?.url) {
     executeCustomAction(targetItem.url, dispatch)
   } else if (targetItem) {
@@ -100,12 +112,5 @@ export function clickFolderItem(targetId: number, appState: IAppState, dispatch:
         })
       }
     }
-  }
-
-  function onRenameSection(targetItem: IFolderItem) {
-    dispatch({
-      type: Action.UpdateAppState,
-      newState: { itemInEdit: targetItem.id }
-    })
   }
 }

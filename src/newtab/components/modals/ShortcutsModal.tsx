@@ -15,6 +15,9 @@ export const ShortcutsModal = ({setOpen }:
           <span className="hotkey">TAB</span> to focus on Search input when open Tabme
         </p>
         <p>
+          <span className="hotkey">{cmdOrCtrl} + F</span> search
+        </p>
+        <p>
           <span className="hotkey">Arrow keys</span> navigate bookmarks
         </p>
         <p>

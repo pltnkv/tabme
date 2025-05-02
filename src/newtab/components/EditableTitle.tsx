@@ -6,8 +6,8 @@ export function EditableTitle(p: {
   onClick?: () => void,
   inEdit: boolean,
   setEditing?: (value: boolean) => void, //todo seems like it can be simplified and setEditing() can be removed at all
-  localTitle: string,
-  setLocalTitle: (val: string) => void,
+  value: string,
+  setNewValue: (val: string) => void,
   search: string
   onSaveTitle: (title: string) => void,
 }) {
@@ -26,17 +26,17 @@ export function EditableTitle(p: {
       textareaRef.current.style.height = "0px" // Reset height to recalculate
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight + 2}px`
     }
-  }, [p.inEdit, p.localTitle])
+  }, [p.inEdit, p.value])
 
   function handleTitleChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
-    p.setLocalTitle(event.target.value)
+    p.setNewValue(event.target.value)
   }
 
   function trySaveChange() {
     if (p.setEditing) {
       p.setEditing(false)
     }
-    p.onSaveTitle(p.localTitle)
+    p.onSaveTitle(p.value)
   }
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -64,10 +64,10 @@ export function EditableTitle(p: {
           onKeyDown={handleKeyDown}
           onChange={handleTitleChange}
           onBlur={trySaveChange}
-          value={p.localTitle}
+          value={p.value}
         />
         :
-        <span onClick={p.onClick} className={p.className} dangerouslySetInnerHTML={hlSearch(p.localTitle, p.search)}/>
+        <span onClick={p.onClick} className={p.className} dangerouslySetInnerHTML={hlSearch(p.value, p.search)}/>
     }
   </>
 }

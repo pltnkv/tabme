@@ -2,20 +2,31 @@ import React, { useContext, useRef, useState } from "react"
 import { hasItemsToHighlight } from "../helpers/utils"
 import { Action, IAppState } from "../state/state"
 import { DispatchContext } from "../state/actions"
-import Switch from "react-switch"
 import { showErrorMessage, showMessage } from "../helpers/actionsHelpersWithDOM"
 import { importFromJson, onExportJson, onImportFromToby } from "../helpers/importExportHelpers"
 import { ImportConfirmationModal } from "./modals/ImportConfirmationModal"
 import { trackStat } from "../helpers/stats"
 import { LeaveBetaModal } from "./modals/LeaveBetaModal"
 import { loadFaviconUrl } from "../helpers/faviconUtils"
-import { JoinBetaModal } from "./modals/JoinBetaModal"
 import { ShortcutsModal } from "./modals/ShortcutsModal"
 import { OverrideModal } from "./modals/OverrideModal"
 import { IFolderItem } from "../helpers/types"
 import { CL } from "../helpers/classNameHelper"
+import { findSpaceById } from "../state/actionHelpers"
+import IconToggle from "../icons/toggle-on.svg"
+import IconCollapse from "../icons/collapse.svg"
+import IconExpand from "../icons/expand.svg"
+import { GetProPlanModal } from "./modals/GetProPlanModal"
 
-type OnClickOption = { onClick: (e: any) => void; title: string; text: string; hidden?: boolean; isFile?: boolean, dangerStyle?: boolean }
+type OnClickOption = {
+  onClick: (e: any) => void;
+  title: string;
+  text: string;
+  hidden?: boolean;
+  isFile?: boolean,
+  dangerStyle?: boolean,
+  icon?: React.FunctionComponent<React.SVGProps<any>>
+}
 type OnToggleOption = { onToggle: () => void; value: boolean, title: string; text: string; hidden?: boolean }
 export type OptionsConfig = Array<OnClickOption | OnToggleOption | { separator: true }>
 
@@ -40,7 +51,7 @@ export const BetaOptions = (props: {
     {
       onClick: onSendFeedbackBeta,
       title: "I appreciate honest feedback on what needs to be improved or bug reports. Thanks for your time and support!",
-      text: "Send feedback"
+      text: "Share feedback about Beta"
     },
     {
       onClick: onStopBeta,
@@ -63,7 +74,7 @@ export const HelpOptions = (p: {
 }) => {
 
   const dispatch = useContext(DispatchContext)
-  const [isJoinBetaModalOpen, setJoinBetaModalOpen] = useState(false)
+  const [isJoinProModalOpen, setJoinProModalOpen] = useState(false)
   const [isShortcutsModalOpen, setShortcutsModalOpen] = useState(false)
 
   function onSendFeedback() {
@@ -91,7 +102,7 @@ export const HelpOptions = (p: {
   }
 
   function tryBeta() {
-    setJoinBetaModalOpen(true)
+    setJoinProModalOpen(true)
     trackStat("settingsClicked", { settingName: "tryBeta" })
   }
 
@@ -135,29 +146,29 @@ export const HelpOptions = (p: {
   const settingsOptions: Array<OnClickOption | OnToggleOption | { separator: true }> = [
     {
       onClick: onHowToUse,
-      title: "Learn more about Tabme. There is a lot of hidden functionality",
-      text: "Guide: How to use"
+      title: "Discover hidden features and learn how to make the most of Tabme.",
+      text: "How to use Tabme"
     },
     {
       onClick: showShortcutsModal,
-      title: "Keyboard shortcuts",
-      text: "Keyboard shortcuts"
+      title: "Boost your speed with keyboard shortcuts.",
+      text: "Keyboard Shortcuts"
     },
     {
       onClick: invalidateBrokenIcons,
-      title: "Sometimes favicons are not showing, this option may help to fix it. Applied only for bookmarks in the current space.",
-      text: "Reload favicons",
+      title: "If some favicons aren’t showing, try this to refresh them. Applies only to bookmarks in the current space.",
+      text: "Reload Favicons",
       hidden: !p.appState.alphaMode
     },
     {
       onClick: onRateInStore,
-      title: "Thank you for using Tabme 🖤",
+      title: "Thanks for using Tabme 🖤. Your support helps Tabme grow!",
       text: "Rate Tabme in Chrome Store"
     },
     {
       onClick: onSendFeedback,
-      title: "I appreciate any feedback, ideas and bug reports.",
-      text: "Send feedback"
+      title: "Got feedback, ideas, or found a bug? I’d love to hear from you!",
+      text: "Share feedback or report an issue"
     },
     {
       separator: true,
@@ -165,8 +176,8 @@ export const HelpOptions = (p: {
     },
     {
       onClick: tryBeta,
-      title: "Join Beta",
-      text: "Try new functionality [Beta]",
+      title: "Try out new features before everyone else. Welcome to Beta!",
+      text: "Try Pro Features for free",
       hidden: p.appState.betaMode
     }
   ]
@@ -174,7 +185,7 @@ export const HelpOptions = (p: {
   return <>
     <Options optionsConfig={settingsOptions}/>
     {
-      isJoinBetaModalOpen && <JoinBetaModal onClose={() => setJoinBetaModalOpen(false)}/>
+      isJoinProModalOpen && <GetProPlanModal onClose={() => setJoinProModalOpen(false)} reason={"Nope"}/>
     }
     {
       isShortcutsModalOpen && <ShortcutsModal setOpen={setShortcutsModalOpen}/>
@@ -188,8 +199,11 @@ export const SettingsOptions = (p: {
   const [importConfirmationOpen, setImportConfirmationOpen] = useState(false)
   const fileEvent = useRef(null)
   const dispatch = useContext(DispatchContext)
-
+  const [isJoinProModalOpen, setJoinProModalOpen] = useState(false)
   const [isOverrideModalOpen, setOverrideModalOpen] = useState(false)
+
+  const currentSpace = findSpaceById(p.appState, p.appState.currentSpaceId)
+  const expandAllFolders = currentSpace?.folders.some(f => f.collapsed) ?? false
 
   function onToggleNotUsed() {
     if (p.appState.showNotUsed) {
@@ -207,12 +221,16 @@ export const SettingsOptions = (p: {
     trackStat("settingsClicked", { settingName: "ToggleNotUsed" })
   }
 
-  function onToggleHidden() {
-    dispatch({ type: Action.UpdateShowArchivedItems, value: !p.appState.showArchived })
-    const message = !p.appState.showArchived ? "Hidden items are visible" : "Hidden items are hidden"
-    showMessage(message, dispatch)
-
-    trackStat("settingsClicked", { settingName: "ToggleHidden" })
+  function onToggleCollapseExpand() {
+    if (p.appState.betaMode) {
+      dispatch({
+        type: Action.SetCollapsedAllFoldersInCurSpace,
+        collapsedValue: !expandAllFolders
+      })
+      trackStat("settingsClicked", { settingName: "CollapseExpand" })
+    } else {
+      setJoinProModalOpen(true)
+    }
   }
 
   function onImportExistingBookmarks() {
@@ -250,17 +268,16 @@ export const SettingsOptions = (p: {
 
   const settingsOptions: OptionsConfig = [
     {
-      onToggle: onToggleNotUsed,
-      value: p.appState.showNotUsed,
-      title: "Highlight not used in past 60 days to archive them. It helps to keep workspace clean.",
-      text: p.appState.showNotUsed ? "Unhighlight not used" : "Highlight not used"
+      onClick: onToggleCollapseExpand,
+      title: "Toggle all folders in current space",
+      text: expandAllFolders ? "Expand all folders" : "Collapse all folders",
+      icon: expandAllFolders ? IconExpand : IconCollapse
     },
     {
-      onToggle: onToggleHidden,
-      value: p.appState.showArchived,
-      title: "You can hide unused folders and bookmarks to keep space clean",
-      text: "Show hidden items",
-      hidden: !p.appState.hiddenFeatureIsEnabled
+      onToggle: onToggleNotUsed,
+      value: p.appState.showNotUsed,
+      title: "Highlight items unused for 60 days",
+      text: "Show unused items"
     },
     {
       separator: true
@@ -274,31 +291,31 @@ export const SettingsOptions = (p: {
     {
       onToggle: onToggleMode,
       value: p.appState.colorTheme === "dark",
-      title: "Change your Color Schema",
-      text: "Use Dark Theme"
+      title: "Switch between light and dark theme",
+      text: "Dark mode"
     },
     {
       onToggle: onToggleOpenInTheNewTab,
       value: !p.appState.openBookmarksInNewTab,
-      title: "You can also open bookmarks on the new tab with pressed CMD or CTRL",
-      text: "Open bookmarks on the same tab"
+      title: "Set default for opening bookmarks. CMD/CTRL works too.",
+      text: "Open bookmarks in same tab"
     },
     {
-      title: "Manage browser new tab override by Tabme",
+      title: "Enable Tabme on Chrome new tab",
       onToggle: () => {
         setOverrideModalOpen(true)
         trackStat("settingsClicked", { settingName: "toggleShowTabmeOnEachNewTab" })
       },
       value: __OVERRIDE_NEWTAB,
-      text: "Show Tabme on each new tab"
+      text: "Show Tabme on Chrome new tab"
     },
     {
       separator: true
     },
     {
       onClick: onImportExistingBookmarks,
-      title: "Import existing Chrome bookmarks into Tabme",
-      text: "Import from browser bookmarks"
+      title: "Bring in your Chrome bookmarks",
+      text: "Import Chrome bookmarks"
     },
     {
       onClick: (e) => {
@@ -307,8 +324,8 @@ export const SettingsOptions = (p: {
         })
         trackStat("settingsClicked", { settingName: "ImportFromToby" })
       },
-      title: "To get Toby`s 'JSON file' go to Account -> Export -> Json in the Toby App",
-      text: "Import from Toby App JSON",
+      title: "Export JSON from Toby to import",
+      text: "Import .json file from Toby",
       isFile: true
     },
     {
@@ -316,8 +333,8 @@ export const SettingsOptions = (p: {
     },
     {
       onClick: e => onImportClick(e),
-      title: "Open exported Tabme JSON file",
-      text: "Import from JSON",
+      title: "Import a Tabme backup file",
+      text: "Import from file",
       isFile: true
     },
     {
@@ -325,8 +342,8 @@ export const SettingsOptions = (p: {
         onExportJson(p.appState.spaces)
         trackStat("settingsClicked", { settingName: "ExportToJson" })
       },
-      title: "Export all Folders and Bookmarks to JSON file",
-      text: "Export to JSON"
+      title: "Download your Tabme backup",
+      text: "Export to file"
     }
   ]
 
@@ -337,6 +354,9 @@ export const SettingsOptions = (p: {
     }
     {
       isOverrideModalOpen && <OverrideModal setOpen={setOverrideModalOpen}/>
+    }
+    {
+      isJoinProModalOpen && <GetProPlanModal onClose={() => setJoinProModalOpen(false)} reason={"Collapsing"}/>
     }
   </>
 }
@@ -366,19 +386,17 @@ export const Options = (props: { optionsConfig: OptionsConfig | (() => OptionsCo
       if (isSeparator(option)) {
         return <div key={index} className="dropdown-menu__separator"/>
       } else if (isToggle(option)) {
-        return <label key={index} className="dropdown-menu__button focusable" title={option.title}>
-          <Switch className={"switch"}
-                  height={16}
-                  width={28}
-                  onColor={"#0066FF"}
-                  offColor={"#cbcbcb"}
-                  checkedIcon={false}
-                  uncheckedIcon={false}
-                  checked={option.value}
-                  onChange={option.onToggle}
-          />
+        return <button key={index}
+                       className="dropdown-menu__button justify-content-start focusable"
+                       onClick={option.onToggle}
+                       title={option.title}>
+          {
+            option.value
+              ? <IconToggle className="icon active"/>
+              : <IconToggle className="icon" style={{ transform: "rotate(180deg)" }}/>
+          }
           <span>{option.text}</span>
-        </label>
+        </button>
 
       } else if (isClick(option)) {
         if (option.isFile) {
@@ -393,12 +411,14 @@ export const Options = (props: { optionsConfig: OptionsConfig | (() => OptionsCo
         } else {
           return <button
             key={index}
-            className={CL("dropdown-menu__button focusable", {
+            className={CL("dropdown-menu__button justify-content-start focusable", {
               "dropdown-menu__button--dander": option.dangerStyle
             })}
             onClick={option.onClick}
             title={option.title}
-          >{option.text}</button>
+          >
+            {option.icon ? React.createElement(option.icon, { className: "icon" }) : null}
+            {option.text}</button>
         }
       }
     })}
