@@ -97,7 +97,7 @@ export function TopBar(p: {
       <div className="menu-buttons">
         {
           p.appState.betaMode && <>
-            <span className={CL("beta-mode-label", { "active": betaMenuVisibility })} onClick={toggleBetaMenu}> <IconBeta/> Beta </span>
+            <span className={CL("beta-mode-label", { "active": betaMenuVisibility })} onClick={toggleBetaMenu}> <IconBeta/> Beta Pro </span>
             {
               betaMenuVisibility && <DropdownMenu onClose={() => {setBetaMenuVisibility(false)}} noSmartPositioning={true} alignRight={true} offset={{ top: 38, right: 80 }}>
                 <BetaOptions appState={p.appState}/>

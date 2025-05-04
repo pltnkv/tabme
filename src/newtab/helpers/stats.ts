@@ -98,13 +98,14 @@ export type CommonStatProps = {
   zTotalFoldersCount: number
   zTotalSpacesCount: number
   zTotalWindowsCount: number
+  zTotalStickersCount: number
   zTabmeType: string
   zColorTheme: string
   zSidebarCollapsed: boolean
 }
 
 type EventOptionsMap = {
-  appLoaded: {}
+  // appLoaded: {}
 
   // WELCOME
   welcomeShown: {};
@@ -152,6 +153,7 @@ type EventOptionsMap = {
   "betaLeave": {},
 
   // OTHER
+  "hiddenDeprecatedWasSeen": {},
   "whatsNewOpened": { key: string },
   "jsError": {
     message: string | undefined

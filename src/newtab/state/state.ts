@@ -84,6 +84,8 @@ export type IAppState = {
 
   currentWhatsNew: WhatsNew | undefined
 
+  hasHiddenObjects: boolean
+
   // API
   apiCommandsQueue: APICommandPayloadFull[],
   apiCommandId?: number
@@ -127,6 +129,8 @@ let initState: IAppState = {
   editingWidgetId: undefined,
 
   currentWhatsNew: undefined,
+
+  hasHiddenObjects: false,
 
   page: "default",
   stat: {

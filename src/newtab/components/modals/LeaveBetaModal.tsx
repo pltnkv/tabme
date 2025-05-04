@@ -51,18 +51,18 @@ export const LeaveBetaModal = (p: {
       <div className="modal-no-override">
         <h2>Leaving the Beta Program</h2>
         <p>
-          Are you sure you want to leave the <b>Tabme Beta Program</b>?
+          Are you sure you want to leave the <b>Tabme Pro Beta</b>?
           If you proceed:
         </p>
         <ul>
-          <li>🔄 Beta features will no longer be available.</li>
-          <li>📂 All your Spaces will be merged into a single space.</li>
+          <li>🔄 Pro features will no longer be available.</li>
+          <li>📂 All your Spaces will be merged into a single Space.</li>
         </ul>
         <p>
-          You can rejoin the Beta later.
+          You can rejoin the Pro Beta later.
         </p>
 
-        <button className="btn__setting" onClick={leaveTheBeta}>Merge Spaces and leave the Beta Program</button>
+        <button className="btn__setting" onClick={leaveTheBeta}>Merge Spaces and leave the Pro Beta Program</button>
       </div>
     </Modal>
   )

@@ -325,7 +325,7 @@ export const SettingsOptions = (p: {
         trackStat("settingsClicked", { settingName: "ImportFromToby" })
       },
       title: "Export JSON from Toby to import",
-      text: "Import .json file from Toby",
+      text: "Import json file from Toby",
       isFile: true
     },
     {

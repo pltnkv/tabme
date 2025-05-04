@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from "react"
+import React, { useEffect, useReducer, useState } from "react"
 import { Bookmarks } from "./Bookmarks"
 import { Sidebar } from "./Sidebar"
 import { Notification } from "./Notification"
@@ -15,6 +15,7 @@ import { CL } from "../helpers/classNameHelper"
 import { Welcome } from "./Welcome"
 import { CommonStatProps, setCommonStatProps, trackStat } from "../helpers/stats"
 import { getHistory, tryLoadMoreHistory } from "../helpers/recentHistoryUtils"
+import { HiddenDeprecationModal } from "./modals/HiddenDeprecationModal"
 
 let notificationTimeout: number | undefined
 let globalAppState: IAppState
@@ -46,6 +47,7 @@ function invalidateStats(newState: IAppState, prevState: IAppState | undefined) 
   if (newState.spaces !== prevState?.spaces) {
     statProps.zTotalFoldersCount = newState.spaces.reduce((sum, curSpace) => sum + curSpace.folders.length, 0)
     statProps.zTotalBookmarksCount = newState.spaces.reduce((sSum, curSpace) => sSum + curSpace.folders.reduce((fSum, folder) => fSum + folder.items.length, 0), 0)
+    statProps.zTotalStickersCount = newState.spaces.reduce((sum, curSpace) => sum + (curSpace.widgets?.length ?? 0), 0)
   }
 
   setCommonStatProps(statProps)
@@ -53,6 +55,7 @@ function invalidateStats(newState: IAppState, prevState: IAppState | undefined) 
 
 export function App() {
   const [appState, dispatch] = useReducer(stateReducer, getInitAppState())
+  const [isHiddenDeprecatedModalOpen, setHiddenDeprecatedModalOpen] = useState(false)
 
   useEffect(() => {
     invalidateStats(appState, globalAppState)
@@ -74,6 +77,16 @@ export function App() {
     }
   }, [appState.loaded])
 
+  useEffect(() => {
+    if (appState.hasHiddenObjects) {
+      const hiddenDeprecatedModalShown = localStorage.getItem("hiddenDeprecatedModalShown")
+      if (!hiddenDeprecatedModalShown) {
+        localStorage.setItem("hiddenDeprecatedModalShown", 'true')
+        setHiddenDeprecatedModalOpen(true)
+      }
+    }
+  }, [])
+
   useEffect(function() {
     Promise.all([
       getTabs(),
@@ -92,7 +105,7 @@ export function App() {
       dispatch({ type: Action.UpdateAppState, newState: { loaded: true } })
 
       requestAnimationFrame(() => { // raf needed to invalidate number of tabs and windows in stat
-        trackStat("appLoaded", {})
+        // trackStat("appLoaded", {})
 
         setTimeout(() => { // preload more history
           tryLoadMoreHistory(dispatch)
@@ -208,6 +221,9 @@ export function App() {
               <Bookmarks appState={appState}/>
               <KeyboardAndMouseManager search={appState.search} selectedWidgetIds={appState.selectedWidgetIds}/>
             </>
+          }
+          {
+            isHiddenDeprecatedModalOpen && <HiddenDeprecationModal onClose={() => setHiddenDeprecatedModalOpen(false)}/>
           }
         </div>
       }

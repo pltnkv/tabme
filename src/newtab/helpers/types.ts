@@ -16,6 +16,9 @@ export interface IFolder extends IObject {
   color?: string
   twoColumn?: boolean
   collapsed?: boolean
+
+  /** @deprecated */
+  archived?: boolean
 }
 
 export interface IFolderItem extends IObject {
@@ -25,6 +28,9 @@ export interface IFolderItem extends IObject {
   isSection?: boolean // todo - replace on "type later". not store bool on server
   collapsed?: boolean
   inEdit?: boolean
+
+  /** @deprecated */
+  archived: true
 }
 
 export type WidgetType = "Sticker"

@@ -265,7 +265,7 @@ export const Folder = React.memo(function Folder(p: {
               <CustomColorInput onChange={setColorLocally} onBlur={setColorConfirmed} currentColor={folderColor}/>
             </div>
             <button className="dropdown-menu__button focusable" onClick={onAddBookmark}>+ Add Bookmark</button>
-            <button className="dropdown-menu__button focusable" onClick={onAddSection}>+ Add Section</button>
+            <button className="dropdown-menu__button focusable" onClick={onAddSection}>+ Add Group</button>
             <button className="dropdown-menu__button focusable" onClick={onOpenAll}>Open All</button>
             {
               p.spaces.length > 1 ?

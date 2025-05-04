@@ -96,15 +96,25 @@ function preprocessLoadedState(state: ISavingAppState): void {
 
   ////////////////////////////////////////////////////////////
   // Process FavIcons
+  //
+  // AND Check if there is hidden items
   ////////////////////////////////////////////////////////////
 
+  let hasHiddenObjects = false
   state.spaces.forEach(s => {
     s.folders.forEach(f => {
+      if (f.archived) {
+        hasHiddenObjects = true
+      }
       f.items.forEach(i => {
+        if (i.archived) {
+          hasHiddenObjects = true
+        }
         faviconsStorage.registerInCache(i.favIconUrl, i.url)
       })
     })
   })
+  state.hasHiddenObjects = hasHiddenObjects
 
   ////////////////////////////////////////////////////////////
   // Check if user in betaMode

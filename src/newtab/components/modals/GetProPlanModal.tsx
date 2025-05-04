@@ -16,7 +16,7 @@ const features = [
   { name: "Bookmarks count", free: "∞", upgrade: "∞", icon: IconBookmarks },
   { name: "Spaces count", free: "1", upgrade: "∞", icon: IconGrid, id: "Spaces" },
   { name: "Sticky Notes", free: true, upgrade: true, icon: IconSticky },
-  { name: "Collapsable folders and sections", free: false, upgrade: true, icon: IconCollapse, id: "Collapsing" },
+  { name: "Collapsable folders and groups", free: false, upgrade: true, icon: IconCollapse, id: "Collapsing" },
   { name: "Cross-device sync [planned]", free: false, upgrade: true, icon: IconSync },
   { name: "Spaces sharing [planned]", free: false, upgrade: true, icon: IconShare },
   { name: "Daily backups [planned]", free: false, upgrade: true, icon: IconCloudDone }
@@ -63,7 +63,7 @@ export const GetProPlanModal = (p: { onClose: () => void, reason: GetProPlanReas
   if (p.reason === "Spaces") {
     title = <><span className="highlighted">Spaces</span> are available only in Pro plan</>
   } else if (p.reason === "Collapsing") {
-    title = <><span className="highlighted">Collapsing</span> of folders and sections <br/>is available only in the Pro plan</>
+    title = <><span className="highlighted">Collapsing</span> of folders and groups <br/>is available only in the Pro plan</>
   }
 
   return (
@@ -130,7 +130,7 @@ export const GetProPlanModal = (p: { onClose: () => void, reason: GetProPlanReas
                   className="btn__setting primary"
                   onClick={joinBeta}
                 >
-                  Join Pro Beta for Free
+                  Join Pro Beta for free
                 </button>
               </div>
               {emailError && <div style={{ color: "red", marginTop: "4px", textAlign: "center" }}>Please enter a valid email address</div>}
@@ -143,18 +143,16 @@ export const GetProPlanModal = (p: { onClose: () => void, reason: GetProPlanReas
         }
         {
           screen === "second" && <div className="container">
-            <h2>🎉 Welcome to the Tabme Beta!</h2>
+            <h2>🎉 Welcome to Tabme Pro Beta!</h2>
             <p>
-              Now you can start organizing your bookmarks and folders with <b>Spaces</b><br/><br/>
+              You now have access to <b>Spaces</b> and <b>Collapsing</b> features.<br/><br/>
 
-              1️⃣ Click the ➕ (“plus”) button to create a new space.<br/>
-              2️⃣ Use drag-and-drop to sort spaces in your preferred order.<br/>
-              3️⃣ Double-click on a space’s name to rename it.<br/>
-              4️⃣ Right-click on a space to open the context menu, then select Delete to remove it.<br/><br/>
+              Quick tips for using Spaces:<br/>
+              1️⃣ Drag and drop spaces to reorder<br/>
+              2️⃣ Double-click space to rename<br/>
+              3️⃣ Right-click for more options like Delete<br/><br/>
 
-              💡 Tip: Spaces help keep your bookmarks structured, <br/>making it easier to switch between different workflows!<br/><br/>
-
-              Let me know what you think by "Send Feedback" in <IconHelp style={{ display: "inline-block", verticalAlign: "bottom" }}/> <br/>– your feedback is invaluable!<br/><br/>
+              Have thoughts? Use <IconHelp style={{ display: "inline-block", verticalAlign: "bottom" }}/> “Share Feedback” — we’d love to hear from you!<br/>
             </p>
             <button className="btn__setting primary" onClick={onClose}>Got it!</button>
           </div>

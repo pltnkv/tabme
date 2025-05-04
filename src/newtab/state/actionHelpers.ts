@@ -3,16 +3,17 @@
  */
 import { IFolder, IFolderItem, IFolderItemToCreate, ISpace, IWidget } from "../helpers/types"
 import { sortByPosition } from "../helpers/fractionalIndexes"
-import { type IAppState } from "./state"
+import { Action, type IAppState } from "./state"
 import { SECTION_ICON_BASE64 } from "../helpers/utils"
 import Tab = chrome.tabs.Tab
 import HistoryItem = chrome.history.HistoryItem
 import { RecentItem } from "../helpers/recentHistoryUtils"
+import { round10 } from "../helpers/mathUtils"
+import { ActionDispatcher } from "./actions"
 
 export function genUniqLocalId(): number {
   return (new Date()).valueOf() + Math.round(Math.random() * 10000000)
 }
-
 
 export type ITabOrRecentItem = (Tab | RecentItem)
 
@@ -46,7 +47,7 @@ export function convertTabOrRecentToItem(item: ITabOrRecentItem): IFolderItemToC
   }
 }
 
-export function createNewSection(title = "Title"): IFolderItemToCreate {
+export function createNewSection(title = "Group title"): IFolderItemToCreate {
   return {
     id: genUniqLocalId(),
     favIconUrl: SECTION_ICON_BASE64,
@@ -96,6 +97,21 @@ export function createNewFolderItem(url?: string, title?: string, favIconUrl?: s
     title: title ?? "",
     url: url ?? ""
   }
+}
+
+export function createNewStickerForOnboarding(dispatch: ActionDispatcher, spaceId: number, text: string, x: number, y: number) {
+  const widgetId = genUniqLocalId()
+  dispatch({
+    type: Action.CreateWidget,
+    spaceId,
+    widgetId,
+    content: {
+      text: text
+    },
+    pos: {
+      point: { x: round10(x), y: round10(y) }
+    }
+  })
 }
 
 export function convertToURL(val?: string | URL): URL | undefined {
