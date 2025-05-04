@@ -1,0 +1,11 @@
+{
+  "extName": {
+    "message": "Lesezeichen-Manager | Tabme Mini"
+  },
+  "extDesc": {
+    "message": "Der einfachste Tab- und Lesezeichen-Manager mit integrierten Haftnotizen."
+  },
+  "extDefaultTitle": {
+    "message": "Tabme öffnen"
+  }
+}

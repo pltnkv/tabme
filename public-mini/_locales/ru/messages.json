@@ -1,0 +1,11 @@
+{
+  "extName": {
+    "message": "Менеджер Закладок | Tabme Mini"
+  },
+  "extDesc": {
+    "message": "Самый простой менеджер табов и закладок со стикерами."
+  },
+  "extDefaultTitle": {
+    "message": "Открыть Tabme"
+  }
+}

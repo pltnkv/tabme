@@ -1,0 +1,11 @@
+{
+  "extName": {
+    "message": "Gestionnaire de Favoris | Tabme Mini"
+  },
+  "extDesc": {
+    "message": "Le gestionnaire d'onglets et de favoris le plus simple avec des notes autocollantes intégrées."
+  },
+  "extDefaultTitle": {
+    "message": "Ouvrir Tabme"
+  }
+}

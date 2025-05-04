@@ -8,8 +8,7 @@ const distPath = path.join(__dirname, "../dist");
 const buildsPath = path.join(__dirname, "../builds");
 
 // Function to update version in manifest.json
-const updateVersionInManifest = (isPatch, manifestFile) => {
-  const manifestPath = path.join(__dirname, `../public/${manifestFile}`);
+const updateVersionInManifest = (isPatch, manifestPath) => {
   const manifest = fs.readJSONSync(manifestPath);
   const version = manifest.version;
 
@@ -52,8 +51,8 @@ const zipDistFolder = (version, buildType, onCompleted) => {
   output.on("close", () => {
     console.log(`${archive.pointer()} total bytes`);
     console.log(`Archive ${zipName} created successfully`);
-    if(onCompleted) {
-      onCompleted()
+    if (onCompleted) {
+      onCompleted();
     }
   });
 
@@ -75,7 +74,7 @@ const main = async () => {
     execSync(`npm run clean`);
 
     // Step 1: Update version in manifest.json for tabme
-    let newVersion = updateVersionInManifest(isPatch, 'manifest-normal.json')
+    let newVersion = updateVersionInManifest(isPatch, path.join(__dirname, `../public-newtab/manifest.json`));
     // Step 2: Build the test version (window.isTest = true)
     buildProject({ BUILD_TYPE: "normal" });
     // Step 3: Zip the test version
@@ -86,7 +85,7 @@ const main = async () => {
       execSync(`npm run clean`);
 
       // Step 4: Update version in manifest.json for tabme - version without newtab
-      newVersion = updateVersionInManifest(isPatch, 'manifest-overrideless.json')
+      newVersion = updateVersionInManifest(isPatch, path.join(__dirname, `../public-mini/manifest.json`));
       // // Step 5: Build the prod version (window.isTest = false)
       buildProject({ BUILD_TYPE: "overrideless" });
       // // Step 6: Zip the prod version

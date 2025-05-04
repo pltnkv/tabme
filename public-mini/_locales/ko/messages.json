@@ -1,0 +1,11 @@
+{
+  "extName": {
+    "message": "북마크 관리자 | Tabme Mini"
+  },
+  "extDesc": {
+    "message": "내장된 스티키 노트가 있는 가장 쉬운 탭 및 북마크 관리자입니다."
+  },
+  "extDefaultTitle": {
+    "message": "Tabme 열기"
+  }
+}

@@ -1,14 +1,11 @@
-import { getSelectedItemsElements, getSelectedItemsIds, selectItems, unselectAllItems } from "../helpers/selectionUtils"
-import { findParentWithClass, isSomeParentHaveClass, isTargetInputOrTextArea, isTargetSupportsDragAndDrop } from "../helpers/utils"
+import { getSelectedItemsElements, unselectAllItems } from "../helpers/selectionUtils"
+import { findParentWithClass, isSomeParentHaveClass, isTargetInputOrTextArea } from "../helpers/utils"
 import { IPoint } from "../helpers/MathTypes"
 import { processMultiselection } from "./processMultiselection"
 import { processWidgetsDragAndDrop } from "./processWidgetsDragAndDrop"
 import { processFolderDragAndDrop } from "./processFolderDragAndDrop"
 import { processItemDragAndDrop } from "./processItemDragAndDrop"
 import { processSpacesDragAndDrop } from "./processSpacesDragAndDrop"
-import { getGlobalAppState } from "../components/App"
-import { findFolderByItemId, findItemById } from "../state/actionHelpers"
-import { IFolderItem } from "../helpers/types"
 
 export type DropArea = { objectId: number, element: HTMLElement, rect: DOMRect, itemRects: { thresholdY: number, itemTop: number, itemHeight: number }[] }
 

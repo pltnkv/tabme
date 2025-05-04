@@ -2,12 +2,13 @@ const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
 const srcDir = path.join(__dirname, "..", "src");
 const webpack = require("webpack");
-const Dotenv = require("dotenv-webpack")
+const Dotenv = require("dotenv-webpack");
 
 module.exports.getCommonConfig = (env) => {
   const override_newtab = env.BUILD_TYPE !== "overrideless";
-  const manifestFrom = override_newtab ? "manifest-normal.json" : "manifest-overrideless.json";
-  console.log('override_newtab', override_newtab, manifestFrom)
+  console.log("override_newtab", override_newtab);
+  const publicFolder = override_newtab ? "public-newtab" : "public-mini";
+
   return {
     entry: {
       // popup: path.join(srcDir, "popup.tsx"),
@@ -35,8 +36,8 @@ module.exports.getCommonConfig = (env) => {
         },
         {
           test: /\.svg$/, // Add this rule for SVG files
-          use: ["@svgr/webpack"],
-        },
+          use: ["@svgr/webpack"]
+        }
       ]
     },
     resolve: {
@@ -50,19 +51,13 @@ module.exports.getCommonConfig = (env) => {
       new CopyPlugin({
         patterns: [
           { from: ".", to: "../", context: "public" },
-          {
-            from: `./public/${manifestFrom}`,
-            to() {
-              // FILENAME_REGEX is a regex that matches the file you are looking for...
-              return `../manifest.json`;
-            }
-          }
+          { from: ".", to: "../", context: publicFolder }
         ],
         options: {}
       }),
       new Dotenv(), // Load .env variables
       new webpack.DefinePlugin({
-        "__OVERRIDE_NEWTAB": JSON.stringify(override_newtab),
+        "__OVERRIDE_NEWTAB": JSON.stringify(override_newtab)
       })
     ]
   };

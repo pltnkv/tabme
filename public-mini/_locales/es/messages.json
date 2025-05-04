@@ -1,0 +1,11 @@
+{
+  "extName": {
+    "message": "Administrador de Marcadores | Tabme Mini"
+  },
+  "extDesc": {
+    "message": "El gestor de pestañas y marcadores más fácil con notas adhesivas integradas."
+  },
+  "extDefaultTitle": {
+    "message": "Abrir Tabme"
+  }
+}

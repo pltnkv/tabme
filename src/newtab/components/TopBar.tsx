@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react"
+import React, { useContext, useState } from "react"
 import { DropdownMenu } from "./dropdown/DropdownMenu"
 import { handleSearchKeyDown } from "../helpers/handleBookmarksKeyDown"
 import { Action, IAppState } from "../state/state"

@@ -1,0 +1,11 @@
+{
+  "extName": {
+    "message": "Gerenciador de Favoritos | Tabme Mini"
+  },
+  "extDesc": {
+    "message": "O gerenciador de abas e favoritos mais fácil com notas adesivas integradas."
+  },
+  "extDefaultTitle": {
+    "message": "Abrir Tabme"
+  }
+}

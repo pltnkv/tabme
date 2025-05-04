@@ -6,7 +6,7 @@
 // clicking on extension icon
 ////////////////////////////////////////////////////////
 
-console.log('Background started')
+console.log("Background started")
 
 const chromeAny: any = chrome // hotfix for "chrome.action"
 chromeAny.action.onClicked.addListener(async function() {
@@ -48,6 +48,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 )
 
 ////////////////////////////////////////////////////////
+// opening tabme when extension was installed
+////////////////////////////////////////////////////////
+
+chrome.runtime.onInstalled.addListener((details) => {
+  if (details.reason === "install") {
+    chrome.tabs.create({ url: chrome.runtime.getURL("newtab.html") }, (tab) => {
+      if(!__OVERRIDE_NEWTAB) {
+        chrome.tabs.update(tab.id!, { pinned: true })
+      }
+    })
+  }
+})
+
+////////////////////////////////////////////////////////
 // opening feedback when uninstall extension
 ////////////////////////////////////////////////////////
 let uninstallURL = __OVERRIDE_NEWTAB
@@ -64,89 +78,89 @@ chrome.runtime.setUninstallURL(uninstallURL, () => {
 // building context menu for saving tabs
 ////////////////////////////////////////////////////////
 /**
-function updateContextMenu() {
-  chrome.contextMenus.removeAll(() => {
-    createContextMenu()
-  })
-}
+ function updateContextMenu() {
+ chrome.contextMenus.removeAll(() => {
+ createContextMenu()
+ })
+ }
 
-function createContextMenu() {
-  chrome.storage.local.get("spaces", (data) => {
-    const spaces: ISpace[] = data.spaces || []
+ function createContextMenu() {
+ chrome.storage.local.get("spaces", (data) => {
+ const spaces: ISpace[] = data.spaces || []
 
-    console.log('createContextMenu')
+ console.log('createContextMenu')
 
-    if (spaces.length === 0) {
-      return
-    }
+ if (spaces.length === 0) {
+ return
+ }
 
-    chrome.contextMenus.create({
-      id: "save_to",
-      title: "Save to Tabme",
-      contexts: ["page"]
-    })
+ chrome.contextMenus.create({
+ id: "save_to",
+ title: "Save to Tabme",
+ contexts: ["page"]
+ })
 
-    spaces.forEach((space) => {
-      if (space.folders.length > 0) {
+ spaces.forEach((space) => {
+ if (space.folders.length > 0) {
 
-        chrome.contextMenus.create({
-          id: `space_${space.id}`,
-          title: space.title,
-          parentId: "save_to",
-          contexts: ["page"]
-        })
+ chrome.contextMenus.create({
+ id: `space_${space.id}`,
+ title: space.title,
+ parentId: "save_to",
+ contexts: ["page"]
+ })
 
-        space.folders.forEach((folder) => {
-          chrome.contextMenus.create({
-            id: `${folder.id}`,
-            title: folder.title,
-            parentId: `space_${space.id}`,
-            contexts: ["page"]
-          })
-        })
-      }
-    })
-  })
-}
+ space.folders.forEach((folder) => {
+ chrome.contextMenus.create({
+ id: `${folder.id}`,
+ title: folder.title,
+ parentId: `space_${space.id}`,
+ contexts: ["page"]
+ })
+ })
+ }
+ })
+ })
+ }
 
-// Listen for storage changes and update the menu
-chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === "local" && changes.spaces) {
-    updateContextMenu()
-  }
-})
+ // Listen for storage changes and update the menu
+ chrome.storage.onChanged.addListener((changes, area) => {
+ if (area === "local" && changes.spaces) {
+ updateContextMenu()
+ }
+ })
 
-// Rebuild menu when the extension starts
-chrome.runtime.onInstalled.addListener(updateContextMenu)
-chrome.runtime.onStartup.addListener(updateContextMenu)
+ // Rebuild menu when the extension starts
+ chrome.runtime.onInstalled.addListener(updateContextMenu)
+ chrome.runtime.onStartup.addListener(updateContextMenu)
 
-// Handle menu item clicks
-chrome.contextMenus.onClicked.addListener((info, tab) => {
-  if (tab && tab.url) {
-    handleSave(parseInt(info.menuItemId, 10), tab.url, tab.title || "Untitled Page")
-  }
-})
+ // Handle menu item clicks
+ chrome.contextMenus.onClicked.addListener((info, tab) => {
+ if (tab && tab.url) {
+ handleSave(parseInt(info.menuItemId, 10), tab.url, tab.title || "Untitled Page")
+ }
+ })
 
-function handleSave(folderId: number, url: string, title: string) {
-  console.log(`Saving URL: ${url} with title: '${title}' to folder: '${folderId}'`)
+ function handleSave(folderId: number, url: string, title: string) {
+ console.log(`Saving URL: ${url} with title: '${title}' to folder: '${folderId}'`)
 
-  //todo !!! add network
-  chrome.storage.local.get("spaces", (data) => {
-    const dataSpaces: ISpace[] = data.spaces || []
-    const newFolderItem = createNewFolderItem(url, title, getFavIconUrl(url))
-    const updatedSpaces = updateFolder(dataSpaces, folderId, (folder) => {
-      const items  = addItemsToFolder([newFolderItem], folder.items)
-      return {
-        ...folder,
-        items
-      }
-    })
+ //todo !!! add network
+ chrome.storage.local.get("spaces", (data) => {
+ const dataSpaces: ISpace[] = data.spaces || []
+ const newFolderItem = createNewFolderItem(url, title, getFavIconUrl(url))
+ const updatedSpaces = updateFolder(dataSpaces, folderId, (folder) => {
+ const items  = addItemsToFolder([newFolderItem], folder.items)
+ return {
+ ...folder,
+ items
+ }
+ })
 
-    chrome.storage.local.set({
-      spaces: updatedSpaces
-    }, () => {
-      bc.postMessage({ type: "folders-updated" })
-    })
-  })
-}
+ chrome.storage.local.set({
+ spaces: updatedSpaces
+ }, () => {
+ bc.postMessage({ type: "folders-updated" })
+ })
+ })
+ }
  */

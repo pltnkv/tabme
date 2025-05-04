@@ -30,7 +30,7 @@ export interface IFolderItem extends IObject {
   inEdit?: boolean
 
   /** @deprecated */
-  archived: true
+  archived?: true
 }
 
 export type WidgetType = "Sticker"

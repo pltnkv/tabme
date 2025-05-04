@@ -13,7 +13,7 @@ import Tab = chrome.tabs.Tab
 import { apiGetToken } from "../../api/api"
 import { CL } from "../helpers/classNameHelper"
 import { Welcome } from "./Welcome"
-import { CommonStatProps, setCommonStatProps, trackStat } from "../helpers/stats"
+import { CommonStatProps, setCommonStatProps } from "../helpers/stats"
 import { getHistory, tryLoadMoreHistory } from "../helpers/recentHistoryUtils"
 import { HiddenDeprecationModal } from "./modals/HiddenDeprecationModal"
 

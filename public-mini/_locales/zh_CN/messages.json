@@ -1,0 +1,11 @@
+{
+  "extName": {
+    "message": "书签管理器 | Tabme Mini"
+  },
+  "extDesc": {
+    "message": "最简单的标签和书签管理器，内置便签功能。"
+  },
+  "extDefaultTitle": {
+    "message": "打开 Tabme"
+  }
+}

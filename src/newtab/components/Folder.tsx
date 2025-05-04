@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react"
 import { IFolder, IFolderItem, ISpace } from "../helpers/types"
-import { colors, DEFAULT_FOLDER_COLOR, filterItemsBySearch, isFolderItemNotUsed, scrollElementIntoView } from "../helpers/utils"
+import { colors, DEFAULT_FOLDER_COLOR, filterItemsBySearch, scrollElementIntoView } from "../helpers/utils"
 import { DropdownMenu, DropdownSubMenu } from "./dropdown/DropdownMenu"
 import { FolderItem } from "./FolderItem"
 import { EditableTitle } from "./EditableTitle"

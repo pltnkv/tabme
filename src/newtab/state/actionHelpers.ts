@@ -6,7 +6,6 @@ import { sortByPosition } from "../helpers/fractionalIndexes"
 import { Action, type IAppState } from "./state"
 import { SECTION_ICON_BASE64 } from "../helpers/utils"
 import Tab = chrome.tabs.Tab
-import HistoryItem = chrome.history.HistoryItem
 import { RecentItem } from "../helpers/recentHistoryUtils"
 import { round10 } from "../helpers/mathUtils"
 import { ActionDispatcher } from "./actions"
