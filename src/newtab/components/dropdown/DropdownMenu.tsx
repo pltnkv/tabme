@@ -189,7 +189,7 @@ export function DropdownMenu(p: {
         }
       }
 
-      if (pos.top + menuRect.height > innerHeight) {
+      if (pos.top + menuRect.height > innerHeight && !p.noSmartPositioning) {
         pos.top = pos.top - (menuRect.height + offset.bottom)
       }
 

@@ -153,6 +153,8 @@ type EventOptionsMap = {
   "betaLeave": {},
 
   // OTHER
+  "importFromFileFailed": {type: string, error:string}
+  "importFromTobyFailed": {type: string, error:string}
   "hiddenDeprecatedWasSeen": {},
   "whatsNewOpened": { key: string },
   "jsError": {

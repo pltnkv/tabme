@@ -1,5 +1,6 @@
 export enum WhatsNewKey {
   StickyNotes = "sticky-notes",
+  Collapsing = "collapsing",
 }
 
 export type WhatsNew = {
@@ -19,6 +20,18 @@ export const WhatsNewConfig: { [x in WhatsNewKey]: WhatsNew } = {
     bodyHtml: `<p>Now you can quickly jot down ideas, to-dos, or anything on your mind with <b>Sticky Notes</b>!<br>Just <b>double-click anywhere</b> to create a note and keep your thoughts right where you need them.</p>${getYoutubeIframe(
       "https://www.youtube.com/embed/9jZCsg8lF8o?si=8skWdiBN2FY8HqQb")}`,
     approxReleaseDate: "10.4.2025"
+  },
+  [WhatsNewKey.Collapsing]: {
+    key: WhatsNewKey.Collapsing,
+    buttonText: "Meet Collapsable Folders and Groups",
+    bodyTitle: "🆕 Meet Collapsable Folders and Groups",
+    bodyHtml: `<p>Keep your workspace tidy with collapsible Folders and Groups!<br/>
+              Use the new “Collapse all folders” option in "Settings" to quickly reorganize your bookmarks.<br/>
+              I've also improved drag-and-drop for Groups, making it easier to use.<br/><br/>
+              <i>Note: Collapsing is available in the Pro plan only.</i><br/><br/>
+              Watch the quick demo below to see it in action:</p>${getYoutubeIframe(
+      "https://www.youtube.com/embed/pAnZQ1GrlEA?si=bjjPlUn81deBrRCb")}`,
+    approxReleaseDate: "9.5.2025"
   }
 }
 

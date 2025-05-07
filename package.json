@@ -22,6 +22,7 @@
   "dependencies": {
     "@types/react-transition-group": "^4.4.1",
     "archiver": "^7.0.1",
+    "cloc": "^2.4.0-cloc",
     "fs-extra": "^11.2.0",
     "mixpanel-browser": "^2.60.0",
     "react": "^18.3.1",

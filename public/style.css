@@ -232,6 +232,7 @@ input.search {
     border-radius: 0 8px 8px 0;
     border: 1px solid var(--border-color);
     filter: drop-shadow(2px 2px 8px rgba(0, 0, 0, 0.1));
+    height: 100%;
 }
 
 .bookmarks-box {
@@ -816,6 +817,7 @@ input.search {
 
     input {
         margin: 0 -6px;
+        min-width: 12px;
     }
 
     &.dummy {

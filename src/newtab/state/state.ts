@@ -210,6 +210,7 @@ export enum Action {
   UpdateFolderItem = "update-folder-item",
   MoveFolderItems = "move-folder-items",
 
+  DeleteEverything = "delete-everything",
   SaveBookmarksToCloud = "save-bookmarks-to-cloud",
 
   CreateWidget = "create-widget",
@@ -278,6 +279,7 @@ export type ActionPayload = (
   | { type: Action.MoveFolderItems; itemIds: number[]; targetFolderId: number; insertBeforeItemId: number | undefined; }
 
   | { type: Action.SaveBookmarksToCloud; }
+  | { type: Action.DeleteEverything; }
 
   | { type: Action.CreateWidget; spaceId?: number; widgetId: number; position?: string, pos: IWidgetPos, content?: Partial<IWidgetContent> }
   | { type: Action.UpdateWidget; widgetId: number; position?: string; pos?: IWidgetPos; content?: Partial<IWidgetContent> }

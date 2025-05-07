@@ -66,10 +66,12 @@ export function importFromJson(event: any, dispatch: ActionDispatcher) {
         trackStat("importedTabmeBookmarks", { version: "v2" })
         showMessage("Backup has been imported", dispatch)
       } else {
+        trackStat("importFromFileFailed", { type: "wrong-format", error: "" })
         dispatch({ type: Action.ShowNotification, isError: true, message: "Unsupported JSON format" })
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error(e)
+      trackStat("importFromFileFailed", { type: "error", error: e.message })
       dispatch({ type: Action.ShowNotification, isError: true, message: "Unsupported JSON format" })
     }
   }
@@ -99,13 +101,16 @@ export function onExportJson(spaces: ISpace[]) {
   downloadObjectAsJson(backup, "tabme_backup")
 }
 
+function isTobyFormat(data: any): data is ITobyJson {
+  return data && Array.isArray(data.lists)
+}
+
 export function onImportFromToby(event: any, dispatch: ActionDispatcher, onReady?: () => void) {
   function receivedText(e: any) {
     let lines = e.target.result
     try {
-      const tobyData = JSON.parse(lines) as ITobyJson
-      const validFormat = Array.isArray(tobyData.lists)
-      if (validFormat) {
+      const tobyData = JSON.parse(lines)
+      if (isTobyFormat(tobyData)) {
         let count = 0
         tobyData.lists.forEach(tobyFolder => {
           dispatch({
@@ -123,10 +128,12 @@ export function onImportFromToby(event: any, dispatch: ActionDispatcher, onReady
         trackStat("importedTobyBookmarks", { count })
         onReady && onReady()
       } else {
+        trackStat("importFromTobyFailed", { type: "wrong-format", error: "" })
         dispatch({ type: Action.ShowNotification, isError: true, message: "Unsupported JSON format" })
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error(e)
+      trackStat("importFromTobyFailed", { type: "error", error: e.message })
       dispatch({ type: Action.ShowNotification, isError: true, message: "Unsupported JSON format" })
     }
   }

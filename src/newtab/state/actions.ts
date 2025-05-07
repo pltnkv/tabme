@@ -28,7 +28,6 @@ export const DispatchContext = createContext<ActionDispatcher>(null!)
 export type ActionDispatcher = (action: ActionPayload) => void;
 
 export function stateReducer(state: IAppState, action: ActionPayload): IAppState {
-  // unselectAll()
   const newState = stateReducer0(state, action)
   console.log("[action]:", action, " [new state]:", newState)
 
@@ -93,7 +92,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
           message: action.message,
           button: action.button,
           isError: action.isError,
-          isLoading: action.isLoading,
+          isLoading: action.isLoading
         }
       }
     }
@@ -212,6 +211,14 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         })
       }
     }
+
+    case Action.DeleteEverything: {
+      return {
+        ...state,
+        spaces: []
+      }
+    }
+
 
     /********************************************************
      * SPACES CRUD

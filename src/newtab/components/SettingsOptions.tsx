@@ -12,7 +12,7 @@ import { ShortcutsModal } from "./modals/ShortcutsModal"
 import { OverrideModal } from "./modals/OverrideModal"
 import { IFolderItem } from "../helpers/types"
 import { CL } from "../helpers/classNameHelper"
-import { findSpaceById } from "../state/actionHelpers"
+import { findSpaceById, genUniqLocalId } from "../state/actionHelpers"
 import IconToggle from "../icons/toggle-on.svg"
 import IconCollapse from "../icons/collapse.svg"
 import IconExpand from "../icons/expand.svg"
@@ -344,6 +344,23 @@ export const SettingsOptions = (p: {
       },
       title: "Download your Tabme backup",
       text: "Export to file"
+    },
+    {
+      separator: true
+    },
+    {
+      onClick: () => {
+        const res = confirm("Permanently remove all your saved Bookmarks and Stickers from Tabme? This action cannot be undone.")
+        if (res) {
+          dispatch({ type: Action.DeleteEverything })
+          const defaultSpaceId = genUniqLocalId()
+          dispatch({ type: Action.CreateSpace, spaceId: defaultSpaceId, title: "Bookmarks" })
+          dispatch({ type: Action.SelectSpace, spaceId: defaultSpaceId })
+          trackStat("settingsClicked", { settingName: "Everything erased" })
+        }
+      },
+      title: "Permanently remove all your saved Bookmarks and Stickers from Tabme. This action cannot be undone.",
+      text: "Delete everything from Tabme"
     }
   ]
 
