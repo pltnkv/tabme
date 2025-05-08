@@ -10,6 +10,7 @@ import { IFolderItem, ISpace } from "../helpers/types"
 import IconSaved from "../icons/saved.svg"
 import { getFoldersList } from "./dropdown/moveToHelpers"
 import { getBrokenImgSVG } from "../helpers/faviconUtils"
+import IconClose from "../icons/close.svg"
 
 export const TabOrRecentItem = (p: {
   data: ITabOrRecentItem,
@@ -21,14 +22,6 @@ export const TabOrRecentItem = (p: {
   const dispatch = useContext(DispatchContext)
   const [showMenu, setShowMenu] = useState<boolean>(false)
   const isTab = isTabData(p.data)
-
-  function getBgColor(tabId?: number): string {
-    if (tabId && p.lastActiveTabId === tabId) {
-      return "rgba(181, 192, 235, 0.6)"
-    } else {
-      return ""
-    }
-  }
 
   const hideMenu = () => {
     setShowMenu(false)
@@ -101,10 +94,11 @@ export const TabOrRecentItem = (p: {
   return (
     <div
       key={p.data.id}
-      style={{ backgroundColor: getBgColor(p.data.id) }}
       className={CL("inbox-item draggable-item", {
         "active": showMenu,
-        "recent-item": !isTab
+        "recent-item": !isTab,
+        "last-visited": p.lastActiveTabId === p.data.id,
+        "is-already-saved": savedInFolders
       })}
       data-id={p.data.id}
       onContextMenu={onTabContextMenu}
@@ -126,7 +120,7 @@ export const TabOrRecentItem = (p: {
       {
         p.onCloseTab && <div onClick={() => p.onCloseTab!(p.data.id!)}
                              className="inbox-item__close stop-click-propagation2 stop-dad-propagation"
-                             title="Close tab">⨉</div>
+                             title="Close tab"><IconClose/></div>
       }
 
       {

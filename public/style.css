@@ -313,7 +313,7 @@ input.search {
 
     .app-sidebar__header__text {
         flex-grow: 1;
-        font-size: 16px;
+        font-size: 18px;
         vertical-align: middle;
         white-space: nowrap;
         font-weight: 600;
@@ -462,23 +462,46 @@ input.search {
     pointer-events: none;
 }
 
+.inbox-item.last-visited {
+    color: var(--active-control-color);
+}
+
+.window-box {
+    border-radius: 8px;
+    margin-bottom: 12px;
+    opacity: 0.6;
+}
+
+.window-box.active {
+    opacity: 1;
+}
+
 .window-name {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
     margin-top: 12px;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
     margin-left: 8px;
-    white-space: nowrap;
-    transition: width 50ms;
+    transition: opacity 50ms;
     transition-delay: 100ms;
-    color: var(--section-text-color);
-    font-size: 14px;
-    font-weight: normal;
-    text-overflow: clip;
+
+    font-weight: 600;
+    white-space: nowrap;
+    text-overflow: ellipsis;
     overflow: hidden;
-    width: 120px
+    font-size: 14px;
+    opacity: 1;
+
+    span {
+        cursor: grab;
+        flex-grow: 1;
+    }
 }
 
 .collapsed .window-name {
-    width: 22px;
+    opacity: 0;
 }
 
 .inbox-item__text {
@@ -498,9 +521,18 @@ input.search {
     margin-left: -6px;
     text-align: center;
     visibility: hidden;
-    color: var(--colors-gray-600);
     padding-top: 2px;
     box-sizing: border-box;
+
+    svg {
+        color: var(--colors-gray-600);
+    }
+
+    &:hover {
+        svg {
+            color: var(--main-text-color);
+        }
+    }
 }
 
 .saved-tab-icon {
@@ -524,10 +556,6 @@ input.search {
 
 .inbox-item:hover .inbox-item__close {
     visibility: visible;
-}
-
-.inbox-item__close:hover {
-    color: var(--main-text-color);
 }
 
 .inbox-item__title {
@@ -1249,6 +1277,10 @@ input.search {
 .dad-dummy .folder-item__inner--selected {
     background-color: rgb(209 224 255);
     opacity: 0.7;
+}
+
+.dad-dummy .folder-item__inner--selected.is-already-saved {
+    opacity: 1;
 }
 
 .folder-item {

@@ -65,7 +65,7 @@ export function filterNonImportant(tab: Tab): boolean {
 
 export function filterTabsBySearch(
   list: Tab[],
-  searchValue: string
+  searchValue: string = ''
 ): Tab[] {
   const searchValueLC = searchValue.toLowerCase()
   return list.filter(item => {

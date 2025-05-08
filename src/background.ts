@@ -9,10 +9,10 @@
 console.log("Background started")
 
 const chromeAny: any = chrome // hotfix for "chrome.action"
-chromeAny.action.onClicked.addListener(async function() {
-  const viewTabUrl = chrome.runtime.getURL("newtab.html")
-  chrome.tabs.create({ url: viewTabUrl })
-})
+// chromeAny.action.onClicked.addListener(async function() {
+//   const viewTabUrl = chrome.runtime.getURL("newtab.html")
+//   chrome.tabs.create({ url: viewTabUrl })
+// })
 
 ////////////////////////////////////////////////////////
 // watching last active tabs

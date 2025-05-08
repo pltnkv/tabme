@@ -1,27 +1,37 @@
 import React, { useContext, useEffect, useRef, useState } from "react"
 import { SidebarOpenTabs } from "./SidebarOpenTabs"
 import { isTabmeTab } from "../helpers/isTabmeTab"
-import { blurSearch, getCurrentData, isTargetSupportsDragAndDrop, scrollElementIntoView } from "../helpers/utils"
+import { blurSearch, filterTabsBySearch, getCurrentData, isTargetSupportsDragAndDrop, scrollElementIntoView } from "../helpers/utils"
 import { DropdownMenu } from "./dropdown/DropdownMenu"
 import { CL } from "../helpers/classNameHelper"
 import { Action, IAppState } from "../state/state"
 import { DispatchContext } from "../state/actions"
 import IconClean from "../icons/clean.svg"
-import IconStash from "../icons/stash.svg"
+import IconDownload from "../icons/download.svg"
 import IconPin from "../icons/pin.svg"
 import Tab = chrome.tabs.Tab
 import { convertTabOrRecentToItem, convertTabToItem } from "../state/actionHelpers"
-import { createFolderWithStat,  showMessage } from "../helpers/actionsHelpersWithDOM"
+import { createFolderWithStat, showMessage } from "../helpers/actionsHelpersWithDOM"
 import { trackStat } from "../helpers/stats"
 import { SidebarRecent } from "./SidebarRecent"
 import { bindDADItemEffect } from "../dragging/dragAndDrop"
 import { RecentItem } from "../helpers/recentHistoryUtils"
+import { ISpace } from "../helpers/types"
 
 export function Sidebar(p: {
-  appState: IAppState;
+  sidebarCollapsed: boolean
+  sidebarHovered: boolean
+  tabs: Tab[]
+  recentItems: RecentItem[]
+  search: string
+  currentWindowId: number | undefined
+  spaces: ISpace[]
+  lastActiveTabIds: number[]
+  showRecent: boolean
+  alphaMode: boolean
 }) {
   const dispatch = useContext(DispatchContext)
-  const keepSidebarOpened = !p.appState.sidebarCollapsed || p.appState.sidebarHovered
+  const keepSidebarOpened = !p.sidebarCollapsed || p.sidebarHovered
   const sidebarClassName = keepSidebarOpened ? "" : "collapsed"
   const sidebarRef = useRef<HTMLDivElement | null>(null)
   const openTabsHeaderRef = useRef<HTMLDivElement | null>(null)
@@ -33,10 +43,10 @@ export function Sidebar(p: {
       // todo technically TabsIds and RecentIds can have collisions
       const onDrop = (folderId: number, insertBeforeItemId: number | undefined, targetTabsOrRecentIds: number[]) => {
         const targetTabId = targetTabsOrRecentIds[0] // we support D&D only single element from sidebar
-        let tabOrRecentItem: Tab | RecentItem | undefined = p.appState.tabs.find((t) => t.id === targetTabId)
+        let tabOrRecentItem: Tab | RecentItem | undefined = p.tabs.find((t) => t.id === targetTabId)
 
         if (!tabOrRecentItem) {
-          tabOrRecentItem = p.appState.recentItems.find(hi => hi.id === targetTabId)
+          tabOrRecentItem = p.recentItems.find(hi => hi.id === targetTabId)
         }
 
         if (folderId === -1) { // we need to create new folder first
@@ -68,13 +78,13 @@ export function Sidebar(p: {
         setMouseDownEvent(undefined)
       }
       const onClick = (tabOrRecentId: number) => {
-        const tab = p.appState.tabs.find(t => t.id === tabOrRecentId)
+        const tab = p.tabs.find(t => t.id === tabOrRecentId)
         if (tab) {
           chrome.tabs.update(tabOrRecentId, { active: true })
           chrome.windows.update(tab.windowId, { focused: true })
           trackStat("tabFocused", { source: "sidebar-open-tabs" })
         } else {
-          const recent = p.appState.recentItems.find(ri => ri.id === tabOrRecentId)
+          const recent = p.recentItems.find(ri => ri.id === tabOrRecentId)
           if (recent && recent.url) {
             chrome.tabs.create({ url: recent.url, active: true })
             trackStat("tabFocused", { source: "sidebar-recent" })
@@ -105,7 +115,7 @@ export function Sidebar(p: {
   }
 
   const onSidebarMouseEnter = () => {
-    if (!p.appState.sidebarCollapsed) {
+    if (!p.sidebarCollapsed) {
       return
     }
 
@@ -117,7 +127,7 @@ export function Sidebar(p: {
 
   const onSidebarMouseLeave = (e: any) => {
 
-    if (!p.appState.sidebarCollapsed) {
+    if (!p.sidebarCollapsed) {
       return
     }
 
@@ -130,14 +140,28 @@ export function Sidebar(p: {
   }
 
   function onToggleSidebar() {
-    trackStat("toggleSidebar", { sidebarCollapsed: !p.appState.sidebarCollapsed })
+    trackStat("toggleSidebar", { sidebarCollapsed: !p.sidebarCollapsed })
     dispatch({
       type: Action.UpdateAppState, newState: {
-        sidebarCollapsed: !p.appState.sidebarCollapsed,
+        sidebarCollapsed: !p.sidebarCollapsed,
         sidebarHovered: false
       }
     })
   }
+
+  const tabsByWindows: Map<number, Tab[]> = new Map()
+  let tabsCount = 0
+  filterTabsBySearch(p.tabs, p.search).forEach(t => {
+    let tabsInWindow = tabsByWindows.get(t.windowId)
+    if (!tabsInWindow) {
+      tabsInWindow = []
+      tabsByWindows.set(t.windowId, tabsInWindow)
+    }
+    tabsInWindow.push(t)
+    tabsCount++
+  })
+
+  const sortedWindowsByTabs = getSortedWindowsWithTabs(tabsByWindows, p.currentWindowId)
 
   return (
     <div className={"app-sidebar " + sidebarClassName}
@@ -148,37 +172,41 @@ export function Sidebar(p: {
     >
       <div className="app-sidebar__header app-sidebar__header--open-tabs" ref={openTabsHeaderRef}>
         <span className="app-sidebar__header__text">Open tabs</span>
-        <CleanupButton tabs={p.appState.tabs}/>
-        <StashButton tabs={p.appState.tabs}/>
+        <CleanupButton tabs={p.tabs}/>
+        {
+          sortedWindowsByTabs.length === 1 && <StashButton tabs={p.tabs} windowId={sortedWindowsByTabs[0].windowId}/>
+        }
         <button id="toggle-sidebar-btn"
                 className={CL("btn__icon")}
                 onClick={onToggleSidebar}
-                style={p.appState.sidebarCollapsed ? { transform: "rotate(180deg)" } : {}}
-                title={p.appState.sidebarCollapsed ? "Pin" : "Collapse"}>
+                style={p.sidebarCollapsed ? { transform: "rotate(180deg)" } : {}}
+                title={p.sidebarCollapsed ? "Pin" : "Collapse"}>
           <IconPin/>
         </button>
       </div>
 
       <SidebarOpenTabs
-        tabs={p.appState.tabs}
-        spaces={p.appState.spaces}
-        search={p.appState.search}
-        lastActiveTabIds={p.appState.lastActiveTabIds}
-        currentWindowId={p.appState.currentWindowId}
+        tabs={p.tabs}
+        spaces={p.spaces}
+        search={p.search}
+        lastActiveTabIds={p.lastActiveTabIds}
+        currentWindowId={p.currentWindowId}
+        sortedWindowsByTabs={sortedWindowsByTabs}
+        tabsCount={tabsCount}
       />
       {
-        (p.appState.showRecent || p.appState.search) && <SidebarRecent
-          search={p.appState.search}
-          alphaMode={p.appState.alphaMode}
-          recentItems={p.appState.recentItems}
-          spaces={p.appState.spaces}
+        (p.showRecent || p.search) && <SidebarRecent
+          search={p.search}
+          alphaMode={p.alphaMode}
+          recentItems={p.recentItems}
+          spaces={p.spaces}
         ></SidebarRecent>
       }
     </div>
   )
 }
 
-const StashButton = React.memo((props: { tabs: Tab[] }) => {
+export const StashButton = React.memo((p: { windowId: number, tabs: Tab[] }) => {
   const [confirmationOpened, setConfirmationOpened] = useState(false)
   const [shouldCloseTabs, setShouldCloseTabs] = useState(true)
   const dispatch = useContext(DispatchContext)
@@ -189,14 +217,14 @@ const StashButton = React.memo((props: { tabs: Tab[] }) => {
 
   const shelveTabs = () => {
     setConfirmationOpened(false)
-    chrome.tabs.query({ currentWindow: true }, (tabs) => {
+    chrome.tabs.query({ windowId: p.windowId }, (tabs) => {
       const tabsToShelve: Tab[] = []
       tabs.forEach(t => {
         if (t.id && !t.pinned) {
           if (!isTabmeTab(t)) {
             tabsToShelve.push(t)
           }
-          if (!t.active && shouldCloseTabs) {
+          if (shouldCloseTabs) {
             chrome.tabs.remove(t.id)
           }
         }
@@ -214,18 +242,20 @@ const StashButton = React.memo((props: { tabs: Tab[] }) => {
       dispatch({ type: Action.ShowNotification, message: "All Tabs has been saved" })
       trackStat("tabsStashed", { stashedTabsClosed: shouldCloseTabs })
 
-      scrollElementIntoView(`[data-folder-id="${folderId}"]`)
+      requestAnimationFrame(() => {
+        scrollElementIntoView(`[data-folder-id="${folderId}"]`)
+      })
     })
   }
 
-  const filteredTabs = props.tabs.filter(t => !t.pinned && !isTabmeTab(t))
+  const filteredTabs = p.tabs.filter(t => !t.pinned && !isTabmeTab(t))
 
   return <div style={{ display: "inline-block", position: "relative" }}>
     <button className={CL("btn__icon", { "active": confirmationOpened })}
             disabled={filteredTabs.length < 1}
             title="Stash open Tabs in the new Folder"
             onClick={onStashClick}>
-      <IconStash/>
+      <IconDownload/>
     </button>
     {
       confirmationOpened ?
@@ -235,7 +265,7 @@ const StashButton = React.memo((props: { tabs: Tab[] }) => {
                       offset={{ top: 12, left: 4 }}
                       skipTabIndexes={true}>
           <div style={{ width: "100%" }}>
-            <p>Save all open Tabs to a new Folder</p>
+            <p>Save open Tabs to a new Folder</p>
             <p>
               <label>
                 <input
@@ -243,7 +273,7 @@ const StashButton = React.memo((props: { tabs: Tab[] }) => {
                   checked={shouldCloseTabs}
                   onChange={(e) => setShouldCloseTabs(e.target.checked)}
                 />
-                and close all the tabs
+                and close them
               </label>
             </p>
           </div>
@@ -324,4 +354,20 @@ function getDuplicatedTabs(cb: (value: Tab[]) => void): void {
       cb(duplicatedTabs)
     })
   })
+}
+
+function getSortedWindowsWithTabs(map: Map<number, Tab[]>, currentWindowId: number | undefined): { windowId: number, tabs: Tab[] }[] {
+  const res = Array.from(map.entries()) // Get entries to maintain access to the window ID
+  let allWindows: { windowId: number, tabs: Tab[] }[] = []
+
+  // Filter out the current window tabs and store them separately
+  res.forEach(([windowId, tabs]) => {
+    if (windowId === currentWindowId) {
+      allWindows.splice(0, 0, { windowId, tabs })
+    } else {
+      allWindows.push({ windowId, tabs })
+    }
+  })
+
+  return allWindows
 }

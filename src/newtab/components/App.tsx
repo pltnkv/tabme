@@ -14,8 +14,9 @@ import { apiGetToken } from "../../api/api"
 import { CL } from "../helpers/classNameHelper"
 import { Welcome } from "./Welcome"
 import { CommonStatProps, setCommonStatProps } from "../helpers/stats"
-import { getHistory, tryLoadMoreHistory } from "../helpers/recentHistoryUtils"
+import { getHistory, RecentItem, tryLoadMoreHistory } from "../helpers/recentHistoryUtils"
 import { HiddenDeprecationModal } from "./modals/HiddenDeprecationModal"
+import { ISpace } from "../helpers/types"
 
 let notificationTimeout: number | undefined
 let globalAppState: IAppState
@@ -81,7 +82,7 @@ export function App() {
     if (appState.hasHiddenObjects) {
       const hiddenDeprecatedModalShown = localStorage.getItem("hiddenDeprecatedModalShown")
       if (!hiddenDeprecatedModalShown) {
-        localStorage.setItem("hiddenDeprecatedModalShown", 'true')
+        localStorage.setItem("hiddenDeprecatedModalShown", "true")
         setHiddenDeprecatedModalOpen(true)
       }
     }
@@ -217,7 +218,18 @@ export function App() {
           }
           {
             appState.page === "default" && <>
-              <Sidebar appState={appState}/>
+              <Sidebar
+                sidebarCollapsed={appState.sidebarCollapsed}
+                sidebarHovered={appState.sidebarHovered}
+                tabs={appState.tabs}
+                recentItems={appState.recentItems}
+                search={appState.search}
+                currentWindowId={appState.currentWindowId}
+                spaces={appState.spaces}
+                lastActiveTabIds={appState.lastActiveTabIds}
+                showRecent={appState.showRecent}
+                alphaMode={appState.alphaMode}
+              />
               <Bookmarks appState={appState}/>
               <KeyboardAndMouseManager search={appState.search} selectedWidgetIds={appState.selectedWidgetIds}/>
             </>
