@@ -42,8 +42,8 @@ export const SidebarOpenTabs = memo((p: {
             <TabOrRecentItem key={t.id} data={t} lastActiveTabId={p.lastActiveTabIds[1]} spaces={p.spaces} search={p.search} onCloseTab={onCloseTab}/>)
           :
           p.sortedWindowsByTabs.map((window, index) => {
-            return <div key={window.windowId} className={CL("window-box", { "active": index === 0 })}>
-              <div className="window-name">
+            return <div key={window.windowId} className={CL("window-box", { "active": index === 0 })} data-folder-id={window.windowId}>
+              <div className="window-name draggable-folder">
                 <span>{index === 0 ? "Current window" : "Inactive window"}</span>
                 <StashButton tabs={window.tabs} windowId={window.windowId}/>
                 <button className="btn__icon" onClick={() => onCloseWindow(window.windowId)} title="Close window with all Tabs">

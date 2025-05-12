@@ -32,6 +32,7 @@ function invalidateStats(newState: IAppState, prevState: IAppState | undefined) 
   statProps.zSidebarCollapsed = newState.sidebarCollapsed
   statProps.zIsBeta = newState.betaMode
   statProps.zIsFirstTime = newState.stat?.sessionNumber === 1
+  statProps.zIsRecentVisible = newState.showRecent
 
   if (newState.tabs !== prevState?.tabs) {
     const uniqWinIds: number[] = []
@@ -225,6 +226,7 @@ export function App() {
                 recentItems={appState.recentItems}
                 search={appState.search}
                 currentWindowId={appState.currentWindowId}
+                currentSpaceId={appState.currentSpaceId}
                 spaces={appState.spaces}
                 lastActiveTabIds={appState.lastActiveTabIds}
                 showRecent={appState.showRecent}

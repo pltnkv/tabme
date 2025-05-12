@@ -1,51 +1,45 @@
 import {
   calculateFoldersDropAreas,
-  calculateSpacesDropAreas, calculateTargetInsertBeforeFolderId, createFolderDummy,
+  calculateTargetInsertBeforeFolderId,
+  createFolderDummy,
   createPlaceholder,
   DropArea,
-  getFolderId, getOverlappedDropArea, getOverlappedSpaceDropArea,
+  getFolderId,
+  getOverlappedDropArea,
+  initSpacesSwitcher,
   PConfigFolder
 } from "./dragAndDrop"
 import { setScrollByDummyClientY, subscribeMouseEvents } from "./dragAndDropUtils"
 
 export function processFolderDragAndDrop(mouseDownEvent: React.MouseEvent,
                                          config: PConfigFolder,
+                                         onChangeSpace: (spaceId: number) => void,
                                          targetRoot: HTMLElement) {
 
-  let dummy: undefined | HTMLElement = undefined
   const placeholder: HTMLElement = createPlaceholder(false)
-  const folderEls = Array.from(document.querySelectorAll(".folder:not(.folder--new)"))
-  let dropFoldersAreas = calculateFoldersDropAreas(folderEls)
-  let dropSpacesAreas = calculateSpacesDropAreas()
-  let prevSpaceDropArea: DropArea | undefined = undefined
-  let dropArea: DropArea | undefined = undefined
   const draggingFolderId = getFolderId(targetRoot)
+  const spacesSwitcher = initSpacesSwitcher(onChangeSpace)
+  let dummy: undefined | HTMLElement = undefined
+  let dropArea: DropArea | undefined = undefined
   let targetInsertBeforeFolderId: number | undefined
-  let lastSelectedSpaceId: number | undefined
 
+  let dropFoldersAreas: DropArea[]
   const onViewportScrolled = () => {
     const folderEls = Array.from(document.querySelectorAll(".folder:not(.folder--new)"))
     dropFoldersAreas = calculateFoldersDropAreas(folderEls)
   }
+  onViewportScrolled()
 
   const onMouseMove = (e: MouseEvent, mouseMoved: boolean) => {
     if (dummy) {
       // move dummy
       dummy.style.transform = `translateX(${e.clientX + "px"}) translateY(${e.clientY + "px"})`
 
-      const spaceDropArea = getOverlappedSpaceDropArea(dropSpacesAreas, e)
-
-      if (spaceDropArea) {
-        if (spaceDropArea !== prevSpaceDropArea) {
-          prevSpaceDropArea = spaceDropArea
-          config.onChangeSpace(spaceDropArea.objectId)
-          lastSelectedSpaceId = spaceDropArea.objectId
-          requestAnimationFrame(onViewportScrolled) // to recalculate dropFoldersAreas
-        }
+      if (spacesSwitcher.test(e)) {
+        requestAnimationFrame(onViewportScrolled) // to recalculate dropFoldersAreas
         placeholder.remove()
         dropArea = undefined
       } else {
-        prevSpaceDropArea = undefined
         dropArea = getOverlappedDropArea(dropFoldersAreas, e)
         if (dropArea) {
           const insertBefore = e.clientX < dropArea.rect.left + dropArea.rect.width / 2
@@ -89,10 +83,12 @@ export function processFolderDragAndDrop(mouseDownEvent: React.MouseEvent,
       placeholder.remove()
       targetRoot.style.removeProperty("opacity")
       if (dropArea) {
-        config.onDrop(draggingFolderId, lastSelectedSpaceId, targetInsertBeforeFolderId)
+        config.onDrop(draggingFolderId, spacesSwitcher.getLastSelectedSpaceId(), targetInsertBeforeFolderId)
       } else {
         config.onCancel()
       }
+    } else if (config.onClick) {
+      config.onClick(draggingFolderId)
     }
   }
 

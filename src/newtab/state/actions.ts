@@ -1,7 +1,7 @@
 import { createContext } from "react"
 import { Action, ActionPayload, APICommandPayload, APICommandPayloadFull, HistoryActionPayload, IAppState, UndoStep } from "./state"
 import { ColorTheme, IFolder, IFolderItem, ISpace, IWidget } from "../helpers/types"
-import { applyTheme, saveStateThrottled, savingStateKeys } from "./storage"
+import { saveStateThrottled, savingStateKeys } from "./storage"
 import { addItemsToFolder, insertBetween, sortByPosition } from "../helpers/fractionalIndexes"
 import { loadFromNetwork } from "../../api/api"
 import {
@@ -18,6 +18,7 @@ import {
 } from "./actionHelpers"
 import { genNextRuntimeId, getRandomHEXColor, isArraysEqual } from "../helpers/utils"
 import { defaultStickerColor, stickerSizeM } from "../components/canvas/WidgetsHorMenu"
+import { applyTheme } from "./colorTheme"
 
 type ObjectWithRemoteId = {
   remoteId: number

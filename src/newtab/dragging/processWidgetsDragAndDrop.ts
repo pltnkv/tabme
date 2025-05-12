@@ -5,7 +5,8 @@ import { setScrollByDummyClientY, subscribeMouseEvents } from "./dragAndDropUtil
 import { getIdFromElement, getIdsFromElements, getPosFromElement, PConfigWidgets } from "./dragAndDrop"
 import { round10 } from "../helpers/mathUtils"
 
-export function processWidgetsDragAndDrop(mouseDownEvent: React.MouseEvent, widgetsConfig: PConfigWidgets) {
+export function processWidgetsDragAndDrop(mouseDownEvent: React.MouseEvent,
+                                          widgetsConfig: PConfigWidgets) {
   let selectedWidgets = Array.from(document.querySelectorAll<HTMLElement>(".widget.selected"))
   let selectedWidgetIds = getIdsFromElements(selectedWidgets)
   let movedWidgetIds = new Set<number>()

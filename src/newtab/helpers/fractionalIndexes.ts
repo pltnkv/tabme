@@ -8,7 +8,8 @@
 // instead. So "insertBetween('', positions[0])" inserts at the front and
 // "insertBetween(positions[positions.length - 1], '')" inserts at the back.
 
-import { IFolderItem, IFolderItemToCreate, IObject } from "./types"
+import { IFolder, IFolderItem, IFolderItemToCreate, IObject, ISpace } from "./types"
+import { findSpaceByFolderId } from "../state/actionHelpers"
 
 // VERY WIERD NAMING, it seems like "before" and "after" are mixed
 export function insertBetween(before: string, after: string): string {
@@ -102,7 +103,7 @@ export function sortByPosition<T>(foldersOrItems: T[], doSorting: boolean = true
   if (!doSorting) {
     return foldersOrItems
   }
-  console.log('!!!sortByPosition')
+  console.log("!!!sortByPosition")
   return foldersOrItems.sort((a: any, b: any) => { //todo fix it also
     if (a.position < b.position) {
       return -1
@@ -117,28 +118,34 @@ export function getFirstSortedByPosition<T>(foldersOrItems: T[]): T | undefined 
   return sortByPosition([...foldersOrItems])[0]
 }
 
-export function addItemsToFolder(insertingItems: IFolderItemToCreate[], existingItems: IFolderItem[], insertBeforeItemId?: number): IFolderItem[] {
-  const insertBeforeItemIndex = existingItems.findIndex((item) => item.id === insertBeforeItemId)
+function findBeforeAndAfterObjects<T extends IObject>(existingItems: T[], insertBeforeItemId?: number) {
+  const nextItemIndex = existingItems.findIndex((item) => item.id === insertBeforeItemId)
   // if insertBeforeItem not found — it means add to the end
-  const insertAfterItemIndex = insertBeforeItemIndex !== -1 ? insertBeforeItemIndex - 1 : existingItems.length - 1
+  const prevItemIndex = nextItemIndex !== -1 ? nextItemIndex - 1 : existingItems.length - 1
 
-  let insertAfterItem = existingItems[insertAfterItemIndex]
-  let insertBeforeItem = existingItems[insertBeforeItemIndex]
+  return {
+    prevItem: existingItems[prevItemIndex],
+    nextItem: existingItems[nextItemIndex]
+  }
+}
+
+export function addItemsToFolder(insertingItems: IFolderItemToCreate[], existingItems: IFolderItem[], insertBeforeItemId?: number): IFolderItem[] {
+  let { prevItem, nextItem } = findBeforeAndAfterObjects(existingItems, insertBeforeItemId)
 
   const newItems: IFolderItem[] = []
   insertingItems.forEach((insertingItem) => {
-    const item = insertFolderItem(insertingItem, insertAfterItem, insertBeforeItem)
-    insertAfterItem = item
+    const item = insertFolderItem(insertingItem, prevItem, nextItem)
+    prevItem = item
     newItems.push(item)
   })
 
   return sortByPosition([...existingItems, ...newItems])
 }
 
-function insertFolderItem(newItem: IFolderItemToCreate, insertAfterItem: IFolderItem | undefined, insertBeforeItem: IFolderItem | undefined): IFolderItem {
+function insertFolderItem(newItem: IFolderItemToCreate, prevItem: IFolderItem | undefined, nextItem: IFolderItem | undefined): IFolderItem {
   return {
     ...newItem,
-    position: insertBetween(insertAfterItem?.position ?? "", insertBeforeItem?.position ?? "")
+    position: insertBetween(prevItem?.position ?? "", nextItem?.position ?? "")
   }
 }
 
@@ -151,4 +158,9 @@ export function regeneratePositions<T extends IObject>(records: T[]): T[] {
   })
 
   return records
+}
+
+export function getPositionForNewFolder(space: ISpace, insertBeforeFolderId: number | undefined): string {
+  let { prevItem, nextItem } = findBeforeAndAfterObjects(space.folders, insertBeforeFolderId)
+  return insertBetween(prevItem?.position ?? "", nextItem?.position ?? "")
 }

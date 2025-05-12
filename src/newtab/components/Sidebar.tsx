@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react"
 import { SidebarOpenTabs } from "./SidebarOpenTabs"
 import { isTabmeTab } from "../helpers/isTabmeTab"
-import { blurSearch, filterTabsBySearch, getCurrentData, isTargetSupportsDragAndDrop, scrollElementIntoView } from "../helpers/utils"
+import { blurSearch, canDisplayTabInSidebar, filterTabsBySearch, getCurrentData, isTargetSupportsDragAndDrop, scrollElementIntoView } from "../helpers/utils"
 import { DropdownMenu } from "./dropdown/DropdownMenu"
 import { CL } from "../helpers/classNameHelper"
 import { Action, IAppState } from "../state/state"
@@ -10,13 +10,14 @@ import IconClean from "../icons/clean.svg"
 import IconDownload from "../icons/download.svg"
 import IconPin from "../icons/pin.svg"
 import Tab = chrome.tabs.Tab
-import { convertTabOrRecentToItem, convertTabToItem } from "../state/actionHelpers"
+import { convertTabOrRecentToItem, convertTabToItem, findSpaceById } from "../state/actionHelpers"
 import { createFolderWithStat, showMessage } from "../helpers/actionsHelpersWithDOM"
 import { trackStat } from "../helpers/stats"
 import { SidebarRecent } from "./SidebarRecent"
 import { bindDADItemEffect } from "../dragging/dragAndDrop"
 import { RecentItem } from "../helpers/recentHistoryUtils"
 import { ISpace } from "../helpers/types"
+import { getPositionForNewFolder } from "../helpers/fractionalIndexes"
 
 export function Sidebar(p: {
   sidebarCollapsed: boolean
@@ -25,6 +26,7 @@ export function Sidebar(p: {
   recentItems: RecentItem[]
   search: string
   currentWindowId: number | undefined
+  currentSpaceId: number
   spaces: ISpace[]
   lastActiveTabIds: number[]
   showRecent: boolean
@@ -40,8 +42,16 @@ export function Sidebar(p: {
 
   useEffect(() => {
     if (mouseDownEvent) {
+
+      const onChangeSpace = (spaceId: number) => {
+        dispatch({
+          type: Action.SelectSpace,
+          spaceId
+        })
+      }
+
       // todo technically TabsIds and RecentIds can have collisions
-      const onDrop = (folderId: number, insertBeforeItemId: number | undefined, targetTabsOrRecentIds: number[]) => {
+      const onDropItems = (folderId: number, insertBeforeItemId: number | undefined, targetTabsOrRecentIds: number[]) => {
         const targetTabId = targetTabsOrRecentIds[0] // we support D&D only single element from sidebar
         let tabOrRecentItem: Tab | RecentItem | undefined = p.tabs.find((t) => t.id === targetTabId)
 
@@ -77,7 +87,7 @@ export function Sidebar(p: {
       const onCancel = () => {
         setMouseDownEvent(undefined)
       }
-      const onClick = (tabOrRecentId: number) => {
+      const onClickTab = (tabOrRecentId: number) => {
         const tab = p.tabs.find(t => t.id === tabOrRecentId)
         if (tab) {
           chrome.tabs.update(tabOrRecentId, { active: true })
@@ -95,12 +105,42 @@ export function Sidebar(p: {
         return true
       }
 
+      const onDropWindow = (draggedFolderId: number, targetSpaceId: number | undefined, insertBeforeFolderId: number | undefined) => {
+        chrome.tabs.query({ windowId: draggedFolderId }, (tabs) => {
+          const targetSpace = findSpaceById({ spaces: p.spaces }, targetSpaceId ?? p.currentSpaceId)
+          if (targetSpace) {
+
+            const items = tabs
+              .filter(canDisplayTabInSidebar)
+              .map(tab => convertTabOrRecentToItem(tab)).reverse()
+
+            createFolderWithStat(dispatch, {
+              spaceId: targetSpaceId,
+              title: getStashedFolderTitle(),
+              position: getPositionForNewFolder(targetSpace, insertBeforeFolderId),
+              items: items
+            }, "by-drag-in-window--sidebar")
+          }
+        })
+      }
+
+      const onClickWindow = (windowId: number) => {
+        chrome.windows.update(windowId, { focused: true })
+      }
+
       return bindDADItemEffect(mouseDownEvent,
+        onChangeSpace,
         {
           isFolderItem: false,
-          onDrop,
+          onDrop: onDropItems,
           onCancel,
-          onClick,
+          onClick: onClickTab,
+          onDragStarted
+        },
+        {
+          onDrop: onDropWindow,
+          onCancel,
+          onClick: onClickWindow,
           onDragStarted
         }
       )
@@ -195,15 +235,20 @@ export function Sidebar(p: {
         tabsCount={tabsCount}
       />
       {
-        (p.showRecent || p.search) && <SidebarRecent
+        <SidebarRecent
           search={p.search}
           alphaMode={p.alphaMode}
           recentItems={p.recentItems}
+          showRecent={p.showRecent}
           spaces={p.spaces}
         ></SidebarRecent>
       }
     </div>
   )
+}
+
+export const getStashedFolderTitle = () => {
+  return `Saved ${getCurrentData()}`
 }
 
 export const StashButton = React.memo((p: { windowId: number, tabs: Tab[] }) => {
@@ -236,7 +281,7 @@ export const StashButton = React.memo((p: { windowId: number, tabs: Tab[] }) => 
       }
 
       const items = tabsToShelve.map(convertTabToItem)
-      const title = `Saved ${getCurrentData()}`
+      const title = getStashedFolderTitle()
       const folderId = createFolderWithStat(dispatch, { title, items }, "by-stash")
 
       dispatch({ type: Action.ShowNotification, message: "All Tabs has been saved" })

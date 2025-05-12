@@ -99,6 +99,7 @@ export type CommonStatProps = {
   zTotalSpacesCount: number
   zTotalWindowsCount: number
   zTotalStickersCount: number
+  zIsRecentVisible: boolean
   zTabmeType: string
   zColorTheme: string
   zSidebarCollapsed: boolean

@@ -14,10 +14,10 @@ export function getBC() {
   return bc
 }
 
-function saveState(appState: IAppState): void {
+export function saveState(appState: Partial<IAppState>): void {
   const savingState: any = {}
   savingStateKeys.forEach(key => {
-    savingState[key] = appState[key as SavingStateKeys]
+    savingState[key] = appState[key as StoredStateKeys]
   })
 
   chrome.storage.local.set(savingState, () => {
@@ -42,69 +42,27 @@ const savingStateDefaultValues = { // if was not saved to LS yet
   "version": 1,
   "folders": undefined // "folders" is legacy. Dont delete it until all users are migrated
 }
-type SavingStateKeys = keyof typeof savingStateDefaultValues
-export const savingStateKeys = Object.keys(savingStateDefaultValues) as SavingStateKeys[]
+type StoredStateKeys = keyof typeof savingStateDefaultValues
+export const savingStateKeys = Object.keys(savingStateDefaultValues) as StoredStateKeys[]
 
-export type ISavingAppState = {
-  [key in SavingStateKeys]: IAppState[key]
+export type IStoredAppState = {
+  [key in StoredStateKeys]: IAppState[key]
 } & { hiddenFeatureIsEnabled: boolean, betaMode: boolean; folders: IFolder[], currentWhatsNew:WhatsNew|undefined, hasHiddenObjects:boolean }
 
-export function getStateFromLS(callback: (state: ISavingAppState) => void): void {
+export function getStateFromLS(callback: (state: IStoredAppState) => void): void {
   chrome.storage.local.get(savingStateKeys, (res) => {
-    const result = {} as ISavingAppState
+    const result = {} as IStoredAppState
     savingStateKeys.forEach(key => {
       if (res.hasOwnProperty(key)) {
         // @ts-ignore
         result[key] = res[key]
       } else {
         // @ts-ignore
-        result[key] = savingStateDefaultValues[key as SavingStateKeys]
+        result[key] = savingStateDefaultValues[key as StoredStateKeys]
       }
     })
     console.log("getStateFromLS", res, result)
     callback(result)
-  })
-}
-
-////////////////////////////////////////////////////////
-// LIGHT & DARK THEMAS
-////////////////////////////////////////////////////////
-
-const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)")
-let canUseSystemTheme = false
-
-darkThemeMq.addEventListener("change", () => {
-  if (canUseSystemTheme) {
-    setThemeStyle(darkThemeMq.matches)
-  }
-})
-
-export function applyTheme(theme: ColorTheme) {
-  canUseSystemTheme = false
-  switch (theme) {
-    case "light":
-      setThemeStyle(false)
-      break
-    case "dark":
-      setThemeStyle(true)
-      break
-    default:
-      setThemeStyle(false)
-      // who need system color?
-      // canUseSystemTheme = true
-      // setThemeStyle(darkThemeMq.matches)
-      break
-  }
-}
-
-function setThemeStyle(useDarkMode: boolean) {
-  if (useDarkMode) {
-    document.documentElement.classList.add("dark-theme")
-  } else {
-    document.documentElement.classList.remove("dark-theme")
-  }
-  setCommonStatProps({
-    zColorTheme: useDarkMode ? "dark" : "light"
   })
 }
 

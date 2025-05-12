@@ -8,7 +8,6 @@ import { getTempFavIconUrl } from "../state/actionHelpers"
 
 export const SECTION_ICON_BASE64 = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIj4KICA8cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2ZmZiIgLz4KPC9zdmc+Cg==`
 
-export const DEFAULT_FOLDER_COLOR = "#f0f0f0"
 export const EMPTY_FOLDER_COLOR = "transparent"
 
 export const MAX_LAST_ACTIVE_TABS_COUNT = 3

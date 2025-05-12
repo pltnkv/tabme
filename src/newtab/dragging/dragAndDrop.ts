@@ -20,7 +20,7 @@ export type PConfigItem = {
 export type PConfigFolder = {
   onDrop: (draggedFolderId: number, targetSpaceId: number | undefined, insertBeforeFolderId: number | undefined) => void,
   onCancel: () => void,
-  onChangeSpace: (spaceId: number) => void,
+  onClick?: (targetId: number) => void,
   onDragStarted: () => boolean // return false to prevent action. Previously was named canDrag()
 }
 
@@ -41,6 +41,7 @@ export type PConfigSpaces = {
 
 export function bindDADItemEffect(
   mouseDownEvent: React.MouseEvent,
+  onChangeSpace: (spaceId: number) => void,
   itemConfig: PConfigItem,
   folderConfig?: PConfigFolder,
   widgetsConfig?: PConfigWidgets,
@@ -62,10 +63,10 @@ export function bindDADItemEffect(
       if (getSelectedItemsElements().includes(targetRoot)) {
         targetRoots = getSelectedItemsElements()
       }
-      return processItemDragAndDrop(mouseDownEvent, itemConfig, targetRoots)
+      return processItemDragAndDrop(mouseDownEvent, itemConfig, onChangeSpace, targetRoots)
     } else if (targetFolderHeader && folderConfig) {
       unselectAllItems()
-      return processFolderDragAndDrop(mouseDownEvent, folderConfig, targetFolderHeader.parentElement!)
+      return processFolderDragAndDrop(mouseDownEvent, folderConfig, onChangeSpace, targetFolderHeader.parentElement!)
     } else if (spacesConfig && isSomeParentHaveClass(target, "spaces-list__item")) {
       if (!isSomeParentHaveClass(target, "spaces-list__delete-button") && spacesConfig.canSortSpaces()) {
         processSpacesDragAndDrop(mouseDownEvent, spacesConfig)
@@ -105,6 +106,33 @@ export function bindDADItemEffect(
       return () => {
         document.removeEventListener("contextmenu", onContextMenu)
       }
+    }
+  }
+}
+
+export function initSpacesSwitcher(onChangeSpace: (spaceId: number) => void) {
+  let dropSpacesAreas = calculateSpacesDropAreas()
+  let prevSpaceDropArea: DropArea | undefined = undefined
+  let lastSelectedSpaceId: number | undefined
+
+  return {
+    test: (e: MouseEvent): boolean => {
+      const spaceDropArea = getOverlappedSpaceDropArea(dropSpacesAreas, e)
+      if (spaceDropArea) {
+        if (spaceDropArea !== prevSpaceDropArea) {
+          prevSpaceDropArea = spaceDropArea
+          onChangeSpace(spaceDropArea.objectId)
+          lastSelectedSpaceId = spaceDropArea.objectId
+          return true
+        }
+        return false
+      } else {
+        prevSpaceDropArea = undefined
+      }
+      return false
+    },
+    getLastSelectedSpaceId: () => {
+      return lastSelectedSpaceId
     }
   }
 }
@@ -299,8 +327,15 @@ export function createFolderDummy(targetRoot: HTMLElement, mouseDownEvent: React
   const dummy = document.createElement("div")
   dummy.append(targetRoot.cloneNode(true))
   dummy.style.opacity = "0.8"
-  const itemsBoxEl = dummy.querySelector<HTMLElement>(".folder-items-box")!
-  itemsBoxEl.style.visibility = "hidden"
+  const itemsBoxEl = dummy.querySelector<HTMLElement>(".folder-items-box")
+  if (itemsBoxEl) {
+    itemsBoxEl.style.visibility = "hidden"
+  }
+
+  const buttons = dummy.querySelectorAll<HTMLElement>(".btn__icon, .inbox-item__already-saved")
+  buttons.forEach(btn => {
+    btn.style.display = "none"
+  })
 
   const rect = targetRoot.getBoundingClientRect()
   // dummy.style.width = `${rect.width + 4}px`

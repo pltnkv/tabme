@@ -1,30 +1,38 @@
 import React, { useCallback, useContext, useEffect, useState } from "react"
-import { extractHostname, filterRecentItemsBySearch, hlSearch, removeUselessProductName } from "../helpers/utils"
+import { filterRecentItemsBySearch } from "../helpers/utils"
 import { CL } from "../helpers/classNameHelper"
 import {
-  confluenceHashRegExp, figmaBoardRegExp, figmaDesignHashRegExp,
+  confluenceHashRegExp,
+  figmaBoardRegExp,
+  figmaDesignHashRegExp,
   figmaSlidesRegExp,
-  RecentItem,
   getBaseFilteredRecentItems,
   getCleanMiroTitle,
   getCleanTitle,
   getFilteredRecentItems,
   githubPRHashRegExp,
-  googleDocHashRegExp, googleFormsHashRegExp, googlePresentationHashRegExp, googleSpreadsheetsHashRegExp,
-  hashGetterFactory, IFilter, jiraHashRegExp,
+  googleDocHashRegExp,
+  googleFormsHashRegExp,
+  googlePresentationHashRegExp,
+  googleSpreadsheetsHashRegExp,
+  hashGetterFactory,
+  IFilter,
+  jiraHashRegExp,
   loomHashRegExp,
-  miroHashRegExp, tryLoadMoreHistory,
+  miroHashRegExp,
+  RecentItem,
+  tryLoadMoreHistory,
   youtubeHashRegExp
 } from "../helpers/recentHistoryUtils"
 import IconFilter from "../icons/filter.svg"
+import IconVisibility from "../icons/visibility.svg"
+import IconVisibilityOff from "../icons/visibility_off.svg"
 import IconNonFilter from "../icons/no-filter-thin.svg"
-import HistoryItem = chrome.history.HistoryItem
 import { getTempFavIconUrl } from "../state/actionHelpers"
 import { DispatchContext } from "../state/actions"
-import { trackStat } from "../helpers/stats"
-import { getBrokenImgSVG } from "../helpers/faviconUtils"
 import { TabOrRecentItem } from "./SidebarItem"
 import { ISpace } from "../helpers/types"
+import { Action } from "../state/state"
 
 const PAGE_SIZE = 100
 
@@ -95,6 +103,7 @@ export const SidebarRecent = React.memo((p: {
   recentItems: RecentItem[];
   alphaMode: boolean,
   search: string;
+  showRecent: boolean,
   spaces: ISpace[];
 }) => {
   const dispatch = useContext(DispatchContext)
@@ -142,6 +151,14 @@ export const SidebarRecent = React.memo((p: {
     }))
   }
 
+  const onShowRecent = () => {
+    dispatch({ type: Action.UpdateAppState, newState: { showRecent: true } })
+  }
+
+  const onHideRecent = () => {
+    dispatch({ type: Action.UpdateAppState, newState: { showRecent: false } })
+  }
+
   return <div className="recent-list">
     <div className={CL("app-sidebar__header app-sidebar__header--recent", {
       "filters-opened": filterByDomainEnabled
@@ -155,6 +172,26 @@ export const SidebarRecent = React.memo((p: {
                                  onClick={onFiltersPanelClick}>
             <IconFilter/>
           </button>
+        }
+        {
+          !p.search && <>
+            {
+              p.showRecent ?
+                <button className={CL("btn__icon")}
+                        style={{ position: "relative" }}
+                        title="Hide recently closed tabs"
+                        onClick={onHideRecent}>
+                  <IconVisibility/>
+                </button>
+                :
+                <button className={CL("btn__icon")}
+                        style={{ position: "relative" }}
+                        title="Show recently closed tabs"
+                        onClick={onShowRecent}>
+                  <IconVisibilityOff/>
+                </button>
+            }
+          </>
         }
       </div>
 
@@ -180,18 +217,23 @@ export const SidebarRecent = React.memo((p: {
       }
     </div>
 
-
-    <RecentList
-      items={itemsFilteredBySearchAndFilter}
-      search={p.search}
-      spaces={p.spaces}
-    ></RecentList>
     {
-      Boolean(moreSearchResultsCount)
-        ? <div className="sidebar-message">
-          <span><span className="sidebar-message__btn" onClick={onClearFilters}>Remove</span> filtering to see {moreSearchResultsCount} more results</span>
-        </div>
-        : <div className="sidebar-message"><span>History is limited by 2 month</span></div>
+      (p.showRecent || p.search)
+        ? <>
+          <RecentList
+            items={itemsFilteredBySearchAndFilter}
+            search={p.search}
+            spaces={p.spaces}
+          ></RecentList>
+          {
+            Boolean(moreSearchResultsCount)
+              ? <div className="sidebar-message">
+                <span><span className="sidebar-message__btn" onClick={onClearFilters}>Remove</span> filtering to see {moreSearchResultsCount} more results</span>
+              </div>
+              : <div className="sidebar-message"><span>History is limited by 2 month</span></div>
+          }
+        </>
+        : null
     }
 
 

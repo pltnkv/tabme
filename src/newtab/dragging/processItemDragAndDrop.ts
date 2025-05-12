@@ -3,11 +3,11 @@ import { setScrollByDummyClientY, subscribeMouseEvents } from "./dragAndDropUtil
 import {
   calculateFoldersDropAreas,
   createPlaceholder,
-  createTabDummy,
+  createTabDummy, DropArea,
   getFolderId, getIdFromElement,
   getIdsFromElements,
   getItemIdByIndex, getNewPlacementForItem,
-  getOverlappedDropArea, PConfigItem
+  getOverlappedDropArea, initSpacesSwitcher, PConfigItem
 } from "./dragAndDrop"
 import { inRange } from "../helpers/mathUtils"
 import { getGlobalAppState } from "../components/App"
@@ -17,6 +17,7 @@ import { IFolderItem } from "../helpers/types"
 export function processItemDragAndDrop(
   mouseDownEvent: React.MouseEvent,
   config: PConfigItem,
+  onChangeSpace: (spaceId: number) => void,
   targetRoots: HTMLElement[]
 ) {
   let originalFolderId: number
@@ -24,44 +25,53 @@ export function processItemDragAndDrop(
   let dummy: undefined | HTMLElement = undefined
   const placeholder: HTMLElement = createPlaceholder(true)
 
-  const folderEls = Array.from(document.querySelectorAll(".folder .folder-items-box"))
-  let dropAreas = calculateFoldersDropAreas(folderEls, true)
-
+  let dropArea: DropArea | undefined = undefined
   let prevBoxToDrop: HTMLElement | undefined = undefined
   let indexToDrop: number
   let targetFolderId: number
 
+  let dropAreas: DropArea[]
   const onViewportScrolled = () => {
     // recalculate drop areas if viewport was scrolled
+    const folderEls = Array.from(document.querySelectorAll(".folder .folder-items-box"))
     dropAreas = calculateFoldersDropAreas(folderEls, true)
   }
+  onViewportScrolled()
+
+  const spacesSwitcher = initSpacesSwitcher(onChangeSpace)
 
   const onMouseMove = (e: MouseEvent, mouseMoved: boolean) => {
     if (dummy) {
       // move dummy
       dummy.style.transform = `translateX(${e.clientX + "px"}) translateY(${e.clientY + "px"})`
 
-      // find target position
-      const dropArea = getOverlappedDropArea(dropAreas, e)
-      const curBoxToDrop = dropArea ? dropArea.element : undefined
-      if (curBoxToDrop !== prevBoxToDrop) {
-        if (curBoxToDrop) {
-          curBoxToDrop.appendChild(placeholder)
-        } else {
-          placeholder.remove()
+      if (spacesSwitcher.test(e)) {
+        requestAnimationFrame(onViewportScrolled) // to recalculate dropFoldersAreas
+        placeholder.remove()
+        dropArea = undefined
+      } else {
+        // find target position
+        dropArea = getOverlappedDropArea(dropAreas, e)
+        const curBoxToDrop = dropArea ? dropArea.element : undefined
+        if (curBoxToDrop !== prevBoxToDrop) {
+          if (curBoxToDrop) {
+            curBoxToDrop.appendChild(placeholder)
+          } else {
+            placeholder.remove()
+          }
+          prevBoxToDrop = curBoxToDrop
         }
-        prevBoxToDrop = curBoxToDrop
-      }
-      if (curBoxToDrop && dropArea) {
-        const res = getNewPlacementForItem(dropArea, e)
-        targetFolderId = dropArea.objectId
-        const tryAddToOriginalPos = targetFolderId === originalFolderId && inRange(res.index, originalIndex, originalIndex + targetRoots.length)
-        if (tryAddToOriginalPos) { //actual only for isFolderItem
-          placeholder.style.top = `${dropArea.itemRects[originalIndex].itemTop}px`
-          indexToDrop = originalIndex
-        } else {
-          placeholder.style.top = `${res.placeholderY}px`
-          indexToDrop = res.index
+        if (curBoxToDrop && dropArea) {
+          const res = getNewPlacementForItem(dropArea, e)
+          targetFolderId = dropArea.objectId
+          const tryAddToOriginalPos = targetFolderId === originalFolderId && inRange(res.index, originalIndex, originalIndex + targetRoots.length)
+          if (tryAddToOriginalPos) { //actual only for isFolderItem
+            placeholder.style.top = `${dropArea.itemRects[originalIndex].itemTop}px`
+            indexToDrop = originalIndex
+          } else {
+            placeholder.style.top = `${res.placeholderY}px`
+            indexToDrop = res.index
+          }
         }
       }
 
@@ -118,7 +128,6 @@ export function processItemDragAndDrop(
   return unsubscribeEvents
 }
 
-
 function selectSectionChildrenIfNeeded(element: HTMLElement): HTMLElement[] {
   const id = getIdFromElement(element)
   const state = getGlobalAppState()
@@ -127,12 +136,12 @@ function selectSectionChildrenIfNeeded(element: HTMLElement): HTMLElement[] {
     const folder = findFolderByItemId(state, id)
     if (folder) {
       const sectionIndex = folder.items.findIndex(i => i.id === id)
-      const children:IFolderItem[] = []
+      const children: IFolderItem[] = []
       for (let i = sectionIndex + 1; i < folder.items.length; i++) {
         const nextItem = folder.items[i]
-        if(nextItem.isSection) {
+        if (nextItem.isSection) {
           break
-        }else{
+        } else {
           children.push(nextItem)
         }
       }
@@ -141,7 +150,7 @@ function selectSectionChildrenIfNeeded(element: HTMLElement): HTMLElement[] {
       childrenElements.unshift(element)
       selectItems(childrenElements)
       return childrenElements
-    }else{
+    } else {
       return [element]
     }
   } else {

@@ -60,6 +60,7 @@ export function EditableTitle(p: {
       p.inEdit ?
         <textarea
           tabIndex={2}
+          className={p.className}
           ref={textareaRef}
           onKeyDown={handleKeyDown}
           onChange={handleTitleChange}

@@ -1,7 +1,7 @@
-import React from "react"
+import React, { useEffect } from "react"
 import { App } from "./components/App"
 import { setInitAppState } from "./state/state"
-import { applyTheme, getStateFromLS, ISavingAppState, isBetaMode, saveStateThrottled } from "./state/storage"
+import { getStateFromLS, IStoredAppState, isBetaMode, saveStateThrottled } from "./state/storage"
 import { apiGetDashboard, loadFromNetwork } from "../api/api"
 import { createRoot } from "react-dom/client"
 import { getFirstSortedByPosition, insertBetween, regeneratePositions } from "./helpers/fractionalIndexes"
@@ -10,6 +10,7 @@ import { genUniqLocalId } from "./state/actionHelpers"
 import { initStats } from "./helpers/stats"
 import { faviconsStorage } from "./helpers/faviconUtils"
 import { getAvailableWhatsNew } from "./helpers/whats-new"
+import { applyTheme } from "./state/colorTheme"
 
 if (loadFromNetwork()) {
   // todo: Always start from LS. rendering should happen without loaded cloud data
@@ -38,6 +39,13 @@ async function runLocally() {
     setInitAppState(res)
     mountApp()
   })
+
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (tabs && tabs.length > 0) {
+      console.log("!!! , ta", tabs)
+    }
+  })
+
 }
 
 function mountApp() {
@@ -50,7 +58,7 @@ function mountApp() {
 }
 
 // TODO remove in JUNE WHEN EVERYONE has version more than v1.30
-function migrateToSpaces(state: ISavingAppState) {
+function migrateToSpaces(state: IStoredAppState) {
   if (Array.isArray(state.folders)) {
     const initSpace: ISpace = {
       id: genUniqLocalId(),
@@ -68,7 +76,7 @@ function migrateToSpaces(state: ISavingAppState) {
   }
 }
 
-function preprocessLoadedState(state: ISavingAppState): void {
+function preprocessLoadedState(state: IStoredAppState): void {
   ////////////////////////////////////////////////////////////
   // initialize app.stat
   ////////////////////////////////////////////////////////////

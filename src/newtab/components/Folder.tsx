@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react"
 import { IFolder, IFolderItem, ISpace } from "../helpers/types"
-import { colors, DEFAULT_FOLDER_COLOR, filterItemsBySearch, scrollElementIntoView } from "../helpers/utils"
+import { colors, filterItemsBySearch, scrollElementIntoView } from "../helpers/utils"
 import { DropdownMenu, DropdownSubMenu } from "./dropdown/DropdownMenu"
 import { FolderItem } from "./FolderItem"
 import { EditableTitle } from "./EditableTitle"
@@ -20,6 +20,7 @@ import { trackStat } from "../helpers/stats"
 import { RecentItem } from "../helpers/recentHistoryUtils"
 import Tab = chrome.tabs.Tab
 import { GetProPlanModal } from "./modals/GetProPlanModal"
+import { getFolderGradientColor } from "../helpers/getFolderGradientColor"
 
 export const Folder = React.memo(function Folder(p: {
   spaces: ISpace[];
@@ -45,14 +46,14 @@ export const Folder = React.memo(function Folder(p: {
   function collapseFolder() {
     if (p.isBeta) {
       dispatch({ type: Action.UpdateFolder, folderId: p.folder.id, collapsed: true })
-      trackStat('collapseFolder', {})
+      trackStat("collapseFolder", {})
     } else {
       setGetProModalOpen(true)
     }
   }
 
   function expandFolder() {
-      dispatch({ type: Action.UpdateFolder, folderId: p.folder.id, collapsed: false })
+    dispatch({ type: Action.UpdateFolder, folderId: p.folder.id, collapsed: false })
   }
 
   function onDelete() {
@@ -91,7 +92,7 @@ export const Folder = React.memo(function Folder(p: {
     setShowMenu(false)
 
     scrollElementIntoView(`[data-id="${newSection.id}"]`)
-    trackStat('createSection', {})
+    trackStat("createSection", {})
   }
 
   function onAddBookmark() {
@@ -115,7 +116,7 @@ export const Folder = React.memo(function Folder(p: {
     setShowMenu(false)
 
     scrollElementIntoView(`[data-id="${newBookmark.id}"]`)
-    trackStat('createEmptyBookmark', {})
+    trackStat("createEmptyBookmark", {})
   }
 
   function setColorLocally(color: string) {
@@ -184,16 +185,7 @@ export const Folder = React.memo(function Folder(p: {
   }
 
   const folderColor = localColor ?? p.folder.color
-  const color = new Color()
-  const color2 = new Color()
-  color.setColor(localColor ?? p.folder.color ?? DEFAULT_FOLDER_COLOR)
-  color.setAlpha(1)
-  color2.value = { ...color.value }
-  color2.setSaturation(color2.value.s + 0.1)
-  color2.value.h = color2.value.h + 0.05
-  // console.log(color2.value)
-  // const folderColorWithOpacity = color.getRGBA()
-  const folderGradientColor = `linear-gradient(45deg, ${color.getRGBA()}, ${color2.getRGBA()})`
+  const folderGradientColor = getFolderGradientColor(localColor ?? p.folder.color)
 
   const onHeaderContextMenu = (e: React.MouseEvent) => {
     setShowMenu(!showMenu)

@@ -1,6 +1,6 @@
 import { ActionDispatcher } from "./actions"
 import { ColorTheme, IFolder, IFolderItem, IFolderItemToCreate, ISpace, IWidgetContent, IWidgetPos } from "../helpers/types"
-import { ISavingAppState } from "./storage"
+import { IStoredAppState } from "./storage"
 import { RecentItem } from "../helpers/recentHistoryUtils"
 import { WhatsNew } from "../helpers/whats-new"
 import Tab = chrome.tabs.Tab
@@ -165,7 +165,7 @@ let initState: IAppState = {
   }
 }
 
-export function setInitAppState(savedState: ISavingAppState): void {
+export function setInitAppState(savedState: IStoredAppState): void {
   initState = { ...initState, ...savedState }
 }
 

@@ -162,6 +162,7 @@ export function Bookmarks(p: {
 
       const canDrag = getCanDragChecker(p.appState.search, dispatch)
       return bindDADItemEffect(mouseDownEvent,
+        onChangeSpace,
         {
           isFolderItem: true,
           onDrop: onDropItems,
@@ -172,7 +173,6 @@ export function Bookmarks(p: {
         {
           onDrop: onDropFolder,
           onCancel,
-          onChangeSpace,
           onDragStarted: canDrag
         },
         {
