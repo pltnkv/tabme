@@ -17,6 +17,7 @@ import { CommonStatProps, setCommonStatProps } from "../helpers/stats"
 import { getHistory, RecentItem, tryLoadMoreHistory } from "../helpers/recentHistoryUtils"
 import { HiddenDeprecationModal } from "./modals/HiddenDeprecationModal"
 import { ISpace } from "../helpers/types"
+import { selectItems } from "../helpers/selectionUtils"
 
 let notificationTimeout: number | undefined
 let globalAppState: IAppState
@@ -119,6 +120,19 @@ export function App() {
         dispatch({ type: Action.UpdateAppState, newState: { page: "welcome" } })
         createWelcomeFolder(dispatch)
       }
+
+      // highlight item by URL
+      requestAnimationFrame(() => {
+        const urlParams = new URLSearchParams(window.location.search)
+        const itemIdFromUrl = parseInt(urlParams.get("focusItemId") ?? "", 10)
+        if (!isNaN(itemIdFromUrl)) {
+          const folderItem = document.querySelector<HTMLElement>(`[data-id="${itemIdFromUrl}"]`)
+          if(folderItem) {
+            selectItems([folderItem])
+            folderItem.scrollIntoView({ block: "center", behavior: "smooth" })
+          }
+        }
+      })
     })
 
     function onTabUpdated(tabId: number, info: Partial<Tab>, tab: Tab) {

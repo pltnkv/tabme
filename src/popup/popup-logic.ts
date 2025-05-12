@@ -4,7 +4,7 @@ import { ISpace } from "../newtab/helpers/types"
 import { saveState } from "../newtab/state/storage"
 import Tab = chrome.tabs.Tab
 
-export function saveNewTabToFolder(state: { spaces: ISpace[] }, savedTab: Tab, folderId: number) {
+export function saveNewTabToFolder(state: { spaces: ISpace[] }, savedTab: Tab, folderId: number):number {
   const item = convertTabToItem(savedTab)
   const spaces = updateFolder(state.spaces, folderId, (folder) => {
     const items = addItemsToFolder([item], folder.items, undefined)
@@ -15,4 +15,5 @@ export function saveNewTabToFolder(state: { spaces: ISpace[] }, savedTab: Tab, f
   })
 
   saveState({ spaces })
+  return item.id
 }

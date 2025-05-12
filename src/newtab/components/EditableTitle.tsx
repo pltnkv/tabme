@@ -51,6 +51,7 @@ export function EditableTitle(p: {
       }
     } else if (isEnter || isCmdEnter || isCtrlEnter) {
       event.preventDefault() // Prevent the default action to avoid inserting a newline
+      event.stopPropagation()
       trySaveChange()
     }
   }

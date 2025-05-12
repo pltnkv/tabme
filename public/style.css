@@ -193,7 +193,7 @@ input.search {
     content: '';
     display: block;
     position: relative;
-    width: 100%;
+    width: 332px;
     height: 1px;
     background-color: var(--colors-gray-400);
     margin-top: 24px;

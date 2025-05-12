@@ -42,7 +42,7 @@ export default function PopupApp(p: {
   currentTab: Tab | undefined
 }) {
 
-  const [showTabSavedScreen, setShowTabSavedScreen] = useState(false)
+  const [savedItemId, setSavedItemId] = useState<number | undefined>(undefined)
   const [searchValue, setSearchValue] = useState("")
   const [currentSpaceId, setCurrentSpaceId] = useState<number | undefined>(() => {
     return findSpaceById(p, p.popupStorage.lastSpaceId)?.id ?? p.spaces.at(0)?.id
@@ -92,8 +92,8 @@ export default function PopupApp(p: {
     if (currentFolderId && p.currentTab) {
       p.currentTab.url = tabUrl
       p.currentTab.title = tabTitle
-      saveNewTabToFolder(p, p.currentTab, currentFolderId)
-      setShowTabSavedScreen(true)
+      const newItemId = saveNewTabToFolder(p, p.currentTab, currentFolderId)
+      setSavedItemId(newItemId)
     }
   }
 
@@ -110,13 +110,14 @@ export default function PopupApp(p: {
   const onOpenTabmeClick = () => {
     const viewTabUrl = chrome.runtime.getURL("newtab.html")
     if (__OVERRIDE_NEWTAB) {
-      chrome.tabs.create({ url: viewTabUrl })
+      chrome.tabs.create({ url: `${viewTabUrl}?spaceId=${currentSpaceId}&focusItemId=${savedItemId ?? ""}` })
     } else {
       chrome.tabs.query({ currentWindow: true, pinned: true, url: viewTabUrl }, (tabs) => {
         if (tabs && tabs.length > 0) {
+          //todo focus on the right space
           chrome.tabs.update(tabs[0].id!, { active: true })
         } else {
-          chrome.tabs.create({ url: viewTabUrl })
+          chrome.tabs.create({ url: `${viewTabUrl}?spaceId=${currentSpaceId}&focusItemId=${savedItemId ?? ""}` })
         }
       })
     }
@@ -136,7 +137,7 @@ export default function PopupApp(p: {
         <div className="p-icon-placeholder"/>
         {/* todo replace icon_32.png */}
         <img src={p.currentTab?.favIconUrl || "icon_32.png"} className="p-favicon"/>
-        <IconEdit className="p-edit-tab"/>
+        <IconEdit className="p-edit-tab" onClick={() => setEditTabTitle(true)}/>
         <div>
           <EditableTitle
             className="p-title"
@@ -160,7 +161,7 @@ export default function PopupApp(p: {
       </div>
 
       {
-        showTabSavedScreen ?
+        savedItemId ?
           <>
             <h2 className="p-tab-was-saved">✅ Tab saved</h2>
             <div className="p-buttons">

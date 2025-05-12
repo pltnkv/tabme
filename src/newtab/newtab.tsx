@@ -92,6 +92,20 @@ function preprocessLoadedState(state: IStoredAppState): void {
   }
 
   ////////////////////////////////////////////////////////////
+  // Parse URL for spaceId parameter and set current space
+  ////////////////////////////////////////////////////////////
+  const urlParams = new URLSearchParams(window.location.search)
+  const spaceIdFromUrl = urlParams.get('spaceId')
+  if (spaceIdFromUrl) {
+    const spaceIdNumber = parseInt(spaceIdFromUrl, 10)
+    if (!isNaN(spaceIdNumber)) {
+      if (state.spaces.some(s => s.id === spaceIdNumber)) {
+        state.currentSpaceId = spaceIdNumber
+      }
+    }
+  }
+
+  ////////////////////////////////////////////////////////////
   // Making sure that selected space exists
   ////////////////////////////////////////////////////////////
   const selectedSpace = state.spaces.find(s => s.id === state.currentSpaceId)

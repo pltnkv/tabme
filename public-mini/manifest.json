@@ -18,7 +18,8 @@
   },
   "action": {
     "default_icon": "icon_48.png",
-    "default_title": "__MSG_extDefaultTitle__"
+    "default_title": "__MSG_extDefaultTitle__",
+    "default_popup": "popup.html"
   },
   "permissions": [
     "bookmarks",
