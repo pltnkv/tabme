@@ -23,6 +23,7 @@ export const FolderItem = React.memo((p: {
   showNotUsed: boolean;
   search: string;
   collapsedChildrenCount?: number
+  isBeta: boolean
 }) => {
   const dispatch = useContext(DispatchContext)
   const [showMenu, setShowMenu] = useState<boolean>(false)
@@ -102,7 +103,9 @@ export const FolderItem = React.memo((p: {
           localTitle={localTitle}
           setLocalTitle={setLocalTitle}
           onSave={trySaveTitleAndURL}
-          onClose={() => setShowMenu(false)}/>
+          onClose={() => setShowMenu(false)}
+          isBeta={p.isBeta}
+        />
         : null
       }
       <button className="folder-item__menu"

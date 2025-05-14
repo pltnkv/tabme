@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React from "react"
 import { App } from "./components/App"
 import { setInitAppState } from "./state/state"
 import { getStateFromLS, IStoredAppState, isBetaMode, saveStateThrottled } from "./state/storage"
@@ -39,13 +39,6 @@ async function runLocally() {
     setInitAppState(res)
     mountApp()
   })
-
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    if (tabs && tabs.length > 0) {
-      console.log("!!! , ta", tabs)
-    }
-  })
-
 }
 
 function mountApp() {

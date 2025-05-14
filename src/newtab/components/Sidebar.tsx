@@ -4,12 +4,11 @@ import { isTabmeTab } from "../helpers/isTabmeTab"
 import { blurSearch, canDisplayTabInSidebar, filterTabsBySearch, getCurrentData, isTargetSupportsDragAndDrop, scrollElementIntoView } from "../helpers/utils"
 import { DropdownMenu } from "./dropdown/DropdownMenu"
 import { CL } from "../helpers/classNameHelper"
-import { Action, IAppState } from "../state/state"
+import { Action } from "../state/state"
 import { DispatchContext } from "../state/actions"
 import IconClean from "../icons/clean.svg"
 import IconDownload from "../icons/download.svg"
 import IconPin from "../icons/pin.svg"
-import Tab = chrome.tabs.Tab
 import { convertTabOrRecentToItem, convertTabToItem, findSpaceById } from "../state/actionHelpers"
 import { createFolderWithStat, showMessage } from "../helpers/actionsHelpersWithDOM"
 import { trackStat } from "../helpers/stats"
@@ -18,6 +17,7 @@ import { bindDADItemEffect } from "../dragging/dragAndDrop"
 import { RecentItem } from "../helpers/recentHistoryUtils"
 import { ISpace } from "../helpers/types"
 import { getPositionForNewFolder } from "../helpers/fractionalIndexes"
+import Tab = chrome.tabs.Tab
 
 export function Sidebar(p: {
   sidebarCollapsed: boolean
@@ -31,6 +31,7 @@ export function Sidebar(p: {
   lastActiveTabIds: number[]
   showRecent: boolean
   alphaMode: boolean
+  reverseOpenTabs: boolean
 }) {
   const dispatch = useContext(DispatchContext)
   const keepSidebarOpened = !p.sidebarCollapsed || p.sidebarHovered
@@ -112,7 +113,11 @@ export function Sidebar(p: {
 
             const items = tabs
               .filter(canDisplayTabInSidebar)
-              .map(tab => convertTabOrRecentToItem(tab)).reverse()
+              .map(tab => convertTabOrRecentToItem(tab))
+
+            if (p.reverseOpenTabs) {
+              items.reverse()
+            }
 
             createFolderWithStat(dispatch, {
               spaceId: targetSpaceId,
@@ -214,7 +219,7 @@ export function Sidebar(p: {
         <span className="app-sidebar__header__text">Open tabs</span>
         <CleanupButton tabs={p.tabs}/>
         {
-          sortedWindowsByTabs.length === 1 && <StashButton tabs={p.tabs} windowId={sortedWindowsByTabs[0].windowId}/>
+          sortedWindowsByTabs.length === 1 && <StashButton tabs={p.tabs} windowId={sortedWindowsByTabs[0].windowId} reverseOpenTabs={p.reverseOpenTabs}/>
         }
         <button id="toggle-sidebar-btn"
                 className={CL("btn__icon")}
@@ -233,6 +238,7 @@ export function Sidebar(p: {
         currentWindowId={p.currentWindowId}
         sortedWindowsByTabs={sortedWindowsByTabs}
         tabsCount={tabsCount}
+        reverseOpenTabs={p.reverseOpenTabs}
       />
       {
         <SidebarRecent
@@ -251,7 +257,7 @@ export const getStashedFolderTitle = () => {
   return `Saved ${getCurrentData()}`
 }
 
-export const StashButton = React.memo((p: { windowId: number, tabs: Tab[] }) => {
+export const StashButton = React.memo((p: { windowId: number, tabs: Tab[], reverseOpenTabs: boolean }) => {
   const [confirmationOpened, setConfirmationOpened] = useState(false)
   const [shouldCloseTabs, setShouldCloseTabs] = useState(true)
   const dispatch = useContext(DispatchContext)
@@ -260,7 +266,7 @@ export const StashButton = React.memo((p: { windowId: number, tabs: Tab[] }) => 
     setConfirmationOpened(!confirmationOpened)
   }
 
-  const shelveTabs = () => {
+  const shelveTabs = (reverseOpenTabs: boolean) => {
     setConfirmationOpened(false)
     chrome.tabs.query({ windowId: p.windowId }, (tabs) => {
       const tabsToShelve: Tab[] = []
@@ -278,6 +284,10 @@ export const StashButton = React.memo((p: { windowId: number, tabs: Tab[] }) => 
       if (tabsToShelve.length === 0) {
         // probably all the tabs where pinned
         return
+      }
+
+      if (reverseOpenTabs) {
+        tabsToShelve.reverse()
       }
 
       const items = tabsToShelve.map(convertTabToItem)
@@ -323,7 +333,7 @@ export const StashButton = React.memo((p: { windowId: number, tabs: Tab[] }) => 
             </p>
           </div>
           <div style={{ width: "100%", display: "flex" }}>
-            <button className="focusable btn__setting primary" style={{ marginRight: "8px" }} onClick={shelveTabs}>Stash tabs</button>
+            <button className="focusable btn__setting primary" style={{ marginRight: "8px" }} onClick={() => shelveTabs(p.reverseOpenTabs)}>Stash tabs</button>
             <button className="focusable btn__setting" onClick={() => setConfirmationOpened(false)}>Cancel</button>
           </div>
         </DropdownMenu>

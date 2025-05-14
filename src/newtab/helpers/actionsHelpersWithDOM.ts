@@ -1,4 +1,4 @@
-import { IFolderItem, IFolderItemToCreate } from "./types"
+import { IFolderItemToCreate } from "./types"
 import { ActionDispatcher, executeCustomAction } from "../state/actions"
 import { Action, IAppState } from "../state/state"
 import { findItemById, genUniqLocalId, isCustomActionItem } from "../state/actionHelpers"
@@ -77,8 +77,11 @@ export function clickFolderItem(targetId: number,
       if (!targetItem.collapsed) {
         trackStat("collapseSection", {})
       }
-    } else if (showProPlan) {
-      showProPlan()
+    } else {
+      dispatch({
+        type: Action.UpdateAppState,
+        newState: { itemInEdit: targetId }
+      })
     }
   } else if (isCustomActionItem(targetItem) && targetItem?.url) {
     executeCustomAction(targetItem.url, dispatch)

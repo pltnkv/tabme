@@ -18,6 +18,7 @@ export const SidebarOpenTabs = memo((p: {
   spaces: ISpace[];
   lastActiveTabIds: number[]
   currentWindowId: number | undefined
+  reverseOpenTabs: boolean
 }) => {
   const dispatch = useContext(DispatchContext)
 
@@ -45,7 +46,7 @@ export const SidebarOpenTabs = memo((p: {
             return <div key={window.windowId} className={CL("window-box", { "active": index === 0 })} data-folder-id={window.windowId}>
               <div className="window-name draggable-folder">
                 <span>{index === 0 ? "Current window" : "Inactive window"}</span>
-                <StashButton tabs={window.tabs} windowId={window.windowId}/>
+                <StashButton tabs={window.tabs} windowId={window.windowId} reverseOpenTabs={p.reverseOpenTabs}/>
                 <button className="btn__icon" onClick={() => onCloseWindow(window.windowId)} title="Close window with all Tabs">
                   <Icon24Close/>
                 </button>

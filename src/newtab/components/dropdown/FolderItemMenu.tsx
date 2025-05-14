@@ -9,6 +9,7 @@ import { createFolderWithStat, showMessage, showMessageWithUndo } from "../../he
 import { findFolderByItemId } from "../../state/actionHelpers"
 import { scrollElementIntoView } from "../../helpers/utils"
 import { trackStat } from "../../helpers/stats"
+import { GetProPlanModal } from "../modals/GetProPlanModal"
 
 export const FolderItemMenu = React.memo((p: {
   spaces: ISpace[],
@@ -17,10 +18,12 @@ export const FolderItemMenu = React.memo((p: {
   onSave: (title: string, url: string) => void,
   onClose: () => void,
   item: IFolderItem;
+  isBeta: boolean
 }) => {
   const dispatch = useContext(DispatchContext)
   const [selectedItems, setSelectedItems] = useState<IFolderItem[]>([])
   const [localURL, setLocalURL] = useState<string>(p.item.url)
+  const [isGetProModalOpen, setGetProModalOpen] = useState(false)
 
   useEffect(() => {
     const items = getSelectedItems()
@@ -94,6 +97,21 @@ export const FolderItemMenu = React.memo((p: {
     p.onClose()
   }
 
+  const expandGroup = () => {
+    dispatch({ type: Action.UpdateFolderItem, itemId: p.item.id, collapsed: !p.item.collapsed })
+  }
+
+  const collapseGroup = () => {
+    if (p.isBeta) {
+      dispatch({ type: Action.UpdateFolderItem, itemId: p.item.id, collapsed: !p.item.collapsed })
+      if (!p.item.collapsed) {
+        trackStat("collapseSection", {})
+      }
+    } else {
+      setGetProModalOpen(true)
+    }
+  }
+
   return <>
     {
       selectedItems.length > 1 ?
@@ -119,6 +137,13 @@ export const FolderItemMenu = React.memo((p: {
                   value={p.localTitle}
                   onChange={e => p.setLocalTitle(e.target.value)}/>
               </label>
+              {
+                p.item.collapsed
+                  ? <button className="dropdown-menu__button focusable" onClick={expandGroup}>Expand</button>
+                  : <button className="dropdown-menu__button focusable" onClick={collapseGroup}>Collapse{
+                    p.isBeta ? null : <span className="get-pro-label">Get Pro</span>
+                  }</button>
+              }
               <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onDeleteItem}>Delete</button>
             </DropdownMenu>
             :
@@ -147,6 +172,9 @@ export const FolderItemMenu = React.memo((p: {
               />
               <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onDeleteItem}>Delete</button>
             </DropdownMenu>
+          }
+          {
+            isGetProModalOpen && <GetProPlanModal onClose={() => setGetProModalOpen(false)} reason={"Collapsing"}/>
           }
         </>
     }

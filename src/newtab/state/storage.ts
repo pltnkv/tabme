@@ -1,7 +1,6 @@
 import { IAppState } from "./state"
 import { throttle } from "../helpers/utils"
-import { ColorTheme, IFolder } from "../helpers/types"
-import { setCommonStatProps } from "../helpers/stats"
+import { IFolder } from "../helpers/types"
 import { WhatsNew } from "../helpers/whats-new"
 
 /**
@@ -38,7 +37,7 @@ const savingStateDefaultValues = { // if was not saved to LS yet
   "colorTheme": "light", // todo I don't use system because it's not ready to used by default
   "stat": undefined,
   "showRecent": false,
-  "showNotUsed": false,
+  "reverseOpenTabs": true,
   "version": 1,
   "folders": undefined // "folders" is legacy. Dont delete it until all users are migrated
 }
@@ -47,7 +46,7 @@ export const savingStateKeys = Object.keys(savingStateDefaultValues) as StoredSt
 
 export type IStoredAppState = {
   [key in StoredStateKeys]: IAppState[key]
-} & { hiddenFeatureIsEnabled: boolean, betaMode: boolean; folders: IFolder[], currentWhatsNew:WhatsNew|undefined, hasHiddenObjects:boolean }
+} & { hiddenFeatureIsEnabled: boolean, betaMode: boolean; folders: IFolder[], currentWhatsNew: WhatsNew | undefined, hasHiddenObjects: boolean }
 
 export function getStateFromLS(callback: (state: IStoredAppState) => void): void {
   chrome.storage.local.get(savingStateKeys, (res) => {

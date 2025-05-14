@@ -7,7 +7,6 @@ import { EditableTitle } from "./EditableTitle"
 import { CL } from "../helpers/classNameHelper"
 import { Action } from "../state/state"
 import { DispatchContext } from "../state/actions"
-import { Color } from "../helpers/Color"
 import MenuIcon from "../icons/menu.svg"
 import CollapseIcon from "../icons/collapse.svg"
 import ExpandIcon from "../icons/expand.svg"
@@ -18,9 +17,9 @@ import { showMessageWithUndo } from "../helpers/actionsHelpersWithDOM"
 import { createNewFolderItem, createNewSection, findSpaceByFolderId } from "../state/actionHelpers"
 import { trackStat } from "../helpers/stats"
 import { RecentItem } from "../helpers/recentHistoryUtils"
-import Tab = chrome.tabs.Tab
 import { GetProPlanModal } from "./modals/GetProPlanModal"
 import { getFolderGradientColor } from "../helpers/getFolderGradientColor"
+import Tab = chrome.tabs.Tab
 
 export const Folder = React.memo(function Folder(p: {
   spaces: ISpace[];
@@ -235,7 +234,7 @@ export const Folder = React.memo(function Folder(p: {
           onClick={() => setShowMenu(!showMenu)}><MenuIcon/>
         </button>
         {
-          p.search === "" ?
+          p.search === "" && p.isBeta ?
             p.folder.collapsed
               ? <button title="Expand" className={CL("folder-title__button visible")} onClick={expandFolder}><ExpandIcon/></button>
               : <button title="Collaps" className={CL("folder-title__button")} onClick={collapseFolder}><CollapseIcon/></button>
@@ -269,6 +268,13 @@ export const Folder = React.memo(function Folder(p: {
             }
 
             <button className="dropdown-menu__button focusable" onClick={onRename}>Rename</button>
+            {
+              p.folder.collapsed
+                ? <button className="dropdown-menu__button focusable" onClick={expandFolder}>Expand</button>
+                : <button className="dropdown-menu__button focusable" onClick={collapseFolder}>Collapse{
+                  p.isBeta ? null : <span className="get-pro-label">Pro</span>
+                }</button>
+            }
             <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onDelete}>Delete</button>
           </DropdownMenu>
         ) : null}
@@ -301,6 +307,7 @@ export const Folder = React.memo(function Folder(p: {
                   showNotUsed={p.showNotUsed}
                   search={p.search}
                   collapsedChildrenCount={collapsedChildrenCountBySectionId.get(item.id) ?? 1}
+                  isBeta={p.isBeta}
                 />
               )
             )}

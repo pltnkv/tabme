@@ -9,15 +9,14 @@ import { Action, getInitAppState, IAppState } from "../state/state"
 import { DispatchContext, stateReducer } from "../state/actions"
 import { getBC, getStateFromLS } from "../state/storage"
 import { executeAPICall } from "../../api/serverCommands"
-import Tab = chrome.tabs.Tab
 import { apiGetToken } from "../../api/api"
 import { CL } from "../helpers/classNameHelper"
 import { Welcome } from "./Welcome"
 import { CommonStatProps, setCommonStatProps } from "../helpers/stats"
-import { getHistory, RecentItem, tryLoadMoreHistory } from "../helpers/recentHistoryUtils"
+import { getHistory, tryLoadMoreHistory } from "../helpers/recentHistoryUtils"
 import { HiddenDeprecationModal } from "./modals/HiddenDeprecationModal"
-import { ISpace } from "../helpers/types"
 import { selectItems } from "../helpers/selectionUtils"
+import Tab = chrome.tabs.Tab
 
 let notificationTimeout: number | undefined
 let globalAppState: IAppState
@@ -93,7 +92,7 @@ export function App() {
   useEffect(function() {
     Promise.all([
       getTabs(),
-      getHistory(), // TODO: !!!! now history updated only once, when app loaded. Fix it next time
+      getHistory(), // TODO: !! now history updated only once, when app loaded. Fix it next time
       getLastActiveTabsIds(),
       getCurrentWindow()
     ]).then(([tabs, historyItems, lastActiveTabIds, currentWindowId]) => {
@@ -127,7 +126,7 @@ export function App() {
         const itemIdFromUrl = parseInt(urlParams.get("focusItemId") ?? "", 10)
         if (!isNaN(itemIdFromUrl)) {
           const folderItem = document.querySelector<HTMLElement>(`[data-id="${itemIdFromUrl}"]`)
-          if(folderItem) {
+          if (folderItem) {
             selectItems([folderItem])
             folderItem.scrollIntoView({ block: "center", behavior: "smooth" })
           }
@@ -184,6 +183,14 @@ export function App() {
       }
     }
   }, [])
+
+  useEffect(() => {
+    if(appState.tabs.length > 0) {
+      getTabs().then(tabs => {
+        dispatch({ type: Action.SetTabsOrHistory, tabs })
+      })
+    }
+  }, [appState.reverseOpenTabs])
 
   useEffect(() => {
     if (notificationTimeout) {
@@ -245,6 +252,7 @@ export function App() {
                 lastActiveTabIds={appState.lastActiveTabIds}
                 showRecent={appState.showRecent}
                 alphaMode={appState.alphaMode}
+                reverseOpenTabs={appState.reverseOpenTabs}
               />
               <Bookmarks appState={appState}/>
               <KeyboardAndMouseManager search={appState.search} selectedWidgetIds={appState.selectedWidgetIds}/>
@@ -260,11 +268,8 @@ export function App() {
 }
 
 function getTabs() {
-  return new Promise<Tab[]>((res) => {
-    chrome.tabs.query({}, (tabs) => {
-      const openedTabs = tabs.reverse()
-      res(openedTabs)
-    })
+  return new Promise<Tab[]>((response) => {
+    chrome.tabs.query({}, response)
   })
 }
 

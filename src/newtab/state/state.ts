@@ -67,6 +67,7 @@ export type IAppState = {
   search: string;
   itemInEdit: undefined | number, //can be item or folder or space
   showRecent: boolean; // Stored in LS
+  reverseOpenTabs: boolean; // Stored in LS
   showNotUsed: boolean; // Stored in LS
   openBookmarksInNewTab: boolean;
   sidebarCollapsed: boolean; // Stored in LS
@@ -122,6 +123,7 @@ let initState: IAppState = {
   sidebarCollapsed: false, //should be named "sidebarCollapsable"
   sidebarHovered: false,
   betaMode: false,
+  reverseOpenTabs: true,
   alphaMode: !!localStorage.getItem("betaStickers"),
   loaded: false,
 
@@ -176,7 +178,7 @@ export function getInitAppState(): IAppState {
 export enum Action {
   InitDashboard = "init-dashboard",
   Undo = "undo",
-  ShowNotification = "show-notification", // todo !!!! fix. error can be overriding by next normal message. not clear for user
+  ShowNotification = "show-notification", // todo !! fix. error can be overriding by next normal message. not clear for user
   HideNotification = "hide-notification",
   UpdateSearch = "update-search",
   UpdateTab = "tab-update",

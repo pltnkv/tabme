@@ -26,6 +26,7 @@ type OnClickOption = {
   isFile?: boolean,
   dangerStyle?: boolean,
   icon?: React.FunctionComponent<React.SVGProps<any>>
+  proOnly?: boolean
 }
 type OnToggleOption = { onToggle: () => void; value: boolean, title: string; text: string; hidden?: boolean }
 export type OptionsConfig = Array<OnClickOption | OnToggleOption | { separator: true }>
@@ -238,9 +239,9 @@ export const SettingsOptions = (p: {
     trackStat("settingsClicked", { settingName: "ImportExistingBookmarks" })
   }
 
-  function onToggleRecentVisibility() {
-    dispatch({ type: Action.UpdateAppState, newState: { showRecent: !p.appState.showRecent } })
-    trackStat("settingsClicked", { settingName: "ToggleRecentVisibility" })
+  function onToggleReversedOpenTabs() {
+    dispatch({ type: Action.UpdateAppState, newState: { reverseOpenTabs: !p.appState.reverseOpenTabs } })
+    trackStat("settingsClicked", { settingName: "ToggleReversedOpenTabs" })
   }
 
   function onToggleMode() {
@@ -271,7 +272,8 @@ export const SettingsOptions = (p: {
       onClick: onToggleCollapseExpand,
       title: "Toggle all folders in current space",
       text: expandAllFolders ? "Expand all folders" : "Collapse all folders",
-      icon: expandAllFolders ? IconExpand : IconCollapse
+      icon: expandAllFolders ? IconExpand : IconCollapse,
+      proOnly: !p.appState.betaMode
     },
     {
       onToggle: onToggleNotUsed,
@@ -283,16 +285,16 @@ export const SettingsOptions = (p: {
       separator: true
     },
     {
-      onToggle: onToggleRecentVisibility,
-      value: p.appState.showRecent,
-      title: "Show recently closed tabs in the sidebar. When off, they appear only during search.",
-      text: "Show Recent in Sidebar"
-    },
-    {
       onToggle: onToggleMode,
       value: p.appState.colorTheme === "dark",
       title: "Switch between light and dark theme",
       text: "Dark mode"
+    },
+    {
+      onToggle: onToggleReversedOpenTabs,
+      value: p.appState.reverseOpenTabs,
+      title: "Match the tab order to how they appear in your browser window",
+      text: `Reverse tab order in ‘Open Tabs’`
     },
     {
       onToggle: onToggleOpenInTheNewTab,
@@ -428,14 +430,19 @@ export const Options = (props: { optionsConfig: OptionsConfig | (() => OptionsCo
         } else {
           return <button
             key={index}
-            className={CL("dropdown-menu__button justify-content-start focusable", {
-              "dropdown-menu__button--dander": option.dangerStyle
+            className={CL("dropdown-menu__button focusable", {
+              "dropdown-menu__button--dander": option.dangerStyle,
+              "dropdown-menu__button--pro-only": option.proOnly
             })}
             onClick={option.onClick}
             title={option.title}
           >
             {option.icon ? React.createElement(option.icon, { className: "icon" }) : null}
-            {option.text}</button>
+            <span style={{flexGrow: 1}}>{option.text}</span>
+            {
+              option.proOnly ? <span className="get-pro-label">Get Pro</span> : null
+            }
+          </button>
         }
       }
     })}

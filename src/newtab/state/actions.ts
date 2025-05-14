@@ -154,9 +154,17 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
     }
 
     case Action.SetTabsOrHistory: {
+      let tabs = state.tabs
+      if (action.tabs) {
+        tabs = action.tabs
+        if (state.reverseOpenTabs) {
+          tabs.reverse()
+        }
+      }
+
       return {
         ...state,
-        tabs: action.tabs ?? state.tabs,
+        tabs,
         recentItems: action.recentItems ?? state.recentItems
       }
     }
