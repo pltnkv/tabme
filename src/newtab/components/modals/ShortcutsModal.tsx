@@ -12,16 +12,13 @@ export const ShortcutsModal = ({setOpen }:
       <div className="modal-no-override">
         <h2>Keyboard shortcuts</h2>
         <p>
-          <span className="hotkey">TAB</span> to focus on Search input when open Tabme
-        </p>
-        <p>
           <span className="hotkey">{cmdOrCtrl} + F</span> search
         </p>
         <p>
-          <span className="hotkey">Arrow keys</span> navigate bookmarks
+          <span className="hotkey">{cmdOrCtrl}&thinsp;+&thinsp;click</span> open bookmark in new Tab
         </p>
         <p>
-          <span className="hotkey">{cmdOrCtrl}&thinsp;+&thinsp;click</span> open bookmark in new Tab
+          <span className="hotkey">Arrow keys</span> navigate bookmarks
         </p>
         <p>
           <span className="hotkey">CTRL + 1..9</span> open Space by index

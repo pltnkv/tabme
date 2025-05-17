@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from "react"
 import { SidebarOpenTabs } from "./SidebarOpenTabs"
-import { isTabmeTab } from "../helpers/isTabmeTab"
+import { isTabmeOrNewTab } from "../helpers/isTabmeTab"
 import { blurSearch, canDisplayTabInSidebar, filterTabsBySearch, getCurrentData, isTargetSupportsDragAndDrop, scrollElementIntoView } from "../helpers/utils"
 import { DropdownMenu } from "./dropdown/DropdownMenu"
 import { CL } from "../helpers/classNameHelper"
@@ -18,6 +18,7 @@ import { RecentItem } from "../helpers/recentHistoryUtils"
 import { ISpace } from "../helpers/types"
 import { getPositionForNewFolder } from "../helpers/fractionalIndexes"
 import Tab = chrome.tabs.Tab
+import { saveLastStateImmediately } from "../state/storage"
 
 export function Sidebar(p: {
   sidebarCollapsed: boolean
@@ -38,7 +39,6 @@ export function Sidebar(p: {
   const sidebarClassName = keepSidebarOpened ? "" : "collapsed"
   const sidebarRef = useRef<HTMLDivElement | null>(null)
   const openTabsHeaderRef = useRef<HTMLDivElement | null>(null)
-
   const [mouseDownEvent, setMouseDownEvent] = useState<React.MouseEvent | undefined>(undefined)
 
   useEffect(() => {
@@ -266,17 +266,23 @@ export const StashButton = React.memo((p: { windowId: number, tabs: Tab[], rever
     setConfirmationOpened(!confirmationOpened)
   }
 
+  const closeTabAsyncToLeftTabmeSaveDataFirst = (tabId: number) => {
+    setTimeout(() => {
+      chrome.tabs.remove(tabId)
+    }, 300)
+  }
+
   const shelveTabs = (reverseOpenTabs: boolean) => {
     setConfirmationOpened(false)
     chrome.tabs.query({ windowId: p.windowId }, (tabs) => {
       const tabsToShelve: Tab[] = []
       tabs.forEach(t => {
         if (t.id && !t.pinned) {
-          if (!isTabmeTab(t)) {
+          if (!isTabmeOrNewTab(t)) {
             tabsToShelve.push(t)
           }
           if (shouldCloseTabs) {
-            chrome.tabs.remove(t.id)
+            closeTabAsyncToLeftTabmeSaveDataFirst(t.id)
           }
         }
       })
@@ -299,11 +305,12 @@ export const StashButton = React.memo((p: { windowId: number, tabs: Tab[], rever
 
       requestAnimationFrame(() => {
         scrollElementIntoView(`[data-folder-id="${folderId}"]`)
+        saveLastStateImmediately()
       })
     })
   }
 
-  const filteredTabs = p.tabs.filter(t => !t.pinned && !isTabmeTab(t))
+  const filteredTabs = p.tabs.filter(t => !t.pinned && !isTabmeOrNewTab(t))
 
   return <div style={{ display: "inline-block", position: "relative" }}>
     <button className={CL("btn__icon", { "active": confirmationOpened })}
@@ -391,7 +398,7 @@ function getDuplicatedTabs(cb: (value: Tab[]) => void): void {
         const groupedTabsByUrl = tabsByUrl.get(t.url)!
 
         //special condition to now close current tab with Tabme but close all others
-        if (isTabmeTab(t) && t.active) {
+        if (isTabmeOrNewTab(t) && t.active) {
           groupedTabsByUrl.unshift(t)
         } else {
           groupedTabsByUrl.push(t)

@@ -27,7 +27,32 @@ export function saveState(appState: Partial<IAppState>): void {
   })
 }
 
-export const saveStateThrottled = throttle(saveState, 300)
+let stateToSave: Partial<IAppState> | undefined
+let timeoutId: number | undefined
+export const saveStateThrottled = (state: Partial<IAppState>) => {
+  stateToSave = state
+
+  if (!timeoutId) {
+    window.clearTimeout(timeoutId)
+    timeoutId = undefined
+  }
+
+  timeoutId = window.setTimeout(() => {
+    if (stateToSave) {
+      saveState(stateToSave)
+      stateToSave = undefined
+    }
+  }, 200)
+}
+export const saveLastStateImmediately = () => {
+  if (stateToSave) {
+    saveState(stateToSave)
+    stateToSave = undefined
+  }
+
+  window.clearTimeout(timeoutId)
+  timeoutId = undefined
+}
 
 const savingStateDefaultValues = { // if was not saved to LS yet
   "spaces": [],

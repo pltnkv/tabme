@@ -24,6 +24,8 @@ export function SpacesList(p: {
   const [menuSpaceId, setMenuSpaceId] = useState(-1)
   const [isJoinBetaModalOpen, setJoinBetaModalOpen] = useState(false)
 
+  const spaceInEdit = p.spaces.find(s => s.id === p.itemInEdit)
+
   const setEditingSpaceId = (spaceId: number | undefined) => {
     dispatch({
       type: Action.UpdateAppState,
@@ -141,7 +143,7 @@ export function SpacesList(p: {
 
       }
       {
-        !p.itemInEdit && <div className="spaces-list__new" onClick={onAddSpace} title="Add new space">
+        !spaceInEdit && <div className="spaces-list__new" onClick={onAddSpace} title="Add new space">
           <PlusIcon/>
         </div>
       }

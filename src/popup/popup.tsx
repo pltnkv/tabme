@@ -10,7 +10,7 @@ import { getFolderGradientColor } from "../newtab/helpers/getFolderGradientColor
 import { isTabAlreadySavedInFolder } from "./popup-utils"
 import Tab = chrome.tabs.Tab
 import { hlSearch, isContainsSearch } from "../newtab/helpers/utils"
-import { isTabmeTab } from "../newtab/helpers/isTabmeTab"
+import { isTabmeOnly, isTabmeOrNewTab } from "../newtab/helpers/isTabmeTab"
 import IconFind from "../newtab/icons/find.svg"
 import IconEdit from "../newtab/icons/edit.svg"
 import { saveNewTabToFolder } from "./popup-logic"
@@ -253,7 +253,8 @@ async function runLocally() {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const currentTab = tabs[0]
 
-      if (isTabmeTab(currentTab)) {
+      const isTabmeTab = __OVERRIDE_NEWTAB ? isTabmeOrNewTab(currentTab) : isTabmeOnly(currentTab)
+      if (isTabmeTab) {
         mountAppThisIsTabme()
       } else {
         chrome.storage.local.get(POPUP_STORAGE_KEY, (result) => {

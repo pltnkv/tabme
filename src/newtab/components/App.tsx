@@ -144,9 +144,11 @@ export function App() {
       })
     }
 
-    chrome.tabs.onCreated.addListener(() => updateTabs())
-    chrome.tabs.onRemoved.addListener(() => updateTabs())
+    chrome.tabs.onCreated.addListener(updateTabs)
+    chrome.tabs.onRemoved.addListener(updateTabs)
     chrome.tabs.onUpdated.addListener(onTabUpdated)
+    chrome.windows.onCreated.addListener(updateTabs)
+    chrome.windows.onRemoved.addListener(updateTabs)
 
     getBC().onmessage = function(ev: MessageEvent) {
       if (ev.data?.type === "folders-updated") {
@@ -185,7 +187,7 @@ export function App() {
   }, [])
 
   useEffect(() => {
-    if(appState.tabs.length > 0) {
+    if (appState.tabs.length > 0) {
       getTabs().then(tabs => {
         dispatch({ type: Action.SetTabsOrHistory, tabs })
       })

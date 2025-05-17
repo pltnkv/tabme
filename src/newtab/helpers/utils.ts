@@ -2,7 +2,7 @@ import Tab = chrome.tabs.Tab
 import HistoryItem = chrome.history.HistoryItem
 import { IFolderItem, ISpace } from "./types"
 import type React from "react"
-import { isTabmeTab } from "./isTabmeTab"
+import { isTabmeOrNewTab } from "./isTabmeTab"
 import { RecentItem } from "./recentHistoryUtils"
 import { getTempFavIconUrl } from "../state/actionHelpers"
 
@@ -229,7 +229,7 @@ export function filterOpenedTabsFromHistory(
 }
 
 export function canDisplayTabInSidebar(t: Tab): boolean {
-  return !isTabmeTab(t) && !t.pinned
+  return !isTabmeOrNewTab(t) && !t.pinned
 }
 
 export function findTabsByURL(url: string | undefined, tabs: Tab[]): Tab[] {

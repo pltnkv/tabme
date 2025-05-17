@@ -1,6 +1,7 @@
 export enum WhatsNewKey {
   StickyNotes = "sticky-notes",
   Collapsing = "collapsing",
+  PopupAndMore = "popup-and-more",
 }
 
 export type WhatsNew = {
@@ -32,6 +33,32 @@ export const WhatsNewConfig: { [x in WhatsNewKey]: WhatsNew } = {
               Watch the quick demo below to see it in action:</p>${getYoutubeIframe(
       "https://www.youtube.com/embed/pAnZQ1GrlEA?si=bjjPlUn81deBrRCb")}`,
     approxReleaseDate: "9.5.2025"
+  },
+  [WhatsNewKey.PopupAndMore]: {
+    key: WhatsNewKey.PopupAndMore,
+    buttonText: "Meet “Saving a site from the popup”",
+    bodyTitle: "✨New: Save any site directly from the popup",
+    bodyHtml: `<p>No need to open Tabme or use drag-and-drop from the “Open Tabs” panel anymore.<br/>
+Just click the Tabme extension icon on any website and choose a folder to save the tab instantly.</p>
+<p style="text-align: left"><img class="use-shadow" src="https://gettabme.com/images/big_3.png" width="640" height="400"></p><br/><br/>
+
+              <h2>🔄 Reverse tab order in “Open Tabs”</h2>
+              <p>You can now choose how tabs are displayed in the “Open Tabs” panel.<br/>
+Go to Settings → Reverse tabs order in “Open Tabs” to toggle the order.</p>
+<p style="text-align: left"><video class="use-shadow" src="https://gettabme.com/videos/tabme-reverse.mp4" width="640" autoplay="autoplay" loop="loop"></p><br/><br/>
+
+              <h2>📥 Improved Chrome windows management</h2>
+              <p>Now you can stash and close an entire window with a single click.<br/>
+Or drag a window into Tabme to save it in the exact spot you want.</p>
+<p style="text-align: left"><video class="use-shadow" src="https://gettabme.com/videos/tabme-window-stashing.mp4" width="640" autoplay="autoplay" loop="loop"></p><br/><br/>
+
+              <h2>🕘 Recently closed tabs in the sidebar</h2>
+              <p>You can now show or hide recently closed tabs in the left sidebar.<br/>
+It’s super handy when you want to reopen something you just closed.<br/>
+And yes, you can drag to save, search, and manage them just like regular tabs.</p>
+<p style="text-align: left"><video class="use-shadow" src="https://gettabme.com/videos/tabme-recent.mp4" width="640" autoplay="autoplay" loop="loop"></p>
+              `,
+    approxReleaseDate: "16.5.2025"
   }
 }
 

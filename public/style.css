@@ -1801,6 +1801,8 @@ button:hover .get-pro-label {
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    padding: 40px 0;
+    box-sizing: border-box;
 }
 
 .modal-inner {
@@ -1873,6 +1875,11 @@ button:hover .get-pro-label {
 
     .btn__setting {
         margin-top: 16px;
+    }
+
+    .use-shadow {
+        filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .15));
+        border-radius: 8px;
     }
 }
 
@@ -1955,3 +1962,4 @@ button:hover .get-pro-label {
         text-align: center;
     }
 }
+

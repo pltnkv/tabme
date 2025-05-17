@@ -255,18 +255,9 @@ export const Folder = React.memo(function Folder(p: {
               <PresetColor color={PRESET_COLORS[6]} onClick={setColorConfirmed} currentColor={folderColor}/>
               <CustomColorInput onChange={setColorLocally} onBlur={setColorConfirmed} currentColor={folderColor}/>
             </div>
-            <button className="dropdown-menu__button focusable" onClick={onAddBookmark}>+ Add Bookmark</button>
-            <button className="dropdown-menu__button focusable" onClick={onAddSection}>+ Add Group</button>
-            <button className="dropdown-menu__button focusable" onClick={onOpenAll}>Open All</button>
-            {
-              p.spaces.length > 1 ?
-                <DropdownSubMenu
-                  menuId={1}
-                  title={"Move to space"}
-                  submenuContent={getSpacesList(p.spaces, moveFolderToSpace, findSpaceByFolderId(p, p.folder.id)?.id)}
-                /> : null
-            }
-
+            <button className="dropdown-menu__button focusable" onClick={onAddBookmark}>+ Add bookmark</button>
+            <button className="dropdown-menu__button focusable" onClick={onAddSection}>+ Add group</button>
+            <button className="dropdown-menu__button focusable" onClick={onOpenAll}>Open all</button>
             <button className="dropdown-menu__button focusable" onClick={onRename}>Rename</button>
             {
               p.folder.collapsed
@@ -274,6 +265,14 @@ export const Folder = React.memo(function Folder(p: {
                 : <button className="dropdown-menu__button focusable" onClick={collapseFolder}>Collapse{
                   p.isBeta ? null : <span className="get-pro-label">Pro</span>
                 }</button>
+            }
+            {
+              p.spaces.length > 1 ?
+                <DropdownSubMenu
+                  menuId={1}
+                  title={"Move to space"}
+                  submenuContent={getSpacesList(p.spaces, moveFolderToSpace, findSpaceByFolderId(p, p.folder.id)?.id)}
+                /> : null
             }
             <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onDelete}>Delete</button>
           </DropdownMenu>
