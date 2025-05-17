@@ -141,7 +141,7 @@
     flex-direction: row;
     align-items: center;
     position: absolute;
-    width: 142px;
+    width: 172px;
     height: 40px;
     background-color: #1E1E1E;
     border-radius: 8px;
@@ -206,6 +206,14 @@
 
         svg {
             color: #d8d8d8;
+        }
+    }
+
+    &.sticker-delete {
+        width: 48px;
+
+        svg {
+            color: #ff6575;
         }
     }
 

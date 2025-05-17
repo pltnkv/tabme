@@ -1,11 +1,13 @@
 import { IWidget } from "../../helpers/types"
 import React, { useContext, useRef } from "react"
-import { DispatchContext } from "../../state/actions"
+import { DispatchContext, mergeStepsInHistory } from "../../state/actions"
 import { useWidgetsContextMenu } from "./widgetsContextMenu"
 import { Action } from "../../state/state"
 import IconStrikethrough from "../../icons/strikethrough_s.svg"
+import IconDelete from "../../icons/delete.svg"
 import { updateWidgetsSelectionFrame_RAF_NotPerformant } from "./widgetsSelectionFrame"
 import { CL } from "../../helpers/classNameHelper"
+import { canvasAPI } from "./canvasAPI"
 
 const Colors = ["#FFF598", "#D1F09E", "#FFBAF5"]
 const SizeLabels = ["M", "S", "L"]
@@ -21,8 +23,8 @@ const SizeToLabel: { [x: string]: string } = {
 }
 
 export const defaultStickerColor = Colors[0]
-export const stickerSizeM = LabelToSize['M']
-export const stickerSizeS = LabelToSize['S']
+export const stickerSizeM = LabelToSize["M"]
+export const stickerSizeS = LabelToSize["S"]
 
 function getNextVal(color: string | undefined, arr: string[]): string | undefined {
   const currentIndex = arr.indexOf(color!)
@@ -47,42 +49,55 @@ export function WidgetsHorMenu(p: {
   useWidgetsContextMenu(widgetsMenuRef)
 
   const onChangeColor = () => {
-    selectedWidgets.forEach((widget: IWidget) => {
-      dispatch({
-        type: Action.UpdateWidget,
-        widgetId: widget.id,
-        content: {
-          color: getNextVal(currentColor, Colors) ?? Colors[0]
-        }
+    mergeStepsInHistory((historyStepId) => {
+      selectedWidgets.forEach((widget: IWidget) => {
+        dispatch({
+          type: Action.UpdateWidget,
+          widgetId: widget.id,
+          content: {
+            color: getNextVal(currentColor, Colors) ?? Colors[0]
+          },
+          historyStepId
+        })
       })
     })
   }
 
   const onChangeSize = () => {
-    selectedWidgets.forEach((widget: IWidget) => {
-      const nextLabel = getNextVal(currentFontSizeLabel, SizeLabels) ?? SizeLabels[0]
+    mergeStepsInHistory((historyStepId) => {
+      selectedWidgets.forEach((widget: IWidget) => {
+        const nextLabel = getNextVal(currentFontSizeLabel, SizeLabels) ?? SizeLabels[0]
 
-      dispatch({
-        type: Action.UpdateWidget,
-        widgetId: widget.id,
-        content: {
-          fontSize: LabelToSize[nextLabel] ?? LabelToSize["mid"]
-        }
+        dispatch({
+          type: Action.UpdateWidget,
+          widgetId: widget.id,
+          content: {
+            fontSize: LabelToSize[nextLabel] ?? LabelToSize["mid"]
+          },
+          historyStepId
+        })
+        updateWidgetsSelectionFrame_RAF_NotPerformant()
       })
-      updateWidgetsSelectionFrame_RAF_NotPerformant()
     })
   }
 
   const onToggleStrike = () => {
-    selectedWidgets.forEach((widget: IWidget) => {
-      dispatch({
-        type: Action.UpdateWidget,
-        widgetId: widget.id,
-        content: {
-          strikethrough: !currentStrikethrough
-        }
+    mergeStepsInHistory((historyStepId) => {
+      selectedWidgets.forEach((widget: IWidget) => {
+        dispatch({
+          type: Action.UpdateWidget,
+          widgetId: widget.id,
+          content: {
+            strikethrough: !currentStrikethrough
+          },
+          historyStepId
+        })
       })
     })
+  }
+
+  const onDelete = () => {
+    canvasAPI.deleteWidgets(dispatch, p.selectedWidgetIds)
   }
 
   let currentColor: string | undefined
@@ -100,7 +115,7 @@ export function WidgetsHorMenu(p: {
       if (currentFontSize !== w.content.fontSize) {
         currentFontSize = undefined
       }
-      if(w.content.strikethrough) {
+      if (w.content.strikethrough) {
         currentStrikethrough = true
       }
     }
@@ -109,16 +124,19 @@ export function WidgetsHorMenu(p: {
   const currentFontSizeLabel = SizeToLabel[currentFontSize!] ?? "mixed"
 
   return <div ref={widgetsMenuRef} className="widgets-hor-menu">
-    <button className="widget-menu-item sticker-color" onClick={onChangeColor} title='Change color'>
+    <button className="widget-menu-item sticker-color" onClick={onChangeColor} title="Change color">
       <div className="sticker-color__inner" style={{ background: currentColor }}></div>
     </button>
-    <button className="widget-menu-item sticker-size" onClick={onChangeSize}  title='Change size'>
+    <button className="widget-menu-item sticker-size" onClick={onChangeSize} title="Change size">
       <span>{currentFontSizeLabel}</span>
     </button>
     <button className={CL("widget-menu-item sticker-strike", {
       active: currentStrikethrough
-    })} onClick={onToggleStrike} title='Toggle strikethrough'>
+    })} onClick={onToggleStrike} title="Toggle strikethrough">
       <IconStrikethrough/>
+    </button>
+    <button className="widget-menu-item sticker-delete" onClick={onDelete} title="Delete">
+      <IconDelete/>
     </button>
   </div>
 }
