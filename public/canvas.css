@@ -201,7 +201,7 @@
         }
     }
 
-    &.sticker-strike {
+    &.sticker-strike, &.sticker-delete {
         width: 48px;
 
         svg {
@@ -209,9 +209,7 @@
         }
     }
 
-    &.sticker-delete {
-        width: 48px;
-
+    &.sticker-delete:hover {
         svg {
             color: #ff6575;
         }
