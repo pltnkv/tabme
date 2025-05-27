@@ -124,7 +124,9 @@ export const FolderItem = React.memo((p: {
          tabIndex={2}
          data-id={p.item.id}
          onClick={e => e.preventDefault()}
-         title={p.item.url}
+         data-tooltip={p.item.title}
+         data-tooltip-more={p.item.url}
+         data-tooltip-position='bottom-left'
          href={p.item.url}
          onContextMenu={onContextMenu}>
         {

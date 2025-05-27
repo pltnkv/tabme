@@ -17,6 +17,7 @@ import { getHistory, tryLoadMoreHistory } from "../helpers/recentHistoryUtils"
 import { HiddenDeprecationModal } from "./modals/HiddenDeprecationModal"
 import { selectItems } from "../helpers/selectionUtils"
 import Tab = chrome.tabs.Tab
+import { TooltipsManager } from "./TooltipsManager"
 
 let notificationTimeout: number | undefined
 let globalAppState: IAppState
@@ -263,6 +264,7 @@ export function App() {
           {
             isHiddenDeprecatedModalOpen && <HiddenDeprecationModal onClose={() => setHiddenDeprecatedModalOpen(false)}/>
           }
+          <TooltipsManager/>
         </div>
       }
     </DispatchContext.Provider>

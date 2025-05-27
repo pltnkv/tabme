@@ -100,17 +100,15 @@ export const TabOrRecentItem = (p: {
         "last-visited": p.lastActiveTabId === p.data.id,
         "is-already-saved": savedInFolders
       })}
+      data-tooltip={p.data.title}
+      data-tooltip-more={p.data.url}
+      data-tooltip-position="bottom-left"
       data-id={p.data.id}
       onContextMenu={onTabContextMenu}
     >
       <img src={p.data.favIconUrl} alt="" onError={handleImageError}/>
       <div className="inbox-item__text">
-        <div className="inbox-item__title"
-             title={p.data.title}
-             dangerouslySetInnerHTML={hlSearch(shortenedTitle, p.search)}/>
-        <div className="inbox-item__url"
-             title={p.data.url}
-             dangerouslySetInnerHTML={hlSearch(domain, p.search)}/>
+        <div className="inbox-item__title" dangerouslySetInnerHTML={hlSearch(shortenedTitle, p.search)}/>
         {
           savedInFolders
             ? <div className="inbox-item__already-saved">Already saved in {savedInFolders}</div>

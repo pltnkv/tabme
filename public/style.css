@@ -334,7 +334,7 @@ input.search {
     display: inline-block;
     font-size: 16px;
     width: 30px;
-    height: 30px;
+    height: 22px;
     vertical-align: top;
     margin-top: -4px;
     margin-left: -6px;
@@ -958,7 +958,7 @@ input.search {
     display: flex;
     align-items: start;
     text-decoration: none;
-    width: 100%;
+    width: calc(100% - 28px);
     padding: 4px 0 5px 4px;
     cursor: pointer;
     border-radius: 4px;
@@ -1041,6 +1041,7 @@ input.search {
     font-size: 14px;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .folder-item__inner__title.not-used {

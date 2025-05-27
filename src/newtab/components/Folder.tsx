@@ -237,7 +237,7 @@ export const Folder = React.memo(function Folder(p: {
           p.search === "" && p.isBeta ?
             p.folder.collapsed
               ? <button title="Expand" className={CL("folder-title__button visible")} onClick={expandFolder}><ExpandIcon/></button>
-              : <button title="Collaps" className={CL("folder-title__button")} onClick={collapseFolder}><CollapseIcon/></button>
+              : <button title="Collapse" className={CL("folder-title__button")} onClick={collapseFolder}><CollapseIcon/></button>
             : null
         }
 
