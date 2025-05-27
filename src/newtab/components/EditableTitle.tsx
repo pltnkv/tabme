@@ -12,6 +12,7 @@ export function EditableTitle(p: {
   onSaveTitle: (title: string) => void,
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const [isComposing, setIsComposing] = useState(false)
 
   useEffect(() => {
     // Select all text when entering edit mode
@@ -40,6 +41,8 @@ export function EditableTitle(p: {
   }
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (isComposing) return
+
     const isCmdEnter = event.metaKey && event.key === "Enter"
     const isCtrlEnter = event.ctrlKey && event.key === "Enter"
     const isEnter = event.key === "Enter" && !event.shiftKey
@@ -65,6 +68,8 @@ export function EditableTitle(p: {
           ref={textareaRef}
           onKeyDown={handleKeyDown}
           onChange={handleTitleChange}
+          onCompositionStart={() => setIsComposing(true)}
+          onCompositionEnd={() => setIsComposing(false)}
           onBlur={trySaveChange}
           value={p.value}
         />
@@ -86,6 +91,7 @@ export function SimpleEditableTitle(p: {
 }) {
   const [localValue, setLocalValue] = useState(p.value)
   const inputRef = useRef<HTMLInputElement>(null)
+  const [isComposing, setIsComposing] = useState(false)
 
   useEffect(() => {
     return () => {
@@ -121,6 +127,8 @@ export function SimpleEditableTitle(p: {
   }
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (isComposing) return
+
     const isCmdEnter = event.metaKey && event.key === "Enter"
     const isCtrlEnter = event.ctrlKey && event.key === "Enter"
     const isEnter = event.key === "Enter" && !event.shiftKey
@@ -144,6 +152,8 @@ export function SimpleEditableTitle(p: {
           tabIndex={2}
           ref={inputRef}
           onKeyDown={handleKeyDown}
+          onCompositionStart={() => setIsComposing(true)}
+          onCompositionEnd={() => setIsComposing(false)}
           onChange={handleTitleChange}
           onBlur={saveChange}
           value={localValue}
