@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react"
 import { createRoot } from "react-dom/client"
-import { initStats } from "../newtab/helpers/stats"
+import { initStats, trackStat } from "../newtab/helpers/stats"
 import { getStateFromLS, IStoredAppState } from "../newtab/state/storage"
 import { applyTheme } from "../newtab/state/colorTheme"
 import { ISpace } from "../newtab/helpers/types"
@@ -8,7 +8,6 @@ import { CL } from "../newtab/helpers/classNameHelper"
 import { findSpaceById } from "../newtab/state/actionHelpers"
 import { getFolderGradientColor } from "../newtab/helpers/getFolderGradientColor"
 import { isTabAlreadySavedInFolder } from "./popup-utils"
-import Tab = chrome.tabs.Tab
 import { hlSearch, isContainsSearch } from "../newtab/helpers/utils"
 import { isTabmeOnly, isTabmeOrNewTab } from "../newtab/helpers/isTabmeTab"
 import IconFind from "../newtab/icons/find.svg"
@@ -16,6 +15,7 @@ import IconEdit from "../newtab/icons/edit.svg"
 import { saveNewTabToFolder } from "./popup-logic"
 import { EditableTitle } from "../newtab/components/EditableTitle"
 import { PopupKeyboardManager } from "./PopupKeyboardManager"
+import Tab = chrome.tabs.Tab
 
 const POPUP_STORAGE_KEY = "popup_last_selection"
 
@@ -109,6 +109,8 @@ export default function PopupApp(p: {
 
   const onOpenTabmeClick = () => {
     const viewTabUrl = chrome.runtime.getURL("newtab.html")
+    trackStat("openTabmeFromPopup", {})
+
     if (__OVERRIDE_NEWTAB) {
       chrome.tabs.create({ url: `${viewTabUrl}?spaceId=${currentSpaceId}&focusItemId=${savedItemId ?? ""}` })
     } else {

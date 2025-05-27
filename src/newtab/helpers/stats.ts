@@ -162,6 +162,7 @@ type EventOptionsMap = {
     message: string | undefined
     line: number | undefined
   }
+  "openTabmeFromPopup": {}
 };
 
 let commonProps: Partial<CommonStatProps> = {
