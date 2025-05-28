@@ -242,3 +242,22 @@ export function updateFolderItem(
 export function isCustomActionItem(item: IFolderItem | undefined): boolean {
   return item?.url.includes("tabme://") ?? false
 }
+
+export function getSectionChildren(sectionId: number, spaces: ISpace[]): IFolderItem[] | undefined {
+  const folder = findFolderByItemId({ spaces }, sectionId)
+  if (folder) {
+    const sectionIndex = folder.items.findIndex(i => i.id === sectionId)
+    const children: IFolderItem[] = []
+    for (let i = sectionIndex + 1; i < folder.items.length; i++) {
+      const nextItem = folder.items[i]
+      if (nextItem.isSection) {
+        break
+      } else {
+        children.push(nextItem)
+      }
+    }
+    return children
+  } else {
+    return undefined
+  }
+}

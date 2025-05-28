@@ -6,7 +6,7 @@ import { Action } from "../../state/state"
 import { DispatchContext, mergeStepsInHistory } from "../../state/actions"
 import { getSpacesWithNestedFoldersList } from "./moveToHelpers"
 import { createFolderWithStat, showMessage, showMessageWithUndo } from "../../helpers/actionsHelpersWithDOM"
-import { findFolderByItemId } from "../../state/actionHelpers"
+import { findFolderByItemId, getSectionChildren } from "../../state/actionHelpers"
 import { scrollElementIntoView } from "../../helpers/utils"
 import { trackStat } from "../../helpers/stats"
 import { GetProPlanModal } from "../modals/GetProPlanModal"
@@ -65,10 +65,23 @@ export const FolderItemMenu = React.memo((p: {
     p.onClose()
   }
 
+  const getItemIdsToMove = () => {
+    if (selectedItems.length === 1 && selectedItems[0].isSection) {
+      const children = getSectionChildren(selectedItems[0].id, p.spaces)
+      if (children) {
+        return [selectedItems[0].id, ...children?.map(item => item.id)]
+      } else {
+        return []
+      }
+    } else {
+      return selectedItems.map(item => item.id)
+    }
+  }
+
   const moveToFolder = (folderId: number) => {
     dispatch({
       type: Action.MoveFolderItems,
-      itemIds: selectedItems.map(item => item.id),
+      itemIds: getItemIdsToMove(),
       targetFolderId: folderId,
       insertBeforeItemId: undefined
     })
@@ -144,6 +157,11 @@ export const FolderItemMenu = React.memo((p: {
                     p.isBeta ? null : <span className="get-pro-label">Get Pro</span>
                   }</button>
               }
+              <DropdownSubMenu
+                menuId={1}
+                title={"Move to"}
+                submenuContent={getSpacesWithNestedFoldersList(p.spaces, moveToFolder, moveToNewFolder, findFolderByItemId(p, p.item.id)?.id)}
+              />
               <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onDeleteItem}>Delete</button>
             </DropdownMenu>
             :

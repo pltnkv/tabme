@@ -11,8 +11,8 @@ import {
 } from "./dragAndDrop"
 import { inRange } from "../helpers/mathUtils"
 import { getGlobalAppState } from "../components/App"
-import { findFolderByItemId, findItemById } from "../state/actionHelpers"
-import { IFolderItem } from "../helpers/types"
+import { findFolderByItemId, findItemById, getSectionChildren } from "../state/actionHelpers"
+import { IFolderItem, ISpace } from "../helpers/types"
 
 export function processItemDragAndDrop(
   mouseDownEvent: React.MouseEvent,
@@ -133,20 +133,9 @@ function selectSectionChildrenIfNeeded(element: HTMLElement): HTMLElement[] {
   const state = getGlobalAppState()
   const item = findItemById(state, id)
   if (item?.isSection && !item.collapsed) {
-    const folder = findFolderByItemId(state, id)
-    if (folder) {
-      const sectionIndex = folder.items.findIndex(i => i.id === id)
-      const children: IFolderItem[] = []
-      for (let i = sectionIndex + 1; i < folder.items.length; i++) {
-        const nextItem = folder.items[i]
-        if (nextItem.isSection) {
-          break
-        } else {
-          children.push(nextItem)
-        }
-      }
-
-      const childrenElements = children.map(childItem => document.querySelector(`[data-id="${childItem.id}"]`) as HTMLElement)
+    const sectionChildren = getSectionChildren(id, state.spaces)
+    if (sectionChildren) {
+      const childrenElements = sectionChildren.map(childItem => document.querySelector(`[data-id="${childItem.id}"]`) as HTMLElement)
       childrenElements.unshift(element)
       selectItems(childrenElements)
       return childrenElements

@@ -153,7 +153,7 @@ export const HelpOptions = (p: {
     {
       onClick: showShortcutsModal,
       title: "Boost your speed with keyboard shortcuts.",
-      text: "Keyboard Shortcuts"
+      text: "Keyboard shortcuts"
     },
     {
       onClick: invalidateBrokenIcons,
@@ -169,7 +169,7 @@ export const HelpOptions = (p: {
     {
       onClick: onSendFeedback,
       title: "Got feedback, ideas, or found a bug? I’d love to hear from you!",
-      text: "Share feedback or report an issue"
+      text: "Share feedback or report a bug"
     },
     {
       separator: true,

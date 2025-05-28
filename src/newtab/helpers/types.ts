@@ -25,7 +25,7 @@ export interface IFolderItem extends IObject {
   favIconUrl: string
   title: string
   url: string
-  isSection?: boolean // todo - replace on "type later". not store bool on server
+  isSection?: boolean // todo - replace on "type later". not store bool on server. Also rename to "Group"
   collapsed?: boolean
   inEdit?: boolean
 
