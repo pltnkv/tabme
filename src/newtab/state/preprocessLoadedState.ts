@@ -74,7 +74,7 @@ export function preprocessLoadedState(state: IStoredAppState): void {
   ////////////////////////////////////////////////////////////
   // Init available "Whats new"
   ////////////////////////////////////////////////////////////
-  state.currentWhatsNew = getAvailableWhatsNew(state.stat.firstSessionDate, state.betaMode)
+  state.availableWhatsNew = getAvailableWhatsNew(state.stat.firstSessionDate, state.betaMode)
 
   ////////////////////////////////////////////////////////////
   // Apply Dark Light Themes

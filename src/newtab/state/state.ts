@@ -83,7 +83,7 @@ export type IAppState = {
   selectedWidgetIds: number[]
   editingWidgetId: number | undefined
 
-  currentWhatsNew: WhatsNew | undefined
+  availableWhatsNew: WhatsNew[]
 
   hasHiddenObjects: boolean
 
@@ -130,7 +130,7 @@ let initState: IAppState = {
   selectedWidgetIds: [],
   editingWidgetId: undefined,
 
-  currentWhatsNew: undefined,
+  availableWhatsNew: [],
 
   hasHiddenObjects: false,
 

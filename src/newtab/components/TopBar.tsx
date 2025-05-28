@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react"
+import React, { useContext, useState, useEffect, useRef } from "react"
 import { DropdownMenu } from "./dropdown/DropdownMenu"
 import { handleSearchKeyDown } from "../helpers/handleBookmarksKeyDown"
 import { Action, IAppState } from "../state/state"
@@ -22,7 +22,24 @@ export function TopBar(p: {
   const [betaMenuVisibility, setBetaMenuVisibility] = useState<boolean>(false)
   const [settingsMenuVisibility, setSettingsMenuVisibility] = useState<boolean>(false)
   const [helpMenuVisibility, setHelpMenuVisibility] = useState<boolean>(false)
-  const [whatsNewForModal, setWhatsNewForModal] = useState<WhatsNew | undefined>(undefined)
+  const [showWhatsNewModal, setShowWhatsNewModal] = useState<boolean>(false)
+
+  const whatsNewRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (p.appState.availableWhatsNew && whatsNewRef.current) {
+      whatsNewRef.current.animate(
+        [
+          { transform: "translateY(0px)" },
+          { transform: "translateY(-8px)" },
+          { transform: "translateY(0px)" },
+          { transform: "translateY(-8px)" },
+          { transform: "translateY(0px)" }
+        ],
+        { duration: 600, iterations: 1, easing: "ease-out" }
+      )
+    }
+  }, [p.appState.availableWhatsNew])
 
   function onToggleHelpSettings() {
     setHelpMenuVisibility(!helpMenuVisibility)
@@ -45,13 +62,15 @@ export function TopBar(p: {
   }
 
   function onWhatsNewClick() {
-    setWhatsNewForModal(p.appState.currentWhatsNew)
+    setShowWhatsNewModal(true)
   }
 
   async function onLogout() {
     localStorage.removeItem("authToken")
     alert("Logout successful")
   }
+
+  const whatsNewText = p.appState.availableWhatsNew.at(-1)?.buttonText
 
   return (
     <div className={CL("bookmarks-menu", { "bookmarks-menu--scrolled": p.isScrolled })}>
@@ -67,9 +86,9 @@ export function TopBar(p: {
       }
       <div className="menu-stretching-space"></div>
       {
-        p.appState.currentWhatsNew && <div className="whats-new" onClick={onWhatsNewClick}>
+        whatsNewText && <div ref={whatsNewRef} className="whats-new" onClick={onWhatsNewClick}>
           <IconGift/>
-          <div className="whats-new__text">{p.appState.currentWhatsNew.buttonText}</div>
+          <div className="whats-new__text">{whatsNewText}</div>
         </div>
       }
       <div style={{ display: "flex", marginRight: "12px", position: "relative" }}>
@@ -123,8 +142,10 @@ export function TopBar(p: {
         }
 
         {
-          whatsNewForModal &&
-          <WhatsNewModal onClose={() => setWhatsNewForModal(undefined)} whatsNew={whatsNewForModal} isBeta={p.appState.betaMode}
+          showWhatsNewModal &&
+          <WhatsNewModal onClose={() => setShowWhatsNewModal(false)}
+                         whatsNews={p.appState.availableWhatsNew}
+                         isBeta={p.appState.betaMode}
                          firstSessionDate={p.appState.stat?.firstSessionDate}/>
         }
       </div>

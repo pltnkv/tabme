@@ -58,7 +58,7 @@ export function TooltipsManager(p: {}) {
       }
     }
 
-    const onMouseDown = () => {
+    const immediatelyHideTooltip = () => {
       if (timeout) {
         clearTimeout(timeout)
       }
@@ -70,14 +70,16 @@ export function TooltipsManager(p: {}) {
     }
 
     document.body.addEventListener("mousemove", onMouseMove)
-    document.body.addEventListener("mousedown", onMouseDown)
+    document.body.addEventListener("mousedown", immediatelyHideTooltip)
+    document.body.addEventListener("scroll", immediatelyHideTooltip, true)
 
     return () => {
       if (timeout) {
         clearTimeout(timeout)
       }
       document.body.removeEventListener("mousemove", onMouseMove)
-      document.body.removeEventListener("mousedown", onMouseDown)
+      document.body.removeEventListener("mousedown", immediatelyHideTooltip)
+      document.body.removeEventListener("scroll", immediatelyHideTooltip, true)
       tooltip.remove()
     }
   }, [])

@@ -81,10 +81,10 @@ function getSeenWhatsNewKeys(): WhatsNewKey[] {
  *
  * If none is available, it returns undefined.
  */
-export function getAvailableWhatsNew(firstSessionDate: number | undefined, isBeta: boolean): WhatsNew | undefined {
+export function getAvailableWhatsNew(firstSessionDate: number | undefined, isBeta: boolean): WhatsNew[] {
   const seen = getSeenWhatsNewKeys()
   const now = new Date()
-  return Object.values(WhatsNewConfig).find(whatsNew => {
+  return Object.values(WhatsNewConfig).filter(whatsNew => {
     const releaseDate = parseDate(whatsNew.approxReleaseDate)
     return now >= releaseDate
       && (firstSessionDate === undefined || firstSessionDate <= releaseDate.getTime())

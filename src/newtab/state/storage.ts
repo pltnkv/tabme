@@ -71,7 +71,7 @@ export const savingStateKeys = Object.keys(savingStateDefaultValues) as StoredSt
 
 export type IStoredAppState = {
   [key in StoredStateKeys]: IAppState[key]
-} & { hiddenFeatureIsEnabled: boolean, betaMode: boolean; folders: IFolder[], currentWhatsNew: WhatsNew | undefined, hasHiddenObjects: boolean }
+} & { hiddenFeatureIsEnabled: boolean, betaMode: boolean; folders: IFolder[], availableWhatsNew: WhatsNew[], hasHiddenObjects: boolean }
 
 export function getStateFromLS(callback: (state: IStoredAppState) => void): void {
   chrome.storage.local.get(savingStateKeys, (res) => {
