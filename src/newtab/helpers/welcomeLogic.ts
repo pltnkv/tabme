@@ -30,9 +30,8 @@ export function createWelcomeFolder(dispatch: ActionDispatcher) {
   items.push(createNewFolderItem("https://slack.com", "Slack", 'https://a.slack-edge.com/80588/marketing/img/meta/favicon-32.png'))
   items.push(createNewFolderItem("https://www.notion.so", "Notion", 'https://www.notion.so/images/favicon.ico'))
 
-  createNewStickerForOnboarding(dispatch, defaultSpaceId, 'Drag a Tab from the "Open tabs" \nto save it', 470, 230)
-  createNewStickerForOnboarding(dispatch, defaultSpaceId, 'Double-click empty space to add a Sticky Note', 670, 210)
-  createNewStickerForOnboarding(dispatch, defaultSpaceId, 'Press "Del" to delete selected Sticky Notes', 470, 430)
+  createNewStickerForOnboarding(dispatch, defaultSpaceId, 'Drag a Tab from the "Open tabs" \nto save it', 350, 230)
+  createNewStickerForOnboarding(dispatch, defaultSpaceId, 'Double-click empty space to add a Sticky Note', 550, 230)
 
   dispatch({ type: Action.CreateFolder, newFolderId: genUniqLocalId(), title: "Welcome to Tabme", items, color: "#A0F3A2" })
 }

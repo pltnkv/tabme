@@ -14,6 +14,12 @@ import { IFolderItem } from "../helpers/types"
 import { CL } from "../helpers/classNameHelper"
 import { findSpaceById, genUniqLocalId } from "../state/actionHelpers"
 import IconToggle from "../icons/toggle-on.svg"
+import IconChat from "../icons/chat.svg"
+import IconKeyboard from "../icons/keyboard.svg"
+import IconLogout from "../icons/logout.svg"
+import IconRefresh from "../icons/refresh.svg"
+import IconStar from "../icons/star.svg"
+import IconHelp from "../icons/help.svg"
 import IconCollapse from "../icons/collapse.svg"
 import IconExpand from "../icons/expand.svg"
 import { GetProPlanModal } from "./modals/GetProPlanModal"
@@ -42,22 +48,22 @@ export const BetaOptions = (props: {
   }
 
   function onSendFeedbackBeta() {
-    chrome.tabs.create({ url: "https://docs.google.com/forms/d/e/1FAIpQLSeA-xs3GjBVNQQEzSbHiGUs1y9_XIo__pQBJKQth737VqAEOw/formResponse", active: true })
+    openFeedbackForm()
     trackStat("settingsClicked", { settingName: "sendFeedbackBeta" })
   }
 
-  type OnClickOption = { onClick: (e: any) => void; title: string; text: string; hidden?: boolean; isFile?: boolean }
-  type OnToggleOption = { onToggle: () => void; value: boolean, title: string; text: string; hidden?: boolean }
   const options: Array<OnClickOption | OnToggleOption | { separator: true }> = [
     {
       onClick: onSendFeedbackBeta,
       title: "I appreciate honest feedback on what needs to be improved or bug reports. Thanks for your time and support!",
-      text: "Share feedback about Beta"
+      text: "Share feedback about Beta Pro",
+      icon: IconChat
     },
     {
       onClick: onStopBeta,
       title: "Cancel the beta program and switch to free plan",
-      text: "Cancel Beta program 👋",
+      text: "Cancel Beta program",
+      icon: IconLogout,
       hidden: !props.appState.betaMode
     }
   ]
@@ -79,7 +85,7 @@ export const HelpOptions = (p: {
   const [isShortcutsModalOpen, setShortcutsModalOpen] = useState(false)
 
   function onSendFeedback() {
-    chrome.tabs.create({ url: "https://docs.google.com/forms/d/e/1FAIpQLSeA-xs3GjBVNQQEzSbHiGUs1y9_XIo__pQBJKQth737VqAEOw/formResponse", active: true })
+    openFeedbackForm()
     trackStat("settingsClicked", { settingName: "sendFeedback" })
   }
 
@@ -142,34 +148,37 @@ export const HelpOptions = (p: {
     })
   }
 
-  type OnClickOption = { onClick: (e: any) => void; title: string; text: string; hidden?: boolean; isFile?: boolean }
-  type OnToggleOption = { onToggle: () => void; value: boolean, title: string; text: string; hidden?: boolean }
   const settingsOptions: Array<OnClickOption | OnToggleOption | { separator: true }> = [
     {
       onClick: onHowToUse,
       title: "Discover hidden features and learn how to make the most of Tabme.",
-      text: "How to use Tabme"
+      text: "How to use Tabme",
+      icon: IconHelp
     },
     {
       onClick: showShortcutsModal,
       title: "Boost your speed with keyboard shortcuts.",
-      text: "Keyboard shortcuts"
+      text: "Keyboard shortcuts",
+      icon: IconKeyboard
     },
     {
       onClick: invalidateBrokenIcons,
       title: "If some favicons aren’t showing, try this to refresh them. Applies only to bookmarks in the current space.",
       text: "Reload Favicons",
-      hidden: !p.appState.alphaMode
+      hidden: !p.appState.alphaMode,
+      icon: IconRefresh
     },
     {
       onClick: onRateInStore,
       title: "Thanks for using Tabme 🖤. Your support helps Tabme grow!",
-      text: "Rate Tabme in Chrome Store"
+      text: "Rate Tabme in Chrome Store",
+      icon: IconStar
     },
     {
       onClick: onSendFeedback,
       title: "Got feedback, ideas, or found a bug? I’d love to hear from you!",
-      text: "Share feedback or report a bug"
+      text: "Share feedback or report a bug",
+      icon: IconChat
     },
     {
       separator: true,
@@ -437,8 +446,8 @@ export const Options = (props: { optionsConfig: OptionsConfig | (() => OptionsCo
             onClick={option.onClick}
             title={option.title}
           >
-            {option.icon ? React.createElement(option.icon, { className: "icon" }) : null}
-            <span style={{flexGrow: 1}}>{option.text}</span>
+            {option.icon ? React.createElement(option.icon, { className: "icon", style: { transform: "scale(0.8)" } }) : null}
+            <span style={{ flexGrow: 1 }}>{option.text}</span>
             {
               option.proOnly ? <span className="get-pro-label">Get Pro</span> : null
             }
@@ -447,4 +456,10 @@ export const Options = (props: { optionsConfig: OptionsConfig | (() => OptionsCo
       }
     })}
   </>
+}
+
+function openFeedbackForm() {
+  const email = localStorage.getItem("userEmail") ?? ''
+  const url = `https://docs.google.com/forms/d/e/1FAIpQLSeA-xs3GjBVNQQEzSbHiGUs1y9_XIo__pQBJKQth737VqAEOw/viewform?entry.2062831439=${email}`
+  chrome.tabs.create({ url, active: true })
 }
