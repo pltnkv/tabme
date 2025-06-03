@@ -15,6 +15,7 @@ import { CL } from "../helpers/classNameHelper"
 import { findSpaceById, genUniqLocalId } from "../state/actionHelpers"
 import IconToggle from "../icons/toggle-on.svg"
 import IconChat from "../icons/chat.svg"
+import IconRocket from "../icons/rocket.svg"
 import IconKeyboard from "../icons/keyboard.svg"
 import IconLogout from "../icons/logout.svg"
 import IconRefresh from "../icons/refresh.svg"
@@ -188,7 +189,8 @@ export const HelpOptions = (p: {
       onClick: tryBeta,
       title: "Try out new features before everyone else. Welcome to Beta!",
       text: "Try Pro Features for free",
-      hidden: p.appState.betaMode
+      hidden: p.appState.betaMode,
+      icon: IconRocket
     }
   ]
 
@@ -258,6 +260,11 @@ export const SettingsOptions = (p: {
     trackStat("settingsClicked", { settingName: "ToggleDarkMode" })
   }
 
+  function onToggleTooltips() {
+    dispatch({ type: Action.UpdateAppState, newState: { tooltipsEnabled: !p.appState.tooltipsEnabled } })
+    trackStat("settingsClicked", { settingName: "ToggleTooltips" })
+  }
+
   function onToggleOpenInTheNewTab() {
     dispatch({ type: Action.UpdateAppState, newState: { openBookmarksInNewTab: !p.appState.openBookmarksInNewTab } })
     trackStat("settingsClicked", { settingName: "ToggleOpenInTheNewTab" })
@@ -298,6 +305,12 @@ export const SettingsOptions = (p: {
       value: p.appState.colorTheme === "dark",
       title: "Switch between light and dark theme",
       text: "Dark mode"
+    },
+    {
+      onToggle: onToggleTooltips,
+      value: p.appState.tooltipsEnabled,
+      title: "Tooltips with full title and URL will be visible for Saved tabs and Open tabs",
+      text: "Show tooltips with Tab URL"
     },
     {
       onToggle: onToggleReversedOpenTabs,
@@ -459,7 +472,7 @@ export const Options = (props: { optionsConfig: OptionsConfig | (() => OptionsCo
 }
 
 function openFeedbackForm() {
-  const email = localStorage.getItem("userEmail") ?? ''
+  const email = localStorage.getItem("userEmail") ?? ""
   const url = `https://docs.google.com/forms/d/e/1FAIpQLSeA-xs3GjBVNQQEzSbHiGUs1y9_XIo__pQBJKQth737VqAEOw/viewform?entry.2062831439=${email}`
   chrome.tabs.create({ url, active: true })
 }

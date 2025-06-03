@@ -5,14 +5,9 @@
 ////////////////////////////////////////////////////////
 // clicking on extension icon
 ////////////////////////////////////////////////////////
-
-console.log("Background started")
-
-const chromeAny: any = chrome // hotfix for "chrome.action"
-// chromeAny.action.onClicked.addListener(async function() {
-//   const viewTabUrl = chrome.runtime.getURL("newtab.html")
-//   chrome.tabs.create({ url: viewTabUrl })
-// })
+// chrome.runtime.onInstalled.addListener(() => {
+//   chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true })
+// });
 
 ////////////////////////////////////////////////////////
 // watching last active tabs

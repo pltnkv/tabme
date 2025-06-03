@@ -125,6 +125,10 @@ export default function PopupApp(p: {
     }
   }
 
+  const onOpenSidebar = () => {
+    // chrome.sidePanel.open({})
+  }
+
   const [editTabTitle, setEditTabTitle] = useState(false)
   const [tabTitle, setTabTitle] = useState(p.currentTab?.title || "")
 
@@ -220,6 +224,7 @@ export default function PopupApp(p: {
             <div className="p-buttons">
               <button className="btn__setting primary" disabled={!currentFolderId} onClick={onSaveTabClick}>Save to folder<span className="p-hotkey">↵</span></button>
               <button className="btn__setting" onClick={onOpenTabmeClick}>Open Tabme</button>
+              {/*<button className="btn__setting" onClick={onOpenSidebar}>Sidebar</button>*/}
             </div>
             {
               !currentFolderId && <div className="p-warning-message">Please select a folder to save this tab</div>

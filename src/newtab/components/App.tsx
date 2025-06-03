@@ -264,7 +264,7 @@ export function App() {
           {
             isHiddenDeprecatedModalOpen && <HiddenDeprecationModal onClose={() => setHiddenDeprecatedModalOpen(false)}/>
           }
-          <TooltipsManager/>
+          <TooltipsManager tooltipsEnabled={appState.tooltipsEnabled}/>
         </div>
       }
     </DispatchContext.Provider>

@@ -112,10 +112,21 @@ export function Welcome(p: {
 
       {
         screen === SCREEN.READY_TO_USE && <div className="welcome-scrollable welcome-scrollable--ready">
-          <div className="welcome-ready-icon">
-            <ReadyIcon/>
-          </div>
+          {/*<div className="welcome-ready-icon">*/}
+          {/*  <ReadyIcon/>*/}
+          {/*</div>*/}
           <h1>Tabme is ready for use!</h1>
+          <div>
+            <iframe width="800"
+                    height="450"
+                    src="https://www.youtube.com/embed/ZRZdTgzXexo?si=qA1F8HcJ1ql0jbmb"
+                    title="Key Tabme Features"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allowFullScreen>
+            </iframe>
+          </div>
           <button className="welcome-button" onClick={onCloseOnboarding}>Get started</button>
         </div>
       }

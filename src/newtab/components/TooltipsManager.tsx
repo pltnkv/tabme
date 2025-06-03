@@ -1,6 +1,8 @@
 import { useEffect } from "react"
 
-export function TooltipsManager(p: {}) {
+export function TooltipsManager(p: {
+  tooltipsEnabled: boolean;
+}) {
 
   useEffect(() => {
     let timeout: ReturnType<typeof setTimeout> | null = null
@@ -24,6 +26,9 @@ export function TooltipsManager(p: {}) {
     document.body.appendChild(tooltip)
 
     const onMouseMove = (e: MouseEvent) => {
+      if (!p.tooltipsEnabled) {
+        return
+      }
       const target = e.target as HTMLElement
       const el = target.closest("[data-tooltip]") as HTMLElement | null
 
@@ -82,7 +87,7 @@ export function TooltipsManager(p: {}) {
       document.body.removeEventListener("scroll", immediatelyHideTooltip, true)
       tooltip.remove()
     }
-  }, [])
+  }, [p.tooltipsEnabled])
 
   return null
 }

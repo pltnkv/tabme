@@ -87,6 +87,8 @@ export type IAppState = {
 
   hasHiddenObjects: boolean
 
+  tooltipsEnabled: boolean
+
   // API
   apiCommandsQueue: APICommandPayloadFull[],
   apiCommandId?: number
@@ -133,6 +135,7 @@ let initState: IAppState = {
   availableWhatsNew: [],
 
   hasHiddenObjects: false,
+  tooltipsEnabled: false,
 
   page: "default",
   stat: {

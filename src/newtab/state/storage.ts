@@ -63,6 +63,7 @@ const savingStateDefaultValues = { // if was not saved to LS yet
   "stat": undefined,
   "showRecent": false,
   "reverseOpenTabs": true,
+  "tooltipsEnabled": false,
   "version": 1,
   "folders": undefined // "folders" is legacy. Dont delete it until all users are migrated
 }
