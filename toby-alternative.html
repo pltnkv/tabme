@@ -4,12 +4,14 @@
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-84M7F9RZPF"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
+        window.dataLayer = window.dataLayer || [];
 
-      function gtag() { dataLayer.push(arguments); }
+        function gtag() {
+            dataLayer.push(arguments);
+        }
 
-      gtag("js", new Date());
-      gtag("config", "G-84M7F9RZPF");
+        gtag("js", new Date());
+        gtag("config", "G-84M7F9RZPF");
     </script>
 
     <meta charset="UTF-8">
@@ -19,45 +21,131 @@
     <meta name="keywords" content="Toby alternative, Toby vs Tabme, Chrome tab manager, bookmark organizer, productivity extension, save tabs, manage tabs, Tabme extension">
 
     <meta property="og:title" content="Toby Alternative for Chrome – Tabme">
-    <meta property="og:description" content="Compare Tabme vs Toby: better performance, clean UI, no paywall. Discover why Tabme is the top free Toby alternative.">
+    <meta property="og:description"
+          content="Compare Tabme vs Toby: better performance, clean UI, no paywall. Discover why Tabme is the top free Toby alternative.">
     <meta property="og:image" content="/main.png">
     <meta property="og:url" content="https://gettabme.com/toby-alternative">
 
     <link rel="canonical" href="https://gettabme.com/toby-alternative">
 
-    <title>Toby Alternative for Chrome – Tabme</title>
+    <title>Toby Alternative for Chrome — Tabme</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+          rel="stylesheet">
 
-    <link type="text/css" rel="stylesheet" href="styles.css">
+    <link type="text/css" rel="stylesheet" href="styles2.css">
 
     <link rel="shortcut icon" href="/favicons/favicon.ico"/>
     <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png">
     <link rel="manifest" href="/favicons/site.webmanifest">
+
+    <style>
+        .title {
+            font-size: 2.5rem;
+            margin-top: 30px;
+            margin-bottom: 20px;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            max-width: 720px;
+        }
+
+        .comparison-table th, .comparison-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .comparison-table th {
+            background-color: #f8f9fa;
+        }
+
+        .comparison-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .comparison-table td strong {
+            color: #1a73e8;
+        }
+
+        .comparison-table td:first-child {
+            font-weight: bold;
+        }
+
+        .comparison-table td:last-child svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        h3 {
+            margin-top: 2rem;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        p {
+            margin-bottom: 0.5rem;
+        }
+    </style>
 </head>
 <body>
 
-<div class="content not-home toby">
-    <div class="content__inner">
-        <a class="install-button"
-           title="Chrome extension for organizing bookmarks and tabs"
-           href="https://chromewebstore.google.com/detail/tabme/jnhiookaaldadiimlgncedhkpmhlmmip?utm_source=toby-alternative">Add Tabme to Chrome</a>
+<div class="min-h-screen flex flex-col">
 
-        <h1 style="font-size: 38px;     margin-top: 14px;">The Best Toby Alternative for Chrome</h1>
+    <!-- Header Section -->
+    <header class="w-full py-4 bg-white sticky top-0 z-10 shadow-sm">
+        <div class="container mx-auto flex justify-between items-center container-padding">
+            <div class="flex items-center gap-2">
+                <a href="/" class="flex">
+                    <img src="favicons/apple-touch-icon.png" alt="Tabme Logo" class="h-8 w-auto mr-2">
+                    <span class="text-xl font-semibold">Tabme</span>
+                </a>
+
+            </div>
+
+            <nav class="hidden md:flex items-center gap-6">
+                <a href="guide.html" class="text-gray-600 hover:text-tabme-blue transition-colors">Guide</a>
+                <a href="pricing.html" class="text-gray-600 hover:text-tabme-blue transition-colors">Pricing</a>
+                <a href="changelog.html" class="text-gray-600 hover:text-tabme-blue transition-colors">Updates</a>
+            </nav>
+
+            <a href="https://chromewebstore.google.com/detail/tabme/jnhiookaaldadiimlgncedhkpmhlmmip"
+               class="rounded-md bg-tabme-blue text-white px-4 py-2 hover:bg-blue-600 transition-colors"
+               title="Chrome extension for organizing bookmarks and tabs"
+            >
+                Add to Chrome
+            </a>
+
+        </div>
+    </header>
+
+    <div class="container mx-auto container-padding">
+        <h1 class="title">The Best Toby Alternative for Chrome</h1>
 
         <div>
-            <video width="100%" autoplay loop muted style=" border-radius: 8px; filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.1));">
-                <source src="videos/main.mp4" type="video/mp4" alt="Tabme Chrome Extension">
-            </video>
+            <iframe width="100%"
+                    style="min-height: 580px;"
+                    src="https://www.youtube.com/embed/ZRZdTgzXexo?si=IumAL7MvRjZCoRUH"
+                    title="Tabme — tab and bookmark manager"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
+
+            </iframe>
         </div>
 
         <h2 style="font-size: 20px; margin-top: 40px">👉 Why People Are Switching from Toby to Tabme</h2>
 
-        <p>Tabme is a powerful, lightweight, and <strong>completely free</strong> alternative to Toby for Chrome users who want a simpler, faster way to manage tabs and bookmarks.
+        <p>Tabme is a powerful, lightweight, and <strong>completely free</strong> alternative to Toby for Chrome users
+            who want a simpler, faster way to manage tabs and bookmarks.
         </p>
 
 
@@ -94,7 +182,9 @@
             </tr>
             <tr>
                 <td>“Mini” Version</td>
-                <td>✅ <a href="https://chromewebstore.google.com/detail/tabme-%E2%80%94-version-without-n/jjdbikbbknmhkknpfnlhgpcikbfjldee?utm_source=toby-alternative" target="_blank">Tabme Mini</a></td>
+                <td>✅ <a
+                        href="https://chromewebstore.google.com/detail/tabme-%E2%80%94-version-without-n/jjdbikbbknmhkknpfnlhgpcikbfjldee?utm_source=toby-alternative"
+                        target="_blank">Tabme Mini</a></td>
                 <td>✅ Toby Mini</td>
             </tr>
             </tbody>
@@ -114,18 +204,46 @@
             <li>In Tabme: go to <code>Settings → Import from Toby JSON</code></li>
         </ol>
 
-        <p><strong><a href="https://chromewebstore.google.com/detail/tabme/jnhiookaaldadiimlgncedhkpmhlmmip?utm_source=toby-alternative">Try Tabme for Free</a> — the best Toby alternative</strong></p>
-
-        <footer class="footer">
-            <hr>
-            <span>©2023 — 2025</span>
-            <a href="mailto:gettabme@gmail.com">Contact</a>
-            <a href="guide.html">Guide</a>
-            <a href="faq.html">FAQ</a>
-            <a href="changelog.html">Changelog</a>
-            <a href="/">Home</a>
-        </footer>
+        <p><strong><a
+                href="https://chromewebstore.google.com/detail/tabme/jnhiookaaldadiimlgncedhkpmhlmmip?utm_source=toby-alternative">Try
+            Tabme for Free</a> — the best Toby alternative</strong></p>
+        <br><br><br><br>
     </div>
+    <!-- CTA Section -->
+    <section id="cta" class="bg-tabme-blue text-white section-spacing">
+        <div class="container mx-auto text-center container-padding">
+            <p class="text-3xl md:text-4xl font-bold mb-6">Try Tabme for free</p>
+            <p class="text-lg mb-8 max-w-2xl mx-auto">Organize your bookmarks and tabs in a single space</p>
+
+            <a href="https://chromewebstore.google.com/detail/tabme/jnhiookaaldadiimlgncedhkpmhlmmip"
+               style="display: inline-flex; align-items: center; padding: 6px 10px; gap: 16px; padding-left: 22px;"
+               class="bg-white text-tabme-blue hover:bg-gray-100 rounded-full px-8 py-6 text-lg font-medium inline-block">
+                <span>Add to Chrome</span>
+                <img src="images/icon_chrome.svg" alt="Chrome Extension"
+                     style="border: 2px solid rgba(255, 255, 255, 0.8); border-radius: 50%;">
+            </a>
+        </div>
+    </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white py-10 border-t border-gray-200">
+        <div class="container mx-auto container-padding">
+            <div class="flex flex-col md:flex-row items-center justify-center">
+
+                <div class="flex flex-wrap justify-center gap-6">
+                    <a href="mailto:gettabme@gmail.com">Contact</a>
+                    <a href="toby-alternative.html">Migrate from Toby</a>
+                    <a href="policy.html">Privacy Policy</a>
+                </div>
+            </div>
+
+            <div class="mt-8 text-center text-gray-500 text-sm">
+                © <span id="current-year">2025</span> Tabme. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
 </div>
 </body>
 </html>

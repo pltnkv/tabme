@@ -1,26 +1,30 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-84M7F9RZPF"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
+        window.dataLayer = window.dataLayer || [];
 
-      function gtag() {dataLayer.push(arguments);}
+        function gtag() {
+            dataLayer.push(arguments);
+        }
 
-      gtag("js", new Date());
+        gtag("js", new Date());
 
-      gtag("config", "G-84M7F9RZPF");
+        gtag("config", "G-84M7F9RZPF");
     </script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta name="description" content="Tabme — A Chrome extension to efficiently organize bookmarks and manage tabs. Save, categorize, and access tabs quickly. Experience fast, intuitive tab management.">
-    <meta name="keywords" content="bookmark manager, Chrome bookmark manager, tab organizer, save tabs, manage bookmarks, tab manager extension, bookmark organizer for Chrome, productivity extension">
+    <meta name="description"
+          content="Tabme — A Chrome extension to efficiently organize bookmarks and manage tabs. Save, categorize, and access tabs quickly. Experience fast, intuitive tab management.">
+    <meta name="keywords"
+          content="bookmark manager, Chrome bookmark manager, tab organizer, save tabs, manage bookmarks, tab manager extension, bookmark organizer for Chrome, productivity extension">
 
     <meta property="og:title" content="Best Bookmark Manager and Tab Organizer for Chrome | Tabme">
-    <meta property="og:description" content="Tabme is a powerful Chrome bookmark manager and tab organizer. Easily manage and organize your bookmarks and tabs for a seamless browsing experience.">
+    <meta property="og:description"
+          content="Tabme is a powerful Chrome bookmark manager and tab organizer. Easily manage and organize your bookmarks and tabs for a seamless browsing experience.">
     <meta property="og:image" content="/main.png">
     <meta property="og:url" content="https://gettabme.com">
     <link rel="canonical" href="https://gettabme.com">
@@ -29,9 +33,10 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+          rel="stylesheet">
 
-    <link type="text/css" rel="stylesheet" href="styles.css">
+    <link type="text/css" rel="stylesheet" href="styles2.css">
 
     <link rel="shortcut icon" href="/favicons/favicon.ico"/>
     <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png">
@@ -41,90 +46,492 @@
 </head>
 
 <body>
+<div class="min-h-screen flex flex-col">
+    <!-- Header Section -->
+    <header class="w-full py-4 bg-white sticky top-0 z-10 shadow-sm">
+        <div class="container mx-auto flex justify-between items-center container-padding">
+            <div class="flex items-center gap-2">
+                <a href="/" class="flex">
+                    <img src="favicons/apple-touch-icon.png" alt="Tabme Logo"
+                         class="h-8 w-auto mr-2">
+                    <span class="text-xl font-semibold">Tabme</span>
+                </a>
+            </div>
 
-<header>
-    <div class="header__inner">
-        <a class="install-button"
-           style="float: right;     margin-top: 18px;"
-           title="Chrome extension for organizing bookmarks and tabs"
-           href="https://chromewebstore.google.com/detail/tabme/jnhiookaaldadiimlgncedhkpmhlmmip">Add to Chrome</a>
-        <p class="main-message">Never lose track of your documents again</p>
-        <h1 class="goal-text">Use Tabme — Tab and Bookmark Manager for Chrome<br></h1>
-        <video width="100%" autoplay loop muted>
-            <source src="videos/main.mp4" type="video/mp4" alt="Tabme Chrome Extension">
-        </video>
-    </div>
-</header>
-<div class="content">
-    <div class="content__inner">
-        <p class="main-description">Tabme is a <strong>tab and bookmark manager</strong> that helps you <strong>organize your projects</strong>. <br>
-            Keep all your documents one click away on one screen.<br>
+            <nav class="hidden md:flex items-center gap-6">
+                <a href="guide.html" class="text-gray-600 hover:text-tabme-blue transition-colors">Guide</a>
+                <a href="pricing.html" class="text-gray-600 hover:text-tabme-blue transition-colors">Pricing</a>
+                <a href="changelog.html" class="text-gray-600 hover:text-tabme-blue transition-colors">Updates</a>
+            </nav>
 
-            <br>
-            Tabme is <strong>free to use</strong>.
-        </p>
-
-        <br>
-
-        <h2>Key features:</h2>
-
-        <div class="key-features">
-            <h3>👆 Simple Interface With Intuitive Drag-and-Drop</h3>
-            <p>Drag tabs into folders to save and organize them.<br>
-                Use color coding and arranging in space to find saved tabs instantly.
-            </p>
-
-            <h3>📦 Stash Open Tabs</h3>
-            <p>Save all your open tabs into a folder by clicking "Stash all Tabs".<br>
-                Use "Open All" in the Folder menu to restore all saved Tabs.</p>
-
-            <h3>🧹 Close Duplicated tabs</h3>
-            <p>Clean up browser clutter instantly with one-click duplicate tab removal.</p>
-
-            <h3>🚀 Built for Speed</h3>
-            <p> Works smoothly even with hundreds of saved tabs.</p>
-
-            <h3>🔎 Smart Search</h3>
-            <p> Search across open tabs, saved bookmarks, and recently closed tabs — all in one place.</p>
-
-            <h3>🌙 Dark Mode Support</h3>
-            <p>Switch between light and dark modes for a more comfortable browsing experience.</p>
-
-            <h3>⌨️ Keyboard Accessibility Support</h3>
-            <p>Power users can navigate and manage bookmarks with keyboard shortcuts.</p>
-
-            <h3>⭐️ Instant Saved Tab Access</h3>
-            <p> Tabme replaces New Tab page for instant access to all your saved tabs.<br>
-                There is an alternative "<a href="https://chromewebstore.google.com/detail/tabme-%E2%80%94-version-without-n/jjdbikbbknmhkknpfnlhgpcikbfjldee">Tabme Mini — version without newtab</a>". <br>It has all the same features but without taking over "newtab".</p>
-        </div>
-
-        <h2 style="margin-top: 60px;">Full Privacy, No Account Needed:</h2>
-        <p>
-            🔐 Tabme puts your privacy first:<br>
-            1. Your data stores locally on your device.<br>
-            2. No accounts or logins required.<br>
-            3. Any analytics are fully anonymous.<br>
-            4. Your data is never shared with anyone.<br>
-        </p>
-
-        <center style="margin-top: 60px;">
-            <a class="install-button"
+            <a href="https://chromewebstore.google.com/detail/tabme/jnhiookaaldadiimlgncedhkpmhlmmip"
+               class="rounded-md bg-tabme-blue text-white px-4 py-2 hover:bg-blue-600 transition-colors"
                title="Chrome extension for organizing bookmarks and tabs"
-               href="https://chromewebstore.google.com/detail/tabme/jnhiookaaldadiimlgncedhkpmhlmmip">Add Tabme to Chrome</a>
-        </center>
+            >
+                Add to Chrome
+            </a>
 
+        </div>
+    </header>
 
-        <footer class="footer">
-            <hr>
-            <span>©2023 — 2025</span>
-            <a href="mailto:gettabme@gmail.com">Contact</a>
-            <a href="guide.html">Guide</a>
-            <a href="faq.html">FAQ</a>
-            <a href="changelog.html">Changelog</a>
-            <a href="toby-alternative.html">Migrate from Toby</a>
-            <a href="policy.html">Privacy Policy</a>
-        </footer>
-    </div>
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section class="bg-white section-spacing">
+            <div class="container mx-auto text-center container-padding">
+                <div class="flex flex-col items-center justify-center mb-8 animate-fade-up">
+
+                    <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
+                        Never lose track of your Links and Documents again
+                    </h1>
+
+                    <h2 class="text-lg text-gray-600 mb-6 max-w-2xl">
+                        Tabme — Tab and Bookmark Management for Chrome, Done Right
+                    </h2>
+
+                    <a href="https://chromewebstore.google.com/detail/tabme/jnhiookaaldadiimlgncedhkpmhlmmip"
+                       style="display: flex; align-items: center; padding: 6px 10px; gap: 16px; padding-left: 22px;"
+                       class="bg-tabme-blue hover:bg-blue-600 text-white rounded-full px-8 py-6 text-lg font-medium inline-block">
+                        <span>Add to Chrome</span>
+                        <img src="images/icon_chrome.svg" alt="Chrome Extension"
+                             style="border: 2px solid rgba(35, 27, 27, 0.2); border-radius: 50%;">
+
+                    </a>
+                </div>
+
+                <div class="mt-12 rounded-xl overflow-hidden shadow-lg animate-fade-in">
+                    <iframe width="100%"
+                            style="min-height: 580px;"
+                            src="https://www.youtube.com/embed/ZRZdTgzXexo?si=IumAL7MvRjZCoRUH"
+                            title="Tabme — tab and bookmark manager"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
+
+                    </iframe>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="bg-white section-spacing">
+            <div class="container mx-auto container-padding">
+                <!-- Feature 1 -->
+                <div class="rounded-xl overflow-hidden mb-12 lg:mb-24 p-6 md:p-0 flex flex-col lg:flex-row shadow-lg">
+                    <div class="bg-[#FFF8E1] p-6 md:p-12 flex flex-col justify-center w-full lg:w-1/2">
+                        <div class="flex items-center mb-4 text-tabme-blue" style="align-items: flex-start;">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                                 style="transform: scale(1.2);     margin-top: 6px;"
+                                 fill="currentColor">
+                                <path d="m280-120-56-56 63-66q-106-12-176.5-91.5T40-520q0-117 81.5-198.5T320-800h120v80H320q-83 0-141.5 58.5T120-520q0 72 46 127t117 69l-59-59 56-57 160 160-160 160Zm240-40v-280h360v280H520Zm0-360v-280h360v280H520Zm80-80h200v-120H600v120Z"/>
+                            </svg>
+                            <h3 class="text-3xl font-medium ml-2 ">Drag and drop to save a single tab or your entire session</h3>
+                        </div>
+                        <p class="text-gray-700 mb-0 text-lg">Quickly organize your tabs by dragging one or all into a folder.
+                            <br><br> Use drag-and-drop on the session window to save everything at once.
+                        </p>
+                    </div>
+                    <div class="w-full lg:w-1/2 bg-white">
+                        <video width="100%" autoplay="" loop="loop" muted=""
+                               class="w-full h-auto object-cover rounded-b-xl lg:rounded-none">
+                            <source src="videos/main-dnd.mp4" type="video/mp4" alt="Intuitive Drag-and-Drop UI">
+                        </video>
+                    </div>
+                </div>
+
+                <div class="rounded-xl overflow-hidden mb-12 lg:mb-24 p-6 md:p-0 flex flex-col lg:flex-row shadow-lg lg:flex-row-reverse">
+                    <div class="bg-[#E8F5E9] p-6 md:p-12 flex flex-col justify-center w-full lg:w-1/2">
+                        <div class="flex items-center mb-4 text-tabme-blue">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                                 style="transform: scale(1.2);"
+                                 fill="currentColor">
+                                <path d="M418-340q24 24 62 23.5t56-27.5l224-336-336 224q-27 18-28.5 55t22.5 61Zm62-460q59 0 113.5 16.5T696-734l-76 48q-33-17-68.5-25.5T480-720q-133 0-226.5 93.5T160-400q0 42 11.5 83t32.5 77h552q23-38 33.5-79t10.5-85q0-36-8.5-70T766-540l48-76q30 47 47.5 100T880-406q1 57-13 109t-41 99q-11 18-30 28t-40 10H204q-21 0-40-10t-30-28q-26-45-40-95.5T80-400q0-83 31.5-155.5t86-127Q252-737 325-768.5T480-800Zm7 313Z"/>
+                            </svg>
+                            <h3 class="text-3xl font-medium ml-2 ">Reduce memory usage</h3>
+                        </div>
+                        <p class="text-gray-700 mb-0 text-lg">Close duplicate tabs with a single click.</p>
+                    </div>
+                    <div class="w-full lg:w-1/2 bg-white">
+                        <img src="images/dedup.png" alt="Save browser memory" class="w-full h-auto object-cover rounded-b-xl">
+                    </div>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="rounded-xl overflow-hidden mb-12 lg:mb-24 p-6 md:p-0 flex flex-col shadow-lg lg:flex-row">
+                    <div class="bg-[#F3E5F5] p-6 md:p-12 flex flex-col justify-center w-full lg:w-1/2">
+                        <div class="flex items-center mb-4 text-tabme-blue">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                                 style="transform: scale(1.2)"
+                                 fill="currentColor">
+                                <path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/>
+                            </svg>
+                            <h3 class="text-3xl font-medium ml-2 ">Advanced Search Functionality</h3>
+                        </div>
+                        <p class="text-gray-700 mb-0 text-lg">Seamlessly search across all locations: open, saved, and
+                            recently closed tabs.</p>
+                    </div>
+                    <div class="w-full lg:w-1/2 bg-white">
+                        <video width="100%" autoplay="" loop="loop" muted=""
+                               class="w-full h-auto object-cover rounded-b-xl lg:rounded-none">
+                            <source src="videos/main-search.mp4" type="video/mp4" alt="Advanced Search Functionality">
+                        </video>
+                    </div>
+                </div>
+
+                <!-- Feature 5 -->
+                <div class="rounded-xl overflow-hidden mb-12 lg:mb-24 p-6 md:p-0 flex flex-col lg:flex-row lg:flex-row-reverse shadow-lg">
+                    <div class="bg-[#FFF8E1] p-6 md:p-12 flex flex-col justify-center w-full lg:w-1/2">
+                        <div class="flex items-center mb-4 text-tabme-blue">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                                 style="transform: scale(1.2)"
+                                 fill="currentColor">
+                                <path d="M280-160v-441q0-33 24-56t57-23h439q33 0 56.5 23.5T880-600v320L680-80H360q-33 0-56.5-23.5T280-160ZM81-710q-6-33 13-59.5t52-32.5l434-77q33-6 59.5 13t32.5 52l10 54h-82l-7-40-433 77 40 226v279q-16-9-27.5-24T158-276L81-710Zm279 110v440h280v-160h160v-280H360Zm220 220Z"/>
+                            </svg>
+                            <h3 class="text-3xl font-medium ml-2 ">Add Sticky Notes for you projects</h3>
+                        </div>
+                        <p class="text-gray-700 mb-0 text-lg">Quickly jot down ideas, to-dos or anything on your mind
+                            right where you need them.
+                        </p>
+                    </div>
+                    <div class="w-full lg:w-1/2 bg-white">
+                        <img src="images/stickers-demo.png"
+                             alt="Add Sticky Notes for you projects"
+                             class="w-full h-auto object-cover rounded-b-xl lg:rounded-none">
+                    </div>
+                </div>
+
+                <!-- Feature 6-->
+                <div class="rounded-xl overflow-hidden mb-12 lg:mb-24 p-6 md:p-0 flex flex-col lg:flex-row  shadow-lg">
+                    <div class="bg-tabme-lightBlue p-6 md:p-12 flex flex-col justify-center w-full lg:w-1/2">
+                        <div class="flex items-center mb-4 text-tabme-blue">
+                            <svg style="transform: scale(1.2)" xmlns="http://www.w3.org/2000/svg" height="24px"
+                                 viewBox="0 -960 960 960" width="24px" fill="currentColor">
+                                <path d="M480-120q-150 0-255-105T120-480q0-150 105-255t255-105q14 0 27.5 1t26.5 3q-41 29-65.5 75.5T444-660q0 90 63 153t153 63q55 0 101-24.5t75-65.5q2 13 3 26.5t1 27.5q0 150-105 255T480-120Zm0-80q88 0 158-48.5T740-375q-20 5-40 8t-40 3q-123 0-209.5-86.5T364-660q0-20 3-40t8-40q-78 32-126.5 102T200-480q0 116 82 198t198 82Zm-10-270Z"/>
+                            </svg>
+                            <h3 class="text-3xl font-medium ml-2 ">Dark Mode Support</h3>
+                        </div>
+                        <p class="text-gray-700 mb-0 text-lg">Enjoy a dark theme for better visibility.</p>
+                    </div>
+                    <div class="w-full lg:w-1/2 bg-white">
+                        <img src="images/dark-mode.png"
+                             alt="Dark mode support"
+                             class="w-full h-auto object-cover rounded-b-xl lg:rounded-none">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Reviews Section -->
+        <section id="reviews" class="bg-gray-50 section-spacing">
+            <div class="container mx-auto container-padding text-center">
+                <div class="mb-12">
+                    <div class="inline-block bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full mb-2">
+                <span class="flex items-center">
+                  <svg class="w-3 h-3 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clip-rule="evenodd"></path>
+                  </svg>
+                  Featured
+                </span>
+                    </div>
+                    <p class="text-3xl font-bold mb-3">Top rated in Chrome Store</p>
+                    <!--<div class="flex items-center justify-center">
+                         <div class="flex">
+                            <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                            </svg>
+                            <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                            </svg>
+                            <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                            </svg>
+                            <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                            </svg>
+                            <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                            </svg>
+                            <span class="ml-2 text-gray-700 font-medium">4.7</span> 
+                        </div>
+                    </div>-->
+                </div>
+
+                <!-- Reviews Grid -->
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Review 1 -->
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                        <div class="flex items-center mb-4">
+                            <img src="images/user-annie.png" alt="positive user review"
+                                 class="w-10 h-10 rounded-full mr-3">
+                            <div>
+                                <div class="font-semibold text-left">Annie P.</div>
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                    <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                    <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                    <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                    <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                    <span class="text-xs text-gray-500 ml-2">May 10, 2023</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-gray-700 text-sm">It's very easy and very useful. It helps me organize tabs
+                            quickly and increase my productivity. Many thanks!</p>
+                    </div>
+
+                    <!-- Review 2 -->
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                        <div class="flex items-center mb-4">
+                            <img src="images/user-hary.png" alt="Positive user review"
+                                 class="w-10 h-10 rounded-full mr-3">
+                            <div>
+                                <div class="font-semibold text-left">Harry</div>
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                    <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                    <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                    <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                    <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                    <span class="text-xs text-gray-500 ml-2">Apr 1, 2025</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-gray-700 text-sm">This extension I found out about on Reddit blew my mind, thanks
+                            to the developer for a great job he did.</p>
+                    </div>
+
+                    <!-- Review 3 -->
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                        <div class="flex items-center mb-4">
+                            <img src="images/user-sergey.png" alt="Tommy S."
+                                 class="w-10 h-10 rounded-full mr-3">
+                            <div>
+                                <div class="font-semibold text-left">Sergey S.</div>
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                    <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                    <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                    <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                    <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                    <span class="text-xs text-gray-500 ml-2">Aug 3, 2023</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-gray-700 text-sm">Wow, just a life saver!</p>
+                    </div>
+
+                    <!-- Review 4 -->
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                        <div class="flex items-center mb-4">
+                            <img src="images/user-stef.png" alt="Stephanie C"
+                                 class="w-10 h-10 rounded-full mr-3">
+                            <div>
+                                <div class="font-semibold text-left">Stephanie C</div>
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                    <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                    <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                    <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                    <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                    <span class="text-xs text-gray-500 ml-2">Feb 9, 2025</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-gray-700 text-sm">Super simple, clean, and great at what it does.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section id="faq" class="bg-white section-spacing">
+            <div class="container mx-auto container-padding">
+                <p class="text-3xl font-bold mb-8 text-center">Frequently asked questions</>
+
+                <div class="max-w-3xl mx-auto">
+                    <div class="accordion">
+                        <!-- FAQ Item 1 -->
+                        <div class="accordion-item">
+                            <button class="accordion-trigger flex justify-between items-center w-full py-4 text-left font-medium text-lg"
+                                    aria-expanded="false">
+                                <span>What is Tabme, and how does it work?</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                     stroke-linejoin="round" class="h-4 w-4 transition-transform duration-200">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </button>
+                            <div class="accordion-content text-sm text-gray-700 pb-0">
+                                <p>Tabme is a Chrome extension designed to make managing your tabs and bookmarks
+                                    effortless.<br/>
+                                    You can save tabs into folders and spaces, use drag-and-drop functionality to
+                                    arrange them.<br/>
+                                    Enjoy a clean, easy-to-navigate design that keeps your focus on what matters.<br/>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- FAQ Item 2 -->
+                        <div class="accordion-item">
+                            <button class="accordion-trigger flex justify-between items-center w-full py-4 text-left font-medium text-lg"
+                                    aria-expanded="false">
+                                <span>Why Tabme overrides Chrome newtab and how to disable it?</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                     stroke-linejoin="round" class="h-4 w-4 transition-transform duration-200">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </button>
+                            <div class="accordion-content text-sm text-gray-700 pb-0">
+                                <p>Tabme overrides the Chrome new tab page to provide quick access to your saved tabs
+                                    and folders. This gives you immediate access to your organized tabs whenever you
+                                    open a new tab.<br/><br/>
+
+                                    If you prefer to keep your default new tab page, opt for the "<a
+                                            style="text-decoration: underline"
+                                            href="https://chromewebstore.google.com/detail/tabme-%E2%80%94-organize-tabs-and/jjdbikbbknmhkknpfnlhgpcikbfjldee">Tabme
+                                        Mini</a>" extension available on the Chrome Web Store.
+                                    It includes all the same features but doesn’t open on every new tab.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- FAQ Item 3 -->
+                        <div class="accordion-item">
+                            <button class="accordion-trigger flex justify-between items-center w-full py-4 text-left font-medium text-lg"
+                                    aria-expanded="false">
+                                <span>Is Tabme secure? How it stores data?</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                     stroke-linejoin="round" class="h-4 w-4 transition-transform duration-200">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </button>
+                            <div class="accordion-content text-sm text-gray-700 pb-0">
+                                <p>Your data remains on your device — nothing is stored in the cloud.<br>
+                                    All usage analytics are completely anonymous.<br>
+                                    We never sell or share your data with anyone.</p>
+                            </div>
+                        </div>
+
+                        <!-- FAQ Item 4 -->
+                        <div class="accordion-item">
+                            <button class="accordion-trigger flex justify-between items-center w-full py-4 text-left font-medium text-lg"
+                                    aria-expanded="false">
+                                <span>How to sync saved bookmarks across devices?</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                     stroke-linejoin="round" class="h-4 w-4 transition-transform duration-200">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </button>
+                            <div class="accordion-content text-sm text-gray-700 pb-0">
+                                <p>Bookmark syncing across devices and with Chrome bookmarks is coming soon — it’s one
+                                    of our most requested features!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section id="cta" class="bg-tabme-blue text-white section-spacing">
+            <div class="container mx-auto text-center container-padding">
+                <p class="text-3xl md:text-4xl font-bold mb-6">Try Tabme for free</p>
+                <p class="text-lg mb-8 max-w-2xl mx-auto">Organize your bookmarks and tabs in a single space</p>
+
+                <a href="https://chromewebstore.google.com/detail/tabme/jnhiookaaldadiimlgncedhkpmhlmmip"
+                   style="display: inline-flex; align-items: center; padding: 6px 10px; gap: 16px; padding-left: 22px;"
+                   class="bg-white text-tabme-blue hover:bg-gray-100 rounded-full px-8 py-6 text-lg font-medium inline-block">
+                    <span>Add to Chrome</span>
+                    <img src="images/icon_chrome.svg" alt="Chrome Extension"
+                         style="border: 2px solid rgba(255, 255, 255, 0.8); border-radius: 50%;">
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white py-10 border-t border-gray-200">
+        <div class="container mx-auto container-padding">
+            <div class="flex flex-col md:flex-row items-center justify-center">
+
+                <div class="flex flex-wrap justify-center gap-6">
+                    <a href="mailto:gettabme@gmail.com">Contact</a>
+                    <a href="toby-alternative.html">Migrate from Toby</a>
+                    <a href="policy.html">Privacy Policy</a>
+                </div>
+            </div>
+
+            <div class="mt-8 text-center text-gray-500 text-sm">
+                © <span id="current-year">2025</span> Tabme. All rights reserved.
+            </div>
+        </div>
+    </footer>
 </div>
+
+<script>
+    // Set current year in footer
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+
+    // Accordion functionality
+    document.addEventListener('DOMContentLoaded', function () {
+        const accordionTriggers = document.querySelectorAll('.accordion-trigger');
+
+        accordionTriggers.forEach(trigger => {
+            trigger.addEventListener('click', () => {
+                const parent = trigger.parentElement;
+                const isExpanded = trigger.getAttribute('aria-expanded') === 'true';
+
+                trigger.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+                parent.classList.toggle('active');
+            });
+        });
+    });
+</script>
+
 </body>
 </html>

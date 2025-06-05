@@ -4,107 +4,764 @@
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-84M7F9RZPF"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
+        window.dataLayer = window.dataLayer || [];
 
-      function gtag() {dataLayer.push(arguments);}
+        function gtag() {
+            dataLayer.push(arguments);
+        }
 
-      gtag("js", new Date());
+        gtag("js", new Date());
 
-      gtag("config", "G-84M7F9RZPF");
+        gtag("config", "G-84M7F9RZPF");
     </script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <meta name="description"
-          content="Tabme — A Chrome extension to efficiently organize bookmarks and manage tabs. Save, categorize, and access tabs quickly. Experience fast, intuitive tab management.">
-    <meta name="keywords" content="Tabme, Chrome extension, bookmark manager, tab organizer, productivity, tab management, save tabs, manage bookmarks">
+          content="Tabme Guide: How to use Tabme. Organize bookmarks and manage Chrome tabs with ease.">
+    <meta name="keywords"
+          content="Tabme, Chrome extension, bookmark manager, tab organizer, productivity, tab management, save tabs, manage bookmarks, guide, how to use Tabme">
 
-    <meta property="og:title" content="Tabme - The Ultimate Chrome Extension for Tab and Bookmark Organization">
-    <meta property="og:description" content="Streamline your browsing with Tabme. Organize bookmarks and manage Chrome tabs with ease.">
-    <meta property="og:image" content="/main.png">
+    <meta property="og:title" content="Tabme Guide">
+    <meta property="og:description" content="How to use Tabme. Organize bookmarks and manage Chrome tabs with ease.">
     <meta property="og:url" content="https://gettabme.com">
 
     <link rel="canonical" href="https://gettabme.com">
 
-    <title>Tabme: Guide</title>
+    <title>Tabme Guide: How to use Tabme</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+          rel="stylesheet">
 
-    <link type="text/css" rel="stylesheet" href="styles.css">
+    <link type="text/css" rel="stylesheet" href="styles2.css">
 
     <link rel="shortcut icon" href="/favicons/favicon.ico"/>
     <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png">
     <link rel="manifest" href="/favicons/site.webmanifest">
+
+    <style>
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            background-color: #fff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .logo img {
+            height: 32px;
+            width: auto;
+        }
+
+        .logo-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #666;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #1a73e8;
+        }
+
+        .cta-button {
+            background: #1a73e8;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+
+        .cta-button:hover {
+            background: #1557b0;
+        }
+
+        /* Main Content */
+        .main {
+            padding: 3rem 0;
+            min-height: calc(100vh - 200px);
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .page-subtitle {
+            font-size: 1.25rem;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Guide Sections */
+        .guide-section {
+            margin-bottom: 4rem;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #333;
+            border-bottom: 3px solid #1a73e8;
+            padding-bottom: 0.5rem;
+        }
+
+        .step {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid #1a73e8;
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: #1a73e8;
+            color: white;
+            border-radius: 50%;
+            font-weight: 600;
+            margin-right: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .step-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .step-content {
+            color: #666;
+            margin-left: 3rem;
+        }
+
+        .tip {
+            background: #e8f0fe;
+            border: 1px solid #1a73e8;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .tip-title {
+            font-weight: 600;
+            color: #1a73e8;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .feature-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: #e8f0fe;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .feature-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-description {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Footer */
+        .footer {
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            padding: 2rem 0;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: #666;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: #1a73e8;
+        }
+
+        .copyright {
+            color: #999;
+            font-size: 0.9rem;
+            text-align: center;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+            }
+
+            .step {
+                padding: 1.5rem;
+            }
+
+            .step-content {
+                margin-left: 0;
+                margin-top: 1rem;
+            }
+
+            .step-title {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
+
+        nav.toc {
+            /*text-align: left;*/
+            a:hover {
+                border-bottom: 1px solid rgb(59 130 246 / var(--tw-text-opacity, 1));
+            }
+        }
+    </style>
 </head>
 <body>
+<header class="w-full py-4 bg-white sticky top-0 z-10 shadow-sm">
+    <div class="container mx-auto flex justify-between items-center container-padding">
+        <div class="flex items-center gap-2">
+            <a href="/" class="flex">
+                <img src="favicons/apple-touch-icon.png" alt="Tabme Logo"
+                     class="h-8 w-auto mr-2">
+                <span class="text-xl font-semibold">Tabme</span>
+            </a>
+        </div>
 
-<div class="content not-home">
-    <div class="content__inner">
-        <a class="install-button"
+        <nav class="hidden md:flex items-center gap-6">
+            <a href="guide.html" class="text-gray-600 hover:text-tabme-blue text-tabme-blue transition-colors">Guide</a>
+            <a href="pricing.html" class="text-gray-600 hover:text-tabme-blue transition-colors">Pricing</a>
+            <a href="changelog.html" class="text-gray-600 hover:text-tabme-blue transition-colors">Updates</a>
+        </nav>
+
+        <a href="https://chromewebstore.google.com/detail/tabme/jnhiookaaldadiimlgncedhkpmhlmmip"
+           class="rounded-md bg-tabme-blue text-white px-4 py-2 hover:bg-blue-600 transition-colors"
            title="Chrome extension for organizing bookmarks and tabs"
-           href="https://chromewebstore.google.com/detail/tabme/jnhiookaaldadiimlgncedhkpmhlmmip">Add to Chrome</a>
-        <h1>Tabme: Guide</h1>
+        >
+            Add to Chrome
+        </a>
 
-        <div style="font-size: 22px;font-weight: 200;">
-            <p>Key features:</p>
-            <ol>
-                <li>Drag and drop tabs from the sidebar into a folder to save them</li>
-                <li>Drag and drop folders by their title to sort them</li>
-                <li>To select and move multiple bookmarks, click and drag from an empty space</li>
-                <li>Right-click to open the context menu and explore additional options</li>
-            </ol>
-            <video width="100%" autoplay loop muted style="margin-top: 28px">
-                <source src="videos/main.mp4" type="video/mp4" alt="Tabme Chrome Extension">
-            </video>
-        </div>
-
-        <div class="guide-block" style="background-color: #fff">
-            <div class="text">
-                <p>Close duplicate tabs by single click to keep browser clean and performant.</p>
-            </div>
-            <img src="images/dedup.png" style="width: 430px;" alt="Close duplicate tabs in Tabme">
-        </div>
-
-        <div class="guide-block" style="background-color: #eaeaea">
-            <img src="images/dedup.png" style="width: 430px;" alt="Stash open tabs in Tabme">
-            <div class="text">
-                <p>Save all your open tabs into a folder by clicking "Stash all Tabs".<br><br> Use "Open All" in the Folder menu to restore all saved Tabs.</p>
-            </div>
-        </div>
-
-        <div class="guide-block" style="background-color: #fff">
-            <div class="text">
-                <p>Seamlessly search across opened, saved, and recently closed tabs.</p>
-            </div>
-            <video width="400" height="200" autoplay loop muted>
-                <source src="videos/search.mp4" type="video/mp4">
-            </video>
-        </div>
-
-        <div class="guide-block" style="background-color: #eaeaea">
-            <video width="400" height="200" autoplay loop muted>
-                <source src="videos/not-used.mp4" type="video/mp4">
-            </video>
-            <div class="text">
-                <p>Highlighting not-used bookmarks helps to keep space clean and manageable.</p>
-            </div>
-        </div>
-
-        <footer class="footer">
-            <hr>
-            <span>©2023 — 2025</span>
-            <a href="mailto:gettabme@gmail.com">Contact</a>
-            <a href="faq.html">FAQ</a>
-            <a href="changelog.html">Changelog</a>
-            <a href="toby-alternative.html">Migrate from Toby</a>
-            <a href="/">Home</a>
-        </footer>
     </div>
-</div>
+</header>
+
+<!-- Main Content -->
+<main class="main">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">How to Use Tabme</h1>
+            <nav class="toc" aria-label="Table of Contents">
+                <strong>Table of content:</strong>
+                <ul>
+                    <li><a href="#getting-started" class="hover:text-tabme-blue">Getting Started</a></li>
+                    <li><a href="#saving-managing-tabs" class="hover:text-tabme-blue">Saving and Managing Tabs</a></li>
+                    <li><a href="#organizing-folders" class="hover:text-tabme-blue">Organizing with Folders and Colors</a></li>
+                    <li><a href="#sticky-notes" class="hover:text-tabme-blue">Using Sticky Notes</a></li>
+                    <li><a href="#search-filtering" class="hover:text-tabme-blue">Search and Smart Filtering</a></li>
+                    <li><a href="#performance-bulk" class="hover:text-tabme-blue">Performance and Bulk Actions</a></li>
+                    <li><a href="#power-users" class="hover:text-tabme-blue">Tips for Power Users</a></li>
+                    <li><a href="#import-export" class="hover:text-tabme-blue">Importing and Exporting Tabs</a></li>
+                    <li><a href="#settings" class="hover:text-tabme-blue">Settings and Customization</a></li>
+                    <li><a href="#faq" class="hover:text-tabme-blue">FAQ and Troubleshooting</a></li>
+                    <li><a href="#need-more-help" class="hover:text-tabme-blue">Need more help?</a></li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Getting Started -->
+        <section class="guide-section">
+            <h2 id="getting-started" class="section-title">Getting Started</h2>
+
+            <div class="step">
+                <h3 class="step-title">
+                    <span class="step-number">1</span>
+                    Installation
+                </h3>
+                <div class="step-content">
+                    <p>Add <a href="https://chromewebstore.google.com/detail/bookmark-manager-for-new/jnhiookaaldadiimlgncedhkpmhlmmip"><strong>Tabme for newtab</strong></a> to Chrome by visiting the Chrome Web Store and clicking <strong>Add to Chrome</strong>.
+                        Once installed, Tabme will replace your new tab page.
+                        <br><br>
+                        If you prefer not to override the new tab page, you can install <a href="https://chromewebstore.google.com/detail/bookmark-manager-tabme-mi/jjdbikbbknmhkknpfnlhgpcikbfjldee"><strong>Tabme Mini</strong></a>, which has all the same features but appears only when you click its toolbar icon.</p>
+                    <div class="tip">
+                        <div class="tip-title">💡 Pro Tip</div>
+                        <p>After installation, we recommend pinning the Tabme Mini icon to your browser's toolbar for easy access.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <h3 class="step-title">
+                    <span class="step-number">2</span>
+                    Opening Tabme
+                </h3>
+                <div class="step-content">
+                    <p>To launch Tabme, simply open a new tab in Chrome. You should see the Tabme interface instead of the usual new tab screen. If you're using Tabme Mini, click the Tabme toolbar icon to open the interface in a new tab.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <h3 class="step-title">
+                    <span class="step-number">3</span>
+                    Quick Tour of the Interface
+                </h3>
+                <div class="step-content">
+                    <p>On the left side of Tabme, you will see an <strong>Open Tabs</strong> panel listing all the tabs currently open in your browser window.
+                        <br>On the right side, you'll find your <strong>Saved Tabs and Folders</strong> area, where you can organize bookmarks (saved tabs) into folders.
+                        <br>At the top, there's a <strong>Search bar</strong> that lets you find tabs quickly.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Saving and Managing Tabs -->
+        <section class="guide-section">
+            <h2 id="saving-managing-tabs" class="section-title">Saving and Managing Tabs</h2>
+
+            <div class="step">
+                <h3 class="step-title">
+                    <span class="step-number">1</span>
+                    Drag and Drop to Save
+                </h3>
+                <div class="step-content">
+                    <p>Whenever Tabme is open, your currently open sites are listed in the left sidebar. To save one, just drag its title from the <strong>Open Tabs</strong> list and drop it into a folder on the right. You can also drag a tab into the blank <strong>New Folder</strong> space to create a new folder on the fly for that tab.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <h3 class="step-title">
+                    <span class="step-number">2</span>
+                    One-Click "Stash All"
+                </h3>
+                <div class="step-content">
+                    <p>To save a whole session of many open tabs, use the <strong>Stash All Tabs</strong> feature. Click the "stash" button (the box or tray icon at the top of the Open Tabs panel) to stash all open tabs into a new folder at once. This is great for when you're finishing a research session or need to quickly clear your browser.</p>
+                </div>
+            </div>
+
+        <div class="step">
+            <h3 class="step-title">
+                <span class="step-number">3</span>
+                Managing Saved Items
+            </h3>
+            <div class="step-content">
+                <p>To open a saved tab in a new tab, hold <kbd>CMD</kbd> or <kbd>CTRL</kbd> and click the saved bookmark. This will open the page in a new browser tab.</p>
+                <p>If you would rather have saved tabs open in the same tab by default, click <strong>Settings</strong> and toggle <strong>Open bookmarks in same tab</strong>.</p>
+            </div>
+        </div>
+        </section>
+
+        <!-- Organizing with Folders and Colors -->
+        <section class="guide-section">
+            <h2 id="organizing-folders" class="section-title">Organizing with Folders and Colors</h2>
+
+            <div class="step">
+                <h3 class="step-title">
+                    <span class="step-number">1</span>
+                    Creating and Naming Folders
+                </h3>
+                <div class="step-content">
+                    <p>You can create a new folder by dragging a tab into the <strong>New Folder</strong> area, or by clicking a dedicated "Add Folder" button and giving the folder a name. Good folder names help — for example, create a folder called <strong>Travel Plans</strong> for all your trip-related tabs, or <strong>Work Project X</strong> for a specific project's resources.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <h3 class="step-title">
+                    <span class="step-number">2</span>
+                    Color Coding
+                </h3>
+                <div class="step-content">
+                    <p>Assign colors to your folders to categorize and visually distinguish them. Tabme allows you to pick a color for each folder (for example, blue for work items, green for personal, etc.). To color-code a folder, right-click the folder name and select a color, or use the color picker icon if one is shown on the folder.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <h3 class="step-title">
+                    <span class="step-number">3</span>
+                    Spatial Arrangement
+                </h3>
+                <div class="step-content">
+                    <p>You're not stuck with a static list of folders — you can rearrange them in a way that makes sense to you. Drag and drop entire folders (grab them by their title bar) to reorder them on the Tabme board. For instance, you might keep your most-used folder at the top, or group related folders side by side.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Using Sticky Notes -->
+        <section class="guide-section">
+            <h2 id="sticky-notes" class="section-title">Using Sticky Notes</h2>
+
+            <div class="step">
+                <h3 class="step-title">
+                    <span class="step-number">1</span>
+                    Creating a Note
+                </h3>
+                <div class="step-content">
+                    <p>To add a sticky note in Tabme, you can use the <strong>Add Note</strong> option. For example, you might find a button or context menu item labeled "Add Sticky Note" when you right-click inside a folder or on an empty area. Click that, and a blank note will appear ready for you to type.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <h3 class="step-title">
+                    <span class="step-number">2</span>
+                    Writing and Editing
+                </h3>
+                <div class="step-content">
+                    <p>Once your sticky note appears, just start typing. You can write anything — a quick reminder ("Finish reading these articles by Friday"), a list of tasks related to the tabs in that folder, or an idea that struck you while browsing. The note saves automatically. You can come back and edit it anytime by clicking on it and typing.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <h3 class="step-title">
+                    <span class="step-number">3</span>
+                    Using Notes for Context
+                </h3>
+                <div class="step-content">
+                    <p>Notes are great for adding context to a group of tabs. For instance, if you saved a bunch of recipe tabs in a folder, you could add a note at the top saying "Weekly Meal Plan Ideas." Next time you open Tabme, that note reminds you what the collection was for.</p>
+                    <div class="tip">
+                        <div class="tip-title">💡 Pro Tip</div>
+                        <p>Sticky Notes are perfect for tracking to-dos or reminders. You can create a checklist of things to do with your saved tabs (e.g., "Read article A, compare prices on site B, email C when done").</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Search and Smart Filtering -->
+        <section class="guide-section">
+            <h2 id="search-filtering" class="section-title">Search and Smart Filtering</h2>
+
+            <div class="step">
+                <h3 class="step-title">
+                    <span class="step-number">1</span>
+                    Using the Search Bar
+                </h3>
+                <div class="step-content">
+                    <p>The search bar is prominently located at the top of the Tabme interface (it says "Search in Tabme"). Click on it and start typing keywords. Tabme will instantly filter and display results that match your query. You'll see results from different categories – for instance, it can show matches from your open tabs, your saved folders, or even recently closed tabs.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <h3 class="step-title">
+                    <span class="step-number">2</span>
+                    Keyboard Shortcut to Search
+                </h3>
+                <div class="step-content">
+                    <p>For even faster access, you can hit the <code>Tab</code> key on your keyboard as soon as you open the Tabme page. Pressing <code>Tab</code> will shift focus from the browser's address bar to Tabme's search field. You can then start typing without having to click the search box at all.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <h3 class="step-title">
+                    <span class="step-number">3</span>
+                    What Search Covers
+                </h3>
+                <div class="step-content">
+                    <p>Tabme's search is comprehensive. It looks through the titles and URLs of <strong>open tabs</strong>, <strong>saved tabs (bookmarks)</strong>, and even <strong>recently closed tabs</strong>. That means if you closed something an hour ago, a quick search can bring it back to your attention.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Performance and Bulk Actions -->
+        <section class="guide-section">
+            <h2 id="performance-bulk" class="section-title">Performance and Bulk Actions</h2>
+
+            <div class="step">
+                <h3 class="step-title">
+                    <span class="step-number">1</span>
+                    Close Duplicate Tabs
+                </h3>
+                <div class="step-content">
+                    <p>Tabme can detect duplicate open tabs and close the extras for you with a single click. Look for the <strong>broom icon</strong> at the top of the Open Tabs sidebar. If there's a number on this icon, it means Tabme found duplicate tabs. Clicking the broom will instantly close those duplicate tabs, leaving just one open.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <h3 class="step-title">
+                    <span class="step-number">2</span>
+                    Stash All Tabs in One Go
+                </h3>
+                <div class="step-content">
+                    <p>When you have a lot of tabs open and want to start fresh, use <strong>Stash All Tabs</strong> to save everything. This bulk action scoops up every open tab and saves them into a new folder (often labeled with the date or a name you choose).</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <h3 class="step-title">
+                    <span class="step-number">3</span>
+                    Archiving for Performance
+                </h3>
+                <div class="step-content">
+                    <p>Over time, you might accumulate lots of folders and saved tabs. To prevent Tabme's main view from getting too crowded (and to keep things running snappily), move older or infrequently used items to the <strong>Archive</strong>. Archiving a tab or a whole folder will hide it from your main dashboard but keep it accessible via Search or an "Archived" view.</p>
+                    <div class="tip">
+                        <div class="tip-title">🧹 Cleanup Tip</div>
+                        <p>Make it a habit to "stash and sweep" at the end of the day. Use Stash All to save your current session, then hit the duplicate broom icon to clean up any repeats. Finally, close those now-saved tabs in Chrome.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tips for Power Users -->
+        <section class="guide-section">
+            <h2 id="power-users" class="section-title">Tips for Power Users</h2>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">⌨️</div>
+                    <h3 class="feature-title">Keyboard Shortcuts</h3>
+                    <p class="feature-description">Master keyboard navigation with shortcuts like Tab for search, arrow keys for navigation, and Enter to open selected items.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🚀</div>
+                    <h3 class="feature-title">Spaces and Workspaces</h3>
+                    <p class="feature-description">Create separate collections of folders for different needs, all within the same extension.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">💾</div>
+                    <h3 class="feature-title">Local File Access</h3>
+                    <p class="feature-description">Enable access to file URLs to manage local files alongside web pages.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">👤</div>
+                    <h3 class="feature-title">Chrome Profiles</h3>
+                    <p class="feature-description">Use multiple Chrome profiles with Tabme to keep work and personal tabs separate.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Importing and Exporting Tabs -->
+        <section class="guide-section">
+            <h2 id="import-export" class="section-title">Importing and Exporting Tabs</h2>
+
+            <div class="step">
+                <h3 class="step-title">
+                    <span class="step-number">1</span>
+                    Import from Toby
+                </h3>
+                <div class="step-content">
+                    <p>If you're switching from Toby to Tabme, you can easily bring your saved sessions into Tabme. Export your Toby collections by going to Toby's account settings and choosing <strong>Export to JSON</strong>. Then, in Tabme, click on <strong>Settings</strong> and find the <strong>Import</strong> option.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <h3 class="step-title">
+                    <span class="step-number">2</span>
+                    Import from Chrome Bookmarks
+                </h3>
+                <div class="step-content">
+                    <p>In Tabme's settings, look for <strong>Import Bookmarks</strong>. If available, it will allow you to pick a Chrome bookmarks folder and import its links into a Tabme folder. This is especially useful to quickly populate Tabme with existing bookmark collections.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <h3 class="step-title">
+                    <span class="step-number">3</span>
+                    Exporting Tabme Data
+                </h3>
+                <div class="step-content">
+                    <p>Tabme provides an <strong>Export</strong> function (typically in the Settings menu) that lets you save all your Tabme data (folders, tabs, notes, spaces – everything) into a single file, usually in JSON format. Click <strong>Export to file</strong> and Tabme will generate a file and save it to your computer.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Settings and Customization -->
+        <section class="guide-section">
+            <h2 id="settings" class="section-title">Settings and Customization</h2>
+
+            <div class="step">
+                <h3 class="step-title">
+                    <span class="step-number">1</span>
+                    Dark Mode
+                </h3>
+                <div class="step-content">
+                    <p>If you often browse at night or prefer darker interfaces, you'll love Tabme's Dark Mode. In Settings, toggle <strong>Light/Dark Mode</strong> to switch the entire interface to a dark theme.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <h3 class="step-title">
+                    <span class="step-number">2</span>
+                    Keyboard Shortcuts Customization
+                </h3>
+                <div class="step-content">
+                    <p>While Tabme itself may not have a full shortcuts editor within its UI, Chrome provides one. In the <strong>Chrome Extensions page</strong> (<code>chrome://extensions/shortcuts</code>), you can set up custom keys for certain Tabme actions, like opening the extension quickly.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ and Troubleshooting -->
+        <section class="guide-section">
+            <h2 id="faq" class="section-title">FAQ and Troubleshooting</h2>
+
+            <div class="step">
+                <h3 class="step-title">Common Questions</h3>
+                <div class="step-content">
+                    <p><strong>Q: What is Tabme, and how does it work?</strong><br>
+                    A: Tabme is a Chrome extension designed to make managing your tabs and bookmarks effortless. You can save tabs into folders and use drag-and-drop functionality to arrange them.</p>
+
+                    <p><strong>Q: Do I need to create an account to use Tabme?</strong><br>
+                    A: Nope! Tabme is entirely free and works without any account or sign-up. All your data is stored in your browser.</p>
+
+                    <p><strong>Q: Will my saved tabs in Tabme sync to my other computer or Chrome profile?</strong><br>
+                    A: Not yet. Automatic syncing of Tabme data is in progress and one of the top requested features. For now, Tabme's data stays on the device where you saved it.</p>
+
+                    <p><strong>Q: Tabme feels slow or laggy now that I've saved hundreds of tabs. What should I do?</strong><br>
+                    A: Try these steps: (1) Archive old or inactive folders to reduce on-screen clutter. (2) Close any extremely large number of open tabs in Chrome. (3) Make sure you're running the latest version of Tabme.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="guide-section">
+            <h2 id="need-more-help" class="section-title">Need More Help?</h2>
+
+            <div style="text-align: center; padding: 2rem; background: #f8f9fa; border-radius: 12px;">
+                <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSf1irmdn7emUEmzFm3xGoXZceHjHNHNIHKQl1lbsuYuexV1qw/viewform?embedded=true" width="100%" height="800" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+            </div>
+        </section>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="bg-white py-10 border-t border-gray-200">
+    <div class="container mx-auto container-padding">
+        <div class="flex flex-col md:flex-row items-center justify-end">
+
+            <div class="flex flex-wrap justify-center gap-6">
+                <a href="mailto:gettabme@gmail.com">Contact</a>
+                <a href="toby-alternative.html">Migrate from Toby</a>
+                <a href="policy.html">Privacy Policy</a>
+            </div>
+        </div>
+
+        <div class="mt-8 text-center text-gray-500 text-sm">
+            © <span id="current-year">2025</span> Tabme. All rights reserved.
+        </div>
+    </div>
+</footer>
+
+
+<script>
+    // Set current year in footer
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+
+    // Accordion functionality
+    document.addEventListener('DOMContentLoaded', function () {
+        const accordionTriggers = document.querySelectorAll('.accordion-trigger');
+
+        accordionTriggers.forEach(trigger => {
+            trigger.addEventListener('click', () => {
+                const parent = trigger.parentElement;
+                const isExpanded = trigger.getAttribute('aria-expanded') === 'true';
+
+                trigger.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+                parent.classList.toggle('active');
+            });
+        });
+    });
+</script>
+
 </body>
 </html>

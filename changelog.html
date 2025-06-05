@@ -4,71 +4,131 @@
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-84M7F9RZPF"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
+        window.dataLayer = window.dataLayer || [];
 
-      function gtag() {dataLayer.push(arguments);}
+        function gtag() {
+            dataLayer.push(arguments);
+        }
 
-      gtag("js", new Date());
+        gtag("js", new Date());
 
-      gtag("config", "G-84M7F9RZPF");
+        gtag("config", "G-84M7F9RZPF");
     </script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <meta name="description"
-          content="Tabme — A Chrome extension to efficiently organize bookmarks and manage tabs. Save, categorize, and access tabs quickly. Experience fast, intuitive tab management.">
-    <meta name="keywords" content="Tabme, Chrome extension, bookmark manager, tab organizer, productivity, tab management, save tabs, manage bookmarks">
+          content="Tabme Changelog: See what's new in Tabme. Organize bookmarks and manage Chrome tabs with ease.">
+    <meta name="keywords"
+          content="Tabme, Chrome extension, bookmark manager, tab organizer, productivity, tab management, save tabs, manage bookmarks, changelog, updates">
 
-    <meta property="og:title" content="Tabme - The Ultimate Chrome Extension for Tab and Bookmark Organization">
-    <meta property="og:description" content="Streamline your browsing with Tabme. Organize bookmarks and manage Chrome tabs with ease.">
-    <meta property="og:image" content="/main.png">
+    <meta property="og:title" content="Tabme Changelog">
+    <meta property="og:description"
+          content="See what's new in Tabme. Organize bookmarks and manage Chrome tabs with ease.">
     <meta property="og:url" content="https://gettabme.com">
 
     <link rel="canonical" href="https://gettabme.com">
 
-    <title>Tabme: Changelog</title>
+    <title>Tabme Changelog: See what's new in Tabme</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
-
-    <link type="text/css" rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+          rel="stylesheet">
 
     <link rel="shortcut icon" href="/favicons/favicon.ico"/>
     <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png">
     <link rel="manifest" href="/favicons/site.webmanifest">
+    <link type="text/css" rel="stylesheet" href="styles2.css">
+    <style>
+        .changelog-container {
+            h1 {
+                font-size: 2.5rem;
+                margin-top: 2rem;
+                margin-bottom: 1rem;
+                text-align: center;
+            }
+
+            h3 {
+                margin-top: 2rem;
+                margin-bottom: 0.5rem;
+                font-weight: bold;
+            }
+
+            p {
+                margin-bottom: 0.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
 
-<div class="content not-home">
-    <div class="content__inner">
-        <a class="install-button"
-           title="Chrome extension for organizing bookmarks and tabs"
-           href="https://chromewebstore.google.com/detail/tabme/jnhiookaaldadiimlgncedhkpmhlmmip">Add to Chrome</a>
+<header class="w-full py-4 bg-white sticky top-0 z-10 shadow-sm">
+    <div class="container mx-auto flex justify-between items-center container-padding">
+        <div class="flex items-center gap-2">
+            <a href="/" class="flex">
+                <img src="favicons/apple-touch-icon.png" alt="Tabme Logo"
+                     class="h-8 w-auto mr-2">
+                <span class="text-xl font-semibold">Tabme</span>
+            </a>
+        </div>
 
-        <h1>Tabme: Changelog</h1>
-        
+        <nav class="hidden md:flex items-center gap-6">
+            <a href="guide.html" class="text-gray-600 hover:text-tabme-blue transition-colors">Guide</a>
+            <a href="pricing.html" class="text-gray-600 hover:text-tabme-blue transition-colors">Pricing</a>
+            <a href="changelog.html" class="text-gray-600 hover:text-tabme-blue text-tabme-blue transition-colors">Updates</a>
+        </nav>
+
+        <a href="https://chromewebstore.google.com/detail/tabme/jnhiookaaldadiimlgncedhkpmhlmmip"
+           class="rounded-md bg-tabme-blue text-white px-4 py-2 hover:bg-blue-600 transition-colors"
+           title="Chrome extension for organizing bookmarks and tabs"
+        >
+            Add to Chrome
+        </a>
+
+    </div>
+</header>
+
+<main class="changelog-container">
+    <div class="container mx-auto container-padding">
+
+        <h1>Tabme Changelog</h1>
+
+        <h3>v1.41 — 4 May 2025</h3>
+        <p>Add tooltips + more compact view</p>
+        <p>Improved WhatsNew modal</p>
+        <p>Icons in settings</p>
+        <p>Deleting stickers from context menu</p>
+
+
+        <h3>v1.40 — 21 May 2025</h3>
+        <p>Improved UI</p>
+        <p>Introducing Beta Pro</p>
+
+        <h3>v1.39 — 17 May 2025</h3>
+        <p>Improved windows management</p>
+
         <h3>v1.38 — 9 May 2025</h3>
         <p>Collapsable Folders and Groups</p>
         <p>Deprecate hidden functionality</p>
         <p>Improve texts</p>
-        
+
         <h3>v1.37 — 26 April 2025</h3>
         <p>Copy-pasting StickyNotes between Spaces</p>
         <p>Minor improvements</p>
-        
+
         <h3>v1.36 — 17 April 2025</h3>
         <p>New Recent panel</p>
         <p>Ability to create new Bookmark in context menu</p>
-        <p>A lot UX improvements</p>
-        
+        <p>UX improvements</p>
+
         <h3>v1.35 — 10 April 2025</h3>
         <p>Release StickyNotes for all</p>
         <p>UX improvements</p>
-        
+
         <h3>v1.34 — 25 Mar 2025</h3>
         <p>Improved Stickers UX</p>
         <p>New Toolbar with Sticker and Folders</p>
@@ -79,103 +139,103 @@
         <h3>v1.33 — 13 Mar 2025</h3>
         <p>Added Stickers as an experimental feature</p>
         <p>Enhanced statistics</p>
-        
+
         <h3>v1.32 — 10 Mar 2025</h3>
         <p>Enabled drag-and-drop sorting for Spaces</p>
         <p>Added "Join Beta" functionality</p>
-        
+
         <h3>v1.30 — 19 Feb 2025</h3>
         <p>Introduced Spaces for beta users</p>
         <p>Multiple UX improvements</p>
         <p>Improved onboarding for new users</p>
-        
+
         <h3>v1.28 — 2 Jan 2025</h3>
         <p>Added search functionality for folder titles</p>
         <p>Optimized scrolling speed when dragging and dropping items</p>
         <p>Added feedback prompt when uninstalling</p>
-        
+
         <h3>v1.27 — 25 Nov 2024</h3>
         <p>Improved performance</p>
         <p>Updated section styles</p>
         <p>Preserved settings between sessions</p>
-        
+
         <h3>v1.26 — 13 Nov 2024</h3>
         <p>Improved title and URL editing</p>
         <p>Minor UI fixes</p>
-        
+
         <h3>v1.24 — 3 Nov 2024</h3>
         <p>Refreshed UI with a polished design</p>
-        
+
         <h3>v1.22 — 30 Oct 2024</h3>
         <p>Refined settings menu</p>
         <p>Added "Open bookmarks in the same tab" option</p>
         <p>Implemented import functionality from Toby</p>
         <p>Enhanced drag-and-drop UX</p>
-        
+
         <h3>v1.21.1 — 22 Oct 2024</h3>
         <p>Added support for bookmarks linking to local files (file:///)</p>
-        
+
         <h3>v1.20 — 20 Oct 2024</h3>
         <p>Added support for multiple windows</p>
         <p>Introduced a "Tabme without New Tab" version</p>
         <p>Enhanced settings popup</p>
-        
+
         <h3>v1.18 — 12 Oct 2024</h3>
         <p>Refined UX and styles</p>
-        
+
         <h3>v1.16 — 1 Oct 2024</h3>
         <p>Added multi-selection support for bookmarks</p>
         <p>Improved "Undo" functionality</p>
         <p>Refined fonts and styles</p>
-        
+
         <h3>v1.14 — 22 Sept 2024</h3>
         <p>Enhanced UX for the open tabs panel</p>
-        
+
         <h3>v1.13 — 20 Sept 2024</h3>
         <p>Refined UI and UX</p>
         <p>More stable folder drag-and-drop</p>
-        
+
         <h3>v1.12 — 23 Aug 2024</h3>
         <p>Added full keyboard navigation for bookmarks</p>
-        
+
         <h3>v1.11 — 21 Aug 2024</h3>
         <p>Enabled predefined colors for folders</p>
-        
+
         <h3>v1.10 — 19 Aug 2024</h3>
         <p>Added support for shelving all tabs into a folder</p>
         <p>Improved keyboard accessibility</p>
         <p>Enhanced UX for saving tabs</p>
         <p>Refined styles</p>
-        
+
         <h3>v1.9 — 4 Aug 2024</h3>
         <p>Added Dark Mode support</p>
         <p>Implemented folder archiving</p>
         <p>Improved UX for section editing</p>
         <p>Fixed issue where tabs could not be focused in any Chrome window</p>
-        
+
         <h3>v1.8 — 23 Feb 2024</h3>
         <p>Enabled inline editing of item titles</p>
         <p>Highlighted the last active tab</p>
         <p>Improved accessibility for dropdown menus</p>
-        
+
         <h3>v1.7 — 12 Feb 2024</h3>
         <p>Added onboarding for new users</p>
-        
+
         <h3>v1.6 — 8 Feb 2024</h3>
         <p>Added a counter to the "Cleanup" button</p>
-        
+
         <h3>v1.5 — 4 Feb 2024</h3>
         <p>Enabled importing of existing bookmarks</p>
         <p>Refined popup designs</p>
-        
+
         <h3>v1.4 — 1 Feb 2024</h3>
         <p>Added a "Clean" button to close duplicate tabs</p>
-        
+
         <h3>v1.3 — 30 Jan 2024</h3>
         <p>Enabled closing of open tabs from the sidebar</p>
         <p>Added date filtering for history search</p>
-        <p>Minor visual improvements</p>
-        
+        <p>Minor UI improvements</p>
+
         <h3>v1.2 — 3 Jan 2024</h3>
         <p>Enabled opening the extension in a new tab via the action button</p>
         <p>Displayed correct messages when there are no archived or unused items</p>
@@ -183,20 +243,33 @@
         <p>Minor visual improvements</p>
         <p>Fixed issue with opening new tabs using CMD</p>
         <p>Fixed 100% height issue</p>
-        
-        <h3>v1.1 — 30 Feb 2023</h3>
-        <p>Initial release of Tabme in the <a href="https://chromewebstore.google.com/detail/tabme/jnhiookaaldadiimlgncedhkpmhlmmip">Chrome Web Store</a> with core features, including tab saving, folder sorting, section management, search, history, export, and import.</p>
 
-        <footer class="footer">
-            <hr>
-            <span>©2023 — 2025</span>
-            <a href="mailto:gettabme@gmail.com">Contact</a>
-            <a href="/guide.html">Guide</a>
-            <a href="/faq.html">FAQ</a>
-            <a href="/toby-alternative.html">Migrate from Toby</a>
-            <a href="/">Home</a>
-        </footer>
+        <h3>v1.1 — 30 Feb 2023</h3>
+        <p>Initial release of Tabme in the <a
+                href="https://chromewebstore.google.com/detail/tabme/jnhiookaaldadiimlgncedhkpmhlmmip">Chrome Web
+            Store</a> with core features, including tab saving, folder sorting, section management, search, history,
+            export, and import.</p>
     </div>
+</main>
+
+<!-- Footer -->
+<footer class="bg-white py-10 border-t border-gray-200">
+    <div class="container mx-auto container-padding">
+        <div class="flex flex-col md:flex-row items-center justify-center">
+
+            <div class="flex flex-wrap justify-center gap-6">
+                <a href="mailto:gettabme@gmail.com">Contact</a>
+                <a href="toby-alternative.html">Migrate from Toby</a>
+                <a href="policy.html">Privacy Policy</a>
+            </div>
+        </div>
+
+        <div class="mt-8 text-center text-gray-500 text-sm">
+            © <span id="current-year">2025</span> Tabme. All rights reserved.
+        </div>
+    </div>
+</footer>
+</div>
 </div>
 </body>
 </html>
