@@ -153,9 +153,7 @@ export const FolderItemMenu = React.memo((p: {
               {
                 p.item.collapsed
                   ? <button className="dropdown-menu__button focusable" onClick={expandGroup}>Expand</button>
-                  : <button className="dropdown-menu__button focusable" onClick={collapseGroup}>Collapse{
-                    p.isBeta ? null : <span className="get-pro-label">Get Pro</span>
-                  }</button>
+                  : (p.isBeta ? <button className="dropdown-menu__button focusable" onClick={collapseGroup}>Collapse</button> : null)
               }
               <DropdownSubMenu
                 menuId={1}

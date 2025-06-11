@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react"
+import React, { useContext, useEffect, useRef, useState } from "react"
 import { IFolder, IFolderItem, ISpace } from "../helpers/types"
 import { colors, filterItemsBySearch, scrollElementIntoView } from "../helpers/utils"
 import { DropdownMenu, DropdownSubMenu } from "./dropdown/DropdownMenu"
@@ -119,10 +119,12 @@ export const Folder = React.memo(function Folder(p: {
   }
 
   function setColorLocally(color: string) {
+    console.log("setColorLocally")
     setLocalColor(color)
   }
 
   function setColorConfirmed(color: string) {
+    console.log("setColorConfirmed")
     setLocalColor(undefined)
     dispatch({
       type: Action.UpdateFolder,
@@ -262,9 +264,7 @@ export const Folder = React.memo(function Folder(p: {
             {
               p.folder.collapsed
                 ? <button className="dropdown-menu__button focusable" onClick={expandFolder}>Expand</button>
-                : <button className="dropdown-menu__button focusable" onClick={collapseFolder}>Collapse{
-                  p.isBeta ? null : <span className="get-pro-label">Pro</span>
-                }</button>
+                : (p.isBeta ? <button className="dropdown-menu__button focusable" onClick={collapseFolder}>Collapse</button> : null)
             }
             {
               p.spaces.length > 1 ?
@@ -335,19 +335,34 @@ function PresetColor(p: { onClick: (color: string) => void; color: string, curre
 }
 
 function CustomColorInput(p: { onChange: (color: string) => void; onBlur: (color: string) => void; currentColor?: string }) {
+  const id = `inputId_${Math.random()}`
+  const lastColorValue = useRef<string | undefined>(undefined)
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    lastColorValue.current = e.target.value
     p.onChange(e.target.value)
   }
   const onBlur = (e: React.ChangeEvent<HTMLInputElement>) => {
     p.onBlur(e.target.value)
+    lastColorValue.current = undefined
   }
+
+  useEffect(() => {
+    return () => {
+      if (lastColorValue.current) {
+        p.onBlur(lastColorValue.current)
+        lastColorValue.current = undefined
+      }
+    }
+  }, [])
 
   const active = !PRESET_COLORS.includes(p.currentColor!)
   return <div className={"color-picker-container " + (active ? "selected" : "")}>
-    <input type="color" id="colorInput" value={p.currentColor}
-           onChange={e => onChange(e)}
-           onBlur={e => onBlur(e)}
+    <input type="color"
+           id={id}
+           value={p.currentColor}
+           onChange={onChange}
+           onBlur={onBlur}
     />
-    <label htmlFor="colorInput" className="custom-color-picker"></label>
+    <label htmlFor={id} className="custom-color-picker"></label>
   </div>
 }

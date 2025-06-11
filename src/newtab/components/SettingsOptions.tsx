@@ -289,7 +289,7 @@ export const SettingsOptions = (p: {
       title: "Toggle all folders in current space",
       text: expandAllFolders ? "Expand all folders" : "Collapse all folders",
       icon: expandAllFolders ? IconExpand : IconCollapse,
-      proOnly: !p.appState.betaMode
+      hidden: !p.appState.betaMode
     },
     {
       onToggle: onToggleNotUsed,
