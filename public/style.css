@@ -460,6 +460,13 @@ input.search {
     height: 68px;
     box-sizing: border-box;
     padding: 12px 0 16px 72px;
+    max-width: calc(100vw - 360px);
+}
+
+.app.collapsible-sidebar {
+    .bookmarks-menu {
+        max-width: calc(100vw - 48px);
+    }
 }
 
 .bookmarks-menu--scrolled {
@@ -536,7 +543,8 @@ input.search {
     border: none;
     background: none;
     white-space: nowrap;
-
+    flex-shrink: 0; /* Prevent items from shrinking */
+    min-width: fit-content; /* Ensure items maintain their content width */
 
     &.active {
         opacity: 1;
@@ -571,6 +579,43 @@ input.search {
     align-items: center;
     padding: 0 2px 0 2px;
     border-radius: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex-shrink: 1;
+    min-width: 0;
+    position: relative;
+
+    /* Smooth scrolling */
+    scroll-behavior: smooth;
+
+    /* Hide scrollbar for a cleaner look */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* Internet Explorer and Edge */
+
+    &::-webkit-scrollbar {
+        display: none; /* Chrome, Safari, and Opera */
+    }
+
+    /* Show scrollbar on hover for better UX */
+
+    &:hover {
+        scrollbar-width: thin; /* Firefox */
+        -ms-overflow-style: auto; /* Internet Explorer and Edge */
+
+        &::-webkit-scrollbar {
+            display: block;
+            height: 4px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 2px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background-color: transparent;
+        }
+    }
 
     input {
         font-size: 18px;
@@ -596,9 +641,16 @@ input.search {
         /*visibility: hidden;*/
         opacity: 0.6;
         cursor: pointer;
+        flex-shrink: 0; /* Prevent the new button from shrinking */
 
         &:hover {
             opacity: 1;
+        }
+    }
+
+    &.spaces-list--small {
+        .spaces-list__item {
+            font-size: 14px;
         }
     }
 }
@@ -688,6 +740,7 @@ input.search {
     display: flex;
     height: 40px;
     margin-right: 8px;
+    flex-shrink: 0;
 
     .btn__setting {
         margin-right: 8px;
@@ -2014,10 +2067,9 @@ button:hover .get-pro-label {
     background: var(--popup-background-color);
     border-radius: 12px;
     padding: 24px;
-    box-shadow: 
-        0 20px 40px rgba(0, 0, 0, 0.15),
-        0 8px 16px rgba(0, 0, 0, 0.1),
-        0 0 0 1px rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15),
+    0 8px 16px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
     pointer-events: auto;
     z-index: 2001;

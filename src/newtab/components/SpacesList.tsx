@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react"
+import React, { useContext, useState} from "react"
 import PlusIcon from "../icons/plus.svg"
 import DeleteIcon from "../icons/delete.svg"
 import { ISpace } from "../helpers/types"
@@ -9,7 +9,6 @@ import { SimpleEditableTitle } from "./EditableTitle"
 import { DropdownMenu } from "./dropdown/DropdownMenu"
 import { genUniqLocalId } from "../state/actionHelpers"
 import { insertBetween } from "../helpers/fractionalIndexes"
-import { JoinBetaModal } from "./modals/JoinBetaModal"
 import { trackStat } from "../helpers/stats"
 import { GetProPlanModal } from "./modals/GetProPlanModal"
 
@@ -103,7 +102,7 @@ export function SpacesList(p: {
   }
 
   return (
-    <div className="spaces-list">
+    <div className={CL("spaces-list")}>
       {
         p.spaces.length === 0 && <span style={{ padding: "8px" }}>Create New Space</span>
       }
@@ -148,7 +147,7 @@ export function SpacesList(p: {
         </div>
       }
       {
-        isJoinBetaModalOpen && <GetProPlanModal onClose={() => setJoinBetaModalOpen(false)} reason={'Spaces'}/>
+        isJoinBetaModalOpen && <GetProPlanModal onClose={() => setJoinBetaModalOpen(false)} reason={"Spaces"}/>
       }
     </div>
   )
