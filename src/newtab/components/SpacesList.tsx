@@ -79,7 +79,7 @@ export function SpacesList(p: {
   }
 
   const onAddSpace = () => {
-    if (p.betaMode) {
+    if (p.betaMode || p.spaces.length === 0) {
       const lastSpace = p.spaces.at(-1)
       const spaceId = genUniqLocalId()
       dispatch({
@@ -105,7 +105,7 @@ export function SpacesList(p: {
   return (
     <div className="spaces-list">
       {
-        p.spaces.length === 0 && <span style={{ padding: "8px" }}>no spaces</span>
+        p.spaces.length === 0 && <span style={{ padding: "8px" }}>Create New Space</span>
       }
       {
         p.spaces.map((space) => {

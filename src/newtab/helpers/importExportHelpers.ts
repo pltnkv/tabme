@@ -234,13 +234,15 @@ export function importBrowserBookmarks(records: BookmarksAsPlainList, dispatch: 
   let count = 0
   records.forEach(rec => {
     if (skipChecked || rec.folder.checked) {
-      const items = rec.folder.children
-        ?.filter(item => (skipChecked || item.checked) && item.url)
+      const items = (rec.folder.children ?? [])
+        .filter(item => (skipChecked || item.checked) && item.url)
         .map(item => createNewFolderItem(item.url, item.title, getTempFavIconUrl(item.url)))
-      count += items?.length ?? 0
+      count += items.length
 
-      const newFolderId = genUniqLocalId()
-      dispatch({ type: Action.CreateFolder, newFolderId, title: rec.folder.title, items }) // intentionally does not send additional stat here
+      if (!skipChecked || items.length !== 0) {
+        const newFolderId = genUniqLocalId()
+        dispatch({ type: Action.CreateFolder, newFolderId, title: rec.folder.title, items }) // intentionally does not send additional stat here
+      }
     }
   })
   trackStat("importedBrowserBookmarks", { count })

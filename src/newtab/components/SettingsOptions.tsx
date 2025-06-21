@@ -23,6 +23,7 @@ import IconStar from "../icons/star.svg"
 import IconHelp from "../icons/help.svg"
 import IconCollapse from "../icons/collapse.svg"
 import IconExpand from "../icons/expand.svg"
+import IconRetakeBulb from "../icons/retake-bulb.svg"
 import { GetProPlanModal } from "./modals/GetProPlanModal"
 
 type OnClickOption = {
@@ -114,6 +115,11 @@ export const HelpOptions = (p: {
     trackStat("settingsClicked", { settingName: "tryBeta" })
   }
 
+  function onRetakeTutorial() {
+    dispatch({ type: Action.UpdateAppState, newState: { tutorialVisible: true } })
+    trackStat("settingsClicked", { settingName: "retakeTutorial" })
+  }
+
   function invalidateFavicon(folderItem: IFolderItem): Promise<void> {
     if (folderItem.url) {
       return loadFaviconUrl(folderItem.url, false).then(newFaviconUrl => {
@@ -157,6 +163,12 @@ export const HelpOptions = (p: {
       icon: IconHelp
     },
     {
+      onClick: onRetakeTutorial,
+      title: "Retake the tutorial to learn how to use Tabme effectively.",
+      text: "Retake tutorial",
+      icon: IconRetakeBulb
+    },
+    {
       onClick: showShortcutsModal,
       title: "Boost your speed with keyboard shortcuts.",
       text: "Keyboard shortcuts",
@@ -164,7 +176,7 @@ export const HelpOptions = (p: {
     },
     {
       onClick: invalidateBrokenIcons,
-      title: "If some favicons aren’t showing, try this to refresh them. Applies only to bookmarks in the current space.",
+      title: "If some favicons aren't showing, try this to refresh them. Applies only to bookmarks in the current space.",
       text: "Reload Favicons",
       hidden: !p.appState.alphaMode,
       icon: IconRefresh
@@ -177,7 +189,7 @@ export const HelpOptions = (p: {
     },
     {
       onClick: onSendFeedback,
-      title: "Got feedback, ideas, or found a bug? I’d love to hear from you!",
+      title: "Got feedback, ideas, or found a bug? I'd love to hear from you!",
       text: "Share feedback or report a bug",
       icon: IconChat
     },
@@ -316,7 +328,7 @@ export const SettingsOptions = (p: {
       onToggle: onToggleReversedOpenTabs,
       value: p.appState.reverseOpenTabs,
       title: "Match the tab order to how they appear in your browser window",
-      text: `Reverse tab order in ‘Open Tabs’`
+      text: `Reverse tab order in 'Open Tabs'`
     },
     {
       onToggle: onToggleOpenInTheNewTab,

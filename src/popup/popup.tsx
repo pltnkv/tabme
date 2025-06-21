@@ -72,7 +72,7 @@ export default function PopupApp(p: {
   }
 
   const totalFoldersCount = p.spaces.reduce((sum, curSpace) => sum + curSpace.folders.length, 0)
-  const showSearch = p.spaces.length > 1 || totalFoldersCount > 10
+  const showSearch = p.spaces.length > 1 || totalFoldersCount > 8
 
   const onSpaceClick = (spaceId: number) => {
     const space = findSpaceById(p, spaceId)

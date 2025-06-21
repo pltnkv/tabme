@@ -75,7 +75,7 @@ export type IAppState = {
   sidebarHovered: boolean; // for hover effects
   alphaMode: boolean
   betaMode: boolean
-  page: "default" | "import" | "welcome",
+  page: "default" | "import" | "welcome" | undefined,
   stat: IAppStats | undefined // Stored in LS
   achievements: IAppAchievements  // Stored in LS
   loaded: boolean
@@ -89,6 +89,8 @@ export type IAppState = {
 
   tooltipsEnabled: boolean
 
+  tutorialVisible: boolean
+
   // API
   apiCommandsQueue: APICommandPayloadFull[],
   apiCommandId?: number
@@ -101,7 +103,7 @@ export type IAppState = {
   version: number
 
   /**
-   * depracated. DONT USE
+   * @deprecated. DONT USE
    */
   folders: IFolder[]
   hiddenFeatureIsEnabled: boolean
@@ -136,8 +138,9 @@ let initState: IAppState = {
 
   hasHiddenObjects: false,
   tooltipsEnabled: false,
+  tutorialVisible: false,
 
-  page: "default",
+  page: undefined,
   stat: {
     sessionNumber: 0,
     firstSessionDate: 0,

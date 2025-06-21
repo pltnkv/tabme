@@ -113,6 +113,11 @@ type EventOptionsMap = {
   welcomeStep: { welcomeStepName: string };
   welcomeCompleted: {};
 
+  // TUTORIAL
+  tutorialStep: { step: number };
+  tutorialCompleted: {};
+  tutorialSkipped: { step: number };
+
   // IMPORT / EXPORT
   importedBrowserBookmarks: { count: number };
   importedTobyBookmarks: { count: number };

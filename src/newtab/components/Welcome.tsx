@@ -4,8 +4,8 @@ import { Action, IAppState } from "../state/state"
 import { CL } from "../helpers/classNameHelper"
 import { DispatchContext } from "../state/actions"
 import { getBrowserBookmarks, importBrowserBookmarks, onImportFromToby } from "../helpers/importExportHelpers"
-import ReadyIcon from "../icons/ready-for-use.svg"
 import { trackStat } from "../helpers/stats"
+import { createWelcomeSpace } from "../helpers/welcomeLogic"
 
 const SCREEN = {
   FIRST: "first",
@@ -17,18 +17,27 @@ const SCREEN = {
 
 export function Welcome(p: {
   appState: IAppState;
+  onComplete: () => void;
 }) {
 
-  const dispatch = useContext(DispatchContext)
   const [screen, setScreen] = useState(SCREEN.FIRST)
+  const dispatch = useContext(DispatchContext)
 
   useEffect(() => {
     trackStat("welcomeShown", {})
   }, [])
 
+  const setReadyToUse = () => {
+    changeScreen(SCREEN.READY_TO_USE)
+  }
+
   const changeScreen = (screen: string) => {
-    setScreen(screen)
-    trackStat("welcomeStep", { welcomeStepName: screen })
+    if (screen === SCREEN.READY_TO_USE) {
+      onCloseOnboarding()
+    } else {
+      setScreen(screen)
+      trackStat("welcomeStep", { welcomeStepName: screen })
+    }
   }
 
   const goPrevScreen = (screen: string) => {
@@ -38,14 +47,14 @@ export function Welcome(p: {
 
   const onCloseOnboarding = () => {
     trackStat("welcomeCompleted", {})
-    dispatch({ type: Action.UpdateAppState, newState: { page: "default" } })
+    p.onComplete()
   }
 
   const onImportAllBookmarks = () => {
     trackStat("welcomeStep", { welcomeStepName: "importAllBookmarks" })
     getBrowserBookmarks((records) => {
       importBrowserBookmarks(records, dispatch, true)
-      setScreen(SCREEN.READY_TO_USE)
+      setReadyToUse()
     }, p.appState.recentItems, dispatch)
   }
 
@@ -64,7 +73,7 @@ export function Welcome(p: {
             <button className="welcome-button" onClick={() => changeScreen(SCREEN.IMPORT_TOBY)}>Yes, import from Toby App
               <span className="subtext">You can always do it later</span>
             </button>
-            <button className="welcome-button" onClick={() => changeScreen(SCREEN.READY_TO_USE)}>No, start fresh</button>
+            <button className="welcome-button" onClick={() => setReadyToUse()}>No, start fresh</button>
           </div>
         </div>
       }
@@ -96,7 +105,10 @@ export function Welcome(p: {
               <input type="file"
                      accept=".json"
                      style={{ visibility: "hidden", position: "absolute" }}
-                     onChange={(e) => onImportFromToby(e, dispatch, () => changeScreen(SCREEN.READY_TO_USE))}/>
+                     onChange={(e) => {
+                       createWelcomeSpace(dispatch)
+                       onImportFromToby(e, dispatch, () => setReadyToUse())
+                     }}/>
             </label>
 
             <button className="welcome-button welcome-back-button" onClick={() => goPrevScreen(SCREEN.FIRST)}>Go back</button>
@@ -106,7 +118,7 @@ export function Welcome(p: {
 
       {
         screen === SCREEN.SELECT_BOOKMARKS && <BookmarkImporter appState={p.appState}
-                                                                onClose={() => changeScreen(SCREEN.READY_TO_USE)}
+                                                                onClose={() => setReadyToUse()}
                                                                 onBack={() => goPrevScreen(SCREEN.IMPORT_BROWSER)}/>
       }
 

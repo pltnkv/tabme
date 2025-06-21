@@ -5,6 +5,8 @@ import { showMessage } from "../helpers/actionsHelpersWithDOM"
 import { BookmarksAsPlainList, CustomBookmarkTreeNode, getBrowserBookmarks, importBrowserBookmarks, PlainListRecord } from "../helpers/importExportHelpers"
 import HistoryItem = chrome.history.HistoryItem
 import { RecentItem } from "../helpers/recentHistoryUtils"
+import { ISpace } from "../helpers/types"
+import { createWelcomeSpace } from "../helpers/welcomeLogic"
 
 const recordToTitle = (rec: PlainListRecord) => {
   const res = rec.breadcrumbs.map(r => r.title).join(" / ")
@@ -13,6 +15,7 @@ const recordToTitle = (rec: PlainListRecord) => {
 
 const BookmarkList = (p: {
   recentItems: RecentItem[],
+  spaces:ISpace[],
   onClose: () => void
   onBack?: () => void
 }) => {
@@ -136,11 +139,6 @@ const BookmarkList = (p: {
     setPlainRecords(newRecords)
   }
 
-  const onImportAll = () => {
-    importBrowserBookmarks(records, dispatch, true)
-    p.onClose()
-  }
-
   return <>
     {
       selectedBookmarksCount > 0
@@ -204,7 +202,7 @@ export function BookmarkImporter(p: {
       }
       <h1>Importing browser bookmarks 📦</h1>
       <h2>Select the bookmarks you'd like to import</h2>
-      <BookmarkList recentItems={p.appState.recentItems} onClose={p.onClose} onBack={p.onBack}/>
+      <BookmarkList recentItems={p.appState.recentItems} onClose={p.onClose} onBack={p.onBack} spaces={p.appState.spaces}/>
     </div>
   )
 }

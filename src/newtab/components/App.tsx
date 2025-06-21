@@ -18,6 +18,7 @@ import { HiddenDeprecationModal } from "./modals/HiddenDeprecationModal"
 import { selectItems } from "../helpers/selectionUtils"
 import Tab = chrome.tabs.Tab
 import { TooltipsManager } from "./TooltipsManager"
+import { Tutorial } from "./Tutorial"
 
 let notificationTimeout: number | undefined
 let globalAppState: IAppState
@@ -105,20 +106,19 @@ export function App() {
       dispatch({ type: Action.UpdateAppState, newState: { lastActiveTabIds } })
       dispatch({ type: Action.UpdateAppState, newState: { currentWindowId } })
       dispatch({ type: Action.UpdateAppState, newState: { version: 2 } })
+
+      setTimeout(() => { // preload more history
+        tryLoadMoreHistory(dispatch)
+      }, 2000)
+
+      // activate app
       dispatch({ type: Action.UpdateAppState, newState: { loaded: true } })
 
-      requestAnimationFrame(() => { // raf needed to invalidate number of tabs and windows in stat
-        // trackStat("appLoaded", {})
-
-        setTimeout(() => { // preload more history
-          tryLoadMoreHistory(dispatch)
-        }, 2000)
-      })
-
-      // first open time
-      if (appState.stat?.sessionNumber === 1) {
-        dispatch({ type: Action.UpdateAppState, newState: { page: "welcome" } })
+      if (appState.stat?.sessionNumber === 1 && appState.spaces.length === 0) {
         createWelcomeFolder(dispatch)
+        dispatch({ type: Action.UpdateAppState, newState: { page: "welcome" } })
+      } else {
+        dispatch({ type: Action.UpdateAppState, newState: { page: "default" } })
       }
 
       // highlight item by URL
@@ -228,6 +228,14 @@ export function App() {
     }
   }, [appState.apiCommandId])
 
+  const onWelcomeComplete = () => {
+    dispatch({ type: Action.UpdateAppState, newState: { page: "default", tutorialVisible: true } })
+  }
+
+  const onTutorialComplete = () => {
+    dispatch({ type: Action.UpdateAppState, newState: { tutorialVisible: false } })
+  }
+
   return (
     <DispatchContext.Provider value={dispatch}>
       {
@@ -236,7 +244,7 @@ export function App() {
         })}>
           <Notification notification={appState.notification}/>
           {
-            appState.page === "welcome" && <Welcome appState={appState}/>
+            appState.page === "welcome" && <Welcome appState={appState} onComplete={onWelcomeComplete}/>
           }
           {
             appState.page === "import" && <ImportBookmarksFromSettings appState={appState}/>
@@ -263,6 +271,9 @@ export function App() {
           }
           {
             isHiddenDeprecatedModalOpen && <HiddenDeprecationModal onClose={() => setHiddenDeprecatedModalOpen(false)}/>
+          }
+          {
+            appState.tutorialVisible && <Tutorial appState={appState} onComplete={onTutorialComplete}/>
           }
           <TooltipsManager tooltipsEnabled={appState.tooltipsEnabled}/>
         </div>

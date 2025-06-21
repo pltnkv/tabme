@@ -124,7 +124,7 @@ export function TopBar(p: {
             }
           </>
         }
-        <button className={`btn__icon ${helpMenuVisibility ? "active" : ""}`} onClick={onToggleHelpSettings}>
+        <button className={`help-menu-button btn__icon ${helpMenuVisibility ? "active" : ""}`} onClick={onToggleHelpSettings}>
           <IconHelp/>
         </button>
         <button className={`btn__icon ${settingsMenuVisibility ? "active" : ""}`} onClick={onToggleSettings}>

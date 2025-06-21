@@ -1976,3 +1976,257 @@ button:hover .get-pro-label {
     }
 }
 
+.tutorial-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2000;
+    box-sizing: border-box;
+    pointer-events: none;
+}
+
+.tutorial-wrapper.tutorial-visible {
+    pointer-events: auto;
+}
+
+.tutorial-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.tutorial-mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+.tutorial-popup {
+    position: absolute;
+    width: 320px;
+    max-width: 90vw;
+    background: var(--popup-background-color);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.15),
+        0 8px 16px rgba(0, 0, 0, 0.1),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    pointer-events: auto;
+    z-index: 2001;
+}
+
+.tutorial-popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.tutorial-popup-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--main-text-color);
+    margin: 0;
+    line-height: 1.3;
+}
+
+.tutorial-step-counter {
+    font-size: 12px;
+    color: var(--colors-gray-600);
+    background: var(--colors-gray-200);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 500;
+    white-space: nowrap;
+    margin-left: 12px;
+}
+
+.tutorial-popup-description {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--colors-gray-700);
+    margin: 0 0 20px 0;
+}
+
+.tutorial-popup-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.tutorial-navigation {
+    display: flex;
+    gap: 8px;
+}
+
+.tutorial-btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+.tutorial-btn-primary {
+    background: #3859ff;
+    color: white;
+}
+
+.tutorial-btn-primary:hover {
+    background: #2848ef;
+    transform: translateY(-1px);
+}
+
+.tutorial-btn-secondary {
+    background: var(--colors-gray-200);
+    color: var(--main-text-color);
+}
+
+.tutorial-btn-secondary:hover {
+    background: var(--colors-gray-300);
+}
+
+.tutorial-btn-skip {
+    background: transparent;
+    color: var(--colors-gray-600);
+    padding: 8px 12px;
+}
+
+.tutorial-btn-skip:hover {
+    color: var(--colors-gray-800);
+    background: var(--colors-gray-100);
+}
+
+.tutorial-progress {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+}
+
+.tutorial-progress-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--colors-gray-300);
+    transition: all 0.3s ease;
+}
+
+.tutorial-progress-dot.active {
+    background: #3859ff;
+    transform: scale(1.2);
+}
+
+/* Tutorial Theme Selector */
+.tutorial-theme-section {
+    margin: 16px 0 24px 0;
+    padding: 16px 0;
+    border-top: 1px solid var(--colors-gray-300);
+    border-bottom: 1px solid var(--colors-gray-300);
+}
+
+.tutorial-theme-intro {
+    font-size: 13px;
+    color: var(--colors-gray-600);
+    margin: 0 0 16px 0;
+    line-height: 1.4;
+}
+
+.tutorial-theme-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.tutorial-theme-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--main-text-color);
+}
+
+.tutorial-theme-label svg {
+    color: var(--colors-gray-600);
+}
+
+.tutorial-theme-options {
+    display: flex;
+    gap: 8px;
+}
+
+.tutorial-theme-option {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 8px;
+    border: 2px solid var(--colors-gray-300);
+    border-radius: 8px;
+    background: var(--popup-background-color);
+    color: var(--main-text-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 12px;
+    font-weight: 500;
+    outline: none;
+}
+
+.tutorial-theme-option:hover {
+    border-color: var(--colors-blue-400);
+    background: var(--colors-blue-100);
+}
+
+.tutorial-theme-option.active {
+    border-color: #3859ff;
+    background: var(--colors-blue-100);
+    color: #3859ff;
+}
+
+.tutorial-theme-option svg {
+    transition: color 0.2s ease;
+}
+
+.tutorial-theme-option.active svg {
+    color: #3859ff;
+}
+
+/* Tutorial Final Step */
+.tutorial-final-step {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--colors-gray-300);
+}
+
+.tutorial-guide-link {
+    margin: 0;
+    margin-bottom: 22px;
+    font-size: 13px;
+    color: var(--colors-gray-600);
+    line-height: 1.4;
+}
+
+.tutorial-link {
+    color: #3859ff;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.tutorial-link:hover {
+    color: #2848ef;
+    text-decoration: underline;
+}
