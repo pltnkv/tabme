@@ -1,53 +1,33 @@
 {
-  "name": "chrome-extension-typescript-starter",
+  "name": "tabme-monorepo",
   "version": "1.0.0",
-  "description": "chrome-extension-typescript-starter",
-  "main": "index.js",
+  "private": true,
+  "description": "TabMe browser Tab and Bookmark manager",
+  "workspaces": [
+    "apps/*"
+  ],
   "scripts": {
-    "watch": "webpack --config webpack/webpack.dev.js --watch",
-    "watch2": "webpack --config webpack/webpack.dev.js --watch --env BUILD_TYPE=overrideless",
-    "build": "webpack --config webpack/webpack.prod.js",
-    "publish": "node webpack/publish.js",
-    "publish-patch": "node webpack/publish.js --patch",
-    "clean": "rimraf dist",
-    "test": "npx jest",
-    "style": "prettier --write \"src/**/*.{ts,tsx}\""
-  },
-  "author": "",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/chibat/chrome-extension-typescript-starter.git"
-  },
-  "dependencies": {
-    "@types/react-transition-group": "^4.4.1",
-    "archiver": "^7.0.1",
-    "cloc": "^2.4.0-cloc",
-    "fs-extra": "^11.2.0",
-    "mixpanel-browser": "^2.60.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-transition-group": "^4.4.1"
+    "client:dev": "npm run watch --workspace=apps/client",
+    "client:build": "npm run build --workspace=apps/client",
+    "client:test": "npm run test --workspace=apps/client",
+    "client:publish": "npm run publish --workspace=apps/client",
+
+    "server:dev": "npm run dev --workspace=apps/server",
+    "server:build": "npm run build --workspace=apps/server",
+    "server:test": "npm run test --workspace=apps/server",
+
+    "build:all": "npm run build --workspaces",
+    "test:all": "npm run test --workspaces",
+    "clean": "npm run clean --workspaces",
+    "install:all": "npm install"
   },
   "devDependencies": {
-    "@svgr/webpack": "^8.1.0",
-    "@types/chrome": "^0.0.100",
-    "@types/jest": "^25.1.4",
-    "@types/jquery": "^3.3.33",
-    "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0",
-    "copy-webpack-plugin": "^6.4.1",
-    "dotenv-webpack": "^8.1.0",
-    "glob": "^7.1.6",
-    "jest": "^29.7.0",
-    "prettier": "^2.2.1",
-    "react-switch": "^7.0.0",
-    "rimraf": "^3.0.2",
-    "ts-jest": "^29.2.5",
-    "ts-loader": "^6.2.1",
     "typescript": "^5.6.3",
-    "webpack": "^5.90.1",
-    "webpack-cli": "^4.0.0",
-    "webpack-merge": "~4.2.2"
+    "prettier": "^2.2.1",
+    "@types/node": "^20.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
   }
-}
+} 

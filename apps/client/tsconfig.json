@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "module": "commonjs",
+    "target": "ES2022",
+    "esModuleInterop": true,
+    "sourceMap": false,
+    "rootDir": "src",
+    "outDir": "dist/js",
+    "noEmitOnError": false,
+    "jsx": "react",
+    "typeRoots": [
+      "../../node_modules/@types",
+      "node_modules/@types"
+    ],
+    "types": ["chrome", "jest", "react", "react-dom", "node"]
+  },
+  "include": [
+    "src",
+    "src/declarations.d.ts"
+  ]
+}

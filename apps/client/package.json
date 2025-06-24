@@ -1,0 +1,46 @@
+{
+  "name": "tabme-chrome-extension",
+  "version": "1.0.0",
+  "description": "tabme-chrome-extension",
+  "scripts": {
+    "watch": "webpack --config webpack/webpack.dev.js --watch",
+    "watch2": "webpack --config webpack/webpack.dev.js --watch --env BUILD_TYPE=overrideless",
+    "build": "webpack --config webpack/webpack.prod.js",
+    "publish": "node webpack/publish.js",
+    "publish-patch": "node webpack/publish.js --patch",
+    "clean": "rimraf dist",
+    "test": "npx jest",
+    "style": "prettier --write \"src/**/*.{ts,tsx}\""
+  },
+  "author": "",
+  "license": "custom",
+  "dependencies": {
+    "@types/react-transition-group": "^4.4.1",
+    "archiver": "^7.0.1",
+    "cloc": "^2.4.0-cloc",
+    "fs-extra": "^11.2.0",
+    "mixpanel-browser": "^2.60.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-transition-group": "^4.4.1"
+  },
+  "devDependencies": {
+    "@svgr/webpack": "^8.1.0",
+    "@types/chrome": "^0.0.100",
+    "@types/jest": "^25.1.4",
+    "@types/jquery": "^3.3.33",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "copy-webpack-plugin": "^6.4.1",
+    "dotenv-webpack": "^8.1.0",
+    "glob": "^7.1.6",
+    "jest": "^29.7.0",
+    "react-switch": "^7.0.0",
+    "rimraf": "^3.0.2",
+    "ts-jest": "^29.2.5",
+    "ts-loader": "^6.2.1",
+    "webpack": "^5.90.1",
+    "webpack-cli": "^4.0.0",
+    "webpack-merge": "~4.2.2"
+  }
+}
