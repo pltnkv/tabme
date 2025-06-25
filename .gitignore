@@ -7,3 +7,7 @@ dist
 builds
 node_modules
 .env
+
+# Generated API files
+apps/client/src/api/schema.ts
+apps/server/openapi.json

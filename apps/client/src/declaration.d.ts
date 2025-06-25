@@ -7,7 +7,6 @@ declare module "*.svg" {
 }
 
 declare const __OVERRIDE_NEWTAB: boolean
-declare const MIXPANEL_TOKEN: string
 
 declare module "mixpanel-browser" {
   const mixpanel: any

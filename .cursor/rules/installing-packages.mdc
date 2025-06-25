@@ -1,0 +1,7 @@
+---
+description: How to install packages
+globs: 
+alwaysApply: false
+---
+- Use `npm`.
+- Don't install in root. Install in `apps/web`:

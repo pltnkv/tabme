@@ -9,7 +9,7 @@ import { Action, getInitAppState, IAppState } from "../state/state"
 import { DispatchContext, stateReducer } from "../state/actions"
 import { getBC, getStateFromLS } from "../state/storage"
 import { executeAPICall } from "../../api/serverCommands"
-import { apiGetToken } from "../../api/api"
+import { auth, client, setAuthToken, sync } from "../../api/client"
 import { CL } from "../helpers/classNameHelper"
 import { Welcome } from "./Welcome"
 import { CommonStatProps, setCommonStatProps } from "../helpers/stats"
@@ -176,12 +176,24 @@ export function App() {
 
     window.betaLogin = async () => {
       try {
-        const userName = prompt("Enter your login")!
-        const res = await apiGetToken(userName)
-        localStorage.setItem("authToken", res.token)
-        dispatch({ type: Action.UpdateAppState, newState: { betaMode: true } })
-        alert("Login successful!")
+        const email = prompt("Enter your email")!
+        if (!email) return
+        
+        const password = prompt("Enter your password")!
+        if (!password) return
+        
+        const response = await auth.login(email, password)
+        
+        if (response && response.token) {
+          localStorage.setItem("authToken", response.token)
+          setAuthToken(response.token) // Set token for future requests
+          dispatch({ type: Action.UpdateAppState, newState: { betaMode: true } })
+          alert("Login successful!")
+        } else {
+          throw new Error("Invalid response format")
+        }
       } catch (e) {
+        console.error("Login error:", e)
         alert("Invalid credentials. Please try again.")
       }
     }

@@ -1,0 +1,120 @@
+---
+description: file structure and language and frameworks
+globs: 
+alwaysApply: true
+---
+# Tabme Monorepo File Structure
+
+Here is the directory tree for the Tabme monorepo. Explanations for each folder are below.
+
+```
+tabme/
+├── .cursor/
+│   └── rules/
+├── apps/
+│   ├── client/                     # Chrome Extension Frontend
+│   │   ├── public/
+│   │   │   ├── newtab.html
+│   │   │   ├── popup.html
+│   │   │   ├── sidebar.html
+│   │   │   ├── options.html
+│   │   ├── public-mini/            # Mini version manifest
+│   │   ├── public-newtab/          # New tab version manifest
+│   │   ├── src/
+│   │   │   ├── api/                # API client for server communication
+│   │   │   ├── background.ts       # Extension background script
+│   │   │   ├── content_script.tsx  # (disabled. dont change it yet)
+│   │   │   ├── newtab/             # Main app components
+│   │   │   │   ├── components/
+│   │   │   │   ├── dragging/
+│   │   │   │   ├── helpers/
+│   │   │   │   ├── icons/
+│   │   │   │   ├── state/
+│   │   │   │   └── newtab.tsx
+│   │   │   ├── popup/              # Extension popup
+│   │   │   ├── sidebar/            # Extension sidebar (disabled. dont change it yet)
+│   │   │   └── options.tsx         # Extension options page (disabled. dont change it yet)
+│   │   ├── webpack/
+│   │   ├── package.json
+│   │   └── tsconfig.json
+│   └── server/                     # Node.js Backend API
+│       ├── src/
+│       │   ├── api/
+│       │   │   └── api.yaml        # OpenAPI specification
+│       │   ├── config/
+│       │   │   ├── db.ts           # Database configuration
+│       │   │   └── index.ts        # App configuration
+│       │   ├── controllers/        # HTTP request handlers
+│       │   │   ├── auth.controller.ts
+│       │   │   ├── user.controller.ts
+│       │   │   ├── space.controller.ts
+│       │   │   ├── folder.controller.ts
+│       │   │   ├── item.controller.ts
+│       │   │   ├── widget.controller.ts
+│       │   │   ├── sync.controller.ts
+│       │   │   └── debug.controller.ts
+│       │   ├── middleware/          # Express middleware
+│       │   │   ├── auth.middleware.ts
+│       │   │   ├── errorHandler.middleware.ts
+│       │   │   └── validator.middleware.ts
+│       │   ├── routes/              # Route definitions
+│       │   │   ├── index.ts
+│       │   │   ├── auth.routes.ts
+│       │   │   ├── user.routes.ts
+│       │   │   ├── space.routes.ts
+│       │   │   ├── folder.routes.ts
+│       │   │   ├── item.routes.ts
+│       │   │   ├── widget.routes.ts
+│       │   │   ├── sync.routes.ts
+│       │   │   └── debug.routes.ts
+│       │   ├── services/            # Business logic layer
+│       │   │   ├── user.service.ts
+│       │   │   ├── space.service.ts
+│       │   │   ├── folder.service.ts
+│       │   │   ├── item.service.ts
+│       │   │   └── sync.service.ts
+│       │   ├── types/
+│       │   │   └── express.d.ts     # Express type extensions
+│       │   ├── utils/
+│       │   │   ├── logger.ts
+│       │   │   └── password.ts
+│       │   └── index.ts             # App entry point
+│       ├── tests/                   # Test files
+│       │   ├── e2e/
+│       │   └── setup/
+│       ├── scripts/
+│       ├── package.json
+│       └── tsconfig.json
+├── prisma/                         # Shared database schema
+│   ├── migrations/
+│   └── schema.prisma
+├── package.json                    # Root package.json for monorepo
+├── tsconfig.json                   # Root TypeScript config
+└── README.md
+```
+
+## Architecture Overview
+
+### Monorepo Structure
+- **apps/client**: Chrome extension frontend (React/TypeScript)
+- **apps/server**: Node.js backend API (Express/TypeScript)
+- **prisma/**: Shared database schema and migrations
+- **Root level**: Shared configuration and dependencies
+
+### Client App (Chrome Extension)
+- Built with React and TypeScript
+- Webpack for bundling
+- Multiple entry points: newtab, popup, sidebar, options, background
+- API client for communicating with the backend server
+
+### Server App (Backend API)
+- Node.js with Express and TypeScript
+- RESTful API architecture
+- Prisma ORM for database operations
+- JWT authentication
+- Comprehensive test suite
+
+### Shared Resources
+- Database schema managed by Prisma at root level
+- Shared TypeScript configuration
+- Monorepo package management

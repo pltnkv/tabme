@@ -19,12 +19,18 @@
     "build:all": "npm run build --workspaces",
     "test:all": "npm run test --workspaces",
     "clean": "npm run clean --workspaces",
-    "install:all": "npm install"
+    "install:all": "npm install",
+    
+    "generate-api": "npm run generate-api --workspace=apps/client"
   },
   "devDependencies": {
     "typescript": "^5.6.3",
     "prettier": "^2.2.1",
-    "@types/node": "^20.0.0"
+    "@types/node": "^20.19.0",
+    "@types/jest": "^29.5.12",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
+    "rimraf": "^3.0.2"
   },
   "engines": {
     "node": ">=16.0.0",

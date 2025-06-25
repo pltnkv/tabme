@@ -1,0 +1,19 @@
+---
+description: Guidelines for testing the application with Jest
+globs: 
+alwaysApply: false
+---
+# Testing Guidelines
+
+## Testing Framework
+- Use the standard Jest framework for testing.
+- Tests are colocated next to the tested file
+  - Example: `dir/format.ts` and `dir/format.test.ts`
+
+## Best Practices
+- Each test should be independent
+- Use descriptive test names
+- Mock external dependencies
+- Clean up mocks between tests
+- Avoid testing implementation details
+- Do not mock the Logger

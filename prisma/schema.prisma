@@ -1,0 +1,309 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Core User Management
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relationships
+  spaces         Space[]
+  settings       UserSettings?
+  subscription   Subscription?
+  sessions       Session[]
+  syncLogs       SyncLog[]
+  spacePositions UserSpacePosition[] // Custom space ordering
+  
+  @@map("users")
+}
+
+// Authentication Sessions
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("sessions")
+}
+
+// User Settings and Preferences
+model UserSettings {
+  id                    String  @id @default(uuid())
+  userId                String  @unique
+  theme                 String  @default("light") // "light" | "dark"
+  reverseTabOrder       Boolean @default(false)
+  enableTooltips        Boolean @default(true)
+  enableKeyboardShortcuts Boolean @default(true)
+  autoRefreshFavicons   Boolean @default(true)
+  
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("user_settings")
+}
+
+// Subscription Management
+model Subscription {
+  id                String            @id @default(uuid())
+  userId            String            @unique
+  plan              SubscriptionPlan  @default(FREE)
+  status            SubscriptionStatus @default(ACTIVE)
+  stripeCustomerId  String?
+  stripeSubscriptionId String?
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  cancelAtPeriodEnd  Boolean          @default(false)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("subscriptions")
+}
+
+// Spaces (Pro Feature)
+model Space {
+  id        String   @id @default(uuid())
+  userId    String   // Owner of the space
+  title     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relationships
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folders       Folder[]
+  stickyNotes   StickyNote[]
+  userPositions UserSpacePosition[] // Custom ordering per user
+  
+  @@map("spaces")
+}
+
+// Folders within Spaces
+model Folder {
+  id               String   @id @default(uuid())
+  spaceId          String
+  title            String
+  color            String?  @default("#6366f1")
+  position         String
+  sourceFolderId   String?  // If this is a synced copy, reference to source folder
+  isSyncedCopy     Boolean  @default(false)
+  lastSyncAt       DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Relationships
+  space           Space       @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  items           Item[]
+  sourceFolder    Folder?     @relation("FolderSync", fields: [sourceFolderId], references: [id])
+  syncedCopies    Folder[]    @relation("FolderSync")
+  sourceSyncs     FolderSync[] @relation("SourceFolder")
+  targetSyncs     FolderSync[] @relation("TargetFolder")
+  
+  @@map("folders")
+}
+
+// Bookmark Items
+model Item {
+  id          String   @id @default(uuid())
+  folderId    String
+  title       String
+  url         String
+  favicon     String?
+  position    String
+  lastUsedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relationships
+  folder Folder @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  
+  @@map("items")
+}
+
+// Sticky Notes
+model StickyNote {
+  id        String   @id @default(uuid())
+  spaceId   String
+  content   String
+  positionX Int      @default(0)
+  positionY Int      @default(0)
+  position  String
+  color     String   @default("#fef3c7")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relationships
+  space Space @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  
+  @@map("sticky_notes")
+}
+
+// Sync Management
+model SyncLog {
+  id          String    @id @default(uuid())
+  userId      String
+  operation   SyncOperation
+  entityType  String    // "space", "folder", "item", "sticky_note"
+  entityId    String
+  timestamp   DateTime  @default(now())
+  version     Int       @default(1)
+  data        Json?     // Snapshot of data at sync time
+  
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("sync_logs")
+}
+
+// Recently Closed Tabs (temporary storage)
+model RecentlyClosedTab {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  url       String
+  favicon   String?
+  closedAt  DateTime @default(now())
+  
+  @@map("recently_closed_tabs")
+}
+
+// Import/Export Jobs
+model ImportJob {
+  id        String    @id @default(uuid())
+  userId    String
+  source    ImportSource
+  status    JobStatus @default(PENDING)
+  filename  String?
+  totalItems Int      @default(0)
+  processedItems Int  @default(0)
+  errorMessage String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("import_jobs")
+}
+
+// Analytics (optional - for usage tracking)
+model AnalyticsEvent {
+  id        String   @id @default(uuid())
+  userId    String?
+  event     String   // "bookmark_created", "folder_created", etc.
+  metadata  Json?
+  timestamp DateTime @default(now())
+  
+  @@map("analytics_events")
+}
+
+// Custom space ordering per user
+model UserSpacePosition {
+  id       String @id @default(uuid())
+  userId   String
+  spaceId  String
+  position String
+  
+  // Relationships
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  space Space @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, spaceId]) // One position per user per space
+  @@map("user_space_positions")
+}
+
+// Folder synchronization between spaces
+model FolderSync {
+  id              String         @id @default(uuid())
+  sourceFolderId  String
+  targetFolderId  String
+  syncDirection   SyncDirection  @default(BIDIRECTIONAL)
+  lastSyncAt      DateTime?
+  syncStatus      SyncStatus     @default(ACTIVE)
+  conflictStrategy ConflictStrategy @default(LATEST_WINS)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  
+  // Relationships
+  sourceFolder Folder @relation("SourceFolder", fields: [sourceFolderId], references: [id], onDelete: Cascade)
+  targetFolder Folder @relation("TargetFolder", fields: [targetFolderId], references: [id], onDelete: Cascade)
+  
+  @@unique([sourceFolderId, targetFolderId]) // Prevent duplicate sync relationships
+  @@map("folder_syncs")
+}
+
+// Enums
+enum SubscriptionPlan {
+  FREE
+  PRO
+  PRO_LIFETIME
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+  UNPAID
+}
+
+enum SyncOperation {
+  CREATE
+  UPDATE
+  DELETE
+  RESTORE
+}
+
+enum ImportSource {
+  CHROME
+  TOBY
+  JSON
+  HTML
+}
+
+enum JobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum ShareType {
+  USER_SHARE    // Direct user-to-user sharing
+  PUBLIC_LINK   // Public link sharing
+}
+
+enum Permission {
+  VIEW
+  EDIT
+}
+
+enum SyncDirection {
+  BIDIRECTIONAL // Changes sync both ways
+  ONE_WAY       // Changes only sync from source to target
+}
+
+enum SyncStatus {
+  ACTIVE
+  PAUSED
+  ERROR
+  DISABLED
+}
+
+enum ConflictStrategy {
+  LATEST_WINS     // Most recent change wins
+  MANUAL_RESOLVE  // Require manual conflict resolution
+  SOURCE_WINS     // Source folder always wins
+}
