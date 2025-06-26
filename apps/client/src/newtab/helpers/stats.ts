@@ -157,6 +157,8 @@ type EventOptionsMap = {
   "betaModalClosed": {},
   "betaModalJoined": { email: string },
   "betaLeave": {},
+  "betaLoginSuccess": {},
+  "betaLoginFailed": {},
 
   // OTHER
   "importFromFileFailed": {type: string, error:string}

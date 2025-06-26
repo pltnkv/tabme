@@ -15,7 +15,7 @@ module.exports.getCommonConfig = (env) => {
       sidebar: path.join(srcDir, "sidebar/sidebar.tsx"),
       newtab: path.join(srcDir, "newtab/newtab.tsx"),
       // options: path.join(srcDir, "options.tsx"),
-      background: path.join(srcDir, "background.ts")
+      background: path.join(srcDir, "background/background.ts")
       // content_script: path.join(srcDir, "content_script.tsx"),
     },
     output: {
