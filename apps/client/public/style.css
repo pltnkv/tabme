@@ -1555,7 +1555,7 @@ button:hover .get-pro-label {
     display: flex;
     text-align: center;
     justify-content: center;
-    z-index: 1;
+    z-index: 1001;
     top: 0;
     width: 100%;
     pointer-events: none;
@@ -1675,7 +1675,7 @@ button:hover .get-pro-label {
             top: 0;
             left: 18px;
             text-align: left;
-            margin-top: 72px;
+            margin-top: 76px;
             opacity: 0.5;
             visibility: hidden;
         }

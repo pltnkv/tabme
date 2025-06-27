@@ -1,224 +1,233 @@
-import createClient from 'openapi-fetch';
-import type { paths } from './schema';
+import createClient from "openapi-fetch"
+import type { paths } from "./schema"
 
-const baseUrl = process.env.NODE_ENV === 'development'
-    ? 'http://localhost:3000'
-    : 'https://api.tabme.app' // Update with your production URL
+const baseUrl = process.env.NODE_ENV === "development"
+  ? "http://localhost:3000"
+  : "https://api.tabme.app" // Update with your production URL
 
 // Create the API client with proper typing
-const client = createClient<paths>({ baseUrl });
+const clientSdk = createClient<paths>({ baseUrl })
 
 // Helper function to set the auth token
-export function setAuthToken(token: string) {
-  client.use({
+export function setAuthTokenToContext(token: string) {
+  clientSdk.use({
     onRequest({ request }) {
-      request.headers.set('Authorization', `Bearer ${token}`);
-    },
-  });
+      request.headers.set("Authorization", `Bearer ${token}`)
+    }
+  })
+}
+
+export function writeAuthTokenToLS(token: string) {
+  localStorage.setItem("authToken", token)
+}
+
+export function getAuthToken(): string | null {
+  return localStorage.getItem("authToken")
 }
 
 // Helper function to remove auth token
 export function clearAuthToken() {
   // Create a new client instance without auth
-  Object.assign(client, createClient<paths>({ baseUrl }));
+  Object.assign(clientSdk, createClient<paths>({ baseUrl }))
 }
 
 // Authentication endpoints
-export const auth = {
+const auth = {
   async login(email: string, password: string) {
-    const { data, error } = await client.POST('/api/auth/login', {
+    const { data, error } = await clientSdk.POST("/api/auth/login", {
       body: {
         email,
-        password,
-      },
-    });
+        password
+      }
+    })
 
     if (error) {
-      throw new Error('Login failed: ' + (error || 'Unknown error'));
+      throw new Error("Login failed: " + (error || "Unknown error"))
     }
 
-    return data;
+    return data
   },
 
   async register(email: string, password: string, name?: string) {
-    const { data, error } = await client.POST('/api/auth/register', {
+    const { data, error } = await clientSdk.POST("/api/auth/register", {
       body: {
         email,
         password,
-        name,
-      },
-    });
+        name
+      }
+    })
 
     if (error) {
-      throw new Error('Registration failed: ' + (error || 'Unknown error'));
+      throw new Error("Registration failed: " + (error || "Unknown error"))
     }
 
-    return data;
+    return data
   },
 
   async logout() {
-    const { data, error } = await client.POST('/api/auth/logout');
+    const { data, error } = await clientSdk.POST("/api/auth/logout")
 
     if (error) {
-      throw new Error('Logout failed: ' + (error || 'Unknown error'));
+      throw new Error("Logout failed: " + (error || "Unknown error"))
     }
 
-    return data;
+    return data
   },
 
   async getMe() {
-    const { data, error } = await client.GET('/api/auth/me');
+    const { data, error } = await clientSdk.GET("/api/auth/me")
 
     if (error) {
-      throw new Error('Get user failed: ' + (error || 'Unknown error'));
+      throw new Error("Get user failed: " + (error || "Unknown error"))
     }
 
-    return data;
+    return data
   },
 
   async refreshToken() {
-    const { data, error } = await client.POST('/api/auth/refresh-token');
+    const { data, error } = await clientSdk.POST("/api/auth/refresh-token")
 
     if (error) {
-      throw new Error('Token refresh failed: ' + (error || 'Unknown error'));
+      throw new Error("Token refresh failed: " + (error || "Unknown error"))
     }
 
-    return data;
-  },
-};
+    return data
+  }
+}
 
 // Spaces endpoints
-export const spaces = {
+const spaces = {
   async getAll() {
-    const { data, error } = await client.GET('/api/spaces');
+    const { data, error } = await clientSdk.GET("/api/spaces")
 
     if (error) {
-      throw new Error('Get spaces failed: ' + (error || 'Unknown error'));
+      throw new Error("Get spaces failed: " + (error || "Unknown error"))
     }
 
-    return data;
+    return data
   },
 
   async getById(spaceId: string) {
-    const { data, error } = await client.GET('/api/spaces/{spaceId}', {
+    const { data, error } = await clientSdk.GET("/api/spaces/{spaceId}", {
       params: {
-        path: { spaceId },
-      },
-    });
+        path: { spaceId }
+      }
+    })
 
     if (error) {
-      throw new Error('Get space failed: ' + (error || 'Unknown error'));
+      throw new Error("Get space failed: " + (error || "Unknown error"))
     }
 
-    return data;
+    return data
   },
 
   async create(title: string, position: string) {
-    const { data, error } = await client.POST('/api/spaces', {
+    const { data, error } = await clientSdk.POST("/api/spaces", {
       body: {
         title,
-        position,
-      },
-    });
+        position
+      }
+    })
 
     if (error) {
-      throw new Error('Create space failed: ' + (error || 'Unknown error'));
+      throw new Error("Create space failed: " + (error || "Unknown error"))
     }
 
-    return data;
+    return data
   },
 
   async update(spaceId: string, updates: { title?: string }) {
-    const { data, error } = await client.PUT('/api/spaces/{spaceId}', {
+    const { data, error } = await clientSdk.PUT("/api/spaces/{spaceId}", {
       params: {
-        path: { spaceId },
+        path: { spaceId }
       },
-      body: updates,
-    });
+      body: updates
+    })
 
     if (error) {
-      throw new Error('Update space failed: ' + (error || 'Unknown error'));
+      throw new Error("Update space failed: " + (error || "Unknown error"))
     }
 
-    return data;
+    return data
   },
 
   async delete(spaceId: string) {
-    const { data, error } = await client.DELETE('/api/spaces/{spaceId}', {
+    const { data, error } = await clientSdk.DELETE("/api/spaces/{spaceId}", {
       params: {
-        path: { spaceId },
-      },
-    });
+        path: { spaceId }
+      }
+    })
 
     if (error) {
-      throw new Error('Delete space failed: ' + (error || 'Unknown error'));
+      throw new Error("Delete space failed: " + (error || "Unknown error"))
     }
 
-    return data;
-  },
-};
+    return data
+  }
+}
 
 // Sync endpoints
-export const sync = {
+const sync = {
   async getFullData() {
-    const { data, error } = await client.GET('/api/sync/full');
+    const { data, error } = await clientSdk.GET("/api/sync/full")
 
     if (error) {
-      throw new Error('Get full sync data failed: ' + (error || 'Unknown error'));
+      throw new Error("Get full sync data failed: " + (error || "Unknown error"))
     }
 
-    return data;
+    return data
   },
 
   async getChanges(lastSyncVersion?: number, entityTypes?: string[]) {
-    const params = new URLSearchParams();
+    const params = new URLSearchParams()
     if (lastSyncVersion !== undefined) {
-      params.append('lastSyncVersion', lastSyncVersion.toString());
+      params.append("lastSyncVersion", lastSyncVersion.toString())
     }
     if (entityTypes && entityTypes.length > 0) {
-      params.append('entityTypes', entityTypes.join(','));
+      params.append("entityTypes", entityTypes.join(","))
     }
 
-    const { data, error } = await client.GET('/api/sync/changes', {
+    const { data, error } = await clientSdk.GET("/api/sync/changes", {
       params: {
-        query: Object.fromEntries(params),
-      },
-    });
+        query: Object.fromEntries(params)
+      }
+    })
 
     if (error) {
-      throw new Error('Get sync changes failed: ' + (error || 'Unknown error'));
+      throw new Error("Get sync changes failed: " + (error || "Unknown error"))
     }
 
-    return data;
+    return data
   },
 
   async applyChanges(changes: any[]) {
-    const { data, error } = await client.POST('/api/sync/apply', {
+    const { data, error } = await clientSdk.POST("/api/sync/apply", {
       body: {
-        changes,
-      },
-    });
+        changes
+      }
+    })
 
     if (error) {
-      throw new Error('Apply sync changes failed: ' + (error || 'Unknown error'));
+      throw new Error("Apply sync changes failed: " + (error || "Unknown error"))
     }
 
-    return data;
+    return data
   },
 
   async getStats() {
-    const { data, error } = await client.GET('/api/sync/stats');
+    const { data, error } = await clientSdk.GET("/api/sync/stats")
 
     if (error) {
-      throw new Error('Get sync stats failed: ' + (error || 'Unknown error'));
+      throw new Error("Get sync stats failed: " + (error || "Unknown error"))
     }
 
-    return data;
-  },
-};
+    return data
+  }
+}
 
-// Export the raw client for advanced usage
-export { client };
-
-// Export default client
-export default client;
+const sdk = {
+  auth,
+  sync,
+  spaces
+}
+export { clientSdk, sdk }

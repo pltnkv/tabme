@@ -3,7 +3,6 @@ import { Action, ActionPayload, APICommandPayload, APICommandPayloadFull, Histor
 import { ColorTheme, IFolder, IFolderItem, ISpace, IWidget } from "../helpers/types"
 import { saveStateThrottled, savingStateKeys } from "./storage"
 import { addItemsToFolder, insertBetween, sortByPosition } from "../helpers/fractionalIndexes"
-import { loadFromNetwork } from "../../api/api"
 import {
   findFolderById,
   findFolderByItemId,
@@ -19,6 +18,7 @@ import {
 import { genNextRuntimeId, getRandomHEXColor, isArraysEqual } from "../helpers/utils"
 import { defaultStickerColor, stickerSizeM } from "../components/canvas/WidgetsHorMenu"
 import { applyTheme } from "./colorTheme"
+import { getAuthToken } from "../../api/client"
 
 type ObjectWithRemoteId = {
   remoteId: number
@@ -56,7 +56,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
   }
 
   function isNetworkAvailable(object?: { remoteId?: number }): object is ObjectWithRemoteId {
-    return loadFromNetwork()
+    return !!getAuthToken()
     // todo with it something. So optimistic updates works, and batching works, and no user data looses
     // if (object && !object.remoteId) {
     //   showNotificationReducer("Network operation not available", true)

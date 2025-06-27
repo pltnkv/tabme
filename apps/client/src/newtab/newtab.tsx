@@ -2,7 +2,6 @@ import React from "react"
 import { App } from "./components/App"
 import { setInitAppState } from "./state/state"
 import { getStateFromLS, IStoredAppState } from "./state/storage"
-import { apiGetDashboard, loadFromNetwork } from "../api/api"
 import { createRoot } from "react-dom/client"
 import { insertBetween, regeneratePositions } from "./helpers/fractionalIndexes"
 import { ISpace } from "./helpers/types"
@@ -12,6 +11,7 @@ import { preprocessLoadedState } from "./state/preprocessLoadedState"
 import { createTheme, MantineColorsTuple, MantineProvider } from "@mantine/core"
 import "@mantine/core/styles.css"
 import { isDarkMode } from "./state/colorTheme"
+import { getAuthToken, sdk, setAuthTokenToContext } from "../api/client"
 
 // other css files are required only if
 // you are using components from the corresponding package
@@ -45,20 +45,17 @@ const theme = createTheme({
 //     font-size: var(--mantine-font-size-md);
 //     line-height: var(--mantine-line-height);
 
-if (loadFromNetwork()) {
-  // todo: Always start from LS. rendering should happen without loaded cloud data
-  // todo: and load last data async (optional). Maybe in background thread
-  getStateFromLS((res) => {
-    apiGetDashboard().then(dashboard => {
-      console.log(dashboard.spaces)
-      setInitAppState(res)
-      mountApp()
-    }).catch(error => {
-      console.error(error)
-      // alert("Failed to load from the cloud. Fallback to local version")
-      runLocally()
-    })
+const authToken = getAuthToken()
+if (authToken) {
+  setAuthTokenToContext(authToken)
+  sdk.spaces.getAll().then(res => {
+    if (res) {
+      const spaces = res
+      console.log("spaces", spaces)
+    }
   })
+
+  runLocally()
 } else {
   runLocally()
 }

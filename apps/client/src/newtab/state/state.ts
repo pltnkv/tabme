@@ -240,6 +240,7 @@ export enum Action {
 }
 
 export type APICommandPayload = (
+  // todo it should use dedicated Actions
   | { type: Action.CreateFolder; body: { folder: Partial<IFolder> } }
   | { type: Action.DeleteFolder; body: { folderId: number } }
   | { type: Action.UpdateFolder; body: { folderId: number, folder: Partial<IFolder> } }

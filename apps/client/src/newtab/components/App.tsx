@@ -8,18 +8,17 @@ import { createWelcomeFolder } from "../helpers/welcomeLogic"
 import { Action, getInitAppState, IAppState } from "../state/state"
 import { DispatchContext, stateReducer } from "../state/actions"
 import { getBC, getStateFromLS } from "../state/storage"
-import { executeAPICall } from "../../api/serverCommands"
-import { auth, client, setAuthToken, sync } from "../../api/client"
+import { sdk, setAuthTokenToContext, writeAuthTokenToLS } from "../../api/client"
 import { CL } from "../helpers/classNameHelper"
 import { Welcome } from "./Welcome"
 import { CommonStatProps, setCommonStatProps } from "../helpers/stats"
 import { getHistory, tryLoadMoreHistory } from "../helpers/recentHistoryUtils"
 import { HiddenDeprecationModal } from "./modals/HiddenDeprecationModal"
 import { selectItems } from "../helpers/selectionUtils"
-import Tab = chrome.tabs.Tab
 import { TooltipsManager } from "./TooltipsManager"
 import { Tutorial } from "./Tutorial"
 import { LoginModal } from "./modals/LoginModal"
+import Tab = chrome.tabs.Tab
 
 let notificationTimeout: number | undefined
 let globalAppState: IAppState
@@ -217,7 +216,8 @@ export function App() {
     if (appState.apiCommandId) {
       const currentCommand = appState.apiCommandsQueue.find(cmd => cmd.commandId === appState.apiCommandId)
       if (currentCommand) {
-        executeAPICall(currentCommand, dispatch)
+        // todo to implement
+        // executeAPICall(currentCommand, dispatch)
       } else {
         throw new Error("Unacceptable flow, no currentCommand")
       }
@@ -235,12 +235,11 @@ export function App() {
   const handleLogin = async (email: string, password: string) => {
     setLoginLoading(true)
     try {
-      const response = await auth.login(email, password)
+      const response = await sdk.auth.login(email, password)
 
       if (response && response.token) {
-        localStorage.setItem("authToken", response.token)
-        setAuthToken(response.token) // Set token for future requests
-        dispatch({ type: Action.UpdateAppState, newState: { betaMode: true } })
+        writeAuthTokenToLS(response.token)
+        setAuthTokenToContext(response.token)
         setLoginModalOpen(false)
         dispatch({ type: Action.ShowNotification, message: "Login successful!" })
       } else {
