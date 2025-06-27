@@ -95,7 +95,7 @@ export function TopBar(p: {
         <IconFind className="search-icon"/>
         <input
           tabIndex={1}
-          className="search"
+          className="search old-input"
           type="text"
           placeholder="Search in Tabme"
           value={p.appState.search}

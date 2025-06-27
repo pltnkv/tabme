@@ -358,6 +358,7 @@ function CustomColorInput(p: { onChange: (color: string) => void; onBlur: (color
   const active = !PRESET_COLORS.includes(p.currentColor!)
   return <div className={"color-picker-container " + (active ? "selected" : "")}>
     <input type="color"
+           className="old-input"
            id={id}
            value={p.currentColor}
            onChange={onChange}

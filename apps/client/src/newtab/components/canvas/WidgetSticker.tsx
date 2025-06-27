@@ -91,7 +91,7 @@ export function WidgetSticker(p: {
         </div>
       )}
       {p.inEdit && (
-        <textarea className="widget-sticker-text"
+        <textarea className="widget-sticker-text old-input"
                   style={textStyle}
                   ref={textareaRef}
                   value={localText}

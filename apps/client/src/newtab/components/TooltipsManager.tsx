@@ -42,8 +42,8 @@ export function TooltipsManager(p: {
             clearTimeout(hideTimeout)
           }
           timeout = setTimeout(() => {
-            updateTooltipElement(tooltip, el)
             tooltip.style.display = "block"
+            updateTooltipElement(tooltip, el)
           }, 600)
         } else {
           updateTooltipElement(tooltip, el)
@@ -96,49 +96,50 @@ function updateTooltipElement(tooltip: HTMLElement, target: HTMLElement) {
   const firstLine = target.dataset.tooltip || ""
   const secondLine = target.dataset.tooltipMore || ""
   tooltip.innerHTML = firstLine + (secondLine ? `<div class="tooltip-more">${secondLine}</div>` : "")
-  const { top, left, transform } = calculateTooltipPosition(target)
+  const { top, left, transform } = calculateTooltipPosition(target, tooltip)
   tooltip.style.top = `${top}px`
   tooltip.style.left = `${left}px`
   tooltip.style.transform = transform
 }
 
-function calculateTooltipPosition(el: HTMLElement) {
-  const rect = el.getBoundingClientRect()
-  const position = el.dataset.tooltipPosition || "top-center"
+function calculateTooltipPosition(targetEl: HTMLElement, tooltipEl: HTMLElement) {
+  const trgtRect = targetEl.getBoundingClientRect()
+  const ttRect = tooltipEl.getBoundingClientRect()
+  const position = targetEl.dataset.tooltipPosition || "top-center"
   let top = 0
   let left = 0
   let transform = "none"
 
   switch (position) {
     case "bottom-center":
-      top = rect.bottom + 8
-      left = rect.left + rect.width / 2
+      top = trgtRect.bottom + 8
+      left = trgtRect.left + trgtRect.width / 2
       transform = "translateX(-50%)"
       break
     case "bottom-left":
-      top = rect.bottom + 2
-      left = rect.left + 22
+      top = trgtRect.bottom + 2
+      left = trgtRect.left + 22
       transform = "none"
       break
     case "bottom-right":
-      top = rect.bottom + 8
-      left = rect.right
+      top = trgtRect.bottom + 8
+      left = trgtRect.right
       transform = "translateX(-100%)"
       break
     case "top-right":
-      top = rect.top - 8
-      left = rect.right
+      top = trgtRect.top - 8
+      left = trgtRect.right
       transform = "translateX(-100%)"
       break
     case "top-left":
-      top = rect.top - 2
-      left = rect.left + 22
+      top = trgtRect.top - ttRect.height
+      left = trgtRect.left + 22
       transform = "none"
       break
     case "top-center":
     default:
-      top = rect.top - 8
-      left = rect.left + rect.width / 2
+      top = trgtRect.top - 8
+      left = trgtRect.left + trgtRect.width / 2
       transform = "translateX(-50%)"
       break
   }

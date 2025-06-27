@@ -103,6 +103,7 @@ export function Welcome(p: {
             <label className="welcome-button">
               Open Toby JSON file
               <input type="file"
+                     className="old-input"
                      accept=".json"
                      style={{ visibility: "hidden", position: "absolute" }}
                      onChange={(e) => {

@@ -64,7 +64,7 @@ export function EditableTitle(p: {
       p.inEdit ?
         <textarea
           tabIndex={2}
-          className={p.className}
+          className={`old-input ${p.className ?? ''}`}
           ref={textareaRef}
           onKeyDown={handleKeyDown}
           onChange={handleTitleChange}
@@ -149,6 +149,7 @@ export function SimpleEditableTitle(p: {
     {
       p.inEdit ?
         <input
+          className="old-input"
           tabIndex={2}
           ref={inputRef}
           onKeyDown={handleKeyDown}

@@ -145,7 +145,7 @@ export const FolderItemMenu = React.memo((p: {
                 <span>Title</span>
                 <input
                   type="text"
-                  className="focusable"
+                  className="focusable old-input"
                   autoFocus={true}
                   value={p.localTitle}
                   onChange={e => p.setLocalTitle(e.target.value)}/>
@@ -167,7 +167,7 @@ export const FolderItemMenu = React.memo((p: {
               <label className="input-label">
                 <span>Title</span>
                 <input type="text"
-                       className="focusable"
+                       className="focusable old-input"
                        autoFocus={true}
                        value={p.localTitle}
                        onChange={e => p.setLocalTitle(e.target.value)}/>
@@ -175,7 +175,7 @@ export const FolderItemMenu = React.memo((p: {
               <label className="input-label">
                 <span>URL</span>
                 <input type="text"
-                       className="focusable"
+                       className="focusable old-input"
                        value={localURL}
                        onChange={e => setLocalURL(e.target.value)}/>
               </label>

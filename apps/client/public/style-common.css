@@ -67,6 +67,10 @@
     --scrollbar-width: 12px;
 }
 
+.app {
+    --mantine-line-height: 10;
+}
+
 .dark-theme {
     /* Dark Theme Variables */
     --main-text-color: #fff;
@@ -147,8 +151,17 @@ body,
     font-family: 'OpenSans', sans-serif;
 }
 
-input, button, textarea {
+html {
+    input, button, textarea {
+
+    }
+}
+
+.old-input {
+    box-sizing: initial;
+    font: initial;
     font-family: 'OpenSans', sans-serif;
+    line-height: normal;
 }
 
 button {
@@ -279,6 +292,8 @@ svg {
     color: var(--button-text-color);
     display: inline-block;
 
+    font: initial;
+    font-family: 'OpenSans', sans-serif;
     font-size: 16px;
     font-weight: 500;
     line-height: 20px;

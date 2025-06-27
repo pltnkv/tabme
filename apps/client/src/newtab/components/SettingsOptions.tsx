@@ -459,7 +459,7 @@ export const Options = (props: { optionsConfig: OptionsConfig | (() => OptionsCo
                         title={option.title}
                         tabIndex={0}>
             <span>{option.text}</span>
-            <input type="file" accept=".json" className="hidden-file-input" onChange={option.onClick} tabIndex={-1}/>
+            <input type="file" accept=".json" className="hidden-file-input old-input" onChange={option.onClick} tabIndex={-1}/>
           </label>
         } else {
           return <button

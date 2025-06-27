@@ -137,6 +137,9 @@ export default function PopupApp(p: {
 
   return (
     <div className="p-app">
+      <div className="p-top-header">
+        <button className="btn__setting" onClick={onOpenTabmeClick}>Open Tabme</button>
+      </div>
       <div className={CL("p-header", {
         "p-in-edit": editTabUrl || editTabTitle
       })}>
@@ -171,7 +174,7 @@ export default function PopupApp(p: {
           <>
             <h2 className="p-tab-was-saved">✅ Tab saved</h2>
             <div className="p-buttons">
-              <button className="btn__setting" onClick={onOpenTabmeClick}>Open Tabme</button>
+              <button className="btn__setting" onClick={onOpenTabmeClick}>Focus on saved tab</button>
             </div>
           </> :
           <>
@@ -179,7 +182,7 @@ export default function PopupApp(p: {
               showSearch && <div className="p-search-block">
                 <IconFind className="search-icon"/>
                 <input
-                  className="p-search-input"
+                  className="p-search-input old-input"
                   type="search"
                   placeholder="Search folder to save"
                   value={searchValue}
@@ -223,7 +226,7 @@ export default function PopupApp(p: {
 
             <div className="p-buttons">
               <button className="btn__setting primary" disabled={!currentFolderId} onClick={onSaveTabClick}>Save to folder<span className="p-hotkey">↵</span></button>
-              <button className="btn__setting" onClick={onOpenTabmeClick}>Open Tabme</button>
+              {/*<button className="btn__setting" onClick={onOpenTabmeClick}>Open Tabme</button>*/}
               {/*<button className="btn__setting" onClick={onOpenSidebar}>Sidebar</button>*/}
             </div>
             {

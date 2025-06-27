@@ -156,6 +156,7 @@ const BookmarkList = (p: {
         <div key={rec.folder.id}>
           <label className="folder-title" title={rec.folder.url}>
             <input type="checkbox"
+                   className="old-input"
                    ref={el => recordsRefs.current[recIndex] = el!}
                    checked={rec.folder.checked}
                    onChange={(e) => handleFolderCheckChange(recIndex, e.target.checked)}/>
@@ -166,6 +167,7 @@ const BookmarkList = (p: {
             {rec.folder.children?.map((item: CustomBookmarkTreeNode, itemIndex) => (
               <label className="imported-bookmark-child" key={item.id} title={item.url}>
                 <input type="checkbox"
+                       className="old-input"
                        checked={item.checked}
                        onChange={(e) => handleItemCheckChange(recIndex, itemIndex, e.target.checked)}
                 />

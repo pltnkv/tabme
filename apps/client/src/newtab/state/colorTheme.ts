@@ -34,6 +34,7 @@ export function applyTheme(theme: ColorTheme) {
 }
 
 function setThemeStyle(useDarkMode: boolean) {
+  __isDarkMode = useDarkMode
   if (useDarkMode) {
     document.documentElement.classList.add("dark-theme")
   } else {
@@ -42,4 +43,10 @@ function setThemeStyle(useDarkMode: boolean) {
   setCommonStatProps({
     zColorTheme: useDarkMode ? "dark" : "light"
   })
+}
+
+let __isDarkMode = false
+
+export function isDarkMode() {
+  return __isDarkMode
 }

@@ -19,6 +19,7 @@ import { selectItems } from "../helpers/selectionUtils"
 import Tab = chrome.tabs.Tab
 import { TooltipsManager } from "./TooltipsManager"
 import { Tutorial } from "./Tutorial"
+import { LoginModal } from "./modals/LoginModal"
 
 let notificationTimeout: number | undefined
 let globalAppState: IAppState
@@ -60,6 +61,8 @@ function invalidateStats(newState: IAppState, prevState: IAppState | undefined) 
 export function App() {
   const [appState, dispatch] = useReducer(stateReducer, getInitAppState())
   const [isHiddenDeprecatedModalOpen, setHiddenDeprecatedModalOpen] = useState(false)
+  const [isLoginModalOpen, setLoginModalOpen] = useState(false)
+  const [loginLoading, setLoginLoading] = useState(false)
 
   useEffect(() => {
     invalidateStats(appState, globalAppState)
@@ -92,6 +95,7 @@ export function App() {
   }, [])
 
   useEffect(function() {
+    console.log("AAAA")
     Promise.all([
       getTabs(),
       getHistory(), // TODO: !! now history updated only once, when app loaded. Fix it next time
@@ -174,28 +178,8 @@ export function App() {
       }
     })
 
-    window.betaLogin = async () => {
-      try {
-        const email = prompt("Enter your email")!
-        if (!email) return
-        
-        const password = prompt("Enter your password")!
-        if (!password) return
-        
-        const response = await auth.login(email, password)
-        
-        if (response && response.token) {
-          localStorage.setItem("authToken", response.token)
-          setAuthToken(response.token) // Set token for future requests
-          dispatch({ type: Action.UpdateAppState, newState: { betaMode: true } })
-          alert("Login successful!")
-        } else {
-          throw new Error("Invalid response format")
-        }
-      } catch (e) {
-        console.error("Login error:", e)
-        alert("Invalid credentials. Please try again.")
-      }
+    window.betaLogin = () => {
+      setLoginModalOpen(true)
     }
   }, [])
 
@@ -248,6 +232,29 @@ export function App() {
     dispatch({ type: Action.UpdateAppState, newState: { tutorialVisible: false } })
   }
 
+  const handleLogin = async (email: string, password: string) => {
+    setLoginLoading(true)
+    try {
+      const response = await auth.login(email, password)
+
+      if (response && response.token) {
+        localStorage.setItem("authToken", response.token)
+        setAuthToken(response.token) // Set token for future requests
+        dispatch({ type: Action.UpdateAppState, newState: { betaMode: true } })
+        setLoginModalOpen(false)
+        dispatch({ type: Action.ShowNotification, message: "Login successful!" })
+      } else {
+        throw new Error("Invalid response format")
+      }
+    } catch (e) {
+      console.error("Login error:", e)
+      dispatch({ type: Action.ShowNotification, message: "Invalid credentials. Please try again.", isError: true })
+      throw e // Re-throw to let the modal handle it
+    } finally {
+      setLoginLoading(false)
+    }
+  }
+
   return (
     <DispatchContext.Provider value={dispatch}>
       {
@@ -287,6 +294,14 @@ export function App() {
           {
             appState.tutorialVisible && <Tutorial appState={appState} onComplete={onTutorialComplete}/>
           }
+          {
+            isLoginModalOpen && <LoginModal
+              onClose={() => setLoginModalOpen(false)}
+              onLogin={handleLogin}
+              loading={loginLoading}
+            />
+          }
+
           <TooltipsManager tooltipsEnabled={appState.tooltipsEnabled}/>
         </div>
       }

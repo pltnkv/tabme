@@ -10,6 +10,18 @@ body.popup {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
+.p-top-header {
+    margin: -20px -20px 10px -20px;
+    display: flex;
+    justify-content: flex-end;
+    padding: 8px 20px;
+    border-bottom: 1px solid var(--colors-gray-400);
+
+    button {
+        font-size: 14px;
+    }
+}
+
 .p-header {
     display: flex;
     align-items: start;
@@ -141,7 +153,7 @@ body.popup {
     flex-direction: column;
     gap: 10px;
     margin-bottom: 16px;
-    max-height: 304px;
+    max-height: 300px;
     overflow-y: auto;
     width: 328px;
 
@@ -177,6 +189,7 @@ body.popup {
 
 .p-buttons {
     display: flex;
+    justify-content: flex-end;
     gap: 8px;
 
     .p-hotkey {

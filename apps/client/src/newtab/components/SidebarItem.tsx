@@ -102,7 +102,7 @@ export const TabOrRecentItem = (p: {
       })}
       data-tooltip={p.data.title}
       data-tooltip-more={p.data.url}
-      data-tooltip-position="bottom-left"
+      data-tooltip-position="top-left"
       data-id={p.data.id}
       onContextMenu={onTabContextMenu}
     >

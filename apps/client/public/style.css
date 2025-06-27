@@ -19,6 +19,7 @@ input.search {
     border-radius: 8px;
     margin: 0;
     user-select: none;
+    box-sizing: content-box;
 }
 
 .search-icon {
@@ -182,6 +183,7 @@ input.search {
     border: 1px solid var(--popup-background-color);;
     line-height: 16px;
     text-align: center;
+    box-sizing: content-box;
 }
 
 .inbox-box, .recent-list {
@@ -250,11 +252,13 @@ input.search {
 }
 
 .inbox-item {
+    font-size: 14px;
     position: relative;
     cursor: pointer;
     padding: 8px;
     white-space: nowrap;
     border-radius: 8px;
+    line-height: normal;
 
     &.active {
         background-color: var(--colors-blue-200);
@@ -328,6 +332,7 @@ input.search {
     display: inline-flex;
     flex-direction: column;
     width: 282px;
+    line-height: normal;
 }
 
 .inbox-item__close {
@@ -754,6 +759,7 @@ input.search {
     cursor: pointer;
     opacity: 0.7;
     user-select: none;
+    font-size: 12px;
 
     svg {
         pointer-events: none;
@@ -800,6 +806,7 @@ input.search {
     width: 340px;
     padding: 8px 28px;
     user-select: none;
+    box-sizing: initial;
 }
 
 .folder--empty {
@@ -827,6 +834,7 @@ input.search {
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;
+        line-height: normal;
     }
 
     textarea {
@@ -852,6 +860,7 @@ input.search {
 
 .folder-empty-tip {
     padding: 0 0 0 32px;
+    font-size: 12px;
     color: var(--colors-gray-600);
 }
 
@@ -907,6 +916,7 @@ input.search {
 }
 
 .draggable-folder {
+    line-height: normal;
     cursor: grab;
 }
 
@@ -1015,7 +1025,7 @@ input.search {
     padding: 4px 0 5px 4px;
     cursor: pointer;
     border-radius: 4px;
-
+    box-sizing: content-box;
 
     img[src=""] {
         visibility: hidden;
@@ -1095,6 +1105,7 @@ input.search {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    line-height: normal;
 }
 
 .folder-item__inner__title.not-used {
@@ -1256,6 +1267,7 @@ body.dragging * {
     flex-direction: column;
     align-items: stretch;
     cursor: default;
+    box-sizing: content-box;
 
     border: 1px solid var(--dropdown-border1-color);
     outline: 1px solid var(--dropdown-border2-color);
@@ -1881,6 +1893,7 @@ button:hover .get-pro-label {
     font-size: 16px;
     max-height: 100%;
     overflow-y: auto;
+    box-sizing: content-box;
 }
 
 .modal-close-x {
@@ -2061,6 +2074,7 @@ button:hover .get-pro-label {
 }
 
 .tutorial-popup {
+    box-sizing: content-box;
     position: absolute;
     width: 320px;
     max-width: 90vw;

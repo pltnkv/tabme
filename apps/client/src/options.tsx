@@ -57,6 +57,7 @@ const Options = () => {
       <div>
         <label>
           <input
+            className="old-input"
             type="checkbox"
             checked={like}
             onChange={(event) => setLike(event.target.checked)}

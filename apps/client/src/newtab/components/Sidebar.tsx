@@ -327,10 +327,11 @@ export const StashButton = React.memo((p: { windowId: number, tabs: Tab[], rever
                       offset={{ top: 12, left: 4 }}
                       skipTabIndexes={true}>
           <div style={{ width: "100%" }}>
-            <p>Save open Tabs to a new Folder</p>
+            <p style={{marginTop: 0}}>Save open Tabs to a new Folder</p>
             <p>
               <label>
                 <input
+                  className="old-input"
                   type="checkbox"
                   checked={shouldCloseTabs}
                   onChange={(e) => setShouldCloseTabs(e.target.checked)}

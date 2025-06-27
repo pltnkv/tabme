@@ -36,6 +36,14 @@ module.exports.getCommonConfig = (env) => {
           exclude: /node_modules/
         },
         {
+          test: /\.css$/i,
+          use: [
+            "style-loader",
+            "css-loader",
+            "postcss-loader"
+          ]
+        },
+        {
           test: /\.svg$/, // Add this rule for SVG files
           use: ["@svgr/webpack"]
         }

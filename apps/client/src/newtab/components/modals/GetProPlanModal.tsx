@@ -110,7 +110,7 @@ export const GetProPlanModal = (p: { onClose: () => void, reason: GetProPlanReas
             <div style={{ display: "flex", flexDirection: "column", marginBottom: "16px", marginTop: "32px" }}>
               <div style={{ display: "flex", justifyContent: "center" }}>
                 <input
-                  className={`normal-input ${emailError ? "input-error" : ""}`}
+                  className={`old-input normal-input ${emailError ? "input-error" : ""}`}
                   type="email"
                   style={{
                     width: "182px",
