@@ -4,7 +4,8 @@
   "private": true,
   "description": "TabMe browser Tab and Bookmark manager",
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "packages/*"
   ],
   "scripts": {
     "client:dev": "npm run watch --workspace=apps/client",
@@ -21,7 +22,12 @@
     "clean": "npm run clean --workspaces",
     "install:all": "npm install",
     
-    "generate-api": "npm run generate-api --workspace=apps/client"
+    "types:build": "npm run build --workspace=packages/shared-types",
+    "types:watch": "npm run watch --workspace=packages/shared-types",
+    
+    "generate-api": "npm run generate-api --workspace=apps/client",
+
+    "prisma:generate": "npx prisma generate"
   },
   "devDependencies": {
     "typescript": "^5.6.3",

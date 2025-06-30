@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import userService from '../services/user.service';
 import { validationResult } from 'express-validator';
+import { logError } from '../utils/logger';
 
 class AuthController {
   async register(req: Request, res: Response): Promise<void> {
@@ -18,6 +19,7 @@ class AuthController {
       const { password: _, ...userWithoutPassword } = user;
       res.status(201).json({ user: userWithoutPassword });
     } catch (error) {
+      logError(error, 'Failed to register user');
       if (error instanceof Error && error.message.includes('already exists')) {
         res.status(409).json({ error: error.message });
       } else {
@@ -45,6 +47,7 @@ class AuthController {
         message: 'Login successful'
       });
     } catch (error) {
+      logError(error, 'Failed to login user');
       if (error instanceof Error && error.message.includes('Invalid credentials')) {
         res.status(401).json({ error: error.message });
       } else {
@@ -64,6 +67,7 @@ class AuthController {
       await userService.logout(token);
       res.json({ message: 'Logout successful' });
     } catch (error) {
+      logError(error, 'Failed to logout user');
       res.status(500).json({ error: 'Failed to logout' });
     }
   }
@@ -86,6 +90,7 @@ class AuthController {
       const { password, ...userWithoutPassword } = user;
       res.json(userWithoutPassword);
     } catch (error) {
+      logError(error, 'Failed to get user data');
       res.status(500).json({ error: 'Failed to get user data' });
     }
   }
@@ -111,6 +116,7 @@ class AuthController {
         user: userWithoutPassword 
       });
     } catch (error) {
+      logError(error, 'Failed to validate token');
       res.status(500).json({ error: 'Failed to validate token' });
     }
   }
@@ -137,6 +143,7 @@ class AuthController {
 
       res.json({ token });
     } catch (error) {
+      logError(error, 'Failed to refresh token');
       res.status(500).json({ error: 'Failed to refresh token' });
     }
   }

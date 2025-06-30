@@ -5,10 +5,10 @@ import { Notification } from "./Notification"
 import { KeyboardAndMouseManager } from "./KeyboardAndMouseManager"
 import { ImportBookmarksFromSettings } from "./ImportBookmarksFromSettings"
 import { createWelcomeFolder } from "../helpers/welcomeLogic"
-import { Action, getInitAppState, IAppState } from "../state/state"
+import { Action, getInitAppState, IAppState, setInitAppState } from "../state/state"
 import { DispatchContext, stateReducer } from "../state/actions"
 import { getBC, getStateFromLS } from "../state/storage"
-import { sdk, setAuthTokenToContext, writeAuthTokenToLS } from "../../api/client"
+import { clearAuthTokenInLS, sdk, setAuthTokenToContext, writeAuthTokenToLS } from "../../api/client"
 import { CL } from "../helpers/classNameHelper"
 import { Welcome } from "./Welcome"
 import { CommonStatProps, setCommonStatProps } from "../helpers/stats"
@@ -19,6 +19,8 @@ import { TooltipsManager } from "./TooltipsManager"
 import { Tutorial } from "./Tutorial"
 import { LoginModal } from "./modals/LoginModal"
 import Tab = chrome.tabs.Tab
+import { fetchLastStateFromServer } from "../../api/fetchLastStateFromServer"
+import { executeAPIRequest } from "../../api/requestFactory"
 
 let notificationTimeout: number | undefined
 let globalAppState: IAppState
@@ -94,7 +96,6 @@ export function App() {
   }, [])
 
   useEffect(function() {
-    console.log("AAAA")
     Promise.all([
       getTabs(),
       getHistory(), // TODO: !! now history updated only once, when app loaded. Fix it next time
@@ -123,6 +124,8 @@ export function App() {
       } else {
         dispatch({ type: Action.UpdateAppState, newState: { page: "default" } })
       }
+
+      fetchLastStateFromServer(dispatch)
 
       // highlight item by URL
       requestAnimationFrame(() => {
@@ -180,6 +183,11 @@ export function App() {
     window.betaLogin = () => {
       setLoginModalOpen(true)
     }
+
+    window.betaLogout = () => {
+      clearAuthTokenInLS()
+      location.reload()
+    }
   }, [])
 
   useEffect(() => {
@@ -210,14 +218,13 @@ export function App() {
       // take the new command from queue
       dispatch({ type: Action.UpdateAppState, newState: { apiCommandId: appState.apiCommandsQueue[0].commandId } })
     }
-  }, [appState.apiCommandsQueue, appState.apiCommandId])
+  }, [appState.apiCommandsQueue])
 
   useEffect(() => {
     if (appState.apiCommandId) {
       const currentCommand = appState.apiCommandsQueue.find(cmd => cmd.commandId === appState.apiCommandId)
       if (currentCommand) {
-        // todo to implement
-        // executeAPICall(currentCommand, dispatch)
+        executeAPIRequest(currentCommand, dispatch)
       } else {
         throw new Error("Unacceptable flow, no currentCommand")
       }
@@ -242,6 +249,7 @@ export function App() {
         setAuthTokenToContext(response.token)
         setLoginModalOpen(false)
         dispatch({ type: Action.ShowNotification, message: "Login successful!" })
+        // TODO !!! impl saving existing bookmarks to storage
       } else {
         throw new Error("Invalid response format")
       }
@@ -337,6 +345,7 @@ function getCurrentWindow() {
 declare global {
   interface Window {
     betaLogin: () => void
+    betaLogout: () => void
     pSBC: any
   }
 }

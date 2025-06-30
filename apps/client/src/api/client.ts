@@ -1,5 +1,7 @@
 import createClient from "openapi-fetch"
 import type { paths } from "./schema"
+import { components } from "./schema"
+import type { FolderWithItems } from "@tabme/shared-types"
 
 const baseUrl = process.env.NODE_ENV === "development"
   ? "http://localhost:3000"
@@ -7,6 +9,23 @@ const baseUrl = process.env.NODE_ENV === "development"
 
 // Create the API client with proper typing
 const clientSdk = createClient<paths>({ baseUrl })
+
+// Extract request/response types from OpenAPI schema instead of duplicating them
+type SyncChange = Omit<components["schemas"]["SyncChange"], "data"> & {
+  data?: any
+}
+
+// Extract types from OpenAPI paths for type safety
+export type CreateFolderPayload = paths["/api/folders"]["post"]["requestBody"]["content"]["application/json"]
+export type UpdateFolderPayload = paths["/api/folders/{folderId}"]["put"]["requestBody"]["content"]["application/json"]
+export type CreateItemPayload = paths["/api/items"]["post"]["requestBody"]["content"]["application/json"]
+export type CreateSpacePayload = paths["/api/spaces"]["post"]["requestBody"]["content"]["application/json"]
+
+// Use schema types directly for responses
+type FolderResponse = components["schemas"]["Folder"]
+type ItemResponse = components["schemas"]["BookmarkItem"]
+type SpaceResponse = components["schemas"]["Space"]
+type UserResponse = components["schemas"]["User"]
 
 // Helper function to set the auth token
 export function setAuthTokenToContext(token: string) {
@@ -20,6 +39,11 @@ export function setAuthTokenToContext(token: string) {
 export function writeAuthTokenToLS(token: string) {
   localStorage.setItem("authToken", token)
 }
+
+export function clearAuthTokenInLS() {
+  localStorage.removeItem("authToken")
+}
+
 
 export function getAuthToken(): string | null {
   return localStorage.getItem("authToken")
@@ -176,49 +200,133 @@ const sync = {
     }
 
     return data
-  },
+  }
+}
 
-  async getChanges(lastSyncVersion?: number, entityTypes?: string[]) {
-    const params = new URLSearchParams()
-    if (lastSyncVersion !== undefined) {
-      params.append("lastSyncVersion", lastSyncVersion.toString())
-    }
-    if (entityTypes && entityTypes.length > 0) {
-      params.append("entityTypes", entityTypes.join(","))
-    }
-
-    const { data, error } = await clientSdk.GET("/api/sync/changes", {
+// Folders endpoints
+const folders = {
+  async getBySpaceId(spaceId: string) {
+    const { data, error } = await clientSdk.GET("/api/folders/space/{spaceId}", {
       params: {
-        query: Object.fromEntries(params)
+        path: { spaceId }
       }
     })
 
     if (error) {
-      throw new Error("Get sync changes failed: " + (error || "Unknown error"))
+      throw new Error("Get folders failed: " + (error || "Unknown error"))
     }
 
     return data
   },
 
-  async applyChanges(changes: any[]) {
-    const { data, error } = await clientSdk.POST("/api/sync/apply", {
+  async create(payload: CreateFolderPayload): Promise<FolderWithItems> {
+    const { data, error } = await clientSdk.POST("/api/folders", {
+      body: payload
+    })
+
+    if (error) {
+      throw new Error("Create folder failed: " + (error || "Unknown error"))
+    }
+
+    return data as unknown as FolderWithItems
+  },
+
+  async update(folderId: string, updates: UpdateFolderPayload) {
+    const { data, error } = await clientSdk.PUT("/api/folders/{folderId}", {
+      params: {
+        path: { folderId }
+      },
+      body: updates
+    })
+
+    if (error) {
+      throw new Error("Update folder failed: " + (error || "Unknown error"))
+    }
+
+    return data
+  },
+
+  async delete(folderId: string) {
+    const { data, error } = await clientSdk.DELETE("/api/folders/{folderId}", {
+      params: {
+        path: { folderId }
+      }
+    })
+
+    if (error) {
+      throw new Error("Delete folder failed: " + (error || "Unknown error"))
+    }
+
+    return data
+  },
+
+  async createSync(sourceFolderId: string, targetFolderId: string, syncDirection: "BIDIRECTIONAL" | "ONE_WAY" = "BIDIRECTIONAL") {
+    const { data, error } = await clientSdk.POST("/api/folders/sync", {
       body: {
-        changes
+        sourceFolderId,
+        targetFolderId,
+        syncDirection
       }
     })
 
     if (error) {
-      throw new Error("Apply sync changes failed: " + (error || "Unknown error"))
+      throw new Error("Create folder sync failed: " + (error || "Unknown error"))
+    }
+
+    return data
+  }
+}
+
+// Items endpoints
+const items = {
+  async create(payload: CreateItemPayload) {
+    const { data, error } = await clientSdk.POST("/api/items", {
+      body: payload
+    })
+
+    if (error) {
+      throw new Error("Create item failed: " + (error || "Unknown error"))
     }
 
     return data
   },
 
-  async getStats() {
-    const { data, error } = await clientSdk.GET("/api/sync/stats")
+  async update(itemId: string, updates: Partial<CreateItemPayload>) {
+    const { data, error } = await clientSdk.PUT("/api/items/{itemId}", {
+      params: {
+        path: { itemId }
+      },
+      body: updates
+    })
 
     if (error) {
-      throw new Error("Get sync stats failed: " + (error || "Unknown error"))
+      throw new Error("Update item failed: " + (error || "Unknown error"))
+    }
+
+    return data
+  },
+
+  async delete(itemId: string) {
+    const { data, error } = await clientSdk.DELETE("/api/items/{itemId}", {
+      params: {
+        path: { itemId }
+      }
+    })
+
+    if (error) {
+      throw new Error("Delete item failed: " + (error || "Unknown error"))
+    }
+
+    return data
+  },
+
+  async bulkUpdatePositions(updates: Array<{ id: string, position: string }>) {
+    const { data, error } = await clientSdk.PUT("/api/items/bulk-positions", {
+      body: { updates }
+    })
+
+    if (error) {
+      throw new Error("Bulk update positions failed: " + (error || "Unknown error"))
     }
 
     return data
@@ -228,6 +336,8 @@ const sync = {
 const sdk = {
   auth,
   sync,
-  spaces
+  spaces,
+  folders,
+  items
 }
 export { clientSdk, sdk }

@@ -1,5 +1,5 @@
 import { createContext } from "react"
-import { Action, ActionPayload, APICommandPayload, APICommandPayloadFull, HistoryActionPayload, IAppState, UndoStep } from "./state"
+import { Action, ActionPayload, HistoryActionPayload, IAppState, UndoStep } from "./state"
 import { ColorTheme, IFolder, IFolderItem, ISpace, IWidget } from "../helpers/types"
 import { saveStateThrottled, savingStateKeys } from "./storage"
 import { addItemsToFolder, insertBetween, sortByPosition } from "../helpers/fractionalIndexes"
@@ -13,12 +13,19 @@ import {
   genUniqLocalId,
   updateFolder,
   updateFolderItem,
-  updateSpace
+  updateSpace, validateRemoteId
 } from "./actionHelpers"
 import { genNextRuntimeId, getRandomHEXColor, isArraysEqual } from "../helpers/utils"
 import { defaultStickerColor, stickerSizeM } from "../components/canvas/WidgetsHorMenu"
 import { applyTheme } from "./colorTheme"
 import { getAuthToken } from "../../api/client"
+import {
+  produceCreateFolderCommand,
+  produceCreateFolderItemCommand,
+  produceDeleteFolderCommand,
+  produceDeleteFolderItemsCommand, produceMoveFolderItemsCommand,
+  produceUpdateFolderCommand, produceUpdateFolderItemCommand
+} from "../../api/requestFactory"
 
 type ObjectWithRemoteId = {
   remoteId: number
@@ -45,15 +52,6 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
   //todo add error icon prop
   const showNotificationReducer = (message: string) => stateReducer0(state, { type: Action.ShowNotification, message, isError: false })
   const showErrorReducer = (message: string) => stateReducer0(state, { type: Action.ShowNotification, message, isError: true })
-
-  const getCommandsQueue = (state: IAppState, command: APICommandPayload): APICommandPayloadFull[] => {
-    return [...state.apiCommandsQueue, {
-      type: command.type,
-      body: command.body,
-      rollbackState: state,
-      commandId: genNextRuntimeId()
-    } as APICommandPayloadFull]
-  }
 
   function isNetworkAvailable(object?: { remoteId?: number }): object is ObjectWithRemoteId {
     return !!getAuthToken()
@@ -350,26 +348,18 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
      ********************************************************/
 
     case Action.CreateFolder: {
-      const currentSpace = findSpaceById(state, action.spaceId ?? state.currentSpaceId)
-      if (!currentSpace) {
+      const targetSpace = findSpaceById(state, action.spaceId ?? state.currentSpaceId)
+      if (!targetSpace) {
         return showErrorReducer(`Space not found`)
       }
 
-      const lastFolder = currentSpace.folders.at(-1)
+      const lastFolder = targetSpace.folders.at(-1)
       const newFolder: IFolder = {
         id: action.newFolderId ?? genUniqLocalId(),
         title: action.title ?? "New folder",
         items: addItemsToFolder(action.items ?? [], []),
         color: action.color ?? getRandomHEXColor(),
         position: action.position ?? insertBetween(lastFolder?.position ?? "", "")
-      }
-
-      let apiCommandsQueue = state.apiCommandsQueue
-      if (isNetworkAvailable()) {
-        apiCommandsQueue = getCommandsQueue(state, {
-          type: Action.CreateFolder,
-          body: { folder: newFolder }
-        })
       }
 
       const undoSteps = getUndoSteps(action, state, () => ({
@@ -379,13 +369,16 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
 
       return {
         ...state,
-        spaces: updateSpace(state.spaces, currentSpace.id, {
+        spaces: updateSpace(state.spaces, targetSpace.id, {
           folders: sortByPosition([
-            ...currentSpace.folders,
+            ...targetSpace.folders,
             newFolder
           ])
         }),
-        apiCommandsQueue,
+        apiCommandsQueue: produceCreateFolderCommand(state, {
+          ...newFolder,
+          spaceId: validateRemoteId(targetSpace.remoteId)
+        }),
         undoSteps
       }
     }
@@ -396,17 +389,6 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
 
       if (!deletingFolder || !parentSpace) {
         return showErrorReducer(`Deleting folder or space not found`)
-      }
-
-      let apiCommandsQueue = state.apiCommandsQueue
-
-      if (isNetworkAvailable(deletingFolder)) {
-        apiCommandsQueue = getCommandsQueue(state, {
-          type: Action.DeleteFolder,
-          body: {
-            folderId: deletingFolder.remoteId
-          }
-        })
       }
 
       //todo can be different when network supported
@@ -423,7 +405,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
             folders: space.folders.filter((f) => f.id !== action.folderId)
           }
         }),
-        apiCommandsQueue,
+        apiCommandsQueue: produceDeleteFolderCommand(state, validateRemoteId(deletingFolder.remoteId)),
         undoSteps
       }
     }
@@ -452,17 +434,6 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         return showErrorReducer(`Updating folder not found`)
       }
 
-      let apiCommandsQueue = state.apiCommandsQueue
-      if (isNetworkAvailable(targetFolder)) {
-        apiCommandsQueue = getCommandsQueue(state, {
-          type: Action.UpdateFolder,
-          body: {
-            folderId: targetFolder.remoteId,
-            folder: newProps
-          }
-        })
-      }
-
       const undoSteps = getUndoSteps(action, state, () => ({
         type: Action.UpdateFolder,
         folderId: action.folderId,
@@ -475,7 +446,10 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       return {
         ...state,
         spaces: updateFolder(state.spaces, action.folderId, newProps, !!newProps.position),
-        apiCommandsQueue,
+        apiCommandsQueue: produceUpdateFolderCommand(state, validateRemoteId(targetFolder.remoteId), {
+          //todo !!!! implement other props
+          ...newProps
+        }),
         undoSteps
       }
     }
@@ -518,10 +492,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         })
       }
 
-      let apiCommandsQueue = state.apiCommandsQueue
-      if (isNetworkAvailable(movingFolder)) {
-        //todo !!!
-      }
+      //todo !!!! impl server
 
       const undoSteps = getUndoSteps(action, state, () => ({
         type: Action.UpdateFolder,
@@ -532,7 +503,6 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       return {
         ...state,
         spaces,
-        apiCommandsQueue,
         undoSteps
       }
     }
@@ -550,20 +520,8 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         }
       })
 
-      let createdItem: IFolderItem = findItemById({ spaces }, action.item.id)!
+      const createdItem: IFolderItem = findItemById({ spaces }, action.item.id)!
       const targetFolder = findFolderById(state, action.folderId)
-      let apiCommandsQueue = state.apiCommandsQueue
-      if (isNetworkAvailable(targetFolder)) {
-        //todo maybe we should not check presence of removeId at all here. and just let it be resolved async?
-        // otherwise how I create folder with items in several actions?
-        apiCommandsQueue = getCommandsQueue(state, {
-          type: Action.CreateFolderItem, // TODO USE DIFFERENT ACTION TYPES !!!
-          body: {
-            folderId: targetFolder.remoteId,
-            item: createdItem
-          }
-        })
-      }
 
       const undoSteps = getUndoSteps(action, state, () => ({
         type: Action.DeleteFolderItems,
@@ -573,25 +531,22 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       return {
         ...state,
         spaces: spaces,
-        apiCommandsQueue,
+        apiCommandsQueue: produceCreateFolderItemCommand(state, {
+          id: createdItem.id,
+          title: createdItem.title,
+          url: createdItem.url,
+          position: createdItem.position,
+          favicon: createdItem.favIconUrl,
+          folderId: validateRemoteId(targetFolder?.remoteId)
+        }),
         undoSteps
       }
     }
 
     case Action.DeleteFolderItems: {
-      let apiCommandsQueue = state.apiCommandsQueue
       let removingItems = action.itemIds.map(itemId => findItemById(state, itemId)!)
-      if (isNetworkAvailable()) { // also decide what to do with validation of remoteId
-        const itemRemoteIds = removingItems.map(item => item.remoteId!)
-        apiCommandsQueue = getCommandsQueue(state, {
-          type: Action.DeleteFolderItems,
-          body: {
-            folderItemIds: itemRemoteIds
-          }
-        })
-      }
 
-      // TODO: Undo for deleting folders for network should be different
+      // TODO: !!! Undo for deleting folders for network should be different
       const undoSteps = getUndoSteps(action, state, () => ({
         type: Action.InitDashboard,
         spaces: state.spaces
@@ -611,10 +566,12 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         }
       }
 
+      const itemRemoteIds = removingItems.map(item => validateRemoteId(item.remoteId))
+
       return {
         ...state,
         spaces: action.itemIds.reduce(deleteItemsFromFolders, state.spaces),
-        apiCommandsQueue,
+        apiCommandsQueue: produceDeleteFolderItemsCommand(state, itemRemoteIds),
         undoSteps
       }
     }
@@ -634,8 +591,8 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         newProps.collapsed = action.collapsed
       }
 
-      const originalItem = findItemById(state, action.itemId)
-      if (!originalItem) {
+      const targetItem = findItemById(state, action.itemId)
+      if (!targetItem) {
         console.error("Item was not found for item:", action.itemId)
         return showErrorReducer("Item was not found")
       }
@@ -645,21 +602,10 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         return showErrorReducer("Folder was not found")
       }
 
-      let apiCommandsQueue = state.apiCommandsQueue
-      if (isNetworkAvailable(originalItem)) {
-        apiCommandsQueue = getCommandsQueue(state, {
-          type: Action.UpdateFolderItem,
-          body: {
-            folderItemId: originalItem.remoteId,
-            item: newProps
-          }
-        })
-      }
-
       const undoSteps = getUndoSteps(action, state, () => ({
         type: Action.UpdateFolderItem,
-        itemId: originalItem.id,
-        ...originalItem
+        itemId: targetItem.id,
+        ...targetItem
       }))
 
       return {
@@ -670,7 +616,9 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
           newProps,
           folderId
         ),
-        apiCommandsQueue,
+        apiCommandsQueue: produceUpdateFolderItemCommand(state, validateRemoteId(targetItem.remoteId), {
+          ...newProps
+        }),
         undoSteps
       }
     }
@@ -699,38 +647,24 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         items: addItemsToFolder(movingItems, folder.items, action.insertBeforeItemId)
       }))
 
-      let apiCommandsQueue = state.apiCommandsQueue
-      //todo decide what to do here
-
-      if (isNetworkAvailable()) {
-        if (!targetFolder?.remoteId || movingItems.some(item => !item.remoteId)) {
-          return showErrorReducer("Network operation not available")
-        }
-        apiCommandsQueue = getCommandsQueue(state, {
-          type: Action.MoveFolderItems,
-          body: {
-            folderId: targetFolder.remoteId,
-            items: action.itemIds.map(itemId => {
-              const item = findItemById({ spaces }, itemId)!
-              return {
-                folderItemId: item.remoteId!,
-                position: item.position
-              }
-            })
-          }
-        })
-      }
-
-      //todo Generate undo actions to restore each item to its original folder and position
+      //todo !!! Generate undo actions to restore each item to its original folder and position
       const undoSteps = getUndoSteps(action, state, () => ({
         type: Action.InitDashboard,
         spaces: state.spaces
       }))
 
+      const updatedItemsPositions = action.itemIds.map(itemId => {
+        const item = findItemById({ spaces }, itemId)!
+        return {
+          remoteFolderItemId: validateRemoteId(item.remoteId),
+          position: item.position
+        }
+      })
+
       return {
         ...state,
         spaces: spaces,
-        apiCommandsQueue,
+        apiCommandsQueue: produceMoveFolderItemsCommand(state, validateRemoteId(targetFolder?.remoteId), updatedItemsPositions),
         undoSteps
       }
     }
@@ -1017,7 +951,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
     }
 
     case Action.APIConfirmEntityCreated: {
-      if (action.entityType === "bookmark") {
+      if (action.entityType === "item") {
         return {
           ...state,
           spaces: updateFolderItem(state.spaces, action.localId, {

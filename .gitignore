@@ -8,6 +8,10 @@ builds
 node_modules
 .env
 
+# Log files
+logs/
+*.log
+
 # Generated API files
 apps/client/src/api/schema.ts
 apps/server/openapi.json

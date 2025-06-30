@@ -34,6 +34,7 @@ Guidelines for implementing backend logic, APIs, and data persistence.
 | Rule File                          | Description                                                 |
 | :--------------------------------- | :---------------------------------------------------------- |
 | @prisma.mdc                        | How to use Prisma                                           |
+| @client-server-communication.mdc   | Client-server communication architecture and data sync      |
 
 ## Frontend & Client
 
@@ -64,6 +65,7 @@ General guidelines for application testing.
 
 ## TypeScript General Guidelines
 
+- Dont use "any", all types should be explicit
 - Use English for all code and documentation.
 - Always declare the type of each variable and function (parameters and return value).
   - Avoid using any.

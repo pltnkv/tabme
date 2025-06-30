@@ -1,6 +1,6 @@
 export interface IObject {
   id: number // local id
-  remoteId?: number // server id
+  remoteId?: string
   position: string
 }
 
@@ -21,17 +21,29 @@ export interface IFolder extends IObject {
   archived?: boolean
 }
 
-export interface IFolderItem extends IObject {
+export interface IBookmarkItem extends IObject {
+  type: 'bookmark'
   favIconUrl: string
   title: string
   url: string
-  isSection?: boolean // todo - replace on "type later". not store bool on server. Also rename to "Group"
   collapsed?: boolean
   inEdit?: boolean
 
   /** @deprecated */
+  isSection?: boolean
+
+  /** @deprecated */
   archived?: true
 }
+
+export interface IGroupItem extends IObject {
+  type: 'group'
+  title: string
+
+  items: IBookmarkItem[]
+}
+
+export type IFolderItem = IBookmarkItem | IGroupItem
 
 export type WidgetType = "Sticker"
 

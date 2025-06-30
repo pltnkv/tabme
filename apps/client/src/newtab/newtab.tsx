@@ -1,6 +1,6 @@
 import React from "react"
 import { App } from "./components/App"
-import { setInitAppState } from "./state/state"
+import { Action, setInitAppState } from "./state/state"
 import { getStateFromLS, IStoredAppState } from "./state/storage"
 import { createRoot } from "react-dom/client"
 import { insertBetween, regeneratePositions } from "./helpers/fractionalIndexes"
@@ -12,6 +12,7 @@ import { createTheme, MantineColorsTuple, MantineProvider } from "@mantine/core"
 import "@mantine/core/styles.css"
 import { isDarkMode } from "./state/colorTheme"
 import { getAuthToken, sdk, setAuthTokenToContext } from "../api/client"
+import { convertRemoteStateToLocal } from "./state/convertRemoteStateToLocal"
 
 // other css files are required only if
 // you are using components from the corresponding package
@@ -45,20 +46,7 @@ const theme = createTheme({
 //     font-size: var(--mantine-font-size-md);
 //     line-height: var(--mantine-line-height);
 
-const authToken = getAuthToken()
-if (authToken) {
-  setAuthTokenToContext(authToken)
-  sdk.spaces.getAll().then(res => {
-    if (res) {
-      const spaces = res
-      console.log("spaces", spaces)
-    }
-  })
-
-  runLocally()
-} else {
-  runLocally()
-}
+runLocally()
 
 async function runLocally() {
   await initStats()

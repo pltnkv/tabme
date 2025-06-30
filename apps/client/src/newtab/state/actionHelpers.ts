@@ -261,3 +261,11 @@ export function getSectionChildren(sectionId: number, spaces: ISpace[]): IFolder
     return undefined
   }
 }
+
+export function validateRemoteId(remoteId: string | undefined): string {
+  if (remoteId) {
+    return remoteId
+  } else {
+    throw new Error("remoteId can not be undefined")
+  }
+}

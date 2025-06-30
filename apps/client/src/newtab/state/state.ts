@@ -239,20 +239,19 @@ export enum Action {
   APIConfirmEntityCreated = "api-confirm-entity-created",
 }
 
-export type APICommandPayload = (
-  // todo it should use dedicated Actions
-  | { type: Action.CreateFolder; body: { folder: Partial<IFolder> } }
-  | { type: Action.DeleteFolder; body: { folderId: number } }
-  | { type: Action.UpdateFolder; body: { folderId: number, folder: Partial<IFolder> } }
-  | { type: Action.MoveFolder; body: { folderId: number, position: string } }
+// export type APICommandPayload = (
+//   | { type: Action.CreateFolder; body: { folder: Partial<IFolder> } }
+//   | { type: Action.DeleteFolder; body: { folderId: number } }
+//   | { type: Action.UpdateFolder; body: { folderId: number, folder: Partial<IFolder> } }
+//   | { type: Action.MoveFolder; body: { folderId: number, position: string } }
+//
+//   | { type: Action.CreateFolderItem; body: { folderId: number, item: IFolderItem } }
+//   | { type: Action.DeleteFolderItems; body: { folderItemIds: number[] } }
+//   | { type: Action.UpdateFolderItem; body: { folderItemId: number, item: Partial<IFolderItem> } }
+//   | { type: Action.MoveFolderItems; body: { folderId: number, items: { folderItemId: number, position: string }[] } }
+//   )
 
-  | { type: Action.CreateFolderItem; body: { folderId: number, item: IFolderItem } }
-  | { type: Action.DeleteFolderItems; body: { folderItemIds: number[] } }
-  | { type: Action.UpdateFolderItem; body: { folderItemId: number, item: Partial<IFolderItem> } }
-  | { type: Action.MoveFolderItems; body: { folderId: number, items: { folderItemId: number, position: string }[] } }
-  )
-
-export type APICommandPayloadFull = APICommandPayload & { commandId: number, rollbackState: IAppState }
+export type APICommandPayloadFull = { commandId: number, rollbackState: IAppState, req: (dispatch:ActionDispatcher) => Promise<void> }
 export type HistoryActionPayload = { byUndo?: boolean, historyStepId?: number }
 export type ActionPayload = (
   | { type: Action.Undo, dispatch: ActionDispatcher }
@@ -302,5 +301,5 @@ export type ActionPayload = (
   | { type: Action.RestoreWidgetOrder; data: { spaceId: number, orderedWidgetIds: number[] }[] }
 
   | { type: Action.APICommandResolved; commandId: number, }
-  | { type: Action.APIConfirmEntityCreated; localId: number; remoteId: number; entityType: "folder" | "bookmark" }
+  | { type: Action.APIConfirmEntityCreated; localId: number; remoteId: string; entityType: "folder" | "item" }
   ) & HistoryActionPayload;

@@ -18,6 +18,7 @@
   "author": "",
   "license": "custom",
   "dependencies": {
+    "@tabme/shared-types": "file:../../packages/shared-types",
     "@mantine/core": "^8.1.2",
     "@mantine/form": "^8.1.2",
     "@mantine/hooks": "^8.1.2",

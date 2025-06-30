@@ -54,7 +54,7 @@ export const saveLastStateImmediately = () => {
   timeoutId = undefined
 }
 
-const savingStateDefaultValues = { // if was not saved to LS yet
+export const savingStateDefaultValues = { // if was not saved to LS yet
   "spaces": [],
   "currentSpaceId": undefined,
   "sidebarCollapsed": false,

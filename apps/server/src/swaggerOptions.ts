@@ -155,10 +155,6 @@ export const swaggerOptions = {
               type: 'string',
               description: 'Position for ordering folders',
             },
-            twoColumn: {
-              type: 'boolean',
-              description: 'Whether folder displays in two columns',
-            },
             collapsed: {
               type: 'boolean',
               description: 'Whether folder is collapsed',
@@ -201,7 +197,7 @@ export const swaggerOptions = {
               format: 'uri',
               description: 'Bookmark URL',
             },
-            favIconUrl: {
+            favicon: {
               type: 'string',
               format: 'uri',
               description: 'Favicon URL',

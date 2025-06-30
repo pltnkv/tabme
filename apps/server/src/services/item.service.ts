@@ -1,7 +1,6 @@
 import prisma from '../config/db';
 import { Item } from '@prisma/client';
 import spaceService from './space.service';
-import folderService from './folder.service';
 
 export interface CreateItemData {
   title: string;

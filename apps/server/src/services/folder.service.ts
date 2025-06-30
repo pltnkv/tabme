@@ -1,35 +1,12 @@
 import prisma from '../config/db';
-import { Folder, Item, FolderSync } from '@prisma/client';
+import { Folder, FolderSync } from '@prisma/client';
 import spaceService from './space.service';
-
-export interface CreateFolderData {
-  title: string;
-  color?: string;
-  position: string;
-  spaceId: string;
-}
-
-export interface UpdateFolderData {
-  title?: string;
-  color?: string;
-  position?: string;
-}
-
-export interface FolderWithItems extends Folder {
-  items: Item[];
-  _count?: {
-    items: number;
-  };
-  syncedCopies?: Folder[];
-  sourceFolder?: Folder | null;
-}
-
-export interface CreateSyncData {
-  sourceFolderId: string;
-  targetFolderId: string;
-  syncDirection?: 'BIDIRECTIONAL' | 'ONE_WAY';
-  conflictStrategy?: 'LATEST_WINS' | 'MANUAL_RESOLVE' | 'SOURCE_WINS';
-}
+import type { 
+  CreateFolderData, 
+  UpdateFolderData, 
+  FolderWithItems, 
+  CreateSyncData 
+} from '@tabme/shared-types';
 
 class FolderService {
   async createFolder(userId: string, folderData: CreateFolderData): Promise<Folder> {
@@ -84,10 +61,32 @@ class FolderService {
       throw new Error('Folder not found');
     }
 
-    // Check if user has access to the space
-    const hasAccess = await spaceService.checkUserSpaceAccess(userId, folder.spaceId);
-    if (!hasAccess) {
+    // Check if user has access to the current space
+    const hasCurrentAccess = await spaceService.checkUserSpaceAccess(userId, folder.spaceId);
+    if (!hasCurrentAccess) {
       throw new Error('Access denied');
+    }
+
+    // If moving to a different space, check access to target space
+    if (updateData.spaceId && updateData.spaceId !== folder.spaceId) {
+      const hasTargetAccess = await spaceService.checkUserSpaceAccess(userId, updateData.spaceId);
+      if (!hasTargetAccess) {
+        throw new Error('Access denied to target space');
+      }
+
+      // If this is a synced copy, prevent moving it to a different space
+      if (folder.isSyncedCopy) {
+        throw new Error('Cannot move synced folder copies to different spaces');
+      }
+
+      // If this folder has synced copies, we need to handle them appropriately
+      const syncedCopies = await prisma.folder.findMany({
+        where: { sourceFolderId: folderId }
+      });
+
+      if (syncedCopies.length > 0) {
+        throw new Error('Cannot move folder with synced copies to different spaces. Remove synced copies first.');
+      }
     }
 
     const updatedFolder = await prisma.folder.update({
@@ -95,9 +94,11 @@ class FolderService {
       data: updateData
     });
 
-    // If this folder has synced copies, update them too
+    // If this folder has synced copies, update them too (but not spaceId)
     if (folder.isSyncedCopy === false) {
-      await this.syncFolderChanges(folderId, updateData);
+      const syncData = { ...updateData };
+      delete syncData.spaceId; // Don't sync spaceId changes to copies
+      await this.syncFolderChanges(folderId, syncData);
     }
 
     return updatedFolder;

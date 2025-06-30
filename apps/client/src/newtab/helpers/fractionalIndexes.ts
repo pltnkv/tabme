@@ -103,7 +103,6 @@ export function sortByPosition<T>(foldersOrItems: T[], doSorting: boolean = true
   if (!doSorting) {
     return foldersOrItems
   }
-  console.log("!!!sortByPosition")
   return foldersOrItems.sort((a: any, b: any) => { //todo fix it also
     if (a.position < b.position) {
       return -1

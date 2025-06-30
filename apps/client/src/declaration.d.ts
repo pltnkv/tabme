@@ -12,3 +12,7 @@ declare module "mixpanel-browser" {
   const mixpanel: any
   export default mixpanel
 }
+
+type Prettify<T> = {
+  [K in keyof T]: T[K]
+} & {}

@@ -1,0 +1,190 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Client-Server Communication Architecture
+
+This document describes the communication architecture between the Tabme Chrome extension (client) and the Node.js backend API (server), focusing on data synchronization, authentication, and state management.
+
+## Core Principles
+
+### 1. Local-First Architecture
+- **Primary Data Source**: Client reads and renders data from `localStorage` first
+- **Progressive Enhancement**: Server data is fetched asynchronously to update local state
+- **Offline Capability**: Application remains functional without server connection
+- **Immediate Responsiveness**: UI updates instantly using local data
+
+### 2. Background Script Communication
+- **Centralized Communication**: All server requests are handled by the background script
+- **Cross-Window Sharing**: Single background script serves all extension windows/tabs
+- **Persistent Connection**: Background script maintains authentication state across sessions
+- **Channel Communication**: Uses `BroadcastChannel("sync-state-channel")` for inter-script communication
+
+## Data Loading from Server
+
+### Authentication Flow
+1. **Token Check**: Client checks for `authToken` in `localStorage` on startup
+2. **Authenticated Requests**: If token exists, proceed with data synchronization
+3. **Unauthenticated State**: If no token, client operates in local-only mode
+
+### Content Synchronization
+1. **ETag-Based Sync**: Client requests `GET /api/sync/full` with stored `etag` header
+2. **Complete Data Response**: Endpoint returns all spaces, folders, items, and stickers
+3. **Conditional Updates**: Server responds with:
+   - `304 Not Modified` if content unchanged (etag matches)
+   - `200 OK` with full content if changes detected
+4. **ETag Storage**: New `etag` value stored in `localStorage` for subsequent requests
+
+### ETag Management
+- **Server-Side**: ETag stored on `User` entity in database
+- **Update Triggers**: ETag increments when any content changes:
+  - Spaces (create, update, delete)
+  - Folders (create, update, delete, move)
+  - Items (create, update, delete, move)
+  - Stickers (create, update, delete)
+  - Synced folder relationships
+- **Client-Side**: ETag managed manually and stored in `localStorage`
+
+## Data Saving to Server
+
+### Optimistic Updates
+1. **Immediate Application**: Client applies changes to local state instantly
+2. **User Feedback**: UI reflects changes without waiting for server confirmation
+3. **Background Sync**: Server request sent asynchronously via background script
+
+### Server Communication Flow
+1. **Request Dispatch**: Background script sends mutation request to appropriate endpoint
+2. **ETag Response**: Each successful response includes updated `etag` value
+3. **Local ETag Update**: New `etag` stored in `localStorage` for future sync requests
+4. **State Confirmation**: Local state remains as-is on successful server response
+
+### Error Handling
+1. **Request Failure Detection**: Background script monitors for failed requests
+2. **State Reversion**: On failure, client reverts to previous state
+3. **User Notification**: Error message displayed to inform user of failure
+4. **Retry Logic**: Failed requests can be retried based on error type
+
+## Communication Channels
+
+### BroadcastChannel Architecture
+- **Channel Name**: `"sync-state-channel"`
+- **Purpose**: Communication between content scripts and background script
+- **Message Types**:
+  - Authentication state updates
+  - Content synchronization requests
+  - Error notifications
+  - State reversion commands
+
+### Message Flow
+```typescript
+// Content Script → Background Script
+channel.postMessage({
+  type: 'SYNC_REQUEST',
+  payload: { /* mutation data */ }
+});
+
+// Background Script → Content Script
+channel.postMessage({
+  type: 'SYNC_RESPONSE',
+  payload: { success: boolean, etag?: string, error?: string }
+});
+```
+
+## API Endpoints
+
+### Data Reading Endpoint
+- **`GET /api/sync/full`**: Fetch all user content with ETag support
+  - Returns complete dataset: spaces, folders, items, and stickers
+  - Supports conditional requests via ETag headers
+  - Used exclusively for data synchronization from server
+
+### Data Modification Endpoints
+Specific endpoints are used for all data modifications:
+
+**Spaces:**
+- **`POST /api/spaces`**: Create new space
+- **`PUT /api/spaces/:id`**: Update space
+- **`DELETE /api/spaces/:id`**: Delete space
+
+**Folders:**
+- **`POST /api/folders`**: Create folder
+- **`PUT /api/folders/:id`**: Update folder
+- **`DELETE /api/folders/:id`**: Delete folder
+
+**Items:**
+- **`POST /api/items`**: Create item
+- **`PUT /api/items/:id`**: Update item
+- **`DELETE /api/items/:id`**: Delete item
+
+**Stickers:**
+- **`POST /api/stickers`**: Create sticker
+- **`PUT /api/stickers/:id`**: Update sticker
+- **`DELETE /api/stickers/:id`**: Delete sticker
+
+**Additional endpoints**: For synced folder relationships and other specialized operations
+
+### Request Headers
+- **Authorization**: `Bearer ${authToken}`
+- **If-None-Match**: `${storedEtag}` (for conditional requests)
+
+### Response Headers
+- **ETag**: Current content version identifier
+- **Cache-Control**: Caching directives for client
+
+## State Management
+
+### Local Storage Schema
+```typescript
+interface LocalStorage {
+  authToken?: string;
+  etag?: string;
+  spaces: Space[];
+  folders: Folder[];
+  items: Item[];
+  stickers: Sticker[];
+  // ... other state
+}
+```
+
+### Synchronization States
+- **SYNCED**: Local and server state match
+- **PENDING**: Local changes not yet confirmed by server
+- **ERROR**: Server request failed, local state may be inconsistent
+- **OFFLINE**: No server connection, operating in local-only mode
+
+## Error Recovery
+
+### Conflict Resolution
+1. **Server Conflicts**: Server returns newer ETag, client must fetch latest data
+2. **Merge Strategy**: Client attempts to merge local changes with server state
+3. **User Resolution**: Complex conflicts may require user intervention
+
+### Retry Mechanisms
+- **Exponential Backoff**: Progressive delay between retry attempts
+- **Request Queuing**: Failed requests queued for retry when connection restored
+- **Circuit Breaker**: Temporary suspension of requests after repeated failures
+
+## Security Considerations
+
+### Authentication
+- **JWT Tokens**: Secure token-based authentication
+- **Token Refresh**: Automatic token renewal before expiration
+- **Secure Storage**: Tokens stored securely in extension storage
+
+### Data Validation
+- **Client-Side**: Input validation before sending to server
+- **Server-Side**: Complete validation and sanitization of all requests
+- **Type Safety**: TypeScript interfaces ensure data consistency
+
+## Performance Optimizations
+
+### Caching Strategy
+- **ETag Caching**: Avoid unnecessary data transfers
+- **Selective Updates**: Only sync changed entities when possible
+- **Batch Operations**: Group multiple changes into single requests
+
+### Background Sync
+- **Debouncing**: Delay sync operations to batch rapid changes
+- **Priority Queue**: Prioritize user-initiated changes over background sync
+- **Connection Awareness**: Adapt sync frequency based on connection quality

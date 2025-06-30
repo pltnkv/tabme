@@ -19,7 +19,8 @@ const folderValidation = [
 const updateFolderValidation = [
   body('title').optional().notEmpty().trim().withMessage('Folder title cannot be empty'),
   body('position').optional().notEmpty().withMessage('Position cannot be empty'),
-  body('color').optional().matches(/^#[0-9A-F]{6}$/i).withMessage('Color must be a valid hex color')
+  body('color').optional().matches(/^#[0-9A-F]{6}$/i).withMessage('Color must be a valid hex color'),
+  body('spaceId').optional().isUUID().withMessage('Space ID must be a valid UUID')
 ];
 
 const syncValidation = [

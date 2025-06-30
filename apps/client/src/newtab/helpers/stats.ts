@@ -103,6 +103,7 @@ export type CommonStatProps = {
   zTabmeType: string
   zColorTheme: string
   zSidebarCollapsed: boolean
+  zVersion: string
 }
 
 type EventOptionsMap = {
@@ -173,7 +174,8 @@ type EventOptionsMap = {
 };
 
 let commonProps: Partial<CommonStatProps> = {
-  zTabmeType: __OVERRIDE_NEWTAB ? "newtab" : "overrideless"
+  zTabmeType: __OVERRIDE_NEWTAB ? "newtab" : "overrideless",
+  zVersion: chrome.runtime.getManifest().version
 }
 
 export function setCommonStatProps(props: Partial<CommonStatProps>) {

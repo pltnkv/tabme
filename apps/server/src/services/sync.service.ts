@@ -1,5 +1,6 @@
 import prisma from '../config/db';
 import { SyncLog } from '@prisma/client';
+import { logError } from '../utils/logger';
 
 export interface SyncData {
   operation: 'CREATE' | 'UPDATE' | 'DELETE' | 'RESTORE';
@@ -105,6 +106,7 @@ class SyncService {
         // Log the sync operation
         await this.createSyncLog(userId, change);
       } catch (error) {
+        logError(error, `Failed to apply sync change for ${change.entityType}:${change.entityId}`);
         success = false;
         errors.push(`Failed to apply change for ${change.entityType}:${change.entityId} - ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
@@ -178,13 +180,16 @@ class SyncService {
         });
         break;
       case 'UPDATE':
+        // Build update data dynamically to include spaceId if provided
+        const updateData: any = {};
+        if (data.title !== undefined) updateData.title = data.title;
+        if (data.color !== undefined) updateData.color = data.color;
+        if (data.position !== undefined) updateData.position = data.position;
+        if (data.spaceId !== undefined) updateData.spaceId = data.spaceId;
+
         await prisma.folder.update({
           where: { id: entityId },
-          data: {
-            title: data.title,
-            color: data.color,
-            position: data.position
-          }
+          data: updateData
         });
         break;
       case 'DELETE':
@@ -308,11 +313,11 @@ class SyncService {
       take: 10
     });
 
-    const lastSyncAt = recentLogs.length > 0 ? recentLogs[0].timestamp : null;
+    // const lastSyncAt = recentLogs.length > 0 ? recentLogs[0].timestamp : null;
 
     return {
       totalSyncOperations: totalLogs,
-      lastSyncAt,
+      // lastSyncAt,
       recentOperations: recentLogs
     };
   }

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import userService from '../services/user.service';
 import { validationResult } from 'express-validator';
+import { logError } from '../utils/logger';
 
 class UserController {
   async getProfile(req: Request, res: Response): Promise<void> {
@@ -21,6 +22,7 @@ class UserController {
       const { password, ...userWithoutPassword } = user;
       res.json(userWithoutPassword);
     } catch (error) {
+      logError(error, 'Failed to get user profile');
       res.status(500).json({ error: 'Failed to get user profile' });
     }
   }
@@ -46,6 +48,7 @@ class UserController {
       const { password, ...userWithoutPassword } = updatedUser;
       res.json(userWithoutPassword);
     } catch (error) {
+      logError(error, 'Failed to update user profile');
       res.status(500).json({ error: 'Failed to update profile' });
     }
   }
@@ -61,6 +64,7 @@ class UserController {
       const settings = await userService.getUserSettings(userId);
       res.json(settings);
     } catch (error) {
+      logError(error, 'Failed to get user settings');
       res.status(500).json({ error: 'Failed to get user settings' });
     }
   }
@@ -82,6 +86,7 @@ class UserController {
       const settings = await userService.updateUserSettings(userId, req.body);
       res.json(settings);
     } catch (error) {
+      logError(error, 'Failed to update user settings');
       res.status(500).json({ error: 'Failed to update user settings' });
     }
   }
@@ -97,6 +102,7 @@ class UserController {
       await userService.deleteUser(userId);
       res.json({ message: 'Account deleted successfully' });
     } catch (error) {
+      logError(error, 'Failed to delete user account');
       res.status(500).json({ error: 'Failed to delete account' });
     }
   }

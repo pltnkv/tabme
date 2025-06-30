@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import userService from '../services/user.service';
+import { logError } from '../utils/logger';
 
 export const authenticate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -27,6 +28,7 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
 
     next();
   } catch (error) {
+    logError(error, 'Authentication middleware error');
     res.status(500).json({ error: 'Authentication error' });
   }
 };
@@ -50,6 +52,7 @@ export const optionalAuth = async (req: Request, res: Response, next: NextFuncti
 
     next();
   } catch (error) {
+    logError(error, 'Optional authentication middleware error');
     // For optional auth, we don't fail on errors, just proceed without user
     next();
   }
