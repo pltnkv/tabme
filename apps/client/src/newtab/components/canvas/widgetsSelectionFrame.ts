@@ -1,5 +1,5 @@
 import { IOffset, IPoint } from "../../helpers/MathTypes"
-import { getIdFromElement } from "../../dragging/dragAndDrop"
+import { getFolderItemId } from "../../dragging/dragAndDrop"
 import { uniteRects } from "../../helpers/mathUtils"
 
 export type WidgetInfo = {
@@ -12,7 +12,7 @@ export function updateWidgetsSelectionFrame_RAF_NotPerformant() {
   requestAnimationFrame(() => {
     const widgetsElements = Array.from(document.querySelectorAll(".widget.selected")) as HTMLElement[]
     const selectedWidgetsInfos: WidgetInfo[] = widgetsElements.map(el => ({
-      id: getIdFromElement(el),
+      id: getFolderItemId(el),
       rect: el.getBoundingClientRect(),
       element: el
     }))

@@ -1,6 +1,6 @@
 import { ActionDispatcher } from "./actions"
-import { ColorTheme, IFolder, IFolderItem, IFolderItemToCreate, ISpace, IWidgetContent, IWidgetPos } from "../helpers/types"
-import { IStoredAppState } from "./storage"
+import { ColorTheme, IFolder, IFolderItemToCreate, ISpace, IWidgetContent, IWidgetPos } from "../helpers/types"
+import { currentAppVersion, IStoredAppState } from "./storage"
 import { RecentItem } from "../helpers/recentHistoryUtils"
 import { WhatsNew } from "../helpers/whats-new"
 import Tab = chrome.tabs.Tab
@@ -85,8 +85,6 @@ export type IAppState = {
 
   availableWhatsNew: WhatsNew[]
 
-  hasHiddenObjects: boolean
-
   tooltipsEnabled: boolean
 
   tutorialVisible: boolean
@@ -110,7 +108,7 @@ export type IAppState = {
 }
 
 let initState: IAppState = {
-  version: 2,
+  version: currentAppVersion,
   folders: [],
   spaces: [],
   currentSpaceId: -1,
@@ -136,8 +134,7 @@ let initState: IAppState = {
 
   availableWhatsNew: [],
 
-  hasHiddenObjects: false,
-  tooltipsEnabled: false,
+  tooltipsEnabled: true,
   tutorialVisible: false,
 
   page: undefined,
@@ -198,7 +195,6 @@ export enum Action {
   UpdateAppState = "update-app-state", // generic way to set simple value into AppState
   SetCollapsedAllFoldersInCurSpace = "toggle-collapse-all-folders",
 
-  // CRUD OPERATIONS — causes saving on server
   CreateSpace = "create-space",
   DeleteSpace = "delete-space",
   UpdateSpace = "update-space",
@@ -213,7 +209,6 @@ export enum Action {
   MoveFolder = "move-folder",
 
   CreateFolderItem = "create-folder-item",
-  CreateFolderItems = "create-folder-items",
   DeleteFolderItems = "delete-folder-items",
   UpdateFolderItem = "update-folder-item",
   MoveFolderItems = "move-folder-items",
@@ -239,19 +234,7 @@ export enum Action {
   APIConfirmEntityCreated = "api-confirm-entity-created",
 }
 
-// export type APICommandPayload = (
-//   | { type: Action.CreateFolder; body: { folder: Partial<IFolder> } }
-//   | { type: Action.DeleteFolder; body: { folderId: number } }
-//   | { type: Action.UpdateFolder; body: { folderId: number, folder: Partial<IFolder> } }
-//   | { type: Action.MoveFolder; body: { folderId: number, position: string } }
-//
-//   | { type: Action.CreateFolderItem; body: { folderId: number, item: IFolderItem } }
-//   | { type: Action.DeleteFolderItems; body: { folderItemIds: number[] } }
-//   | { type: Action.UpdateFolderItem; body: { folderItemId: number, item: Partial<IFolderItem> } }
-//   | { type: Action.MoveFolderItems; body: { folderId: number, items: { folderItemId: number, position: string }[] } }
-//   )
-
-export type APICommandPayloadFull = { commandId: number, rollbackState: IAppState, req: (dispatch:ActionDispatcher) => Promise<void> }
+export type APICommandPayloadFull = { commandId: number, rollbackState: IAppState, req: (dispatch: ActionDispatcher) => Promise<void> }
 export type HistoryActionPayload = { byUndo?: boolean, historyStepId?: number }
 export type ActionPayload = (
   | { type: Action.Undo, dispatch: ActionDispatcher }
@@ -277,14 +260,13 @@ export type ActionPayload = (
 
   | { type: Action.CreateFolder; newFolderId?: number; title?: string; color?: string; position?: string; items?: IFolderItemToCreate[]; spaceId?: number, folderType?: string }
   | { type: Action.DeleteFolder; folderId: number; }
-  | { type: Action.UpdateFolder; folderId: number; title?: string; color?: string; twoColumn?: boolean; position?: string, collapsed?: boolean }
+  | { type: Action.UpdateFolder; folderId: number; title?: string; color?: string; position?: string, collapsed?: boolean }
   | { type: Action.MoveFolder; folderId: number; targetSpaceId: number, insertBeforeFolderId: number | undefined; }
 
-  | { type: Action.CreateFolderItem; folderId: number; insertBeforeItemId: number | undefined; item: IFolderItemToCreate; }
-  | { type: Action.CreateFolderItems; folderId: number; items: IFolderItemToCreate[]; }
+  | { type: Action.CreateFolderItem; folderId: number; groupId: number | undefined; insertBeforeItemId: number | undefined; item: IFolderItemToCreate; }
   | { type: Action.DeleteFolderItems; itemIds: number[] }
-  | { type: Action.UpdateFolderItem; itemId: number; title?: string; url?: string; favIconUrl?: string, collapsed?: boolean }
-  | { type: Action.MoveFolderItems; itemIds: number[]; targetFolderId: number; insertBeforeItemId: number | undefined; }
+  | { type: Action.UpdateFolderItem; itemId: number; props: { title?: string; url?: string; favIconUrl?: string, collapsed?: boolean } }
+  | { type: Action.MoveFolderItems; itemIds: number[]; targetFolderId: number; targetGroupId: number | undefined; insertBeforeItemId: number | undefined; }
 
   | { type: Action.SaveBookmarksToCloud; }
   | { type: Action.DeleteEverything; }

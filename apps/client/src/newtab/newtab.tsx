@@ -1,18 +1,14 @@
 import React from "react"
 import { App } from "./components/App"
-import { Action, setInitAppState } from "./state/state"
-import { getStateFromLS, IStoredAppState } from "./state/storage"
+import { setInitAppState } from "./state/state"
+import { getStateFromLS } from "./state/storage"
 import { createRoot } from "react-dom/client"
-import { insertBetween, regeneratePositions } from "./helpers/fractionalIndexes"
-import { ISpace } from "./helpers/types"
-import { genUniqLocalId } from "./state/actionHelpers"
 import { initStats } from "./helpers/stats"
 import { preprocessLoadedState } from "./state/preprocessLoadedState"
 import { createTheme, MantineColorsTuple, MantineProvider } from "@mantine/core"
 import "@mantine/core/styles.css"
 import { isDarkMode } from "./state/colorTheme"
-import { getAuthToken, sdk, setAuthTokenToContext } from "../api/client"
-import { convertRemoteStateToLocal } from "./state/convertRemoteStateToLocal"
+import { migrateSectionsToGroups_state, migrateToSpaces_state } from "./helpers/migrations"
 
 // other css files are required only if
 // you are using components from the corresponding package
@@ -52,7 +48,8 @@ async function runLocally() {
   await initStats()
   // loading state from LS
   getStateFromLS((res) => {
-    migrateToSpaces(res)
+    migrateToSpaces_state(res)
+    migrateSectionsToGroups_state(res)
     preprocessLoadedState(res)
     setInitAppState(res)
     mountApp()
@@ -68,24 +65,5 @@ function mountApp() {
     </MantineProvider>
     // </React.StrictMode>
   )
-}
-
-// TODO remove in JUNE WHEN EVERYONE has version more than v1.30
-function migrateToSpaces(state: IStoredAppState) {
-  if (Array.isArray(state.folders)) {
-    const initSpace: ISpace = {
-      id: genUniqLocalId(),
-      title: "Bookmarks",
-      folders: regeneratePositions(state.folders.map(f => {
-        return {
-          ...f,
-          items: regeneratePositions(f.items)
-        }
-      })),
-      position: insertBetween("", "")
-    }
-    state.spaces = [initSpace]
-    state.folders = null! // to prevent the next migrations
-  }
 }
 

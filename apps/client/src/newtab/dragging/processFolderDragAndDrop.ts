@@ -5,7 +5,7 @@ import {
   createPlaceholder,
   DropArea,
   getFolderId,
-  getOverlappedDropArea,
+  getOverlappedFolderDropArea,
   initSpacesSwitcher,
   PConfigFolder
 } from "./dragAndDrop"
@@ -40,7 +40,7 @@ export function processFolderDragAndDrop(mouseDownEvent: React.MouseEvent,
         placeholder.remove()
         dropArea = undefined
       } else {
-        dropArea = getOverlappedDropArea(dropFoldersAreas, e)
+        dropArea = getOverlappedFolderDropArea(dropFoldersAreas, e)
         if (dropArea) {
           const insertBefore = e.clientX < dropArea.rect.left + dropArea.rect.width / 2
           targetInsertBeforeFolderId = calculateTargetInsertBeforeFolderId(dropFoldersAreas, dropArea, insertBefore)

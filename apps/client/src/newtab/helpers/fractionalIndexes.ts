@@ -99,7 +99,7 @@ export function insertBetween(before: string, after: string): string {
 // NOTE: Sort array in place
 // todo fix types it later
 // export function sortByPosition<T extends { position: string }>(foldersOrItems: T[]): T[] {
-export function sortByPosition<T>(foldersOrItems: T[], doSorting: boolean = true): T[] {
+export function sortByPosition<T extends IObject>(foldersOrItems: T[], doSorting: boolean = true): T[] {
   if (!doSorting) {
     return foldersOrItems
   }
@@ -113,7 +113,7 @@ export function sortByPosition<T>(foldersOrItems: T[], doSorting: boolean = true
   })
 }
 
-export function getFirstSortedByPosition<T>(foldersOrItems: T[]): T | undefined {
+export function getFirstSortedByPosition<T extends IObject>(foldersOrItems: T[]): T | undefined {
   return sortByPosition([...foldersOrItems])[0]
 }
 
@@ -128,12 +128,12 @@ function findBeforeAndAfterObjects<T extends IObject>(existingItems: T[], insert
   }
 }
 
-export function addItemsToFolder(insertingItems: IFolderItemToCreate[], existingItems: IFolderItem[], insertBeforeItemId?: number): IFolderItem[] {
+export function addItemsToParent<T extends IObject>(insertingItems: IFolderItemToCreate[], existingItems: T[], insertBeforeItemId?: number): T[] {
   let { prevItem, nextItem } = findBeforeAndAfterObjects(existingItems, insertBeforeItemId)
 
-  const newItems: IFolderItem[] = []
+  const newItems: T[] = []
   insertingItems.forEach((insertingItem) => {
-    const item = insertFolderItem(insertingItem, prevItem, nextItem)
+    const item = insertItem(insertingItem, prevItem, nextItem)
     prevItem = item
     newItems.push(item)
   })
@@ -141,9 +141,9 @@ export function addItemsToFolder(insertingItems: IFolderItemToCreate[], existing
   return sortByPosition([...existingItems, ...newItems])
 }
 
-function insertFolderItem(newItem: IFolderItemToCreate, prevItem: IFolderItem | undefined, nextItem: IFolderItem | undefined): IFolderItem {
+function insertItem<T extends IObject>(newItem: IFolderItemToCreate, prevItem: T | undefined, nextItem: T | undefined): T {
   return {
-    ...newItem,
+    ...newItem as unknown as T,
     position: insertBetween(prevItem?.position ?? "", nextItem?.position ?? "")
   }
 }

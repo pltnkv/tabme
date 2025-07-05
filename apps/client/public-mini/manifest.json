@@ -25,7 +25,8 @@
     "bookmarks",
     "storage",
     "history",
-    "tabs"
+    "tabs",
+    "tabGroups"
   ],
   "optional_host_permissions": [
     "<all_urls>"

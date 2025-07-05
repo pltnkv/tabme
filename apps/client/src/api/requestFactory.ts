@@ -7,6 +7,18 @@ function isNetworkAvailable(): boolean {
   return !!getAuthToken()
 }
 
+export function validateRemoteId(remoteId: string | undefined): string {
+  if (isNetworkAvailable()) {
+    if (remoteId) {
+      return remoteId
+    } else {
+      throw new Error("remoteId can not be undefined")
+    }
+  } else {
+    return remoteId!
+  }
+}
+
 const getCommandsQueue = (state: IAppState, reqWrapper: any): APICommandPayloadFull[] => {
   if (isNetworkAvailable()) {
     const queueCommand: APICommandPayloadFull = {

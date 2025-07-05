@@ -2,25 +2,25 @@ import { findParentWithClass } from "../helpers/utils"
 import { hideWidgetsContextMenu, updateWidgetsContextMenu } from "../components/canvas/widgetsContextMenu"
 import { updateWidgetsSelectionFrame_RAF_NotPerformant } from "../components/canvas/widgetsSelectionFrame"
 import { setScrollByDummyClientY, subscribeMouseEvents } from "./dragAndDropUtils"
-import { getIdFromElement, getIdsFromElements, getPosFromElement, PConfigWidgets } from "./dragAndDrop"
+import { getFolderItemId, getFolderItemsIds, getPosFromElement, PConfigWidgets } from "./dragAndDrop"
 import { round10 } from "../helpers/mathUtils"
 
 export function processWidgetsDragAndDrop(mouseDownEvent: React.MouseEvent,
                                           widgetsConfig: PConfigWidgets) {
   let selectedWidgets = Array.from(document.querySelectorAll<HTMLElement>(".widget.selected"))
-  let selectedWidgetIds = getIdsFromElements(selectedWidgets)
+  let selectedWidgetIds = getFolderItemsIds(selectedWidgets)
   let movedWidgetIds = new Set<number>()
   const initWidgetPositions = Array.from(document.querySelectorAll<HTMLElement>(".widget"))
     .map(el => ({
       element: el,
-      id: getIdFromElement(el),
+      id: getFolderItemId(el),
       pos: getPosFromElement(el)
     }))
   const targetWidget = findParentWithClass(mouseDownEvent.target, "widget")!
   if (!targetWidget) {
     return
   }
-  const targetWidgetId = getIdFromElement(targetWidget)
+  const targetWidgetId = getFolderItemId(targetWidget)
   const bookmarksElement = document.querySelector(".bookmarks")!
   const initScrollTop = bookmarksElement.scrollTop
 

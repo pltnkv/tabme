@@ -1,49 +1,93 @@
-import { selectItems, unselectAllItems } from "../helpers/selectionUtils"
+import { unselectAllItems } from "../helpers/selectionUtils"
 import { setScrollByDummyClientY, subscribeMouseEvents } from "./dragAndDropUtils"
 import {
   calculateFoldersDropAreas,
+  calculateGroupsDropAreas,
   createPlaceholder,
-  createTabDummy, DropArea,
-  getFolderId, getIdFromElement,
-  getIdsFromElements,
-  getItemIdByIndex, getNewPlacementForItem,
-  getOverlappedDropArea, initSpacesSwitcher, PConfigItem
+  createTabDummy,
+  DropArea,
+  getFolderId,
+  getFolderItemId,
+  getFolderItemsIds,
+  getNewPlacementForItem,
+  getOverlappedDropArea,
+  getOverlappedFolderDropArea,
+  initSpacesSwitcher,
+  PConfigItem
 } from "./dragAndDrop"
+import { findParentWithClass } from "../helpers/utils"
 import { inRange } from "../helpers/mathUtils"
-import { getGlobalAppState } from "../components/App"
-import { findFolderByItemId, findItemById, getSectionChildren } from "../state/actionHelpers"
-import { IFolderItem, ISpace } from "../helpers/types"
 
 export function processItemDragAndDrop(
   mouseDownEvent: React.MouseEvent,
   config: PConfigItem,
   onChangeSpace: (spaceId: number) => void,
-  targetRoots: HTMLElement[]
+  targetElements: HTMLElement[]
 ) {
-  let originalFolderId: number
+  const movingItemsIds = getFolderItemsIds(targetElements)
   let originalIndex: number
+  let originalFolderId: number
+  let originalGroupId: number | undefined
+  let originalInsertBeforeId: number | undefined
   let dummy: undefined | HTMLElement = undefined
   const placeholder: HTMLElement = createPlaceholder(true)
 
   let dropArea: DropArea | undefined = undefined
   let prevBoxToDrop: HTMLElement | undefined = undefined
-  let indexToDrop: number
-  let targetFolderId: number
+  let targetFolderId: number | undefined
+  let targetGroupId: number | undefined
 
   let dropAreas: DropArea[]
+  let groupDropAreas: DropArea[]
   const onViewportScrolled = () => {
     // recalculate drop areas if viewport was scrolled
     const folderEls = Array.from(document.querySelectorAll(".folder .folder-items-box"))
     dropAreas = calculateFoldersDropAreas(folderEls, true)
+    groupDropAreas = calculateGroupsDropAreas()
   }
   onViewportScrolled()
 
   const spacesSwitcher = initSpacesSwitcher(onChangeSpace)
 
+  let currentGroupArea: DropArea | undefined
+  let enterGroupModeTimeoutId: number | undefined
+  let insertBeforeItemId: number | undefined
+
+  function unhighlightPrevDropArea() {
+    if (currentGroupArea) {
+      currentGroupArea.element.classList.remove("dnd-group-mode")
+      currentGroupArea = undefined
+      targetGroupId = undefined
+    } else {
+      clearTimeout(enterGroupModeTimeoutId)
+      enterGroupModeTimeoutId = undefined
+    }
+  }
+
   const onMouseMove = (e: MouseEvent, mouseMoved: boolean) => {
     if (dummy) {
       // move dummy
       dummy.style.transform = `translateX(${e.clientX + "px"}) translateY(${e.clientY + "px"})`
+
+      if (enterGroupModeTimeoutId) {
+        clearTimeout(enterGroupModeTimeoutId)
+        enterGroupModeTimeoutId = undefined
+      }
+      const newGroupDropArea = getOverlappedDropArea(groupDropAreas, e)
+      // make sure to not enter "group-mode" into current dragging group
+      if (newGroupDropArea && !movingItemsIds.some(id => id === newGroupDropArea.objectId)) {
+        if (newGroupDropArea !== currentGroupArea) {
+          //enter "group-mode" if dont move mouse for X ms
+          enterGroupModeTimeoutId = window.setTimeout(() => {
+            unhighlightPrevDropArea()
+            currentGroupArea = newGroupDropArea
+            currentGroupArea.element.classList.add("dnd-group-mode")
+            onMouseMove(e, false)
+          }, 0)
+        }
+      } else {
+        unhighlightPrevDropArea()
+      }
 
       if (spacesSwitcher.test(e)) {
         requestAnimationFrame(onViewportScrolled) // to recalculate dropFoldersAreas
@@ -51,7 +95,7 @@ export function processItemDragAndDrop(
         dropArea = undefined
       } else {
         // find target position
-        dropArea = getOverlappedDropArea(dropAreas, e)
+        dropArea = getOverlappedFolderDropArea(dropAreas, e)
         const curBoxToDrop = dropArea ? dropArea.element : undefined
         if (curBoxToDrop !== prevBoxToDrop) {
           if (curBoxToDrop) {
@@ -62,15 +106,21 @@ export function processItemDragAndDrop(
           prevBoxToDrop = curBoxToDrop
         }
         if (curBoxToDrop && dropArea) {
-          const res = getNewPlacementForItem(dropArea, e)
+          const res = getNewPlacementForItem(dropArea, currentGroupArea, e)
+
           targetFolderId = dropArea.objectId
-          const tryAddToOriginalPos = targetFolderId === originalFolderId && inRange(res.index, originalIndex, originalIndex + targetRoots.length)
-          if (tryAddToOriginalPos) { //actual only for isFolderItem
-            placeholder.style.top = `${dropArea.itemRects[originalIndex].itemTop}px`
-            indexToDrop = originalIndex
+          targetGroupId = currentGroupArea?.objectId
+          insertBeforeItemId = res.itemRect?.objectId
+
+          const tryAddToOriginalPos = targetFolderId === originalFolderId
+            && targetGroupId === originalGroupId
+            && inRange(res.index, originalIndex, originalIndex + movingItemsIds.length)
+          if (tryAddToOriginalPos) {
+            const itemRects = currentGroupArea?.itemRects ?? dropArea.itemRects
+            placeholder.style.top = `${itemRects[originalIndex].itemTop}px`
+            targetFolderId = undefined
           } else {
             placeholder.style.top = `${res.placeholderY}px`
-            indexToDrop = res.index
           }
         }
       }
@@ -83,42 +133,52 @@ export function processItemDragAndDrop(
           return
         }
 
-        if (targetRoots.length === 1) {
-          targetRoots = selectSectionChildrenIfNeeded(targetRoots[0])
-        }
-
         //create dummy
-        dummy = createTabDummy(targetRoots, mouseDownEvent, config.isFolderItem)
+        dummy = createTabDummy(targetElements, mouseDownEvent, config.isFolderItem)
         dummy.style.transform = `translateX(${e.clientX + "px"}) translateY(${e.clientY + "px"})`
         document.body.classList.add("dragging")
         document.body.append(dummy)
+        onViewportScrolled()
         if (config.isFolderItem) {
-          // currently we support drag-and-drop of single folder only
-          const targetRoot = targetRoots[0]
+          const targetRoot = targetElements[0]
+          const origContainerChildren = Array.from(getParentFolderOrGroupElement(targetRoot)!.children)
+
           // here we remember only first index from all selected elements
-          originalIndex = Array.from(targetRoot.parentElement!.parentElement!.children).indexOf(targetRoot.parentElement!)
-          originalFolderId = getFolderId(targetRoot.parentElement!.parentElement!)
+          originalIndex = origContainerChildren.indexOf(targetRoot.parentElement!)
+          const nextItem = origContainerChildren.at(originalIndex + 1) as HTMLElement | undefined
+          originalInsertBeforeId = nextItem ? getFolderItemId(nextItem) : undefined
+          originalFolderId = getFolderId(getParentFolderElement(targetRoot)!)
+          const parentGroupElement = getParentGroupElement(targetRoot)
+          originalGroupId = parentGroupElement ? getFolderItemId(parentGroupElement) : undefined
         }
       }
     }
   }
-  const onMouseUp = () => {
+  const onMouseUp = (e: any) => {
     if (dummy) {
       document.body.classList.remove("dragging")
       dummy.remove()
       placeholder.remove()
-      targetRoots.forEach(el => el.style.removeProperty("opacity"))
-      const tryAddToOriginalPos = targetFolderId === originalFolderId && inRange(indexToDrop, originalIndex, originalIndex + targetRoots.length)
-      if (prevBoxToDrop && !tryAddToOriginalPos) {
-        const folderId = getFolderId(prevBoxToDrop)
-        const insertBeforeItemId = getItemIdByIndex(prevBoxToDrop, indexToDrop)
-        config.onDrop(folderId, insertBeforeItemId, getIdsFromElements(targetRoots))
+      targetElements.forEach(el => el.style.removeProperty("opacity"))
+      const tryAddToOriginalPos = originalInsertBeforeId === insertBeforeItemId
+        && originalGroupId === targetGroupId
+        && originalFolderId === targetFolderId
+      if (prevBoxToDrop && !tryAddToOriginalPos && targetFolderId) { // if folder not specified it means we add to the same position
+        config.onDrop(targetFolderId, targetGroupId, insertBeforeItemId, movingItemsIds)
       } else {
         config.onCancel()
       }
+      unhighlightPrevDropArea() //must be in the end to not cleanup "targetGroupId"
     } else {
       // we can click only by single element
-      config.onClick(getIdsFromElements(targetRoots)[0])
+      let targetId: number
+      const itemEl = findParentWithClass(e.target, "folder-item__inner") ?? findParentWithClass(e.target, "folder-group-item__header")?.parentElement
+      if (itemEl) {
+        targetId = getFolderItemId(itemEl)
+      } else {
+        throw new Error("no targetId defined")
+      }
+      config.onClick(targetId)
     }
 
     unselectAllItems()
@@ -128,21 +188,15 @@ export function processItemDragAndDrop(
   return unsubscribeEvents
 }
 
-function selectSectionChildrenIfNeeded(element: HTMLElement): HTMLElement[] {
-  const id = getIdFromElement(element)
-  const state = getGlobalAppState()
-  const item = findItemById(state, id)
-  if (item?.isSection && !item.collapsed) {
-    const sectionChildren = getSectionChildren(id, state.spaces)
-    if (sectionChildren) {
-      const childrenElements = sectionChildren.map(childItem => document.querySelector(`[data-id="${childItem.id}"]`) as HTMLElement)
-      childrenElements.unshift(element)
-      selectItems(childrenElements)
-      return childrenElements
-    } else {
-      return [element]
-    }
-  } else {
-    return [element]
-  }
+function getParentFolderElement(target: HTMLElement): HTMLElement | undefined {
+  return findParentWithClass(target, "folder-items-box")
 }
+
+function getParentGroupElement(target: HTMLElement): HTMLElement | undefined {
+  return findParentWithClass(target, "group-items-box")
+}
+
+function getParentFolderOrGroupElement(target: HTMLElement): HTMLElement | undefined {
+  return getParentGroupElement(target) ?? getParentFolderElement(target)
+}
+

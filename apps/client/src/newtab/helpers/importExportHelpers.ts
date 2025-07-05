@@ -1,12 +1,12 @@
 import { IFolder, ISpace } from "./types"
 import { Action } from "../state/state"
 import { ActionDispatcher } from "../state/actions"
-import { createNewFolderItem, genUniqLocalId, getTempFavIconUrl } from "../state/actionHelpers"
+import { createNewFolderBookmark, genUniqLocalId, getTempFavIconUrl } from "../state/actionHelpers"
 import { showMessage } from "./actionsHelpersWithDOM"
 import { getTopVisitedFromHistory } from "./utils"
-import HistoryItem = chrome.history.HistoryItem
 import { trackStat } from "./stats"
 import { RecentItem } from "./recentHistoryUtils"
+import { migrateFromFoldersToSpaces, migrateSectionsToGroups } from "./migrations"
 
 type IBackup = {
   isTabme: true,
@@ -22,39 +22,19 @@ function isImportJsonV2(data: IBackup) {
   return data.isTabme && Array.isArray(data.spaces) && data.version === 2
 }
 
+function isImportJsonV3(data: IBackup) {
+  return data.isTabme && Array.isArray(data.spaces) && data.version === 3
+}
+
 export function importFromJson(event: any, dispatch: ActionDispatcher) {
   function receivedText(e: any) {
     let lines = e.target.result
     try {
-      const res = JSON.parse(lines)
-      if (isLegacyImportJson(res)) {
-        dispatch({ // clear existing folders
-          type: Action.InitDashboard,
-          spaces: [],
-          saveToLS: true
-        })
 
-        const defaultSpaceId = genUniqLocalId()
-        dispatch({ type: Action.CreateSpace, spaceId: defaultSpaceId, title: "Bookmarks" })
-        dispatch({ type: Action.SelectSpace, spaceId: defaultSpaceId })
-
-        const loadedFolders = res as IFolder[]
-        loadedFolders.forEach(loadedFolder => {
-          dispatch({
-            type: Action.CreateFolder, // intentionally does not send additional stat here
-            title: loadedFolder.title,
-            items: loadedFolder.items,
-            color: loadedFolder.color
-          })
-        })
-
-        trackStat("importedTabmeBookmarks", { version: "v1" })
-        showMessage("Backup has been imported", dispatch)
-      } else if (isImportJsonV2(res)) {
-        const data = res as IBackup
+      const importSpacesData = (backupSpaces: ISpace[], ver: string) => {
         dispatch({
           type: Action.InitDashboard,
-          spaces: data.spaces,
+          spaces: backupSpaces,
           saveToLS: true
         })
 
@@ -63,8 +43,17 @@ export function importFromJson(event: any, dispatch: ActionDispatcher) {
           spaceId: -1 //hack to force update
         })
 
-        trackStat("importedTabmeBookmarks", { version: "v2" })
+        trackStat("importedTabmeBookmarks", { version: ver })
         showMessage("Backup has been imported", dispatch)
+      }
+      const res = JSON.parse(lines)
+      if (isLegacyImportJson(res)) { // V1
+        // no need to do "migrateSectionsToGroups" because in V1 was no groups yet
+        importSpacesData(migrateFromFoldersToSpaces(res as IFolder[]), 'v1')
+      } else if (isImportJsonV2(res)) { // V2
+        importSpacesData(migrateSectionsToGroups(res.spaces), "v2")
+      } else if (isImportJsonV3(res)) { // V3
+        importSpacesData(res.spaces, "v3")
       } else {
         trackStat("importFromFileFailed", { type: "wrong-format", error: "" })
         dispatch({ type: Action.ShowNotification, isError: true, message: "Unsupported JSON format" })
@@ -96,7 +85,7 @@ export function onExportJson(spaces: ISpace[]) {
   const backup: IBackup = {
     spaces,
     isTabme: true,
-    version: 2
+    version: 3
   }
   downloadObjectAsJson(backup, "tabme_backup")
 }
@@ -118,6 +107,7 @@ export function onImportFromToby(event: any, dispatch: ActionDispatcher, onReady
             title: tobyFolder.title,
             items: tobyFolder.cards.map(card => ({
               id: genUniqLocalId(),
+              type: "bookmark",
               title: card.title,
               url: card.url,
               favIconUrl: getTempFavIconUrl(card.url)
@@ -236,7 +226,7 @@ export function importBrowserBookmarks(records: BookmarksAsPlainList, dispatch: 
     if (skipChecked || rec.folder.checked) {
       const items = (rec.folder.children ?? [])
         .filter(item => (skipChecked || item.checked) && item.url)
-        .map(item => createNewFolderItem(item.url, item.title, getTempFavIconUrl(item.url)))
+        .map(item => createNewFolderBookmark(item.url, item.title, getTempFavIconUrl(item.url)))
       count += items.length
 
       if (!skipChecked || items.length !== 0) {

@@ -1,10 +1,21 @@
 /**
  * CAN NOT IMPORT REACT AS DEPENDENCY OR ANY DOM API
  */
-import { IFolder, IFolderItem, IFolderItemToCreate, ISpace, IWidget } from "../helpers/types"
-import { sortByPosition } from "../helpers/fractionalIndexes"
+import {
+  IAllFolderItemProps,
+  IBookmarkItem,
+  IFolder,
+  IFolderBookmarkToCreate,
+  IFolderGroupToCreate,
+  IFolderItem,
+  IFolderItemToCreate,
+  IGroupItem,
+  ISpace,
+  IWidget
+} from "../helpers/types"
+import { addItemsToParent, sortByPosition } from "../helpers/fractionalIndexes"
 import { Action, type IAppState } from "./state"
-import { SECTION_ICON_BASE64 } from "../helpers/utils"
+import { isBookmarkItem, isGroupItem, SECTION_ICON_BASE64 } from "../helpers/utils"
 import Tab = chrome.tabs.Tab
 import { RecentItem } from "../helpers/recentHistoryUtils"
 import { round10 } from "../helpers/mathUtils"
@@ -20,25 +31,27 @@ export function isTabData(data: ITabOrRecentItem): data is Tab {
   return !(data as RecentItem).isRecent
 }
 
-export function convertTabToItem(item: Tab): IFolderItemToCreate {
+export function convertTabToItem(item: Tab): IFolderBookmarkToCreate {
   return {
     id: genUniqLocalId(),
+    type: "bookmark",
     favIconUrl: item.favIconUrl || "",
     title: item.title || "",
     url: item.url || ""
   }
 }
 
-export function convertRecentToItem(item: RecentItem): IFolderItemToCreate {
+export function convertRecentToItem(item: RecentItem): IFolderBookmarkToCreate {
   return {
     id: genUniqLocalId(),
+    type: "bookmark",
     favIconUrl: item.favIconUrl ?? getTempFavIconUrl(item.url),
     title: item.title ?? "",
     url: item.url ?? ""
   }
 }
 
-export function convertTabOrRecentToItem(item: ITabOrRecentItem): IFolderItemToCreate {
+export function convertTabOrRecentToItem(item: ITabOrRecentItem): IFolderBookmarkToCreate {
   if (isTabData(item)) {
     return convertTabToItem(item)
   } else {
@@ -46,13 +59,37 @@ export function convertTabOrRecentToItem(item: ITabOrRecentItem): IFolderItemToC
   }
 }
 
-export function createNewSection(title = "Group title"): IFolderItemToCreate {
+export function createNewFolderBookmark(url?: string, title?: string, favIconUrl?: string): IFolderBookmarkToCreate {
   return {
     id: genUniqLocalId(),
-    favIconUrl: SECTION_ICON_BASE64,
+    type: "bookmark",
+    favIconUrl: favIconUrl ?? getTempFavIconUrl(url),
+    title: title ?? "",
+    url: url ?? ""
+  }
+}
+
+export function createNewStickerForOnboarding(dispatch: ActionDispatcher, spaceId: number, text: string, x: number, y: number) {
+  const widgetId = genUniqLocalId()
+  dispatch({
+    type: Action.CreateWidget,
+    spaceId,
+    widgetId,
+    content: {
+      text: text
+    },
+    pos: {
+      point: { x: round10(x), y: round10(y) }
+    }
+  })
+}
+
+export function createNewFolderGroup(title = "Group title", groupItemsToCreate?: IFolderBookmarkToCreate[]): IFolderGroupToCreate {
+  return {
+    id: genUniqLocalId(),
+    type: "group",
     title,
-    url: "",
-    isSection: true
+    groupItems: addItemsToParent((groupItemsToCreate ?? []), [])
   }
 }
 
@@ -60,9 +97,19 @@ export function findItemById(appState: Pick<IAppState, "spaces">, itemId: number
   let res: IFolderItem | undefined = undefined
   appState.spaces.some(s => {
     return s.folders.some(f => {
-      const item = f.items.find(i => i.id === itemId)
-      res = item
-      return !!item
+      for (let i = 0; i < f.items.length; i++) {
+        const item = f.items[i]
+        if (item.id === itemId) {
+          res = item
+          break
+        } else if (isGroupItem(item)) {
+          res = item.groupItems.find(itm => itm.id === itemId)
+          if (res) {
+            break
+          }
+        }
+      }
+      return !!res
     })
   })
 
@@ -87,30 +134,6 @@ export function findSpaceByFolderId(state: Pick<IAppState, "spaces">, folderId: 
 
 export function findSpaceById(state: Pick<IAppState, "spaces">, spaceId: number | undefined): ISpace | undefined {
   return state.spaces.find(s => s.id === spaceId)
-}
-
-export function createNewFolderItem(url?: string, title?: string, favIconUrl?: string): IFolderItemToCreate {
-  return {
-    id: genUniqLocalId(),
-    favIconUrl: favIconUrl ?? getTempFavIconUrl(url),
-    title: title ?? "",
-    url: url ?? ""
-  }
-}
-
-export function createNewStickerForOnboarding(dispatch: ActionDispatcher, spaceId: number, text: string, x: number, y: number) {
-  const widgetId = genUniqLocalId()
-  dispatch({
-    type: Action.CreateWidget,
-    spaceId,
-    widgetId,
-    content: {
-      text: text
-    },
-    pos: {
-      point: { x: round10(x), y: round10(y) }
-    }
-  })
 }
 
 export function convertToURL(val?: string | URL): URL | undefined {
@@ -138,7 +161,20 @@ export function findFolderByItemId(appState: Pick<IAppState, "spaces">, itemId: 
   let res: IFolder | undefined = undefined
   appState.spaces.some(s => {
     const folder = s.folders.find(f => {
-      return f.items.find(i => i.id === itemId)
+      let containsTargetItem = false
+      for (let i = 0; i < f.items.length; i++) {
+        const item = f.items[i]
+        if (item.id === itemId) {
+          containsTargetItem = true
+          break
+        } else if (isGroupItem(item)) {
+          if (item.groupItems.some(itm => itm.id === itemId)) {
+            containsTargetItem = true
+            break
+          }
+        }
+      }
+      return containsTargetItem
     })
     res = folder
     return !!folder
@@ -212,10 +248,35 @@ export function updateFolder(
   })
 }
 
+export function updateFolderGroup(
+  spaces: ISpace[],
+  folderId: number,
+  groupId: number,
+  newGroup: Partial<IGroupItem> | ((group: IGroupItem) => IGroupItem)
+): ISpace[] {
+  return updateFolder(spaces, folderId, (folder) => {
+    return {
+      ...folder,
+      items: folder.items.map((item) => {
+        if (item.id === groupId && isGroupItem(item)) {
+          if (typeof newGroup === "function") {
+            return newGroup(item)
+          } else {
+            return { ...item, ...newGroup }
+          }
+        } else {
+          return item
+        }
+
+      })
+    }
+  })
+}
+
 export function updateFolderItem(
   spaces: ISpace[],
   itemId: number,
-  newItemProps: Partial<IFolderItem>,
+  newItemProps: Partial<IAllFolderItemProps>,
   folderId?: number //just optimization
 ): ISpace[] {
   if (!folderId) {
@@ -240,32 +301,17 @@ export function updateFolderItem(
 }
 
 export function isCustomActionItem(item: IFolderItem | undefined): boolean {
-  return item?.url.includes("tabme://") ?? false
+  return (isBookmarkItem(item) && item?.url.includes("tabme://")) ?? false
 }
 
-export function getSectionChildren(sectionId: number, spaces: ISpace[]): IFolderItem[] | undefined {
-  const folder = findFolderByItemId({ spaces }, sectionId)
-  if (folder) {
-    const sectionIndex = folder.items.findIndex(i => i.id === sectionId)
-    const children: IFolderItem[] = []
-    for (let i = sectionIndex + 1; i < folder.items.length; i++) {
-      const nextItem = folder.items[i]
-      if (nextItem.isSection) {
-        break
-      } else {
-        children.push(nextItem)
-      }
+export function getFolderBookmarksFlatList(folder: IFolder): IBookmarkItem[] {
+  const res: IBookmarkItem[] = []
+  folder.items.forEach(i => {
+    if (isBookmarkItem(i)) {
+      res.push(i)
+    } else {
+      res.push(...i.groupItems)
     }
-    return children
-  } else {
-    return undefined
-  }
-}
-
-export function validateRemoteId(remoteId: string | undefined): string {
-  if (remoteId) {
-    return remoteId
-  } else {
-    throw new Error("remoteId can not be undefined")
-  }
+  })
+  return res
 }

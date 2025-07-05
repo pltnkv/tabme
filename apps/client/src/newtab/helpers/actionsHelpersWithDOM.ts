@@ -3,6 +3,7 @@ import { ActionDispatcher, executeCustomAction } from "../state/actions"
 import { Action, IAppState } from "../state/state"
 import { findItemById, genUniqLocalId, isCustomActionItem } from "../state/actionHelpers"
 import { trackStat } from "./stats"
+import { isBookmarkItem, isGroupItem } from "./utils"
 
 export function showMessage(message: string, dispatch: ActionDispatcher, isLoading = false): void {
   dispatch({
@@ -68,20 +69,13 @@ export function clickFolderItem(targetId: number,
                                 appState: IAppState,
                                 dispatch: ActionDispatcher,
                                 openInNewTab: boolean,
-                                openBookmarksInNewTab: boolean,
-                                showProPlan?: () => void) {
+                                openBookmarksInNewTab: boolean) {
   const targetItem = findItemById(appState, targetId)
-  if (targetItem?.isSection) {
-    if (appState.betaMode || targetItem.collapsed) {
-      dispatch({ type: Action.UpdateFolderItem, itemId: targetItem.id, collapsed: !targetItem.collapsed })
-      if (!targetItem.collapsed) {
-        trackStat("collapseSection", {})
-      }
-    } else {
-      dispatch({
-        type: Action.UpdateAppState,
-        newState: { itemInEdit: targetId }
-      })
+
+  if (isGroupItem(targetItem)) {
+    dispatch({ type: Action.UpdateFolderItem, itemId: targetItem.id, props: { collapsed: !targetItem.collapsed } })
+    if (!targetItem.collapsed) {
+      trackStat("collapseSection", {})
     }
   } else if (isCustomActionItem(targetItem) && targetItem?.url) {
     executeCustomAction(targetItem.url, dispatch)

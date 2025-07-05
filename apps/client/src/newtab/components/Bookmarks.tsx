@@ -1,12 +1,12 @@
 import React, { useContext, useEffect, useRef, useState } from "react"
-import { blurSearch, isContainsSearch, isTargetSupportsDragAndDrop } from "../helpers/utils"
+import { blurSearch, filterItemsBySearch, isContainsSearch, isTargetSupportsDragAndDrop } from "../helpers/utils"
 import { bindDADItemEffect } from "../dragging/dragAndDrop"
 import { Folder } from "./Folder"
 import { handleBookmarksKeyDown } from "../helpers/handleBookmarksKeyDown"
 import { Action, IAppState } from "../state/state"
 import { DispatchContext, mergeStepsInHistory } from "../state/actions"
 import { IFolder, IWidget } from "../helpers/types"
-import { findFolderById, findFolderByItemId, findSpaceById, genUniqLocalId } from "../state/actionHelpers"
+import { findSpaceById, genUniqLocalId } from "../state/actionHelpers"
 import { clickFolderItem, createFolderWithStat, getCanDragChecker } from "../helpers/actionsHelpersWithDOM"
 import { Canvas } from "./Canvas"
 import { IPoint } from "../helpers/MathTypes"
@@ -19,7 +19,6 @@ import { canvasAPI } from "./canvas/canvasAPI"
 import { DropdownMenu } from "./dropdown/DropdownMenu"
 import { Options } from "./SettingsOptions"
 import { getCanvasMenuOption } from "./canvas/getCanvasMenuOptions"
-import { GetProPlanModal } from "./modals/GetProPlanModal"
 
 let __prevCurrentSpaceId: number | undefined = undefined
 let __prevSearch: string | undefined = undefined
@@ -32,7 +31,6 @@ export function Bookmarks(p: {
   const [isScrolled, setIsScrolled] = useState(false)
   const [canvasMenuPos, setCanvasMenuPos] = useState<IPoint | undefined>(undefined)
   const [canvasMenuType, setCanvasMenuType] = useState<"canvas" | "widgets">("canvas")
-  const [isJoinProModalOpen, setJoinProModalOpen] = useState(false)
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const bookmarksRef = useRef<HTMLDivElement>(null)
@@ -76,21 +74,19 @@ export function Bookmarks(p: {
 
   useEffect(() => {
     if (mouseDownEvent) {
-      const onDropItems = (folderId: number, insertBeforeItemId: number | undefined, targetsIds: number[]) => {
-
+      const onDropItems = (folderId: number, groupId: number | undefined, insertBeforeItemId: number | undefined, targetsIds: number[]) => {
         mergeStepsInHistory((historyStepId) => {
 
           if (folderId === -1) { // we need to create new folder first
             folderId = createFolderWithStat(dispatch, { historyStepId }, "by-drag-in-new-folder--bookmarks")
           }
 
-          targetsIds = addSectionChildrenIfNeeded(targetsIds, p.appState)
-
           // todo !!! support switching spaces like for folders
           dispatch({
             type: Action.MoveFolderItems,
             itemIds: targetsIds,
             targetFolderId: folderId,
+            targetGroupId: groupId,
             insertBeforeItemId: insertBeforeItemId,
             historyStepId
           })
@@ -114,9 +110,7 @@ export function Bookmarks(p: {
       }
       const onClick = (targetId: number) => {
         const meta = mouseDownEvent.metaKey || mouseDownEvent.ctrlKey || mouseDownEvent.button === 1
-        clickFolderItem(targetId, p.appState, dispatch, meta, p.appState.openBookmarksInNewTab, () => {
-          setJoinProModalOpen(true)
-        })
+        clickFolderItem(targetId, p.appState, dispatch, meta, p.appState.openBookmarksInNewTab)
       }
 
       const onChangeSpace = (spaceId: number) => {
@@ -234,10 +228,14 @@ export function Bookmarks(p: {
     const searchValueLC = p.appState.search.toLowerCase()
     p.appState.spaces.forEach(s => {
       s.folders.forEach(f => {
-        if (isContainsSearch(f, searchValueLC) || f.items.some(i => isContainsSearch(i, searchValueLC))) {
-          folders.push(f)
-          // todo !! support search for stickers
+        const filteredItems = filterItemsBySearch(f.items, searchValueLC)
+        if (filteredItems.length > 0 || isContainsSearch(f, searchValueLC)) {
+          folders.push({
+            ...f,
+            items: filteredItems
+          })
         }
+        // todo !! support search for stickers
       })
     })
   }
@@ -292,36 +290,6 @@ export function Bookmarks(p: {
         p.appState.search === ""
         && <Toolbar folders={folders} currentSpaceId={p.appState.currentSpaceId}/>
       }
-      {
-        isJoinProModalOpen && <GetProPlanModal onClose={() => setJoinProModalOpen(false)} reason={"Collapsing"}/>
-      }
     </div>
   )
-}
-
-function addSectionChildrenIfNeeded(targetItemIds: number[], appState: IAppState): number[] {
-  const resultIds: number[] = []
-  targetItemIds.forEach(itemId => {
-    const parentFolder = findFolderByItemId(appState, itemId)!
-    let addChildrenToResults = false
-    for (let i = 0; i < parentFolder.items.length; i++) {
-      const item = parentFolder.items[i]
-      if (addChildrenToResults) {
-        if (item.isSection) { // we found the next section and need to stop here
-          break
-        } else {
-          resultIds.push(item.id) // add child of collapsed Section
-        }
-      } else if (item.id === itemId) {
-        resultIds.push(item.id)
-        if (item.isSection && item.collapsed) {
-          addChildrenToResults = true // adding all Section children from the same folder
-        } else {
-          break // do nothing in that case
-        }
-      }
-    }
-  })
-
-  return resultIds
 }

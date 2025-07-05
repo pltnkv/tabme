@@ -14,20 +14,19 @@ export interface IFolder extends IObject {
   title: string
   items: IFolderItem[]
   color?: string
-  twoColumn?: boolean
   collapsed?: boolean
 
+  /** @deprecated */
+  twoColumn?: boolean
   /** @deprecated */
   archived?: boolean
 }
 
 export interface IBookmarkItem extends IObject {
-  type: 'bookmark'
+  type: "bookmark"
   favIconUrl: string
   title: string
   url: string
-  collapsed?: boolean
-  inEdit?: boolean
 
   /** @deprecated */
   isSection?: boolean
@@ -37,13 +36,22 @@ export interface IBookmarkItem extends IObject {
 }
 
 export interface IGroupItem extends IObject {
-  type: 'group'
+  type: "group"
   title: string
+  collapsed?: boolean
 
-  items: IBookmarkItem[]
+  groupItems: IBookmarkItem[]
 }
 
 export type IFolderItem = IBookmarkItem | IGroupItem
+
+export type IAllFolderItemProps = {
+  favIconUrl: string
+  title: string
+  url: string
+  collapsed?: boolean
+  remoteId: string
+}
 
 export type WidgetType = "Sticker"
 
@@ -69,7 +77,9 @@ export interface IWidget extends IObject {
 }
 
 // Data for not yet created FolderItem
-export type IFolderItemToCreate = Pick<IFolderItem, "id" | "favIconUrl" | "url" | "title" | "isSection"> & { position?: string }
+export type IFolderItemToCreate = IFolderBookmarkToCreate | IFolderGroupToCreate
+export type IFolderBookmarkToCreate = Pick<IBookmarkItem, "id" | "type" | "favIconUrl" | "url" | "title">
+export type IFolderGroupToCreate = Pick<IGroupItem, "id"| "type" | "title" | "collapsed" | "groupItems">
 
 // undefined === 'system'
 export type ColorTheme = "light" | "dark" | undefined

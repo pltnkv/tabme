@@ -5,7 +5,7 @@ import { Notification } from "./Notification"
 import { KeyboardAndMouseManager } from "./KeyboardAndMouseManager"
 import { ImportBookmarksFromSettings } from "./ImportBookmarksFromSettings"
 import { createWelcomeFolder } from "../helpers/welcomeLogic"
-import { Action, getInitAppState, IAppState, setInitAppState } from "../state/state"
+import { Action, getInitAppState, IAppState } from "../state/state"
 import { DispatchContext, stateReducer } from "../state/actions"
 import { getBC, getStateFromLS } from "../state/storage"
 import { clearAuthTokenInLS, sdk, setAuthTokenToContext, writeAuthTokenToLS } from "../../api/client"
@@ -13,14 +13,13 @@ import { CL } from "../helpers/classNameHelper"
 import { Welcome } from "./Welcome"
 import { CommonStatProps, setCommonStatProps } from "../helpers/stats"
 import { getHistory, tryLoadMoreHistory } from "../helpers/recentHistoryUtils"
-import { HiddenDeprecationModal } from "./modals/HiddenDeprecationModal"
 import { selectItems } from "../helpers/selectionUtils"
 import { TooltipsManager } from "./TooltipsManager"
 import { Tutorial } from "./Tutorial"
 import { LoginModal } from "./modals/LoginModal"
-import Tab = chrome.tabs.Tab
 import { fetchLastStateFromServer } from "../../api/fetchLastStateFromServer"
 import { executeAPIRequest } from "../../api/requestFactory"
+import Tab = chrome.tabs.Tab
 
 let notificationTimeout: number | undefined
 let globalAppState: IAppState
@@ -61,7 +60,6 @@ function invalidateStats(newState: IAppState, prevState: IAppState | undefined) 
 
 export function App() {
   const [appState, dispatch] = useReducer(stateReducer, getInitAppState())
-  const [isHiddenDeprecatedModalOpen, setHiddenDeprecatedModalOpen] = useState(false)
   const [isLoginModalOpen, setLoginModalOpen] = useState(false)
   const [loginLoading, setLoginLoading] = useState(false)
 
@@ -85,16 +83,6 @@ export function App() {
     }
   }, [appState.loaded])
 
-  useEffect(() => {
-    if (appState.hasHiddenObjects) {
-      const hiddenDeprecatedModalShown = localStorage.getItem("hiddenDeprecatedModalShown")
-      if (!hiddenDeprecatedModalShown) {
-        localStorage.setItem("hiddenDeprecatedModalShown", "true")
-        setHiddenDeprecatedModalOpen(true)
-      }
-    }
-  }, [])
-
   useEffect(function() {
     Promise.all([
       getTabs(),
@@ -109,7 +97,6 @@ export function App() {
       })
       dispatch({ type: Action.UpdateAppState, newState: { lastActiveTabIds } })
       dispatch({ type: Action.UpdateAppState, newState: { currentWindowId } })
-      dispatch({ type: Action.UpdateAppState, newState: { version: 2 } })
 
       setTimeout(() => { // preload more history
         tryLoadMoreHistory(dispatch)
@@ -294,9 +281,6 @@ export function App() {
               <Bookmarks appState={appState}/>
               <KeyboardAndMouseManager search={appState.search} selectedWidgetIds={appState.selectedWidgetIds}/>
             </>
-          }
-          {
-            isHiddenDeprecatedModalOpen && <HiddenDeprecationModal onClose={() => setHiddenDeprecatedModalOpen(false)}/>
           }
           {
             appState.tutorialVisible && <Tutorial appState={appState} onComplete={onTutorialComplete}/>

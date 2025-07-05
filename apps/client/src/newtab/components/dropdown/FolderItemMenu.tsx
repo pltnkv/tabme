@@ -6,8 +6,8 @@ import { Action } from "../../state/state"
 import { DispatchContext, mergeStepsInHistory } from "../../state/actions"
 import { getSpacesWithNestedFoldersList } from "./moveToHelpers"
 import { createFolderWithStat, showMessage, showMessageWithUndo } from "../../helpers/actionsHelpersWithDOM"
-import { findFolderByItemId, getSectionChildren } from "../../state/actionHelpers"
-import { scrollElementIntoView } from "../../helpers/utils"
+import { findFolderByItemId } from "../../state/actionHelpers"
+import { isBookmarkItem, isGroupItem, scrollElementIntoView } from "../../helpers/utils"
 import { trackStat } from "../../helpers/stats"
 import { GetProPlanModal } from "../modals/GetProPlanModal"
 
@@ -22,7 +22,7 @@ export const FolderItemMenu = React.memo((p: {
 }) => {
   const dispatch = useContext(DispatchContext)
   const [selectedItems, setSelectedItems] = useState<IFolderItem[]>([])
-  const [localURL, setLocalURL] = useState<string>(p.item.url)
+  const [localURL, setLocalURL] = useState<string>(isBookmarkItem(p.item) ? p.item.url : "")
   const [isGetProModalOpen, setGetProModalOpen] = useState(false)
 
   useEffect(() => {
@@ -36,11 +36,13 @@ export const FolderItemMenu = React.memo((p: {
 
   // support multiple
   function onOpenNewTab() {
-    selectedItems.forEach((item) => {
-      if (item.url) {
-        chrome.tabs.create({ url: item.url })
-      }
-    })
+    selectedItems
+      .filter(isBookmarkItem)
+      .forEach((item) => {
+        if (item.url) {
+          chrome.tabs.create({ url: item.url })
+        }
+      })
     trackStat("tabOpened", { inNewTab: true, source: "bookmark-menu" })
     p.onClose()
   }
@@ -55,9 +57,11 @@ export const FolderItemMenu = React.memo((p: {
   }
 
   function onCopyUrl() {
-    navigator.clipboard.writeText(p.item.url)
-    p.onClose()
-    showMessage("URL has been copied", dispatch)
+    if (isBookmarkItem(p.item)) {
+      navigator.clipboard.writeText(p.item.url)
+      p.onClose()
+      showMessage("URL has been copied", dispatch)
+    }
   }
 
   function onSaveAndClose() {
@@ -66,16 +70,7 @@ export const FolderItemMenu = React.memo((p: {
   }
 
   const getItemIdsToMove = () => {
-    if (selectedItems.length === 1 && selectedItems[0].isSection) {
-      const children = getSectionChildren(selectedItems[0].id, p.spaces)
-      if (children) {
-        return [selectedItems[0].id, ...children?.map(item => item.id)]
-      } else {
-        return []
-      }
-    } else {
-      return selectedItems.map(item => item.id)
-    }
+    return selectedItems.map(item => item.id)
   }
 
   const moveToFolder = (folderId: number) => {
@@ -83,6 +78,7 @@ export const FolderItemMenu = React.memo((p: {
       type: Action.MoveFolderItems,
       itemIds: getItemIdsToMove(),
       targetFolderId: folderId,
+      targetGroupId: undefined,
       insertBeforeItemId: undefined
     })
 
@@ -100,6 +96,7 @@ export const FolderItemMenu = React.memo((p: {
         type: Action.MoveFolderItems,
         itemIds: selectedItems.map(item => item.id),
         targetFolderId: folderId,
+        targetGroupId: undefined,
         insertBeforeItemId: undefined,
         historyStepId
       })
@@ -111,24 +108,34 @@ export const FolderItemMenu = React.memo((p: {
   }
 
   const expandGroup = () => {
-    dispatch({ type: Action.UpdateFolderItem, itemId: p.item.id, collapsed: !p.item.collapsed })
+    if (isGroupItem(p.item)) {
+      dispatch({ type: Action.UpdateFolderItem, itemId: p.item.id, props: { collapsed: !p.item.collapsed } })
+    } else {
+      throw new Error("Unexpected flow: expandGroup in context menu")
+    }
   }
 
   const collapseGroup = () => {
-    if (p.isBeta) {
-      dispatch({ type: Action.UpdateFolderItem, itemId: p.item.id, collapsed: !p.item.collapsed })
-      if (!p.item.collapsed) {
-        trackStat("collapseSection", {})
+    if (isGroupItem(p.item)) {
+      if (p.isBeta) {
+        dispatch({ type: Action.UpdateFolderItem, itemId: p.item.id, props: { collapsed: !p.item.collapsed } })
+        if (!p.item.collapsed) {
+          trackStat("collapseSection", {})
+        }
+      } else {
+        setGetProModalOpen(true)
       }
     } else {
-      setGetProModalOpen(true)
+      throw new Error("Unexpected flow: expandGroup in context menu")
     }
   }
+
+  const LEFT = 8
 
   return <>
     {
       selectedItems.length > 1 ?
-        <DropdownMenu onClose={p.onClose} className={"dropdown-menu--folder-item"} offset={{ top: 29, bottom: 32 }}>
+        <DropdownMenu onClose={p.onClose} className={"dropdown-menu--folder-item"} offset={{ top: 29, bottom: 32, left: LEFT }}>
           <button className="dropdown-menu__button focusable" onClick={onOpenNewTab}>Open in New Tab</button>
           <DropdownSubMenu
             menuId={1}
@@ -139,8 +146,8 @@ export const FolderItemMenu = React.memo((p: {
         </DropdownMenu>
         :
         <>
-          {p.item.isSection ?
-            <DropdownMenu onClose={onSaveAndClose} className={"dropdown-menu--folder-item dropdown-menu--folder-section"} offset={{ top: 35, bottom: 32 }}>
+          {isGroupItem(p.item) ?
+            <DropdownMenu onClose={onSaveAndClose} className={"dropdown-menu--folder-item dropdown-menu--folder-section"} offset={{ top: 35, bottom: 32, left: LEFT }}>
               <label className="input-label">
                 <span>Title</span>
                 <input
@@ -163,7 +170,7 @@ export const FolderItemMenu = React.memo((p: {
               <button className="dropdown-menu__button dropdown-menu__button--dander focusable" onClick={onDeleteItem}>Delete</button>
             </DropdownMenu>
             :
-            <DropdownMenu onClose={onSaveAndClose} className={"dropdown-menu--folder-item"} offset={{ top: 29, bottom: 32 }} width={334}>
+            <DropdownMenu onClose={onSaveAndClose} className={"dropdown-menu--folder-item"} offset={{ top: 29, bottom: 32, left: LEFT }} width={334}>
               <label className="input-label">
                 <span>Title</span>
                 <input type="text"

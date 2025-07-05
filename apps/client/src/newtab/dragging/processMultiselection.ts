@@ -3,16 +3,22 @@ import { getCanvasScrolledOffset, hideWidgetsSelectionFrame, renderWidgetsSelect
 import { areRectsOverlapping, normalizeRect, uniteRects } from "../helpers/mathUtils"
 import { selectItems, unselectAllItems } from "../helpers/selectionUtils"
 import { subscribeMouseEvents } from "./dragAndDropUtils"
-import { PConfigWidgets, getIdFromElement } from "./dragAndDrop"
+import { PConfigWidgets, getFolderItemId, getFolderId, getWidgetId } from "./dragAndDrop"
 import { sticker_size_half } from "../components/canvas/const"
 
 const DOUBLE_CLICK_THRESHOLD_MS = 200
 let prevClickTime: number | undefined
 
+type ItemRect = {
+  rect: DOMRect
+  element: HTMLElement
+}
+
 export function processMultiselection(mouseDownEvent: React.MouseEvent,
                                       config: PConfigWidgets) {
   hideWidgetsContextMenu()
 
+  let containerIdOfFirstSelectedItem: number | undefined
   const canvas = config.canvasEl
   const rect = canvas.getBoundingClientRect()
   const startPos = {
@@ -28,15 +34,32 @@ export function processMultiselection(mouseDownEvent: React.MouseEvent,
     return
   }
 
-  const itemElements = Array.from(document.querySelectorAll(".bookmarks .folder-item__inner")) as HTMLElement[]
-  const itemsByRect = itemElements.map(el => ({
-    rect: el.getBoundingClientRect(),
-    element: el
-  }))
+  function elToRect(el: Element): ItemRect {
+    return {
+      rect: el.getBoundingClientRect(),
+      element: el as HTMLElement
+    }
+  }
+
+  const itemsByParents: {
+    parentId: number,
+    bookmarks: ItemRect[]
+    groups: ItemRect[]
+  }[] = []
+  const folderElements = Array.from(document.querySelectorAll(".bookmarks .folder")) as HTMLElement[]
+  folderElements.forEach((folderElement) => {
+    const topLevelBookmarkElements = folderElement.querySelectorAll(".folder-items-box > .folder-item .folder-item__inner")
+    const groupElements = folderElement.querySelectorAll(".folder-items-box .folder-group-item__inner")
+    itemsByParents.push({
+      parentId: getFolderId(folderElement),
+      bookmarks: Array.from(topLevelBookmarkElements).map(elToRect),
+      groups: Array.from(groupElements).map(elToRect)
+    })
+  })
 
   const widgetsElements = Array.from(document.querySelectorAll(".widget")) as HTMLElement[]
   const allWidgetsInfos: WidgetInfo[] = widgetsElements.map(el => ({
-    id: getIdFromElement(el),
+    id: getWidgetId(el),
     rect: el.getBoundingClientRect(),
     element: el
   }))
@@ -83,13 +106,35 @@ export function processMultiselection(mouseDownEvent: React.MouseEvent,
       }
     } else {
       const itemsToSelect: HTMLElement[] = []
-      itemsByRect.forEach(i => {
-        if (areRectsOverlapping(selectionRect, i.rect)) {
-          itemsToSelect.push(i.element)
+      for (const folder of itemsByParents) {
+        if (containerIdOfFirstSelectedItem && folder.parentId !== containerIdOfFirstSelectedItem) {
+          continue
         }
-      })
+
+        folder.bookmarks.forEach(i => {
+          if (areRectsOverlapping(selectionRect, i.rect)) {
+            itemsToSelect.push(i.element)
+          }
+        })
+
+        folder.groups.forEach(i => {
+          if (areRectsOverlapping(selectionRect, i.rect)) {
+            itemsToSelect.push(i.element)
+          }
+        })
+
+        if (itemsToSelect.length > 0) {
+          containerIdOfFirstSelectedItem = folder.parentId
+          break
+        }
+      }
+
       config.onWidgetsSelected([])
       selectItems(itemsToSelect)
+
+      if (itemsToSelect.length === 0) {
+        containerIdOfFirstSelectedItem = undefined
+      }
     }
   }
 

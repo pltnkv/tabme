@@ -16,7 +16,7 @@ const features = [
   { name: "Bookmarks count", free: "∞", upgrade: "∞", icon: IconBookmarks },
   { name: "Spaces count", free: "1", upgrade: "∞", icon: IconGrid, id: "Spaces" },
   { name: "Sticky Notes", free: true, upgrade: true, icon: IconSticky },
-  { name: "Collapsable folders and groups", free: false, upgrade: true, icon: IconCollapse, id: "Collapsing" },
+  { name: "Collapsable folders", free: false, upgrade: true, icon: IconCollapse, id: "Collapsing" },
   { name: "Cross-device sync [planned]", free: false, upgrade: true, icon: IconSync },
   { name: "Spaces sharing [planned]", free: false, upgrade: true, icon: IconShare },
   { name: "Daily backups [planned]", free: false, upgrade: true, icon: IconCloudDone }

@@ -1,0 +1,1 @@
+export const FOLDER_WIDTH = '316px';

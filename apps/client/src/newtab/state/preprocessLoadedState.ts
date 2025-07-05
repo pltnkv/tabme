@@ -3,6 +3,8 @@ import { getFirstSortedByPosition } from "../helpers/fractionalIndexes"
 import { faviconsStorage } from "../helpers/faviconUtils"
 import { getAvailableWhatsNew } from "../helpers/whats-new"
 import { applyTheme } from "./colorTheme"
+import { isBookmarkItem } from "../helpers/utils"
+import { IBookmarkItem, IFolderItem, IGroupItem } from "../helpers/types"
 
 export function preprocessLoadedState(state: IStoredAppState): void {
   ////////////////////////////////////////////////////////////
@@ -23,7 +25,7 @@ export function preprocessLoadedState(state: IStoredAppState): void {
   // Parse URL for spaceId parameter and set current space
   ////////////////////////////////////////////////////////////
   const urlParams = new URLSearchParams(window.location.search)
-  const spaceIdFromUrl = urlParams.get('spaceId')
+  const spaceIdFromUrl = urlParams.get("spaceId")
   if (spaceIdFromUrl) {
     const spaceIdNumber = parseInt(spaceIdFromUrl, 10)
     if (!isNaN(spaceIdNumber)) {
@@ -50,21 +52,15 @@ export function preprocessLoadedState(state: IStoredAppState): void {
   // AND Check if there is hidden items
   ////////////////////////////////////////////////////////////
 
-  let hasHiddenObjects = false
   state.spaces.forEach(s => {
     s.folders.forEach(f => {
-      if (f.archived) {
-        hasHiddenObjects = true
-      }
       f.items.forEach(i => {
-        if (i.archived) {
-          hasHiddenObjects = true
+        if (isBookmarkItem(i)) {
+          faviconsStorage.registerInCache(i.favIconUrl, i.url)
         }
-        faviconsStorage.registerInCache(i.favIconUrl, i.url)
       })
     })
   })
-  state.hasHiddenObjects = hasHiddenObjects
 
   ////////////////////////////////////////////////////////////
   // Check if user in betaMode

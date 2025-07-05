@@ -5,7 +5,7 @@ import { clickFolderItem } from "./actionsHelpersWithDOM"
 import { findFolderByItemId } from "../state/actionHelpers"
 import { trackStat } from "./stats"
 
-const FOLDER_ITEM_SELECTOR = "a.folder-item__inner"
+const FOLDER_BOOKMARK_SELECTOR = "a.folder-item__inner"
 
 function focusNextItem(folderItems: Element[], currentElement: Element, offset: number) {
   if (folderItems.length === 0) {
@@ -129,7 +129,7 @@ function convertItemsIntoVerticalList(): Element[] {
   })
   const resItems: Element[] = []
   folderPositions.forEach(folder => {
-    resItems.push(...folder.element.querySelectorAll(FOLDER_ITEM_SELECTOR))
+    resItems.push(...folder.element.querySelectorAll(FOLDER_BOOKMARK_SELECTOR))
   })
   return resItems
 }
@@ -145,11 +145,11 @@ function convertItemsIntoHorizontalList(currentItem: HTMLElement, appState: IApp
     return []
   }
   const allFoldersInRow = foldersPositions.filter(f => f.row === currentFoldersPos.row)
-  const allItemsInCurrentFolder = Array.from(currentFoldersPos.element.querySelectorAll<HTMLElement>(FOLDER_ITEM_SELECTOR))
+  const allItemsInCurrentFolder = Array.from(currentFoldersPos.element.querySelectorAll<HTMLElement>(FOLDER_BOOKMARK_SELECTOR))
   const currentItemIndexInFolder = allItemsInCurrentFolder.findIndex(item => item.dataset.id === currentItem.dataset.id)
   const resItems: Element[] = []
   allFoldersInRow.forEach(folder => {
-    const items = Array.from(folder.element.querySelectorAll<HTMLElement>(FOLDER_ITEM_SELECTOR))
+    const items = Array.from(folder.element.querySelectorAll<HTMLElement>(FOLDER_BOOKMARK_SELECTOR))
     if (items.length > currentItemIndexInFolder) {
       resItems.push(items[currentItemIndexInFolder])
     } else if (items.length > 0) {
@@ -163,7 +163,7 @@ let trackSearchUsedTimeout: ReturnType<typeof setTimeout> | null = null
 
 export function handleSearchKeyDown(event: React.KeyboardEvent, onClearSearch: () => void) {
   if (event.code === "ArrowDown") {
-    const firstFolderItem = document.querySelector(FOLDER_ITEM_SELECTOR) as HTMLElement
+    const firstFolderItem = document.querySelector(FOLDER_BOOKMARK_SELECTOR) as HTMLElement
     if (firstFolderItem) {
       firstFolderItem.focus()
       event.preventDefault()

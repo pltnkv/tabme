@@ -1,8 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react"
-import { IFolder, IFolderItem, ISpace } from "../helpers/types"
-import { colors, filterItemsBySearch, scrollElementIntoView } from "../helpers/utils"
+import { IFolder, ISpace } from "../helpers/types"
+import { colors, isBookmarkItem, scrollElementIntoView } from "../helpers/utils"
 import { DropdownMenu, DropdownSubMenu } from "./dropdown/DropdownMenu"
-import { FolderItem } from "./FolderItem"
 import { EditableTitle } from "./EditableTitle"
 import { CL } from "../helpers/classNameHelper"
 import { Action } from "../state/state"
@@ -10,15 +9,16 @@ import { DispatchContext } from "../state/actions"
 import MenuIcon from "../icons/menu.svg"
 import CollapseIcon from "../icons/collapse.svg"
 import ExpandIcon from "../icons/expand.svg"
-import ArrowRightIcon from "../icons/arrow-right.svg"
 
 import { getSpacesList } from "./dropdown/moveToHelpers"
 import { showMessageWithUndo } from "../helpers/actionsHelpersWithDOM"
-import { createNewFolderItem, createNewSection, findSpaceByFolderId } from "../state/actionHelpers"
+import { createNewFolderBookmark, createNewFolderGroup, findSpaceByFolderId, getFolderBookmarksFlatList } from "../state/actionHelpers"
 import { trackStat } from "../helpers/stats"
 import { RecentItem } from "../helpers/recentHistoryUtils"
 import { GetProPlanModal } from "./modals/GetProPlanModal"
 import { getFolderGradientColor } from "../helpers/getFolderGradientColor"
+import { FolderBookmarkItem } from "./FolderBookmarkItem"
+import { FolderGroupItem } from "./FolderGroupItem"
 import Tab = chrome.tabs.Tab
 
 export const Folder = React.memo(function Folder(p: {
@@ -42,17 +42,13 @@ export const Folder = React.memo(function Folder(p: {
     setLocalTitle(p.folder.title)
   }, [p.folder.title])
 
-  function collapseFolder() {
-    if (p.isBeta) {
-      dispatch({ type: Action.UpdateFolder, folderId: p.folder.id, collapsed: true })
-      trackStat("collapseFolder", {})
-    } else {
-      setGetProModalOpen(true)
+  function toggleCollapsing() {
+    if (p.isBeta || p.folder.collapsed) {
+      dispatch({ type: Action.UpdateFolder, folderId: p.folder.id, collapsed: !p.folder.collapsed })
+      if (!p.folder.collapsed) {
+        trackStat("collapseFolder", {})
+      }
     }
-  }
-
-  function expandFolder() {
-    dispatch({ type: Action.UpdateFolder, folderId: p.folder.id, collapsed: false })
   }
 
   function onDelete() {
@@ -74,32 +70,34 @@ export const Folder = React.memo(function Folder(p: {
     setEditing(false)
   }
 
-  function onAddSection() {
-    const newSection = createNewSection()
+  function onAddGroup() {
+    const newGroup = createNewFolderGroup()
     dispatch({
       type: Action.CreateFolderItem,
       folderId: p.folder.id,
+      groupId: undefined,
       insertBeforeItemId: undefined,
-      item: newSection
+      item: newGroup
     })
 
     dispatch({
       type: Action.UpdateAppState,
-      newState: { itemInEdit: newSection.id }
+      newState: { itemInEdit: newGroup.id }
     })
 
     setShowMenu(false)
 
-    scrollElementIntoView(`[data-id="${newSection.id}"]`)
+    scrollElementIntoView(`[data-id="${newGroup.id}"]`)
     trackStat("createSection", {})
   }
 
   function onAddBookmark() {
 
-    const newBookmark = createNewFolderItem(undefined, "New bookmark")
+    const newBookmark = createNewFolderBookmark(undefined, "New bookmark")
     dispatch({
       type: Action.CreateFolderItem,
       folderId: p.folder.id,
+      groupId: undefined,
       insertBeforeItemId: undefined,
       item: newBookmark
     })
@@ -134,10 +132,9 @@ export const Folder = React.memo(function Folder(p: {
   }
 
   function onOpenAll() {
-    p.folder.items.forEach(item => {
-      if (!item.isSection) {
-        chrome.tabs.create({ url: item.url, active: false })
-      }
+    const items = getFolderBookmarksFlatList(p.folder)
+    items.forEach(item => {
+      chrome.tabs.create({ url: item.url, active: false })
     })
     trackStat("tabOpened", { inNewTab: true, source: "folder-menu-open-all" })
 
@@ -156,34 +153,7 @@ export const Folder = React.memo(function Folder(p: {
     })
   }
 
-  const folderItems = filterItemsBySearch(p.folder.items, p.search)
-  const collapsedChildrenCountBySectionId = new Map<number, number>()
-
-  let visibleFolderItems: IFolderItem[] = []
-  if (p.search === "") {
-    let lastCollapsedSectionId: number | undefined = undefined
-    let hiddenItemsCount = 0
-    folderItems.forEach((item) => {
-      if (item.isSection) {
-        visibleFolderItems.push(item)
-        if (item.collapsed) {
-          collapsedChildrenCountBySectionId.set(item.id, 0)
-          lastCollapsedSectionId = item.id
-          hiddenItemsCount = 0
-        } else {
-          lastCollapsedSectionId = undefined
-        }
-      } else {
-        if (lastCollapsedSectionId) {
-          collapsedChildrenCountBySectionId.set(lastCollapsedSectionId, ++hiddenItemsCount)
-        } else {
-          visibleFolderItems.push(item)
-        }
-      }
-    })
-  } else {
-    visibleFolderItems = folderItems
-  }
+  const allBookmarks = getFolderBookmarksFlatList(p.folder)
 
   const folderColor = localColor ?? p.folder.color
   const folderGradientColor = getFolderGradientColor(localColor ?? p.folder.color)
@@ -229,19 +199,25 @@ export const Folder = React.memo(function Folder(p: {
             onClick={() => setEditing(true)}
           />
         }
+        <div style={{ flexGrow: "1" }} onClick={toggleCollapsing}></div>
+
+        {p.folder.collapsed && p.search === "" && (
+          <span className="folder-title__count" onClick={toggleCollapsing}>{allBookmarks.length}</span>
+        )}
+
+        {
+          p.search === "" && p.isBeta ?
+            p.folder.collapsed
+              ? <button title="Expand" className={CL("folder-title__button visible")} onClick={toggleCollapsing}><ExpandIcon/></button>
+              : <button title="Collapse" className={CL("folder-title__button")} onClick={toggleCollapsing}><CollapseIcon/></button>
+            : null
+        }
 
         <button
           title="Show menu"
           className={CL("folder-title__button", { "visible": showMenu || p.folder.collapsed })}
           onClick={() => setShowMenu(!showMenu)}><MenuIcon/>
         </button>
-        {
-          p.search === "" && p.isBeta ?
-            p.folder.collapsed
-              ? <button title="Expand" className={CL("folder-title__button visible")} onClick={expandFolder}><ExpandIcon/></button>
-              : <button title="Collapse" className={CL("folder-title__button")} onClick={collapseFolder}><CollapseIcon/></button>
-            : null
-        }
 
         {showMenu ? (
           <DropdownMenu onClose={() => setShowMenu(false)} className={"dropdown-menu--folder"} offset={{ top: 5, left: 150, bottom: 38 }}>
@@ -258,13 +234,13 @@ export const Folder = React.memo(function Folder(p: {
               <CustomColorInput onChange={setColorLocally} onBlur={setColorConfirmed} currentColor={folderColor}/>
             </div>
             <button className="dropdown-menu__button focusable" onClick={onAddBookmark}>+ Add bookmark</button>
-            <button className="dropdown-menu__button focusable" onClick={onAddSection}>+ Add group</button>
+            <button className="dropdown-menu__button focusable" onClick={onAddGroup}>+ Add group</button>
             <button className="dropdown-menu__button focusable" onClick={onOpenAll}>Open all</button>
             <button className="dropdown-menu__button focusable" onClick={onRename}>Rename</button>
             {
               p.folder.collapsed
-                ? <button className="dropdown-menu__button focusable" onClick={expandFolder}>Expand</button>
-                : (p.isBeta ? <button className="dropdown-menu__button focusable" onClick={collapseFolder}>Collapse</button> : null)
+                ? <button className="dropdown-menu__button focusable" onClick={toggleCollapsing}>Expand</button>
+                : (p.isBeta ? <button className="dropdown-menu__button focusable" onClick={toggleCollapsing}>Collapse</button> : null)
             }
             {
               p.spaces.length > 1 ?
@@ -279,7 +255,7 @@ export const Folder = React.memo(function Folder(p: {
         ) : null}
       </h2>
       {
-        folderItems.length === 0 && !p.folder.collapsed ?
+        p.folder.items.length === 0 && !p.folder.collapsed ?
           <div className="folder-empty-tip">
             To add bookmark, drop an item form the sidebar
           </div>
@@ -288,15 +264,10 @@ export const Folder = React.memo(function Folder(p: {
 
       <div className="folder-items-box" data-folder-id={p.folder.id}>
         {
-          p.folder.collapsed && p.search === ""
-            ? <div className={CL("folder-item-all-collapsed")}>
-              <div className={CL("folder-item-all__inner")} onClick={expandFolder}>
-                <ArrowRightIcon/>
-                <span>Collapsed ({folderItems.length})</span>
-              </div>
-            </div>
-            : visibleFolderItems.map((item) => (
-                <FolderItem
+          !p.folder.collapsed || p.search !== "" ?
+            p.folder.items.map((item) => {
+              if (isBookmarkItem(item)) {
+                return <FolderBookmarkItem
                   key={item.id}
                   spaces={p.spaces}
                   item={item}
@@ -305,11 +276,24 @@ export const Folder = React.memo(function Folder(p: {
                   recentItems={p.recentItems}
                   showNotUsed={p.showNotUsed}
                   search={p.search}
-                  collapsedChildrenCount={collapsedChildrenCountBySectionId.get(item.id) ?? 1}
                   isBeta={p.isBeta}
                 />
-              )
-            )}
+              } else {
+                return <FolderGroupItem
+                  key={item.id}
+                  spaces={p.spaces}
+                  groupItem={item}
+                  itemInEdit={p.itemInEdit}
+                  tabs={p.tabs}
+                  recentItems={p.recentItems}
+                  showNotUsed={p.showNotUsed}
+                  search={p.search}
+                  isBeta={p.isBeta}
+                />
+              }
+            })
+            : null
+        }
       </div>
       {
         isGetProModalOpen && <GetProPlanModal onClose={() => setGetProModalOpen(false)} reason={"Collapsing"}/>

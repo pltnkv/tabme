@@ -22,7 +22,7 @@ export function saveState(appState: Partial<IAppState>): void {
   chrome.storage.local.set(savingState, () => {
     // TODO. store in LS only when last transaction confirmed by server
     // if last transaction was not confirmed, reload app and use prev state from LS
-    console.log("SAVED", savingState)
+    console.log("STATE SAVED", savingState)
     bc.postMessage({ type: "folders-updated" })
   })
 }
@@ -30,6 +30,7 @@ export function saveState(appState: Partial<IAppState>): void {
 let stateToSave: Partial<IAppState> | undefined
 let timeoutId: number | undefined
 export const saveStateThrottled = (state: Partial<IAppState>) => {
+  console.info('saveStateThrottled', state)
   stateToSave = state
 
   if (!timeoutId) {
@@ -54,6 +55,7 @@ export const saveLastStateImmediately = () => {
   timeoutId = undefined
 }
 
+export const currentAppVersion = 3
 export const savingStateDefaultValues = { // if was not saved to LS yet
   "spaces": [],
   "currentSpaceId": undefined,
@@ -63,8 +65,8 @@ export const savingStateDefaultValues = { // if was not saved to LS yet
   "stat": undefined,
   "showRecent": false,
   "reverseOpenTabs": true,
-  "tooltipsEnabled": false,
-  "version": 1,
+  "tooltipsEnabled": true,
+  "version": currentAppVersion,
   "folders": undefined // "folders" is legacy. Dont delete it until all users are migrated
 }
 type StoredStateKeys = keyof typeof savingStateDefaultValues
@@ -72,7 +74,7 @@ export const savingStateKeys = Object.keys(savingStateDefaultValues) as StoredSt
 
 export type IStoredAppState = {
   [key in StoredStateKeys]: IAppState[key]
-} & { hiddenFeatureIsEnabled: boolean, betaMode: boolean; folders: IFolder[], availableWhatsNew: WhatsNew[], hasHiddenObjects: boolean }
+} & { hiddenFeatureIsEnabled: boolean, betaMode: boolean; folders: IFolder[], availableWhatsNew: WhatsNew[] }
 
 export function getStateFromLS(callback: (state: IStoredAppState) => void): void {
   chrome.storage.local.get(savingStateKeys, (res) => {

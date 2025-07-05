@@ -52,7 +52,7 @@ export function Sidebar(p: {
       }
 
       // todo technically TabsIds and RecentIds can have collisions
-      const onDropItems = (folderId: number, insertBeforeItemId: number | undefined, targetTabsOrRecentIds: number[]) => {
+      const onDropItems = (folderId: number, groupId:number|undefined,  insertBeforeItemId: number | undefined, targetTabsOrRecentIds: number[]) => {
         const targetTabId = targetTabsOrRecentIds[0] // we support D&D only single element from sidebar
         let tabOrRecentItem: Tab | RecentItem | undefined = p.tabs.find((t) => t.id === targetTabId)
 
@@ -69,6 +69,7 @@ export function Sidebar(p: {
           dispatch({
             type: Action.CreateFolderItem,
             folderId,
+            groupId,
             insertBeforeItemId,
             item
           })

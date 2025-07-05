@@ -7,11 +7,12 @@ import { processFolderDragAndDrop } from "./processFolderDragAndDrop"
 import { processItemDragAndDrop } from "./processItemDragAndDrop"
 import { processSpacesDragAndDrop } from "./processSpacesDragAndDrop"
 
-export type DropArea = { objectId: number, element: HTMLElement, rect: DOMRect, itemRects: { thresholdY: number, itemTop: number, itemHeight: number }[] }
+export type ItemRect = { objectId: number, thresholdY: number, itemTop: number, itemHeight: number }
+export type DropArea = { objectId: number, element: HTMLElement, rect: DOMRect, itemRects: ItemRect[] }
 
 export type PConfigItem = {
   isFolderItem: boolean, // otherwise we drag-and-drop from sidebar
-  onDrop: (folderId: number, insertBeforeItemId: number | undefined, targetsIds: number[]) => void,
+  onDrop: (folderId: number, groupId: number | undefined, insertBeforeItemId: number | undefined, targetsIds: number[]) => void,
   onCancel: () => void,
   onClick: (targetId: number) => void,
   onDragStarted: () => boolean // return false to prevent action. Previously was named canDrag()
@@ -48,7 +49,7 @@ export function bindDADItemEffect(
   spacesConfig?: PConfigSpaces
 ) {
   const target = mouseDownEvent.target as HTMLElement
-  const targetRoot = findRootOfDraggableItem(target)
+  const targetRootElements = findRootOfDraggableItem(target)
   const clickOnUIElement = isSomeParentHaveClass(target, ["widgets-hor-menu", "dropdown-menu", "modal-wrapper", "toolbar"])
   const targetFolderHeader = findRootOfDraggableFolder(target)
 
@@ -57,12 +58,13 @@ export function bindDADItemEffect(
   }
 
   if (mouseDownEvent.button === 0) { // LEFT_CLICK
-    if (targetRoot) {
+    if (targetRootElements) {
       // checking if we start d&d one of selected item
-      let targetRoots = [targetRoot]
-      if (getSelectedItemsElements().includes(targetRoot)) {
+      let targetRoots = [targetRootElements]
+      if (getSelectedItemsElements().includes(targetRootElements)) {
         targetRoots = getSelectedItemsElements()
       }
+      //todo it's not a root element, it 'folder_item_inner'. to rename
       return processItemDragAndDrop(mouseDownEvent, itemConfig, onChangeSpace, targetRoots)
     } else if (targetFolderHeader && folderConfig) {
       unselectAllItems()
@@ -80,12 +82,12 @@ export function bindDADItemEffect(
     }
   } else if (widgetsConfig && mouseDownEvent.button === 2) { // RIGHT_CLICK
     //todo subscribe mouse up
-    const IGNORE_ELEMENTS = ["draggable-folder", "folder-item"]
+    const IGNORE_ELEMENTS = ["draggable-folder", "folder-item", "folder-group"]
     if (isSomeParentHaveClass(target, "bookmarks") && !isSomeParentHaveClass(target, IGNORE_ELEMENTS)) {
       const onContextMenu = (e: MouseEvent) => {
         const targetWidget = findParentWithClass(mouseDownEvent.target, "widget")
         if (targetWidget) {
-          const targetWidgetId = getIdFromElement(targetWidget)
+          const targetWidgetId = getFolderItemId(targetWidget)
           widgetsConfig.onWidgetsRightClick({
             x: mouseDownEvent.clientX,
             y: mouseDownEvent.clientY
@@ -117,7 +119,7 @@ export function initSpacesSwitcher(onChangeSpace: (spaceId: number) => void) {
 
   return {
     test: (e: MouseEvent): boolean => {
-      const spaceDropArea = getOverlappedSpaceDropArea(dropSpacesAreas, e)
+      const spaceDropArea = getOverlappedDropArea(dropSpacesAreas, e)
       if (spaceDropArea) {
         if (spaceDropArea !== prevSpaceDropArea) {
           prevSpaceDropArea = spaceDropArea
@@ -140,7 +142,7 @@ export function initSpacesSwitcher(onChangeSpace: (spaceId: number) => void) {
 const FOLDER_TOP_OFFSET = 50
 const FOLDER_BOTTOM_OFFSET = 20
 
-export function getOverlappedDropArea(dropAreas: DropArea[], e: MouseEvent): DropArea | undefined {
+export function getOverlappedFolderDropArea(dropAreas: DropArea[], e: MouseEvent): DropArea | undefined {
   return dropAreas.find((da) => {
     return (
       da.rect.left < e.clientX &&
@@ -151,7 +153,7 @@ export function getOverlappedDropArea(dropAreas: DropArea[], e: MouseEvent): Dro
   })
 }
 
-export function getOverlappedSpaceDropArea(dropAreas: DropArea[], e: MouseEvent): DropArea | undefined {
+export function getOverlappedDropArea(dropAreas: DropArea[], e: MouseEvent): DropArea | undefined {
   return dropAreas.find((da) => {
     return (
       da.rect.left < e.clientX &&
@@ -162,20 +164,24 @@ export function getOverlappedSpaceDropArea(dropAreas: DropArea[], e: MouseEvent)
   })
 }
 
-export function getNewPlacementForItem(dropArea: DropArea, e: MouseEvent): { placeholderY: number, index: number } {
+export function getNewPlacementForItem(dropArea: DropArea, currentGroupArea: DropArea | undefined, e: MouseEvent): { placeholderY: number, itemRect?: ItemRect, index: number } {
   const deltaY = e.clientY - dropArea.rect.y
 
-  const index = dropArea.itemRects.findIndex(r => deltaY < r.thresholdY)
+  const itemRects = currentGroupArea?.itemRects ?? dropArea.itemRects
+
+  const index = itemRects.findIndex(r => deltaY < r.thresholdY)
   if (index === -1) {
-    const len = dropArea.itemRects.length
+    const len = itemRects.length
     return {
       index: len,
-      placeholderY: len > 0 ? dropArea.itemRects[len - 1].itemTop + dropArea.itemRects[len - 1].itemHeight : 0
+      itemRect: undefined,
+      placeholderY: len > 0 ? itemRects[len - 1].itemTop + itemRects[len - 1].itemHeight : 0
     }
   } else {
     return {
-      index,
-      placeholderY: dropArea.itemRects[index].itemTop
+      index: index,
+      itemRect: itemRects[index],
+      placeholderY: itemRects[index].itemTop
     }
   }
 }
@@ -248,28 +254,22 @@ export function getSpaceId(dropAreaElement: HTMLElement): number {
   return parseInt(dropAreaElement.dataset.spaceId!)
 }
 
-export function getIdFromElement(target: HTMLElement): number {
+export function getFolderItemId(target: HTMLElement): number {
   return parseInt(target.dataset.id!, 10)
 }
 
-export function getIdsFromElements(targets: HTMLElement[]): number[] {
-  return targets.map(getIdFromElement)
+export function getWidgetId(target: HTMLElement): number {
+  return parseInt(target.dataset.id!, 10)
+}
+
+export function getFolderItemsIds(targets: HTMLElement[]): number[] {
+  return targets.map(getFolderItemId)
 }
 
 export function getPosFromElement(el: HTMLElement): IPoint {
   return {
     x: parseFloat(el.style.left),
     y: parseFloat(el.style.top)
-  }
-}
-
-export function getItemIdByIndex(currentBoxToDrop: HTMLElement, index: number): number | undefined {
-  const children = currentBoxToDrop.children
-  if (index >= children.length) {
-    return undefined //means paste last
-  } else {
-    const item = children.item(index)!.querySelector(".folder-item__inner") as HTMLElement
-    return parseInt(item.dataset.id!, 10)
   }
 }
 
@@ -301,14 +301,32 @@ export function calculateFoldersDropAreas(folderEls: Element[], calcItemRects = 
     element: el as HTMLElement,
     rect: el.getBoundingClientRect(),
     itemRects: calcItemRects ? Array.from(el.children).map((item) => {
-      //todo support grid
       const offsetTop = (item as HTMLElement).offsetTop
       return {
+        objectId: getFolderItemId(item as HTMLElement),
         thresholdY: offsetTop + item.clientHeight / 2,
         itemTop: offsetTop,
         itemHeight: item.clientHeight
       }
     }) : null!
+  }))
+}
+
+export function calculateGroupsDropAreas(): DropArea[] {
+  const groupElements = Array.from(document.querySelectorAll(".folder-group-item__inner"))
+  return groupElements.map((el) => ({
+    objectId: getFolderItemId(el as HTMLElement),
+    element: el as HTMLElement,
+    rect: el.getBoundingClientRect(),
+    itemRects: Array.from(el.querySelectorAll(".folder-item")).map((item) => {
+      const offsetTop = (item as HTMLElement).offsetTop
+      return {
+        objectId: getFolderItemId(item as HTMLElement),
+        thresholdY: offsetTop + item.clientHeight / 2,
+        itemTop: offsetTop,
+        itemHeight: item.clientHeight
+      }
+    })
   }))
 }
 

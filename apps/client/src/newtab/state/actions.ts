@@ -1,8 +1,8 @@
 import { createContext } from "react"
 import { Action, ActionPayload, HistoryActionPayload, IAppState, UndoStep } from "./state"
-import { ColorTheme, IFolder, IFolderItem, ISpace, IWidget } from "../helpers/types"
+import { ColorTheme, IAllFolderItemProps, IBookmarkItem, IFolder, IFolderItem, IGroupItem, ISpace, IWidget } from "../helpers/types"
 import { saveStateThrottled, savingStateKeys } from "./storage"
-import { addItemsToFolder, insertBetween, sortByPosition } from "../helpers/fractionalIndexes"
+import { addItemsToParent, insertBetween, sortByPosition } from "../helpers/fractionalIndexes"
 import {
   findFolderById,
   findFolderByItemId,
@@ -11,11 +11,11 @@ import {
   findSpaceById,
   findWidgetById,
   genUniqLocalId,
-  updateFolder,
+  updateFolder, updateFolderGroup,
   updateFolderItem,
-  updateSpace, validateRemoteId
+  updateSpace
 } from "./actionHelpers"
-import { genNextRuntimeId, getRandomHEXColor, isArraysEqual } from "../helpers/utils"
+import { genNextRuntimeId, getRandomHEXColor, isArraysEqual, isBookmarkItem, isGroupItem } from "../helpers/utils"
 import { defaultStickerColor, stickerSizeM } from "../components/canvas/WidgetsHorMenu"
 import { applyTheme } from "./colorTheme"
 import { getAuthToken } from "../../api/client"
@@ -24,7 +24,7 @@ import {
   produceCreateFolderItemCommand,
   produceDeleteFolderCommand,
   produceDeleteFolderItemsCommand, produceMoveFolderItemsCommand,
-  produceUpdateFolderCommand, produceUpdateFolderItemCommand
+  produceUpdateFolderCommand, produceUpdateFolderItemCommand, validateRemoteId
 } from "../../api/requestFactory"
 
 type ObjectWithRemoteId = {
@@ -357,7 +357,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       const newFolder: IFolder = {
         id: action.newFolderId ?? genUniqLocalId(),
         title: action.title ?? "New folder",
-        items: addItemsToFolder(action.items ?? [], []),
+        items: addItemsToParent(action.items ?? [], []),
         color: action.color ?? getRandomHEXColor(),
         position: action.position ?? insertBetween(lastFolder?.position ?? "", "")
       }
@@ -417,9 +417,6 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       }
       if (typeof action.color !== "undefined") {
         newProps.color = action.color
-      }
-      if (typeof action.twoColumn !== "undefined") {
-        newProps.twoColumn = action.twoColumn
       }
       if (typeof action.position !== "undefined") {
         newProps.position = action.position
@@ -512,16 +509,31 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
      ********************************************************/
 
     case Action.CreateFolderItem: {
-      const spaces = updateFolder(state.spaces, action.folderId, (folder) => {
-        const items = addItemsToFolder([action.item], folder.items, action.insertBeforeItemId)
-        return {
-          ...folder,
-          items
-        }
-      })
+      if (action.item.type === "group" && action.groupId) {
+        return showErrorReducer("Nested Group are not supported")
+      }
 
-      const createdItem: IFolderItem = findItemById({ spaces }, action.item.id)!
+      const spaces =
+        action.groupId
+          ? updateFolderGroup(state.spaces, action.folderId, action.groupId, (group) => {
+            return {
+              ...group,
+              groupItems: addItemsToParent([action.item], group.groupItems, action.insertBeforeItemId)
+            }
+          })
+          : updateFolder(state.spaces, action.folderId, (folder) => {
+            return {
+              ...folder,
+              items: addItemsToParent([action.item], folder.items, action.insertBeforeItemId)
+            }
+          })
+
+
       const targetFolder = findFolderById(state, action.folderId)
+      if (!targetFolder) {
+        return showErrorReducer("TargetFolder not found")
+      }
+      const createdItem: IFolderItem = findItemById({ spaces }, action.item.id)!
 
       const undoSteps = getUndoSteps(action, state, () => ({
         type: Action.DeleteFolderItems,
@@ -531,14 +543,15 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       return {
         ...state,
         spaces: spaces,
-        apiCommandsQueue: produceCreateFolderItemCommand(state, {
-          id: createdItem.id,
-          title: createdItem.title,
-          url: createdItem.url,
-          position: createdItem.position,
-          favicon: createdItem.favIconUrl,
-          folderId: validateRemoteId(targetFolder?.remoteId)
-        }),
+        // !!!
+        // apiCommandsQueue: produceCreateFolderItemCommand(state, {
+        //   id: createdItem.id,
+        //   title: createdItem.title,
+        //   url: createdItem.url,
+        //   position: createdItem.position,
+        //   favicon: createdItem.favIconUrl,
+        //   folderId: validateRemoteId(targetFolder?.remoteId)
+        // }),
         undoSteps
       }
     }
@@ -577,18 +590,18 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
     }
 
     case Action.UpdateFolderItem: {
-      const newProps: IFolderItem = {} as any
-      if (typeof action.title !== "undefined") {
-        newProps.title = action.title
+      const newProps: IAllFolderItemProps = {} as any
+      if (typeof action.props.title !== "undefined") {
+        newProps.title = action.props.title
       }
-      if (typeof action.url !== "undefined") {
-        newProps.url = action.url
+      if (typeof action.props.url !== "undefined") {
+        newProps.url = action.props.url
       }
-      if (typeof action.favIconUrl !== "undefined") {
-        newProps.favIconUrl = action.favIconUrl
+      if (typeof action.props.favIconUrl !== "undefined") {
+        newProps.favIconUrl = action.props.favIconUrl
       }
-      if (typeof action.collapsed !== "undefined") {
-        newProps.collapsed = action.collapsed
+      if (typeof action.props.collapsed !== "undefined") {
+        newProps.collapsed = action.props.collapsed
       }
 
       const targetItem = findItemById(state, action.itemId)
@@ -605,7 +618,9 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       const undoSteps = getUndoSteps(action, state, () => ({
         type: Action.UpdateFolderItem,
         itemId: targetItem.id,
-        ...targetItem
+        props: {
+          ...targetItem
+        }
       }))
 
       return {
@@ -625,7 +640,21 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
 
     case Action.MoveFolderItems: {
       const targetFolder = findFolderById(state, action.targetFolderId)
-      const movingItems = action.itemIds.map(itemId => findItemById(state, itemId)!)
+      let movingItems = action.itemIds.map(itemId => findItemById(state, itemId)!)
+      let actuallyMovingItems = movingItems
+
+      // Consider case when move Group into a Group.
+      // In that case we merge groups. Just add children of moving group into a target group
+      if (movingItems.some(isGroupItem) && action.targetGroupId) {
+        actuallyMovingItems = []
+        movingItems.forEach(item => {
+          if (isBookmarkItem(item)) {
+            actuallyMovingItems.push(item)
+          } else {
+            actuallyMovingItems.push(...item.groupItems)
+          }
+        })
+      }
 
       // Store the original folder IDs and positions for undo purposes
       // const originalPositions = movingItems.map(item => ({
@@ -638,14 +667,32 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         const folder = findFolderByItemId({ spaces }, movingItem.id)!
         return updateFolder(spaces, folder.id, folder => ({
           ...folder,
-          items: folder.items.filter(i => i.id !== movingItem.id)
+          items: folder.items
+            .map(item => {
+              if (isGroupItem(item)) {
+                return {
+                  ...item,
+                  groupItems: item.groupItems.filter(gi => gi.id !== movingItem.id)
+                }
+              } else {
+                return item
+              }
+            })
+            .filter(item => item.id !== movingItem.id)
         }))
       }, state.spaces)
 
-      const spaces = updateFolder(spaceWithFolderWithRemovedItems, action.targetFolderId, folder => ({
-        ...folder,
-        items: addItemsToFolder(movingItems, folder.items, action.insertBeforeItemId)
-      }))
+      const spaces = action.targetGroupId
+        // move to group & folder
+        ? updateFolderGroup(spaceWithFolderWithRemovedItems, action.targetFolderId, action.targetGroupId, group => ({
+          ...group,
+          groupItems: addItemsToParent(actuallyMovingItems, group.groupItems, action.insertBeforeItemId)
+        }))
+        // move to folder
+        : updateFolder(spaceWithFolderWithRemovedItems, action.targetFolderId, folder => ({
+          ...folder,
+          items: addItemsToParent(actuallyMovingItems, folder.items, action.insertBeforeItemId)
+        }))
 
       //todo !!! Generate undo actions to restore each item to its original folder and position
       const undoSteps = getUndoSteps(action, state, () => ({
@@ -653,18 +700,19 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
         spaces: state.spaces
       }))
 
-      const updatedItemsPositions = action.itemIds.map(itemId => {
-        const item = findItemById({ spaces }, itemId)!
-        return {
-          remoteFolderItemId: validateRemoteId(item.remoteId),
-          position: item.position
-        }
-      })
+      // const updatedItemsPositions = action.itemIds.map(itemId => {
+      //   const item = findItemById({ spaces }, itemId)!
+      //   return {
+      //     remoteFolderItemId: validateRemoteId(item.remoteId),
+      //     position: item.position
+      //   }
+      // })
 
       return {
         ...state,
         spaces: spaces,
-        apiCommandsQueue: produceMoveFolderItemsCommand(state, validateRemoteId(targetFolder?.remoteId), updatedItemsPositions),
+        // todo it should be API about creating bookmarks on server from scratch and removing in prev order. It's not real moving items
+        // apiCommandsQueue: produceMoveFolderItemsCommand(state, validateRemoteId(targetFolder?.remoteId), updatedItemsPositions),
         undoSteps
       }
     }

@@ -1,6 +1,6 @@
 import Tab = chrome.tabs.Tab
 import HistoryItem = chrome.history.HistoryItem
-import { IFolderItem, ISpace } from "./types"
+import { IBookmarkItem, IFolder, IFolderItem, IGroupItem, ISpace } from "./types"
 import type React from "react"
 import { isTabmeOrNewTab } from "./isTabmeTab"
 import { RecentItem } from "./recentHistoryUtils"
@@ -64,7 +64,7 @@ export function filterNonImportant(tab: Tab): boolean {
 
 export function filterTabsBySearch(
   list: Tab[],
-  searchValue: string = ''
+  searchValue: string = ""
 ): Tab[] {
   const searchValueLC = searchValue.toLowerCase()
   return list.filter(item => {
@@ -90,20 +90,66 @@ export function filterRecentItemsBySearch(
 }
 
 export function hasItemsToHighlight(spaces: ISpace[], recentItems: RecentItem[]): boolean {
-  return spaces.some(s => {
-    return s.folders.some(f => f.items.some(i => isFolderItemNotUsed(i, recentItems)))
+  return !!findFolderItem(spaces, (item) => {
+    return isBookmarkItem(item) && isBookmarkItemNotUsed(item, recentItems)
   })
 }
 
-export function filterItemsBySearch<T extends { title?: string, url?: string }>(
-  list: T[],
+export function findFolderItem(spaces: ISpace[], condition: (item: IFolderItem) => boolean): { parentSpace: ISpace, parentFolder: IFolder, parentGroup?: IGroupItem } | undefined {
+  for (const space of spaces) {
+    for (const folder of space.folders) {
+      for (const item of folder.items) {
+        // Check the item itself
+        if (condition(item)) {
+          return {
+            parentSpace: space,
+            parentFolder: folder
+          }
+        }
+
+        // If it's a group, check its items
+        if (isGroupItem(item)) {
+          for (const groupItem of item.groupItems) {
+            if (condition(groupItem)) {
+              return {
+                parentSpace: space,
+                parentFolder: folder,
+                parentGroup: item
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return undefined
+}
+
+export function filterItemsBySearch(
+  list: IFolderItem[],
   searchValue: string
-): T[] {
+): IFolderItem[] {
   if (searchValue === "") {
     return list
   } else {
-    const searchValueLC = searchValue.toLowerCase()
-    return list.filter(item => isContainsSearch(item, searchValueLC))
+    const resItems: IFolderItem[] = []
+    list.forEach(item => {
+      if (isBookmarkItem(item)) {
+        if (isContainsSearch(item, searchValue)) {
+          resItems.push(item)
+        }
+      } else {
+        const groupItems = filterItemsBySearch(item.groupItems, searchValue) as IBookmarkItem[]
+        if(groupItems.length > 0) {
+          resItems.push({
+            ...item,
+            groupItems
+          })
+        }
+      }
+    })
+    return resItems
   }
 }
 
@@ -239,7 +285,7 @@ export function findTabsByURL(url: string | undefined, tabs: Tab[]): Tab[] {
   return tabs.filter(t => t.url === url || t.pendingUrl === url)
 }
 
-export function isFolderItemNotUsed(item: IFolderItem, historyItems: RecentItem[]): boolean {
+export function isBookmarkItemNotUsed(item: IBookmarkItem, historyItems: RecentItem[]): boolean {
   if (item.isSection) {
     return false
   }
@@ -417,6 +463,14 @@ export function isArraysEqual(arr1: number[], arr2: number[]): boolean {
   }
 
   return arr1.every((value, index) => value === arr2[index])
+}
+
+export function isBookmarkItem(item?: IFolderItem): item is IBookmarkItem {
+  return !isGroupItem(item)
+}
+
+export function isGroupItem(item?: IFolderItem): item is IGroupItem {
+  return !!item && item.type === "group" && !!item.groupItems
 }
 
 export const IS_MAC_DEVICE: boolean = navigator.userAgent.indexOf("Mac OS X") != -1

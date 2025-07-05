@@ -10,6 +10,8 @@ export function EditableTitle(p: {
   setNewValue: (val: string) => void,
   search: string
   onSaveTitle: (title: string) => void,
+  dataTooltip?: string
+  dataTooltipPosition?: string
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [isComposing, setIsComposing] = useState(false)
@@ -41,7 +43,9 @@ export function EditableTitle(p: {
   }
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (isComposing) return
+    if (isComposing) {
+      return
+    }
 
     const isCmdEnter = event.metaKey && event.key === "Enter"
     const isCtrlEnter = event.ctrlKey && event.key === "Enter"
@@ -64,7 +68,7 @@ export function EditableTitle(p: {
       p.inEdit ?
         <textarea
           tabIndex={2}
-          className={`old-input ${p.className ?? ''}`}
+          className={`old-input ${p.className ?? ""}`}
           ref={textareaRef}
           onKeyDown={handleKeyDown}
           onChange={handleTitleChange}
@@ -74,7 +78,11 @@ export function EditableTitle(p: {
           value={p.value}
         />
         :
-        <span onClick={p.onClick} className={p.className} dangerouslySetInnerHTML={hlSearch(p.value, p.search)}/>
+        <span onClick={p.onClick}
+              className={p.className}
+              data-tooltip={p.dataTooltip}
+              data-tooltip-position={p.dataTooltipPosition}
+              dangerouslySetInnerHTML={hlSearch(p.value, p.search)}/>
     }
   </>
 }
@@ -127,7 +135,9 @@ export function SimpleEditableTitle(p: {
   }
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (isComposing) return
+    if (isComposing) {
+      return
+    }
 
     const isCmdEnter = event.metaKey && event.key === "Enter"
     const isCtrlEnter = event.ctrlKey && event.key === "Enter"
@@ -176,7 +186,7 @@ function getTextWidthWithSpan(inputElement: HTMLInputElement): number {
   span.style.visibility = "hidden"
   span.style.whiteSpace = "nowrap"
   span.style.font = window.getComputedStyle(inputElement).font
-  span.textContent = inputElement.value + '.'
+  span.textContent = inputElement.value + "."
   document.body.appendChild(span)
   const width = span.offsetWidth
   document.body.removeChild(span)

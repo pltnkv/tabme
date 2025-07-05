@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react"
-import { IFolderItem, ISpace } from "../helpers/types"
-import { findTabsByURL, isFolderItemNotUsed } from "../helpers/utils"
+import { IBookmarkItem, ISpace } from "../helpers/types"
+import { findTabsByURL, isBookmarkItem, isBookmarkItemNotUsed } from "../helpers/utils"
 import { EditableTitle } from "./EditableTitle"
 import { Action } from "../state/state"
 import { DispatchContext } from "../state/actions"
@@ -12,17 +12,16 @@ import { trackStat } from "../helpers/stats"
 import { getBrokenImgSVG, loadFaviconUrl } from "../helpers/faviconUtils"
 import { RecentItem } from "../helpers/recentHistoryUtils"
 import Tab = chrome.tabs.Tab
-import ArrowRightIcon from "../icons/arrow-right.svg"
+import { getTooltipForBookmark } from "../helpers/debugTooltips"
 
-export const FolderItem = React.memo((p: {
-  spaces: ISpace[];
-  item: IFolderItem;
+export const FolderBookmarkItem = React.memo((p: {
+  spaces: ISpace[]; // todo dont pass
+  item: IBookmarkItem;
   inEdit: boolean
-  tabs: Tab[];
-  recentItems: RecentItem[];
+  tabs: Tab[]; // todo dont pass
+  recentItems: RecentItem[]; // todo dont pass
   showNotUsed: boolean;
   search: string;
-  collapsedChildrenCount?: number
   isBeta: boolean
 }) => {
   const dispatch = useContext(DispatchContext)
@@ -41,8 +40,10 @@ export const FolderItem = React.memo((p: {
       dispatch({
         type: Action.UpdateFolderItem,
         itemId: p.item.id,
-        title: newTitle,
-        url: newUrl ?? p.item.url
+        props: {
+          title: newTitle,
+          url: newUrl ?? p.item.url
+        }
       })
 
       if (urlChanged) {
@@ -50,7 +51,7 @@ export const FolderItem = React.memo((p: {
           dispatch({
             type: Action.UpdateFolderItem,
             itemId: p.item.id,
-            favIconUrl: faviconUrl
+            props:{favIconUrl: faviconUrl}
           })
         })
       }
@@ -84,18 +85,12 @@ export const FolderItem = React.memo((p: {
     imgElement.src = getBrokenImgSVG()
   }
 
-  const folderItemOpened = findTabsByURL(p.item.url, p.tabs).length !== 0
-
-  const numberOfHiddenItems = p.item.collapsed
-    ? (Number(p.collapsedChildrenCount) >= 0 ? ` (${p.collapsedChildrenCount})` : "")
-    : ""
+  const folderItemOpened = isBookmarkItem(p.item) && findTabsByURL(p.item.url, p.tabs).length !== 0
 
   return (
-    <div className={
-      CL("folder-item", {
-        "section": p.item.isSection,
-        "selected": showMenu
-      })}>
+    <div className={CL("folder-item", { "selected": showMenu })}
+         data-id={p.item.id}
+    >
       {showMenu
         ? <FolderItemMenu
           spaces={p.spaces}
@@ -116,7 +111,6 @@ export const FolderItem = React.memo((p: {
 
       <a className={
         CL("folder-item__inner draggable-item", {
-          "section": p.item.isSection,
           "open": folderItemOpened
         })
       }
@@ -125,22 +119,19 @@ export const FolderItem = React.memo((p: {
          data-id={p.item.id}
          onClick={e => e.preventDefault()}
          data-tooltip={p.item.title}
-         data-tooltip-more={p.item.url}
-         data-tooltip-position='top-left'
+         data-tooltip-more={getTooltipForBookmark(p.item)}
+         data-tooltip-position="top-left"
          href={p.item.url}
          onContextMenu={onContextMenu}>
-        {
-          p.item.isSection
-            ? <ArrowRightIcon style={{ transform: p.item.collapsed ? undefined : "rotate(90deg)" }}/>
-            : <img src={p.item.favIconUrl} alt="" onError={handleImageError}/>
-        }
+        <img src={p.item.favIconUrl} alt="" onError={handleImageError}/>
+
 
         <EditableTitle className={CL("folder-item__inner__title", {
-          "not-used": p.showNotUsed && isFolderItemNotUsed(p.item, p.recentItems)
+          "not-used": p.showNotUsed && isBookmarkItemNotUsed(p.item, p.recentItems)
         })}
                        inEdit={p.inEdit}
                        setEditing={setEditing}
-                       value={localTitle + numberOfHiddenItems}
+                       value={localTitle}
                        setNewValue={setLocalTitle}
                        onSaveTitle={trySaveTitleAndURL}
                        search={p.search}
@@ -148,9 +139,10 @@ export const FolderItem = React.memo((p: {
         {
           folderItemOpened ? <button className="btn__close-tab stop-dad-propagation"
                                      tabIndex={2}
-                                     title="Close tab"
+                                     data-tooltip="Close tab"
+                                     data-tooltip-position="top-center"
                                      onClick={onCloseTab}>
-            <IconClose></IconClose>
+            <IconClose/>
           </button> : null
         }
       </a>

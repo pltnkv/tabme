@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react"
-import { extractHostname, hlSearch, removeUselessProductName, scrollElementIntoView } from "../helpers/utils"
+import { extractHostname, hlSearch, isBookmarkItem, removeUselessProductName, scrollElementIntoView } from "../helpers/utils"
 import { DropdownMenu, DropdownSubMenu } from "./dropdown/DropdownMenu"
 import { CL } from "../helpers/classNameHelper"
 import { Action } from "../state/state"
@@ -52,6 +52,7 @@ export const TabOrRecentItem = (p: {
     dispatch({
       type: Action.CreateFolderItem,
       folderId,
+      groupId: undefined,
       insertBeforeItemId: undefined,
       item
     })
@@ -162,7 +163,7 @@ function findFoldersTitlesWhereTabSaved(curTab: { url?: string }, spaces: ISpace
   let res: string[] = []
   spaces.forEach((space) => {
     const titles = space.folders
-      .filter(folder => folder.items.some((item: IFolderItem) => item.url === curTab.url))
+      .filter(folder => folder.items.some((item: IFolderItem) => isBookmarkItem(item) && item.url === curTab.url))
       .map(folder => `«${folder.title}»`)
     res.push(...titles)
   })

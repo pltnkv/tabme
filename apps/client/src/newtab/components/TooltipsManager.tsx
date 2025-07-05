@@ -44,7 +44,7 @@ export function TooltipsManager(p: {
           timeout = setTimeout(() => {
             tooltip.style.display = "block"
             updateTooltipElement(tooltip, el)
-          }, 600)
+          }, 800)
         } else {
           updateTooltipElement(tooltip, el)
         }
@@ -127,18 +127,18 @@ function calculateTooltipPosition(targetEl: HTMLElement, tooltipEl: HTMLElement)
       transform = "translateX(-100%)"
       break
     case "top-right":
-      top = trgtRect.top - 8
+      top = trgtRect.top - ttRect.height
       left = trgtRect.right
       transform = "translateX(-100%)"
       break
     case "top-left":
       top = trgtRect.top - ttRect.height
-      left = trgtRect.left + 22
+      left = trgtRect.left + 28
       transform = "none"
       break
     case "top-center":
     default:
-      top = trgtRect.top - 8
+      top = trgtRect.top - ttRect.height
       left = trgtRect.left + trgtRect.width / 2
       transform = "translateX(-50%)"
       break

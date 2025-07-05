@@ -1,5 +1,5 @@
 import React, { useContext, useRef, useState } from "react"
-import { hasItemsToHighlight } from "../helpers/utils"
+import { hasItemsToHighlight, isBookmarkItem } from "../helpers/utils"
 import { Action, IAppState } from "../state/state"
 import { DispatchContext } from "../state/actions"
 import { showErrorMessage, showMessage } from "../helpers/actionsHelpersWithDOM"
@@ -10,7 +10,7 @@ import { LeaveBetaModal } from "./modals/LeaveBetaModal"
 import { loadFaviconUrl } from "../helpers/faviconUtils"
 import { ShortcutsModal } from "./modals/ShortcutsModal"
 import { OverrideModal } from "./modals/OverrideModal"
-import { IFolderItem } from "../helpers/types"
+import { IBookmarkItem, IFolderItem } from "../helpers/types"
 import { CL } from "../helpers/classNameHelper"
 import { findSpaceById, genUniqLocalId } from "../state/actionHelpers"
 import IconToggle from "../icons/toggle-on.svg"
@@ -120,14 +120,16 @@ export const HelpOptions = (p: {
     trackStat("settingsClicked", { settingName: "retakeTutorial" })
   }
 
-  function invalidateFavicon(folderItem: IFolderItem): Promise<void> {
+  function invalidateFavicon(folderItem: IBookmarkItem): Promise<void> {
     if (folderItem.url) {
       return loadFaviconUrl(folderItem.url, false).then(newFaviconUrl => {
         if (newFaviconUrl !== folderItem.favIconUrl) {
           dispatch({
             type: Action.UpdateFolderItem,
             itemId: folderItem.id,
-            favIconUrl: newFaviconUrl
+            props: {
+              favIconUrl: newFaviconUrl
+            }
           })
         }
       })
@@ -145,7 +147,7 @@ export const HelpOptions = (p: {
     const currentSpace = p.appState.spaces.find(s => s.id === p.appState.currentSpaceId)
     if (currentSpace) {
       currentSpace.folders.forEach(f => {
-        promises.push(...f.items.map(invalidateFavicon))
+        promises.push(...f.items.filter(i => isBookmarkItem(i)).map(invalidateFavicon))
       })
     }
 
