@@ -131,6 +131,8 @@ type EventOptionsMap = {
   tabsDeduplicated: { count: number };
   tabsStashed: { stashedTabsClosed: boolean };
   tabsSaved: { source: string };
+  openAllInFolder: {}
+  openAllInGroup: {}
 
   // SPACES
   spaceCreated: { source: string }

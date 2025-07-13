@@ -4,6 +4,7 @@ import { currentAppVersion, IStoredAppState } from "./storage"
 import { RecentItem } from "../helpers/recentHistoryUtils"
 import { WhatsNew } from "../helpers/whats-new"
 import Tab = chrome.tabs.Tab
+import TabGroup = chrome.tabGroups.TabGroup
 
 export type IAppStats = {
   sessionNumber: number
@@ -54,6 +55,7 @@ export type IAppState = {
   currentSpaceId: number // Stored in LS
 
   tabs: Tab[];
+  tabGroups: TabGroup[];
   currentWindowId: number | undefined
   recentItems: RecentItem[];
   notification: {
@@ -114,6 +116,7 @@ let initState: IAppState = {
   currentSpaceId: -1,
   recentItems: [],
   tabs: [],
+  tabGroups: [],
   currentWindowId: undefined,
   notification: { visible: false, message: "" },
   lastActiveTabIds: [],
@@ -184,9 +187,11 @@ export enum Action {
   ShowNotification = "show-notification", // todo !! fix. error can be overriding by next normal message. not clear for user
   HideNotification = "hide-notification",
   UpdateSearch = "update-search",
-  UpdateTab = "tab-update",
-  CloseTabs = "close-tab",
-  SetTabsOrHistory = "set-tab-or-history",
+  UpdateTab = "update-tab",
+  UpdateTabGroup = "update-tab-group",
+  CloseTabs = "close-tabs",
+  CloseTabGroup = "close-tab-group",
+  SetTabsOrHistory = "set-tabs-or-history",
   ToggleDarkMode = "toggle-dark-mode",
   UpdateShowNotUsedItems = "update-show-not-used-items",
   SelectSpace = "select-space",
@@ -243,8 +248,10 @@ export type ActionPayload = (
   | { type: Action.UpdateSearch; value: string }
   | { type: Action.InitDashboard; spaces?: ISpace[], sidebarCollapsed?: boolean, saveToLS?: boolean, init?: boolean }
   | { type: Action.UpdateTab; tabId: number; opt: Tab; }
+  | { type: Action.UpdateTabGroup, groupId: number, opt: TabGroup }
   | { type: Action.CloseTabs; tabIds: number[] }
-  | { type: Action.SetTabsOrHistory; tabs?: Tab[]; recentItems?: RecentItem[] }
+  | { type: Action.CloseTabGroup; groupId: number }
+  | { type: Action.SetTabsOrHistory; tabs?: Tab[]; tabGroups?: TabGroup[], recentItems?: RecentItem[] }
   | { type: Action.ToggleDarkMode }
   | { type: Action.UpdateShowNotUsedItems; value: boolean }
   | { type: Action.FixBrokenIcons }

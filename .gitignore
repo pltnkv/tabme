@@ -6,7 +6,7 @@ target
 dist
 builds
 node_modules
-.env
+.env/
 
 # Log files
 logs/

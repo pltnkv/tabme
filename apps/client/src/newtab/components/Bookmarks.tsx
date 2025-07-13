@@ -158,7 +158,7 @@ export function Bookmarks(p: {
       return bindDADItemEffect(mouseDownEvent,
         onChangeSpace,
         {
-          isFolderItem: true,
+          isFolderItemsDragging: true,
           onDrop: onDropItems,
           onCancel,
           onClick,

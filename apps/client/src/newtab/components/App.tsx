@@ -20,6 +20,7 @@ import { LoginModal } from "./modals/LoginModal"
 import { fetchLastStateFromServer } from "../../api/fetchLastStateFromServer"
 import { executeAPIRequest } from "../../api/requestFactory"
 import Tab = chrome.tabs.Tab
+import TabGroup = chrome.tabGroups.TabGroup
 
 let notificationTimeout: number | undefined
 let globalAppState: IAppState
@@ -86,13 +87,15 @@ export function App() {
   useEffect(function() {
     Promise.all([
       getTabs(),
+      getTabGroups(),
       getHistory(), // TODO: !! now history updated only once, when app loaded. Fix it next time
       getLastActiveTabsIds(),
       getCurrentWindow()
-    ]).then(([tabs, historyItems, lastActiveTabIds, currentWindowId]) => {
+    ]).then(([tabs, tabGroups, historyItems, lastActiveTabIds, currentWindowId]) => {
       dispatch({
         type: Action.SetTabsOrHistory,
         tabs: tabs,
+        tabGroups: tabGroups,
         recentItems: historyItems
       })
       dispatch({ type: Action.UpdateAppState, newState: { lastActiveTabIds } })
@@ -119,7 +122,7 @@ export function App() {
         const urlParams = new URLSearchParams(window.location.search)
         const itemIdFromUrl = parseInt(urlParams.get("focusItemId") ?? "", 10)
         if (!isNaN(itemIdFromUrl)) {
-          const folderItem = document.querySelector<HTMLElement>(`[data-id="${itemIdFromUrl}"]`)
+          const folderItem = document.querySelector<HTMLElement>(`.folder-item__inner[data-id="${itemIdFromUrl}"]`)
           if (folderItem) {
             selectItems([folderItem])
             folderItem.scrollIntoView({ block: "center", behavior: "smooth" })
@@ -132,15 +135,23 @@ export function App() {
       dispatch({ type: Action.UpdateTab, tabId, opt: tab })
     }
 
+    function onTabGroupUpdated(group: TabGroup) {
+      dispatch({ type: Action.UpdateTabGroup, groupId: group.id, opt: group })
+    }
+
     function updateTabs() {
-      getTabs().then(tabs => {
-        dispatch({ type: Action.SetTabsOrHistory, tabs })
+      Promise.all([getTabs(), getTabGroups()]).then(([tabs, tabGroups]) => {
+        dispatch({ type: Action.SetTabsOrHistory, tabs, tabGroups })
       })
     }
 
     chrome.tabs.onCreated.addListener(updateTabs)
     chrome.tabs.onRemoved.addListener(updateTabs)
+    chrome.tabs.onMoved.addListener(updateTabs)
     chrome.tabs.onUpdated.addListener(onTabUpdated)
+    chrome.tabGroups.onCreated.addListener(updateTabs)
+    chrome.tabGroups.onRemoved.addListener(updateTabs)
+    chrome.tabGroups.onUpdated.addListener(onTabGroupUpdated)
     chrome.windows.onCreated.addListener(updateTabs)
     chrome.windows.onRemoved.addListener(updateTabs)
 
@@ -268,6 +279,7 @@ export function App() {
                 sidebarCollapsed={appState.sidebarCollapsed}
                 sidebarHovered={appState.sidebarHovered}
                 tabs={appState.tabs}
+                tabGroups={appState.tabGroups}
                 recentItems={appState.recentItems}
                 search={appState.search}
                 currentWindowId={appState.currentWindowId}
@@ -303,6 +315,12 @@ export function App() {
 function getTabs() {
   return new Promise<Tab[]>((response) => {
     chrome.tabs.query({}, response)
+  })
+}
+
+function getTabGroups() {
+  return new Promise<TabGroup[]>((response) => {
+    chrome.tabGroups.query({}, response)
   })
 }
 

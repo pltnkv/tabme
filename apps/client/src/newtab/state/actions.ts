@@ -143,12 +143,41 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       }
     }
 
+    case Action.UpdateTabGroup: {
+      return {
+        ...state,
+        tabGroups: state.tabGroups.map((g) => {
+          if (g.id === action.groupId) {
+            return action.opt
+          } else {
+            return g
+          }
+        })
+      }
+    }
+
     case Action.CloseTabs: {
       chrome.tabs.remove(action.tabIds)
       return {
         ...state,
         tabs: state.tabs.filter(t => !action.tabIds.includes(t.id!))
       }
+    }
+
+    case Action.CloseTabGroup: {
+      const tabIds = state.tabs
+        .filter(tab => tab.groupId === action.groupId && tab.id)
+        .map(tab => tab.id!)
+
+      const newState: IAppState = {
+        ...state,
+        tabGroups: state.tabGroups.filter(tg => tg.id !== action.groupId)
+      }
+
+      return stateReducer0(newState, {
+        type: Action.CloseTabs,
+        tabIds: tabIds
+      })
     }
 
     case Action.SetTabsOrHistory: {
@@ -163,6 +192,7 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       return {
         ...state,
         tabs,
+        tabGroups: action.tabGroups ?? state.tabGroups,
         recentItems: action.recentItems ?? state.recentItems
       }
     }
@@ -527,7 +557,6 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
               items: addItemsToParent([action.item], folder.items, action.insertBeforeItemId)
             }
           })
-
 
       const targetFolder = findFolderById(state, action.folderId)
       if (!targetFolder) {

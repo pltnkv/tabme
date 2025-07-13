@@ -69,7 +69,7 @@ input.search {
 }
 
 .app-sidebar.collapsed {
-    width: 48px;
+    width: 54px;
 
     &::-webkit-scrollbar {
         width: 0;
@@ -252,6 +252,8 @@ input.search {
 }
 
 .inbox-item {
+    display: flex;
+    align-items: center;
     font-size: 14px;
     position: relative;
     cursor: pointer;
@@ -277,8 +279,12 @@ input.search {
     display: inline-block;
     vertical-align: top;
     margin-right: 6px;
-    margin-top: 2px;
     pointer-events: none;
+
+    background: var(--popup-background-color);
+    padding: 2px;
+    box-sizing: content-box;
+    border-radius: 4px;
 }
 
 .inbox-item.last-visited {
@@ -299,7 +305,7 @@ input.search {
     background-color: var(--popup-background-color);
 }
 
-.window-name {
+.window-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -317,21 +323,33 @@ input.search {
     font-size: 14px;
     opacity: 1;
 
-    span {
+    .tabs-number {
+        background-color: var(--colors-gray-900);
+        color: var(--colors-gray-100);
+        padding: 4px 10px;
+        border-radius: 16px;
+        font-weight: 700;
+        margin-right: 16px;
+    }
+
+    .window-title {
         cursor: grab;
         flex-grow: 1;
+        color: var(--colors-gray-700);
     }
 }
 
-.collapsed .window-name {
+.collapsed .window-header {
     opacity: 0;
 }
+
 
 .inbox-item__text {
     vertical-align: top;
     display: inline-flex;
     flex-direction: column;
-    width: 282px;
+    flex-grow: 1;
+    max-width: 282px;
     line-height: normal;
 }
 
@@ -342,7 +360,7 @@ input.search {
     height: 22px;
     vertical-align: top;
     margin-top: -4px;
-    margin-left: -6px;
+    margin-right: -8px;
     text-align: center;
     visibility: hidden;
     padding-top: 2px;
@@ -360,16 +378,14 @@ input.search {
 }
 
 .saved-tab-icon {
+    margin-right: 2px;
     color: var(--active-control-color);
-    position: absolute;
-    right: 11px;
-    top: 14px;
 }
-
 
 .inbox-item:hover .saved-tab-icon {
     display: none;
 }
+
 
 .inbox-item.recent-item {
     .saved-tab-icon {
@@ -393,7 +409,7 @@ input.search {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: 100%;
+    max-width: 260px;
 }
 
 .inbox-item__url {
@@ -1024,7 +1040,7 @@ input.search {
     }
 
     &.open {
-        background-color: var(--popup-background-color);
+        background-color: var(--active-tab-bg-color);
         filter: drop-shadow(1px 1px 0px rgba(0, 0, 0, 0.2));
     }
 
@@ -1156,10 +1172,17 @@ input.search {
     }
 }
 
+.folder-group-item__header.selected,
+.folder-group-item__header:hover {
+    .folder-item__menu {
+        visibility: visible;
+    }
+}
+
+
 .folder-group {
     display: flex;
     margin-bottom: 6px;
-    margin-left: -32px;
 
     &:not(:first-child) {
         margin-top: 6px;
@@ -1175,7 +1198,6 @@ input.search {
         visibility: hidden;
         min-width: 32px;
         padding: 0;
-        margin-top: -1px;
 
         svg {
             scale: 0.6;
@@ -1184,8 +1206,7 @@ input.search {
 
 
     &:hover {
-        background-color: rgba(255, 255, 255, 0.6);
-        /*box-shadow: 0px 0px 0px 1px rgb(0 0 0 / 20%);*/
+        background-color: var(--group-background-color);
 
         .open-in-new {
             visibility: visible;
@@ -1198,10 +1219,17 @@ input.search {
 }
 
 .folder-group-item__header {
-    display: flex;
+    position: relative;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    margin-left: -32px;
     margin-bottom: 4px;
-    width: 316px;
+    width: 348px;
+
+    .dropdown-menu__anchor {
+        top: -6px;
+    }
 
     .group-icon {
         color: var(--section-text-color);
@@ -2324,3 +2352,61 @@ button:hover .get-pro-label {
     font-size: 18px;
     font-weight: normal;
 }
+
+.tab-group-box {
+    border-radius: 8px;
+    overflow: hidden;
+    transition: background-color 0.2s ease;
+    margin-bottom: 8px;
+    padding-bottom: 2px;
+}
+
+.tab-group-box.collapsed .tab-group-content {
+    display: none;
+}
+
+.tab-group-header {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    cursor: grab;
+    user-select: none;
+
+    .group-icon {
+        margin-right: 2px;
+        margin-left: 4px;
+        pointer-events: none;
+    }
+
+    .tab-group-title {
+        cursor: text;
+        font-size: 14px;
+        font-weight: normal;
+        padding-top: 1px;
+        box-sizing: border-box;
+
+        input {
+            font-size: 14px;
+            margin: -2px 0 -2px -4px;
+        }
+    }
+
+    .tab-group-title .tabs-number {
+        opacity: 0.7;
+    }
+
+    .tab-group-content {
+        padding: 4px 0;
+    }
+
+    &:hover .inbox-item__close {
+        margin-right: 2px;
+        visibility: visible;
+        cursor: pointer;
+    }
+
+    &:active {
+        cursor: grabbing;
+    }
+}
+

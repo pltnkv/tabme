@@ -9,21 +9,23 @@ import { DispatchContext } from "../state/actions"
 import IconClean from "../icons/clean.svg"
 import IconDownload from "../icons/download.svg"
 import IconPin from "../icons/pin.svg"
-import { convertTabOrRecentToItem, convertTabToItem, findSpaceById } from "../state/actionHelpers"
+import { convertTabOrRecentToItem, convertTabToItem, createNewFolderGroup, findSpaceById, genUniqLocalId } from "../state/actionHelpers"
 import { createFolderWithStat, showMessage } from "../helpers/actionsHelpersWithDOM"
 import { trackStat } from "../helpers/stats"
 import { SidebarRecent } from "./SidebarRecent"
 import { bindDADItemEffect } from "../dragging/dragAndDrop"
 import { RecentItem } from "../helpers/recentHistoryUtils"
 import { ISpace } from "../helpers/types"
-import { getPositionForNewFolder } from "../helpers/fractionalIndexes"
+import { addItemsToParent, getPositionForNewFolder } from "../helpers/fractionalIndexes"
 import Tab = chrome.tabs.Tab
 import { saveLastStateImmediately } from "../state/storage"
+import TabGroup = chrome.tabGroups.TabGroup
 
 export function Sidebar(p: {
   sidebarCollapsed: boolean
   sidebarHovered: boolean
   tabs: Tab[]
+  tabGroups: TabGroup[]
   recentItems: RecentItem[]
   search: string
   currentWindowId: number | undefined
@@ -52,9 +54,11 @@ export function Sidebar(p: {
       }
 
       // todo technically TabsIds and RecentIds can have collisions
-      const onDropItems = (folderId: number, groupId:number|undefined,  insertBeforeItemId: number | undefined, targetTabsOrRecentIds: number[]) => {
+      const onDropItems = (folderId: number, groupId: number | undefined, insertBeforeItemId: number | undefined, targetTabsOrRecentIds: number[]) => {
         const targetTabId = targetTabsOrRecentIds[0] // we support D&D only single element from sidebar
         let tabOrRecentItem: Tab | RecentItem | undefined = p.tabs.find((t) => t.id === targetTabId)
+
+        console.error(targetTabId, tabOrRecentItem)
 
         if (!tabOrRecentItem) {
           tabOrRecentItem = p.recentItems.find(hi => hi.id === targetTabId)
@@ -82,7 +86,33 @@ export function Sidebar(p: {
           })
           trackStat("tabsSaved", { source: "sidebar-open-tabs" })
         } else {
-          console.error("ERROR: tab not found")
+          const group = p.tabGroups.find(tg => tg.id === targetTabId)
+          if (group) {
+            const tabs = p.tabs.filter(t => t.groupId === group.id)
+            const bookmarkItems = tabs.map(tab => convertTabToItem(tab))
+            if (groupId) {
+              // just put all tabs into existing group (nested groups are not supported)
+              bookmarkItems.forEach(item => {
+                dispatch({
+                  type: Action.CreateFolderItem,
+                  folderId,
+                  groupId,
+                  insertBeforeItemId,
+                  item
+                })
+              })
+            } else {
+              const newGroupItem = createNewFolderGroup(group.title || "Group", bookmarkItems)
+              dispatch({
+                type: Action.CreateFolderItem,
+                folderId,
+                groupId,
+                insertBeforeItemId,
+                item: newGroupItem
+              })
+            }
+            trackStat("tabsSaved", { source: "sidebar-open-tabs-group" })
+          }
         }
         setMouseDownEvent(undefined)
       }
@@ -137,7 +167,7 @@ export function Sidebar(p: {
       return bindDADItemEffect(mouseDownEvent,
         onChangeSpace,
         {
-          isFolderItem: false,
+          isFolderItemsDragging: false,
           onDrop: onDropItems,
           onCancel,
           onClick: onClickTab,
@@ -233,6 +263,7 @@ export function Sidebar(p: {
 
       <SidebarOpenTabs
         tabs={p.tabs}
+        tabGroups={p.tabGroups}
         spaces={p.spaces}
         search={p.search}
         lastActiveTabIds={p.lastActiveTabIds}
@@ -241,15 +272,13 @@ export function Sidebar(p: {
         tabsCount={tabsCount}
         reverseOpenTabs={p.reverseOpenTabs}
       />
-      {
-        <SidebarRecent
-          search={p.search}
-          alphaMode={p.alphaMode}
-          recentItems={p.recentItems}
-          showRecent={p.showRecent}
-          spaces={p.spaces}
-        ></SidebarRecent>
-      }
+      <SidebarRecent
+        search={p.search}
+        alphaMode={p.alphaMode}
+        recentItems={p.recentItems}
+        showRecent={p.showRecent}
+        spaces={p.spaces}
+      ></SidebarRecent>
     </div>
   )
 }
@@ -328,7 +357,7 @@ export const StashButton = React.memo((p: { windowId: number, tabs: Tab[], rever
                       offset={{ top: 12, left: 4 }}
                       skipTabIndexes={true}>
           <div style={{ width: "100%" }}>
-            <p style={{marginTop: 0}}>Save open Tabs to a new Folder</p>
+            <p style={{ marginTop: 0 }}>Save open Tabs to a new Folder</p>
             <p>
               <label>
                 <input

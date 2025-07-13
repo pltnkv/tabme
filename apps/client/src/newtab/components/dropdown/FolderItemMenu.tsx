@@ -117,13 +117,9 @@ export const FolderItemMenu = React.memo((p: {
 
   const collapseGroup = () => {
     if (isGroupItem(p.item)) {
-      if (p.isBeta) {
-        dispatch({ type: Action.UpdateFolderItem, itemId: p.item.id, props: { collapsed: !p.item.collapsed } })
-        if (!p.item.collapsed) {
-          trackStat("collapseSection", {})
-        }
-      } else {
-        setGetProModalOpen(true)
+      dispatch({ type: Action.UpdateFolderItem, itemId: p.item.id, props: { collapsed: !p.item.collapsed } })
+      if (!p.item.collapsed) {
+        trackStat("collapseSection", {})
       }
     } else {
       throw new Error("Unexpected flow: expandGroup in context menu")

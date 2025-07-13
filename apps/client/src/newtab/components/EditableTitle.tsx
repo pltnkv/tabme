@@ -88,7 +88,7 @@ export function EditableTitle(p: {
 }
 
 export function SimpleEditableTitle(p: {
-  onClick?: () => void,
+  onClick?: (e: React.MouseEvent) => void,
   onContextMenu?: () => void,
   className?: string,
   inEdit: boolean,

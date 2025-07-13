@@ -20,6 +20,7 @@ import { getFolderGradientColor } from "../helpers/getFolderGradientColor"
 import { FolderBookmarkItem } from "./FolderBookmarkItem"
 import { FolderGroupItem } from "./FolderGroupItem"
 import Tab = chrome.tabs.Tab
+import { openTabsInFolder } from "../helpers/tabManagementAPI"
 
 export const Folder = React.memo(function Folder(p: {
   spaces: ISpace[];
@@ -132,11 +133,10 @@ export const Folder = React.memo(function Folder(p: {
   }
 
   function onOpenAll() {
-    const items = getFolderBookmarksFlatList(p.folder)
-    items.forEach(item => {
-      chrome.tabs.create({ url: item.url, active: false })
-    })
-    trackStat("tabOpened", { inNewTab: true, source: "folder-menu-open-all" })
+    openTabsInFolder(p.folder)
+
+    trackStat("tabOpened", { inNewTab: true, source: "folder-menu-open-all" }) // we need to dispatch it for each tab actually
+    trackStat("openAllInFolder", {})
 
     setShowMenu(false)
   }

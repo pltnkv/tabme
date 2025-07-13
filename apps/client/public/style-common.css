@@ -23,6 +23,8 @@
     --active-control-color: #0066FF;
     --active-control-text: #fff;
     --icon-color: #000;
+    --active-tab-bg-color: #ffffff;
+    --group-background-color: rgba(255, 255, 255, 0.6);
 
     --colors-gray-100: #fafafa;
     --colors-gray-200: #f2f2f2;
@@ -95,6 +97,8 @@
     --active-control-color: #FFF;
     --active-control-text: #1E1E1E;
     --icon-color: #909090;
+    --active-tab-bg-color: rgba(0, 0, 0, 0.4);
+    --group-background-color: rgba(0, 0, 0, 0.3);
 
     --colors-gray-100: #303030;
     --colors-gray-200: #3c3c3c;

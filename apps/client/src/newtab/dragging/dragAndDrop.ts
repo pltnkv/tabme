@@ -11,7 +11,7 @@ export type ItemRect = { objectId: number, thresholdY: number, itemTop: number, 
 export type DropArea = { objectId: number, element: HTMLElement, rect: DOMRect, itemRects: ItemRect[] }
 
 export type PConfigItem = {
-  isFolderItem: boolean, // otherwise we drag-and-drop from sidebar
+  isFolderItemsDragging: boolean, // otherwise we drag-and-drop from sidebar
   onDrop: (folderId: number, groupId: number | undefined, insertBeforeItemId: number | undefined, targetsIds: number[]) => void,
   onCancel: () => void,
   onClick: (targetId: number) => void,

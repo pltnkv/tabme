@@ -1,0 +1,680 @@
+{
+  "name": "tabme",
+  "folderPath": "/Users/pltnkv/dev/tabme",
+  "canvas": {
+    "views": {
+      "24": {
+        "id": "24",
+        "type": "Frame",
+        "fields": {},
+        "x": -23360,
+        "y": -896,
+        "width": 5344,
+        "height": 3168,
+        "backgroundColor": "#4f4f4f"
+      },
+      "25": {
+        "id": "25",
+        "type": "Sticker",
+        "fields": {},
+        "x": 144,
+        "y": 48,
+        "parentId": "24",
+        "width": 272,
+        "height": 256,
+        "text": "I am Stickerasdf\nas\ndf\nasfasdfsa\n\nasdf"
+      },
+      "29": {
+        "id": "29",
+        "type": "Sticker",
+        "fields": {},
+        "x": 560,
+        "y": 112,
+        "parentId": "24",
+        "width": 272,
+        "height": 256,
+        "text": "I am Stickerasdf\nas\ndf\nasfasdfsa\n\nasdf"
+      },
+      "55": {
+        "id": "55",
+        "type": "Prompt",
+        "fields": {},
+        "x": 1872,
+        "y": 96,
+        "parentId": "24",
+        "width": 600,
+        "text": "",
+        "promptContext": {
+          "contextFiles": [
+            {
+              "type": "widget",
+              "widgetId": "25",
+              "widgetType": "Sticker"
+            },
+            {
+              "type": "widget",
+              "widgetId": "29",
+              "widgetType": "Sticker"
+            },
+            {
+              "type": "widget",
+              "widgetId": "32",
+              "widgetType": "Code"
+            },
+            {
+              "type": "widget",
+              "widgetId": "33",
+              "widgetType": "Code"
+            },
+            {
+              "type": "file",
+              "path": "/Users/pltnkv/dev/tabme/apps/client/src/newtab/helpers/Color.ts",
+              "name": "Color.ts"
+            },
+            {
+              "type": "widget",
+              "widgetId": "54",
+              "widgetType": "Code"
+            },
+            {
+              "type": "widget",
+              "widgetId": "67",
+              "widgetType": "Prompt"
+            }
+          ]
+        }
+      },
+      "56": {
+        "id": "56",
+        "type": "UserPrompt",
+        "fields": {},
+        "x": 0,
+        "y": 0,
+        "parentId": "55",
+        "width": 400,
+        "text": "Say something\n"
+      },
+      "57": {
+        "id": "57",
+        "type": "Code",
+        "fields": {},
+        "x": -11200,
+        "y": -2368,
+        "parentId": "55",
+        "width": 600,
+        "height": 96,
+        "content": "Hello! How can I assist you today? If you have any questions or need help with something specific, feel free to ask!",
+        "fileName": "gpt-response.md",
+        "filePath": "",
+        "showLineNumbers": false,
+        "language": "markdown"
+      },
+      "58": {
+        "id": "58",
+        "type": "UserPrompt",
+        "fields": {},
+        "x": -11216,
+        "y": -2256,
+        "parentId": "55",
+        "width": 600,
+        "text": "generate me sun"
+      },
+      "59": {
+        "id": "59",
+        "type": "Code",
+        "fields": {},
+        "x": 0,
+        "y": 0,
+        "parentId": "55",
+        "width": 800,
+        "height": 132,
+        "content": "Here is the image of a cheerful sun with rays, set against a clear blue sky. You can view it below:\n\n![Sun](sandbox:/dcd/images/generated_1752143912178.png)",
+        "fileName": "gpt-response.md",
+        "filePath": "",
+        "showLineNumbers": false,
+        "language": "markdown"
+      },
+      "66": {
+        "id": "66",
+        "type": "Prompt",
+        "fields": {},
+        "x": -24464,
+        "y": -736,
+        "width": 600,
+        "text": "",
+        "promptContext": {
+          "contextFiles": [
+            {
+              "type": "file",
+              "path": "/Users/pltnkv/dev/tabme/prisma/schema.prisma",
+              "name": "schema.prisma"
+            }
+          ]
+        }
+      },
+      "71": {
+        "id": "71",
+        "type": "UserPrompt",
+        "fields": {},
+        "x": 0,
+        "y": 0,
+        "parentId": "66",
+        "width": 400,
+        "text": "Generate me image of schema of DataBase"
+      },
+      "72": {
+        "id": "72",
+        "type": "Code",
+        "fields": {},
+        "x": 0,
+        "y": 0,
+        "parentId": "66",
+        "width": 800,
+        "height": 168,
+        "content": "Here is the image representing the schema of the database for the user management system. It illustrates the various entities and their relationships clearly. You can view the diagram by clicking on the image below.\n\n![Database Schema](sandbox:/dcd/images/generated_1752155875296.png)",
+        "fileName": "gpt-response.md",
+        "filePath": "",
+        "showLineNumbers": false,
+        "language": "markdown"
+      },
+      "73": {
+        "id": "73",
+        "type": "Image",
+        "fields": {},
+        "x": 0,
+        "y": 0,
+        "parentId": "66",
+        "width": 800,
+        "height": 600,
+        "fileName": "generated_1752155875296.png",
+        "filePath": ".dcd/images/generated_1752155875296.png"
+      },
+      "76": {
+        "id": "76",
+        "type": "UserPrompt",
+        "fields": {},
+        "x": 0,
+        "y": 0,
+        "parentId": "66",
+        "width": 400,
+        "text": "Design me architectire of the app for tab management. Describe requriements"
+      },
+      "77": {
+        "id": "77",
+        "type": "Code",
+        "fields": {},
+        "x": 0,
+        "y": 0,
+        "parentId": "66",
+        "width": 800,
+        "height": 1716,
+        "content": "To design the architecture of a tab management application, we need to consider several key requirements and components. Below is a structured overview:\n\n### Requirements\n\n1. **User Management**\n   - User authentication (registration, login, password management).\n   - User profile management (name, email, preferences).\n   - Session management (tracking user sessions and tokens).\n\n2. **Tab Management**\n   - Ability to create, organize, and manage tabs.\n   - Support for grouping tabs into folders or spaces for better organization.\n   - Options to favorite or bookmark tabs for easy access.\n\n3. **Collaboration Features**\n   - Allow sharing of tabs or spaces with other users.\n   - Support for real-time collaboration on shared tabs.\n\n4. **Synchronization Features**\n   - Sync tabs and folders across multiple devices.\n   - Support for folder synchronization, allowing updates to be reflected across all synced folders.\n\n5. **Analytics and Usage Tracking**\n   - Collect analytics on user interactions (e.g., most visited tabs, time spent on tabs).\n   - Support for tracking closed tabs and usage patterns.\n\n6. **Settings Management**\n   - User preferences for themes (light/dark mode), tab order, and notifications.\n   - Options for keyboard shortcuts and tooltip enablement.\n\n7. **Import/Export Capabilities**\n   - Ability to import bookmarks or tabs from other browsers or applications.\n   - Export bookmarks or settings for backup or transfer.\n\n8. **Error Handling and Logging**\n   - Logging for all operations (e.g., sync operations, user activity).\n   - Error handling for failed actions, especially during imports and syncs.\n\n9. **Database Structure**\n   - A normalized database schema (as outlined in the provided Prisma schema).\n   - Efficient storage and retrieval paths for tab data, user data, and session management.\n\n### High-Level Architecture\n\n1. **Frontend**\n   - A user-friendly interface built with modern web technologies (e.g., React, Vue).\n   - Responsive design to ensure usability across devices (desktops, tablets, phones).\n\n2. **Backend**\n   - REST API or GraphQL to handle requests from the frontend.\n   - Logic for authentication, session management, and data manipulation.\n\n3. **Database**\n   - PostgreSQL as the relational database for storing user data, user preferences, tabs, folders, etc.\n   - Ability to scale and manage connections efficiently.\n\n4. **Caching Layer**\n   - Implement caching (e.g., Redis) for frequently accessed data to speed up read operations and reduce database load.\n\n5. **Real-Time Communication**\n   - WebSockets or similar technologies for real-time features, such as collaborative editing or sharing updates.\n\n6. **Monitoring**\n   - Integration with monitoring tools to track performance, error rates, and user engagement.\n\n### Deployment\n\n- Containerization with Docker to ease deployment and scaling.\n- CI/CD pipeline for automated testing and deployment.\n- Cloud infrastructure (AWS, Azure, etc.) for hosting.\n\n### Visual Representation\n\nTo better visualize this architecture, I can create a diagram that represents these components. Would you like me to generate that image?",
+        "fileName": "gpt-response.md",
+        "filePath": "",
+        "showLineNumbers": false,
+        "language": "markdown"
+      },
+      "78": {
+        "id": "78",
+        "type": "UserPrompt",
+        "fields": {},
+        "x": 0,
+        "y": 0,
+        "parentId": "66",
+        "width": 400,
+        "text": "Generate example of TS code for this functionality\n1. **User Management**\n   - User authentication (registration, login, password management).\n   - User profile management (name, email, preferences).\n   - Session management (tracking user sessions and tokens).\n\n2. **Tab Management**\n   - Ability to create, organize, and manage tabs.\n   - Support for grouping tabs into folders or spaces for better organization.\n   - Options to favorite or bookmark tabs for easy access.\n"
+      },
+      "79": {
+        "id": "79",
+        "type": "Code",
+        "fields": {},
+        "x": 0,
+        "y": 0,
+        "parentId": "66",
+        "width": 800,
+        "height": 2418,
+        "content": "Here's an example of TypeScript code that addresses the specified functionalities for User Management and Tab Management based on your Prisma schema. This code utilizes a Node.js server with Express and Prisma Client for database operations.\n\n### TypeScript Code Example\n\n```typescript\nimport express from 'express';\nimport { PrismaClient } from '@prisma/client';\nimport bcrypt from 'bcrypt';\nimport jwt from 'jsonwebtoken';\n\nconst app = express();\nconst prisma = new PrismaClient();\nconst PORT = process.env.PORT || 4000;\n\napp.use(express.json());\n\n// Middleware for authentication\nconst authenticateToken = (req, res, next) => {\n  const token = req.headers['authorization'];\n  if (!token) return res.sendStatus(401);\n  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {\n    if (err) return res.sendStatus(403);\n    req.user = user;\n    next();\n  });\n};\n\n// User Management\n\n// 1. User Registration\napp.post('/register', async (req, res) => {\n  const { email, password, name } = req.body;\n  const hashedPassword = await bcrypt.hash(password, 10);\n  const user = await prisma.user.create({\n    data: {\n      email,\n      password: hashedPassword,\n      name,\n    },\n  });\n  res.json({ id: user.id, email: user.email });\n});\n\n// 2. User Login\napp.post('/login', async (req, res) => {\n  const { email, password } = req.body;\n  const user = await prisma.user.findUnique({ where: { email } });\n  \n  if (!user || !(await bcrypt.compare(password, user.password))) {\n    return res.status(401).json({ message: 'Invalid credentials' });\n  }\n\n  const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET);\n  res.json({ token });\n});\n\n// 3. Update User Profile\napp.put('/users/me', authenticateToken, async (req, res) => {\n  const { name, email } = req.body;\n  const updatedUser = await prisma.user.update({\n    where: { id: req.user.id },\n    data: { name, email },\n  });\n  res.json(updatedUser);\n});\n\n// Session Management\n\n// 4. Get Current User's Sessions\napp.get('/sessions', authenticateToken, async (req, res) => {\n  const sessions = await prisma.session.findMany({\n    where: { userId: req.user.id },\n  });\n  res.json(sessions);\n});\n\n// Tab Management\n\n// 5. Create a new Tab\napp.post('/tabs', authenticateToken, async (req, res) => {\n  const { title, url } = req.body;\n  const tab = await prisma.item.create({\n    data: {\n      title,\n      url,\n      folderId: req.body.folderId, // Assuming folderId is being provided for organization\n    },\n  });\n  res.json(tab);\n});\n\n// 6. Get User's Tabs\napp.get('/tabs', authenticateToken, async (req, res) => {\n  const tabs = await prisma.item.findMany({\n    where: { folderId: req.body.folderId }, // Can be modified as per need\n  });\n  res.json(tabs);\n});\n\n// 7. Favorite a Tab\napp.post('/tabs/:id/favorite', authenticateToken, async (req, res) => {\n  const { id } = req.params;\n  const tab = await prisma.item.update({\n    where: { id },\n    data: { favorite: true }, // Assuming you have a favorite field in your Item model\n  });\n  res.json(tab);\n});\n\napp.listen(PORT, () => {\n  console.log(`Server running on http://localhost:${PORT}`);\n});\n```\n\n### Key Features:\n- This code provides basic user authentication, including registration, login, and session management.\n- User profile can be updated.\n- Tab management functionality is included, allowing users to create and organize tabs.\n- This example assumes that you have defined appropriate routes and methods in your Prisma schema for items and related entities.\n\nFeel free to adapt and expand upon this code according to your application's requirements!",
+        "fileName": "gpt-response.md",
+        "filePath": "",
+        "showLineNumbers": false,
+        "language": "markdown"
+      },
+      "80": {
+        "id": "80",
+        "type": "Code",
+        "fields": {},
+        "x": 64,
+        "y": 512,
+        "parentId": "24",
+        "width": 800,
+        "height": 1616,
+        "content": "import React, { useContext, useEffect, useRef, useState } from \"react\"\nimport { IFolder, ISpace } from \"../helpers/types\"\nimport { colors, isBookmarkItem, scrollElementIntoView } from \"../helpers/utils\"\nimport { DropdownMenu, DropdownSubMenu } from \"./dropdown/DropdownMenu\"\nimport { EditableTitle } from \"./EditableTitle\"\nimport { CL } from \"../helpers/classNameHelper\"\nimport { Action } from \"../state/state\"\nimport { DispatchContext } from \"../state/actions\"\nimport MenuIcon from \"../icons/menu.svg\"\nimport CollapseIcon from \"../icons/collapse.svg\"\nimport ExpandIcon from \"../icons/expand.svg\"\n\nimport { getSpacesList } from \"./dropdown/moveToHelpers\"\nimport { showMessageWithUndo } from \"../helpers/actionsHelpersWithDOM\"\nimport { createNewFolderBookmark, createNewFolderGroup, findSpaceByFolderId, getFolderBookmarksFlatList } from \"../state/actionHelpers\"\nimport { trackStat } from \"../helpers/stats\"\nimport { RecentItem } from \"../helpers/recentHistoryUtils\"\nimport { GetProPlanModal } from \"./modals/GetProPlanModal\"\nimport { getFolderGradientColor } from \"../helpers/getFolderGradientColor\"\nimport { FolderBookmarkItem } from \"./FolderBookmarkItem\"\nimport { FolderGroupItem } from \"./FolderGroupItem\"\nimport Tab = chrome.tabs.Tab\nimport { openTabsInFolder } from \"../helpers/tabManagementAPI\"\n\nexport const Folder = React.memo(function Folder(p: {\n  spaces: ISpace[];\n  folder: IFolder;\n  tabs: Tab[];\n  recentItems: RecentItem[];\n  showNotUsed: boolean;\n  search: string;\n  itemInEdit: undefined | number,\n  isBeta: boolean\n}) {\n  const dispatch = useContext(DispatchContext)\n  const [showMenu, setShowMenu] = useState<boolean>(false)\n  const [localColor, setLocalColor] = useState<string | undefined>(undefined)\n  const [localTitle, setLocalTitle] = useState<string>(p.folder.title)\n  const [isGetProModalOpen, setGetProModalOpen] = useState(false)\n\n  useEffect(() => {\n    // to support UNDO operation\n    setLocalTitle(p.folder.title)\n  }, [p.folder.title])\n\n  function toggleCollapsing() {\n    if (p.isBeta || p.folder.collapsed) {\n      dispatch({ type: Action.UpdateFolder, folderId: p.folder.id, collapsed: !p.folder.collapsed })\n      if (!p.folder.collapsed) {\n        trackStat(\"collapseFolder\", {})\n      }\n    }\n  }\n\n  function onDelete() {\n    dispatch({\n      type: Action.DeleteFolder,\n      folderId: p.folder.id\n    })\n    showMessageWithUndo(\"Folder has been deleted\", dispatch)\n  }\n\n  function saveFolderTitle(newTitle: string) {\n    if (p.folder.title !== newTitle) {\n      dispatch({\n        type: Action.UpdateFolder,\n        folderId: p.folder.id,\n        title: newTitle\n      })\n    }\n    setEditing(false)\n  }\n\n  function onAddGroup() {\n    const newGroup = createNewFolderGroup()\n    dispatch({\n      type: Action.CreateFolderItem,\n      folderId: p.folder.id,\n      groupId: undefined,\n      insertBeforeItemId: undefined,\n      item: newGroup\n    })\n\n    dispatch({\n      type: Action.UpdateAppState,\n      newState: { itemInEdit: newGroup.id }\n    })\n\n    setShowMenu(false)\n\n    scrollElementIntoView(`[data-id=\"${newGroup.id}\"]`)\n    trackStat(\"createSection\", {})\n  }\n\n  function onAddBookmark() {\n\n    const newBookmark = createNewFolderBookmark(undefined, \"New bookmark\")\n    dispatch({\n      type: Action.CreateFolderItem,\n      folderId: p.folder.id,\n      groupId: undefined,\n      insertBeforeItemId: undefined,\n      item: newBookmark\n    })\n\n    requestAnimationFrame(() => {\n      const bookmarkElement = document.querySelector(`[data-id=\"${newBookmark.id}\"]`)\n      const menuButton = bookmarkElement?.parentElement?.querySelector(\".folder-item__menu\") as HTMLButtonElement\n      if (menuButton) {\n        menuButton.click()\n      }\n    })\n\n    setShowMenu(false)\n\n    scrollElementIntoView(`[data-id=\"${newBookmark.id}\"]`)\n    trackStat(\"createEmptyBookmark\", {})\n  }\n\n  function setColorLocally(color: string) {\n    console.log(\"setColorLocally\")\n    setLocalColor(color)\n  }\n\n  function setColorConfirmed(color: string) {\n    console.log(\"setColorConfirmed\")\n    setLocalColor(undefined)\n    dispatch({\n      type: Action.UpdateFolder,\n      folderId: p.folder.id,\n      color: color\n    })\n  }\n\n  function onOpenAll() {\n    openTabsInFolder(p.folder)\n\n    trackStat(\"tabOpened\", { inNewTab: true, source: \"folder-menu-open-all\" }) // we need to dispatch it for each tab actually\n    trackStat(\"openAllInFolder\", {})\n\n    setShowMenu(false)\n  }\n\n  function onRename() {\n    setEditing(true)\n    setShowMenu(false)\n  }\n\n  function setEditing(val: boolean) {\n    dispatch({\n      type: Action.UpdateAppState,\n      newState: { itemInEdit: val ? p.folder.id : undefined }\n    })\n  }\n\n  const allBookmarks = getFolderBookmarksFlatList(p.folder)\n\n  const folderColor = localColor ?? p.folder.color\n  const folderGradientColor = getFolderGradientColor(localColor ?? p.folder.color)\n\n  const onHeaderContextMenu = (e: React.MouseEvent) => {\n    setShowMenu(!showMenu)\n    e.preventDefault()\n  }\n\n  const moveFolderToSpace = (spaceId: number) => {\n    dispatch({\n      type: Action.MoveFolder,\n      folderId: p.folder.id,\n      targetSpaceId: spaceId,\n      insertBeforeFolderId: undefined\n    })\n\n    dispatch({\n      type: Action.SelectSpace,\n      spaceId: spaceId\n    })\n\n    dispatch({ type: Action.ShowNotification, message: \"Folder has been moved\" })\n\n    scrollElementIntoView(`[data-folder-id=\"${p.folder.id}\"]`)\n\n    setShowMenu(false)\n  }\n\n  return (\n    <div className={CL(\"folder\", { \"two-column\": p.folder.twoColumn })} data-folder-id={p.folder.id}>\n      <h2 style={{\n        background: folderGradientColor\n      }} className=\"draggable-folder\" onContextMenu={onHeaderContextMenu}>\n        {\n          <EditableTitle\n            className=\"folder-title__text\"\n            inEdit={p.folder.id === p.itemInEdit}\n            value={localTitle}\n            setNewValue={setLocalTitle}\n            onSaveTitle={saveFolderTitle}\n            search={p.search}\n            onClick={() => setEditing(true)}\n          />\n        }\n        <div style={{ flexGrow: \"1\" }} onClick={toggleCollapsing}></div>\n\n        {p.folder.collapsed && p.search === \"\" && (\n          <span className=\"folder-title__count\" onClick={toggleCollapsing}>{allBookmarks.length}</span>\n        )}\n\n        {\n          p.search === \"\" && p.isBeta ?\n            p.folder.collapsed\n              ? <button title=\"Expand\" className={CL(\"folder-title__button visible\")} onClick={toggleCollapsing}><ExpandIcon/></button>\n              : <button title=\"Collapse\" className={CL(\"folder-title__button\")} onClick={toggleCollapsing}><CollapseIcon/></button>\n            : null\n        }\n\n        <button\n          title=\"Show menu\"\n          className={CL(\"folder-title__button\", { \"visible\": showMenu || p.folder.collapsed })}\n          onClick={() => setShowMenu(!showMenu)}><MenuIcon/>\n        </button>\n\n        {showMenu ? (\n          <DropdownMenu onClose={() => setShowMenu(false)} className={\"dropdown-menu--folder\"} offset={{ top: 5, left: 150, bottom: 38 }}>\n            <div className=\"dropdown-menu__colors-row\" style={{ marginTop: \"4px\" }}>\n              <PresetColor color={PRESET_COLORS[0]} onClick={setColorConfirmed} currentColor={folderColor}/>\n              <PresetColor color={PRESET_COLORS[1]} onClick={setColorConfirmed} currentColor={folderColor}/>\n              <PresetColor color={PRESET_COLORS[2]} onClick={setColorConfirmed} currentColor={folderColor}/>\n              <PresetColor color={PRESET_COLORS[3]} onClick={setColorConfirmed} currentColor={folderColor}/>\n            </div>\n            <div className=\"dropdown-menu__colors-row\" style={{ marginBottom: \"4px\" }}>\n              <PresetColor color={PRESET_COLORS[4]} onClick={setColorConfirmed} currentColor={folderColor}/>\n              <PresetColor color={PRESET_COLORS[5]} onClick={setColorConfirmed} currentColor={folderColor}/>\n              <PresetColor color={PRESET_COLORS[6]} onClick={setColorConfirmed} currentColor={folderColor}/>\n              <CustomColorInput onChange={setColorLocally} onBlur={setColorConfirmed} currentColor={folderColor}/>\n            </div>\n            <button className=\"dropdown-menu__button focusable\" onClick={onAddBookmark}>+ Add bookmark</button>\n            <button className=\"dropdown-menu__button focusable\" onClick={onAddGroup}>+ Add group</button>\n            <button className=\"dropdown-menu__button focusable\" onClick={onOpenAll}>Open all</button>\n            <button className=\"dropdown-menu__button focusable\" onClick={onRename}>Rename</button>\n            {\n              p.folder.collapsed\n                ? <button className=\"dropdown-menu__button focusable\" onClick={toggleCollapsing}>Expand</button>\n                : (p.isBeta ? <button className=\"dropdown-menu__button focusable\" onClick={toggleCollapsing}>Collapse</button> : null)\n            }\n            {\n              p.spaces.length > 1 ?\n                <DropdownSubMenu\n                  menuId={1}\n                  title={\"Move to space\"}\n                  submenuContent={getSpacesList(p.spaces, moveFolderToSpace, findSpaceByFolderId(p, p.folder.id)?.id)}\n                /> : null\n            }\n            <button className=\"dropdown-menu__button dropdown-menu__button--dander focusable\" onClick={onDelete}>Delete</button>\n          </DropdownMenu>\n        ) : null}\n      </h2>\n      {\n        p.folder.items.length === 0 && !p.folder.collapsed ?\n          <div className=\"folder-empty-tip\">\n            To add bookmark, drop an item form the sidebar\n          </div>\n          : null\n      }\n\n      <div className=\"folder-items-box\" data-folder-id={p.folder.id}>\n        {\n          !p.folder.collapsed || p.search !== \"\" ?\n            p.folder.items.map((item) => {\n              if (isBookmarkItem(item)) {\n                return <FolderBookmarkItem\n                  key={item.id}\n                  spaces={p.spaces}\n                  item={item}\n                  inEdit={item.id === p.itemInEdit}\n                  tabs={p.tabs}\n                  recentItems={p.recentItems}\n                  showNotUsed={p.showNotUsed}\n                  search={p.search}\n                  isBeta={p.isBeta}\n                />\n              } else {\n                return <FolderGroupItem\n                  key={item.id}\n                  spaces={p.spaces}\n                  groupItem={item}\n                  itemInEdit={p.itemInEdit}\n                  tabs={p.tabs}\n                  recentItems={p.recentItems}\n                  showNotUsed={p.showNotUsed}\n                  search={p.search}\n                  isBeta={p.isBeta}\n                />\n              }\n            })\n            : null\n        }\n      </div>\n      {\n        isGetProModalOpen && <GetProPlanModal onClose={() => setGetProModalOpen(false)} reason={\"Collapsing\"}/>\n      }\n    </div>\n  )\n})\n\nconst PRESET_COLORS = [...colors]\nPRESET_COLORS.length = 7\n\nfunction PresetColor(p: { onClick: (color: string) => void; color: string, currentColor?: string }) {\n  const borderColor = window.pSBC(-0.5, p.color)\n  const onClick = () => {\n    p.onClick(p.color)\n  }\n  const active = p.color === p.currentColor\n  return <button className={\"dropdown-menu__preset_color \" + (active ? \"selected\" : \"\")}\n                 tabIndex={0}\n                 onClick={onClick}>\n    <span style={{ backgroundColor: p.color, borderColor }}></span>\n  </button>\n}\n\nfunction CustomColorInput(p: { onChange: (color: string) => void; onBlur: (color: string) => void; currentColor?: string }) {\n  const id = `inputId_${Math.random()}`\n  const lastColorValue = useRef<string | undefined>(undefined)\n  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {\n    lastColorValue.current = e.target.value\n    p.onChange(e.target.value)\n  }\n  const onBlur = (e: React.ChangeEvent<HTMLInputElement>) => {\n    p.onBlur(e.target.value)\n    lastColorValue.current = undefined\n  }\n\n  useEffect(() => {\n    return () => {\n      if (lastColorValue.current) {\n        p.onBlur(lastColorValue.current)\n        lastColorValue.current = undefined\n      }\n    }\n  }, [])\n\n  const active = !PRESET_COLORS.includes(p.currentColor!)\n  return <div className={\"color-picker-container \" + (active ? \"selected\" : \"\")}>\n    <input type=\"color\"\n           className=\"old-input\"\n           id={id}\n           value={p.currentColor}\n           onChange={onChange}\n           onBlur={onBlur}\n    />\n    <label htmlFor={id} className=\"custom-color-picker\"></label>\n  </div>\n}\n",
+        "fileName": "Folder.tsx",
+        "filePath": "/Users/pltnkv/dev/tabme/apps/client/src/newtab/components/Folder.tsx",
+        "showLineNumbers": false
+      },
+      "81": {
+        "id": "81",
+        "type": "Code",
+        "fields": {},
+        "x": 928,
+        "y": 80,
+        "parentId": "24",
+        "width": 800,
+        "height": 2778,
+        "content": "import React, { useContext, useEffect, useState } from \"react\"\nimport { IBookmarkItem, ISpace } from \"../helpers/types\"\nimport { findTabsByURL, isBookmarkItem, isBookmarkItemNotUsed } from \"../helpers/utils\"\nimport { EditableTitle } from \"./EditableTitle\"\nimport { Action } from \"../state/state\"\nimport { DispatchContext } from \"../state/actions\"\nimport { CL } from \"../helpers/classNameHelper\"\nimport IconClose from \"../icons/close.svg\"\nimport IconMore from \"../icons/more.svg\"\nimport { FolderItemMenu } from \"./dropdown/FolderItemMenu\"\nimport { trackStat } from \"../helpers/stats\"\nimport { getBrokenImgSVG, loadFaviconUrl } from \"../helpers/faviconUtils\"\nimport { RecentItem } from \"../helpers/recentHistoryUtils\"\nimport Tab = chrome.tabs.Tab\nimport { getTooltipForBookmark } from \"../helpers/debugTooltips\"\n\nexport const FolderBookmarkItem = React.memo((p: {\n  spaces: ISpace[]; // todo dont pass\n  item: IBookmarkItem;\n  inEdit: boolean\n  tabs: Tab[]; // todo dont pass\n  recentItems: RecentItem[]; // todo dont pass\n  showNotUsed: boolean;\n  search: string;\n  isBeta: boolean\n}) => {\n  const dispatch = useContext(DispatchContext)\n  const [showMenu, setShowMenu] = useState<boolean>(false)\n  const [localTitle, setLocalTitle] = useState<string>(p.item.title)\n\n  useEffect(() => {\n    // to support UNDO operation\n    setLocalTitle(p.item.title)\n  }, [p.item.title])\n\n  function trySaveTitleAndURL(newTitle: string, newUrl?: string) {\n    const titleChanged = p.item.title !== newTitle\n    const urlChanged = newUrl && p.item.url !== newUrl\n    if (titleChanged || urlChanged) {\n      dispatch({\n        type: Action.UpdateFolderItem,\n        itemId: p.item.id,\n        props: {\n          title: newTitle,\n          url: newUrl ?? p.item.url\n        }\n      })\n\n      if (urlChanged) {\n        loadFaviconUrl(newUrl).then(faviconUrl => {\n          dispatch({\n            type: Action.UpdateFolderItem,\n            itemId: p.item.id,\n            props:{favIconUrl: faviconUrl}\n          })\n        })\n      }\n    }\n  }\n\n  function setEditing(val: boolean) {\n    dispatch({\n      type: Action.UpdateAppState,\n      newState: { itemInEdit: val ? p.item.id : undefined }\n    })\n  }\n\n  function onContextMenu(e: React.MouseEvent) {\n    setShowMenu(true)\n    e.preventDefault()\n  }\n\n  function onCloseTab() {\n    const tabs = findTabsByURL(p.item.url, p.tabs)\n    const tabIds = tabs.filter(t => t.id).map(t => t.id!)\n    dispatch({\n      type: Action.CloseTabs,\n      tabIds: tabIds\n    })\n    trackStat(\"tabClosed\", { source: \"bookmarks\" })\n  }\n\n  function handleImageError(e: React.SyntheticEvent) {\n    const imgElement = e.target as HTMLImageElement\n    imgElement.src = getBrokenImgSVG()\n  }\n\n  const folderItemOpened = isBookmarkItem(p.item) && findTabsByURL(p.item.url, p.tabs).length !== 0\n\n  return (\n    <div className={CL(\"folder-item\", { \"selected\": showMenu })}\n         data-id={p.item.id}\n    >\n      {showMenu\n        ? <FolderItemMenu\n          spaces={p.spaces}\n          item={p.item}\n          localTitle={localTitle}\n          setLocalTitle={setLocalTitle}\n          onSave={trySaveTitleAndURL}\n          onClose={() => setShowMenu(false)}\n          isBeta={p.isBeta}\n        />\n        : null\n      }\n      <button className=\"folder-item__menu\"\n              onContextMenu={onContextMenu}\n              onClick={() => setShowMenu(!showMenu)}>\n        <IconMore/>\n      </button>\n\n      <a className={\n        CL(\"folder-item__inner draggable-item\", {\n          \"open\": folderItemOpened\n        })\n      }\n         onDragStart={(e) => {e.preventDefault()}} // to prevent text drag-and-drop in the textarea\n         tabIndex={2}\n         data-id={p.item.id}\n         onClick={e => e.preventDefault()}\n         data-tooltip={p.item.title}\n         data-tooltip-more={getTooltipForBookmark(p.item)}\n         data-tooltip-position=\"top-left\"\n         href={p.item.url}\n         onContextMenu={onContextMenu}>\n        <img src={p.item.favIconUrl} alt=\"\" onError={handleImageError}/>\n\n\n        <EditableTitle className={CL(\"folder-item__inner__title\", {\n          \"not-used\": p.showNotUsed && isBookmarkItemNotUsed(p.item, p.recentItems)\n        })}\n                       inEdit={p.inEdit}\n                       setEditing={setEditing}\n                       value={localTitle}\n                       setNewValue={setLocalTitle}\n                       onSaveTitle={trySaveTitleAndURL}\n                       search={p.search}\n        />\n        {\n          folderItemOpened ? <button className=\"btn__close-tab stop-dad-propagation\"\n                                     tabIndex={2}\n                                     data-tooltip=\"Close tab\"\n                                     data-tooltip-position=\"top-center\"\n                                     onClick={onCloseTab}>\n            <IconClose/>\n          </button> : null\n        }\n      </a>\n    </div>\n  )\n})",
+        "fileName": "FolderBookmarkItem.tsx",
+        "filePath": "/Users/pltnkv/dev/tabme/apps/client/src/newtab/components/FolderBookmarkItem.tsx",
+        "showLineNumbers": false
+      },
+      "82": {
+        "id": "82",
+        "type": "Shape",
+        "fields": {},
+        "x": -14640,
+        "y": -1936,
+        "width": 100,
+        "height": 100,
+        "backgroundColor": "#ffc800"
+      },
+      "84": {
+        "id": "84",
+        "type": "Code",
+        "fields": {},
+        "x": -12928,
+        "y": -2448,
+        "width": 800,
+        "height": 4002,
+        "content": "import React, { useContext, useEffect, useState } from \"react\"\nimport { IFolderItem, ISpace } from \"../../helpers/types\"\nimport { DropdownMenu, DropdownSubMenu } from \"./DropdownMenu\"\nimport { getSelectedItems } from \"../../helpers/selectionUtils\"\nimport { Action } from \"../../state/state\"\nimport { DispatchContext, mergeStepsInHistory } from \"../../state/actions\"\nimport { getSpacesWithNestedFoldersList } from \"./moveToHelpers\"\nimport { createFolderWithStat, showMessage, showMessageWithUndo } from \"../../helpers/actionsHelpersWithDOM\"\nimport { findFolderByItemId } from \"../../state/actionHelpers\"\nimport { isBookmarkItem, isGroupItem, scrollElementIntoView } from \"../../helpers/utils\"\nimport { trackStat } from \"../../helpers/stats\"\nimport { GetProPlanModal } from \"../modals/GetProPlanModal\"\n\nexport const FolderItemMenu = React.memo((p: {\n  spaces: ISpace[],\n  localTitle: string,\n  setLocalTitle: (val: string) => void\n  onSave: (title: string, url: string) => void,\n  onClose: () => void,\n  item: IFolderItem;\n  isBeta: boolean\n}) => {\n  const dispatch = useContext(DispatchContext)\n  const [selectedItems, setSelectedItems] = useState<IFolderItem[]>([])\n  const [localURL, setLocalURL] = useState<string>(isBookmarkItem(p.item) ? p.item.url : \"\")\n  const [isGetProModalOpen, setGetProModalOpen] = useState(false)\n\n  useEffect(() => {\n    const items = getSelectedItems()\n    if (items.length > 0) {\n      setSelectedItems(items)\n    } else {\n      setSelectedItems([p.item])\n    }\n  }, [])\n\n  // support multiple\n  function onOpenNewTab() {\n    selectedItems\n      .filter(isBookmarkItem)\n      .forEach((item) => {\n        if (item.url) {\n          chrome.tabs.create({ url: item.url })\n        }\n      })\n    trackStat(\"tabOpened\", { inNewTab: true, source: \"bookmark-menu\" })\n    p.onClose()\n  }\n\n  // support multiple\n  function onDeleteItem() {\n    dispatch({\n      type: Action.DeleteFolderItems,\n      itemIds: selectedItems.map(i => i.id)\n    })\n    showMessageWithUndo(\"Bookmark has been deleted\", dispatch)\n  }\n\n  function onCopyUrl() {\n    if (isBookmarkItem(p.item)) {\n      navigator.clipboard.writeText(p.item.url)\n      p.onClose()\n      showMessage(\"URL has been copied\", dispatch)\n    }\n  }\n\n  function onSaveAndClose() {\n    p.onSave(p.localTitle, localURL)\n    p.onClose()\n  }\n\n  const getItemIdsToMove = () => {\n    return selectedItems.map(item => item.id)\n  }\n\n  const moveToFolder = (folderId: number) => {\n    dispatch({\n      type: Action.MoveFolderItems,\n      itemIds: getItemIdsToMove(),\n      targetFolderId: folderId,\n      targetGroupId: undefined,\n      insertBeforeItemId: undefined\n    })\n\n    showMessage(\"Bookmarks has been moved\", dispatch) // todo place all texts in a single file\n\n    scrollElementIntoView(`a[data-id=\"${p.item.id}\"]`)\n\n    p.onClose()\n  }\n\n  const moveToNewFolder = (spaceId: number) => {\n    mergeStepsInHistory((historyStepId) => {\n      const folderId = createFolderWithStat(dispatch, { historyStepId, spaceId }, \"by-move-to-new-folder\")\n      dispatch({\n        type: Action.MoveFolderItems,\n        itemIds: selectedItems.map(item => item.id),\n        targetFolderId: folderId,\n        targetGroupId: undefined,\n        insertBeforeItemId: undefined,\n        historyStepId\n      })\n    })\n\n    showMessage(\"Bookmarks has been moved\", dispatch)\n\n    p.onClose()\n  }\n\n  const expandGroup = () => {\n    if (isGroupItem(p.item)) {\n      dispatch({ type: Action.UpdateFolderItem, itemId: p.item.id, props: { collapsed: !p.item.collapsed } })\n    } else {\n      throw new Error(\"Unexpected flow: expandGroup in context menu\")\n    }\n  }\n\n  const collapseGroup = () => {\n    if (isGroupItem(p.item)) {\n      dispatch({ type: Action.UpdateFolderItem, itemId: p.item.id, props: { collapsed: !p.item.collapsed } })\n      if (!p.item.collapsed) {\n        trackStat(\"collapseSection\", {})\n      }\n    } else {\n      throw new Error(\"Unexpected flow: expandGroup in context menu\")\n    }\n  }\n\n  const LEFT = 8\n\n  return <>\n    {\n      selectedItems.length > 1 ?\n        <DropdownMenu onClose={p.onClose} className={\"dropdown-menu--folder-item\"} offset={{ top: 29, bottom: 32, left: LEFT }}>\n          <button className=\"dropdown-menu__button focusable\" onClick={onOpenNewTab}>Open in New Tab</button>\n          <DropdownSubMenu\n            menuId={1}\n            title={\"Move to\"}\n            submenuContent={getSpacesWithNestedFoldersList(p.spaces, moveToFolder, moveToNewFolder, findFolderByItemId(p, p.item.id)?.id)}\n          />\n          <button className=\"dropdown-menu__button dropdown-menu__button--dander focusable\" onClick={onDeleteItem}>Delete</button>\n        </DropdownMenu>\n        :\n        <>\n          {isGroupItem(p.item) ?\n            <DropdownMenu onClose={onSaveAndClose} className={\"dropdown-menu--folder-item dropdown-menu--folder-section\"} offset={{ top: 35, bottom: 32, left: LEFT }}>\n              <label className=\"input-label\">\n                <span>Title</span>\n                <input\n                  type=\"text\"\n                  className=\"focusable old-input\"\n                  autoFocus={true}\n                  value={p.localTitle}\n                  onChange={e => p.setLocalTitle(e.target.value)}/>\n              </label>\n              {\n                p.item.collapsed\n                  ? <button className=\"dropdown-menu__button focusable\" onClick={expandGroup}>Expand</button>\n                  : (p.isBeta ? <button className=\"dropdown-menu__button focusable\" onClick={collapseGroup}>Collapse</button> : null)\n              }\n              <DropdownSubMenu\n                menuId={1}\n                title={\"Move to\"}\n                submenuContent={getSpacesWithNestedFoldersList(p.spaces, moveToFolder, moveToNewFolder, findFolderByItemId(p, p.item.id)?.id)}\n              />\n              <button className=\"dropdown-menu__button dropdown-menu__button--dander focusable\" onClick={onDeleteItem}>Delete</button>\n            </DropdownMenu>\n            :\n            <DropdownMenu onClose={onSaveAndClose} className={\"dropdown-menu--folder-item\"} offset={{ top: 29, bottom: 32, left: LEFT }} width={334}>\n              <label className=\"input-label\">\n                <span>Title</span>\n                <input type=\"text\"\n                       className=\"focusable old-input\"\n                       autoFocus={true}\n                       value={p.localTitle}\n                       onChange={e => p.setLocalTitle(e.target.value)}/>\n              </label>\n              <label className=\"input-label\">\n                <span>URL</span>\n                <input type=\"text\"\n                       className=\"focusable old-input\"\n                       value={localURL}\n                       onChange={e => setLocalURL(e.target.value)}/>\n              </label>\n              <button className=\"dropdown-menu__button focusable\" onClick={onOpenNewTab}>Open in New Tab</button>\n              <button className=\"dropdown-menu__button focusable\" onClick={onCopyUrl}>Copy url</button>\n              <DropdownSubMenu\n                menuId={1}\n                title={\"Move to\"}\n                submenuContent={getSpacesWithNestedFoldersList(p.spaces, moveToFolder, moveToNewFolder, findFolderByItemId(p, p.item.id)?.id)}\n              />\n              <button className=\"dropdown-menu__button dropdown-menu__button--dander focusable\" onClick={onDeleteItem}>Delete</button>\n            </DropdownMenu>\n          }\n          {\n            isGetProModalOpen && <GetProPlanModal onClose={() => setGetProModalOpen(false)} reason={\"Collapsing\"}/>\n          }\n        </>\n    }\n  </>\n})",
+        "fileName": "FolderItemMenu.tsx",
+        "filePath": "/Users/pltnkv/dev/tabme/apps/client/src/newtab/components/dropdown/FolderItemMenu.tsx",
+        "showLineNumbers": false
+      },
+      "85": {
+        "id": "85",
+        "type": "Code",
+        "fields": {},
+        "x": -14672,
+        "y": -2448,
+        "width": 800,
+        "height": 2994,
+        "content": "import React, { useContext, useState} from \"react\"\nimport PlusIcon from \"../icons/plus.svg\"\nimport DeleteIcon from \"../icons/delete.svg\"\nimport { ISpace } from \"../helpers/types\"\nimport { CL } from \"../helpers/classNameHelper\"\nimport { DispatchContext } from \"../state/actions\"\nimport { Action } from \"../state/state\"\nimport { SimpleEditableTitle } from \"./EditableTitle\"\nimport { DropdownMenu } from \"./dropdown/DropdownMenu\"\nimport { genUniqLocalId } from \"../state/actionHelpers\"\nimport { insertBetween } from \"../helpers/fractionalIndexes\"\nimport { trackStat } from \"../helpers/stats\"\nimport { GetProPlanModal } from \"./modals/GetProPlanModal\"\n\nexport function SpacesList(p: {\n  betaMode: boolean\n  spaces: ISpace[]\n  currentSpaceId: number\n  itemInEdit: number | undefined\n}) {\n  const dispatch = useContext(DispatchContext)\n\n  const [menuSpaceId, setMenuSpaceId] = useState(-1)\n  const [isJoinBetaModalOpen, setJoinBetaModalOpen] = useState(false)\n\n  const spaceInEdit = p.spaces.find(s => s.id === p.itemInEdit)\n\n  const setEditingSpaceId = (spaceId: number | undefined) => {\n    dispatch({\n      type: Action.UpdateAppState,\n      newState: { itemInEdit: spaceId }\n    })\n  }\n\n  const onSpaceClick = (spaceId: number) => {\n    if (p.currentSpaceId === spaceId) {\n      setEditingSpaceId(spaceId)\n    } else {\n      dispatch({\n        type: Action.SelectSpace,\n        spaceId: spaceId\n      })\n    }\n  }\n\n  const onSaveNewSpaceTitle = (spaceId: number, title: string) => {\n    dispatch({\n      type: Action.UpdateSpace,\n      spaceId,\n      title\n    })\n    setEditingSpaceId(undefined)\n  }\n\n  const onSpaceTitleElementUnmount = () => {\n    setEditingSpaceId(undefined)\n  }\n\n  const onRenameSpace = (spaceId: number) => {\n    setMenuSpaceId(-1)\n    setEditingSpaceId(spaceId)\n  }\n\n  const deleteSpace = (space: ISpace) => {\n    const bookmarksCount = space.folders.reduce((count, f) => count + f.items.length, 0)\n    const stickersCount = space.widgets?.length ?? 0\n    const totalCount = bookmarksCount + stickersCount\n    let res = true\n    if (totalCount > 0) {\n      res = confirm(`Delete the space '${space.title}'?`)\n    }\n    if (res) {\n      dispatch({\n        type: Action.DeleteSpace,\n        spaceId: space.id\n      })\n    }\n  }\n\n  const onAddSpace = () => {\n    if (p.betaMode || p.spaces.length === 0) {\n      const lastSpace = p.spaces.at(-1)\n      const spaceId = genUniqLocalId()\n      dispatch({\n        type: Action.CreateSpace,\n        spaceId: spaceId,\n        title: `New space`,\n        position: insertBetween(lastSpace?.position ?? \"\", \"\")\n      })\n\n      dispatch({\n        type: Action.SelectSpace,\n        spaceId: spaceId\n      })\n\n      setEditingSpaceId(spaceId)\n\n      trackStat(\"spaceCreated\", { source: \"new-space-button\" })\n    } else {\n      setJoinBetaModalOpen(true)\n    }\n  }\n\n  return (\n    <div className={CL(\"spaces-list\")}>\n      {\n        p.spaces.length === 0 && <span style={{ padding: \"8px\" }}>Create New Space</span>\n      }\n      {\n        p.spaces.map((space) => {\n          return <span key={space.id}\n                       className={CL(\"spaces-list__item\", { active: space.id === p.currentSpaceId })}\n                       onClick={() => onSpaceClick(space.id)}\n                       data-position={space.position}\n                       data-space-id={space.id}\n          >\n            <SimpleEditableTitle\n              inEdit={space.id === p.itemInEdit}\n              onContextMenu={() => setMenuSpaceId(space.id)}\n              value={space.title || \"untitled\"}\n              onSave={(title) => onSaveNewSpaceTitle(space.id, title)}\n              onUnmount={onSpaceTitleElementUnmount}\n            />\n            {\n              space.id === p.itemInEdit && p.spaces.length > 1 && <button className=\"spaces-list__delete-button\"\n                                                                          title=\"Delete space\"\n                                                                          onMouseDown={() => deleteSpace(space)}\n              >\n                <DeleteIcon/>\n              </button>\n            }\n            {\n              menuSpaceId === space.id && <DropdownMenu onClose={() => {setMenuSpaceId(-1)}} className={\"dropdown-menu--folder\"} offset={{ top: 2, left: -16 }}>\n                <button className=\"dropdown-menu__button focusable\" onClick={() => onRenameSpace(space.id)}>Rename space</button>\n                {\n                  p.spaces.length > 1 && <button className=\"dropdown-menu__button dropdown-menu__button--dander focusable\" onClick={() => deleteSpace(space)}>Delete space</button>\n                }\n              </DropdownMenu>\n            }\n          </span>\n        })\n\n      }\n      {\n        !spaceInEdit && <div className=\"spaces-list__new\" onClick={onAddSpace} title=\"Add new space\">\n          <PlusIcon/>\n        </div>\n      }\n      {\n        isJoinBetaModalOpen && <GetProPlanModal onClose={() => setJoinBetaModalOpen(false)} reason={\"Spaces\"}/>\n      }\n    </div>\n  )\n}\n\n",
+        "fileName": "SpacesList.tsx",
+        "filePath": "/Users/pltnkv/dev/tabme/apps/client/src/newtab/components/SpacesList.tsx",
+        "showLineNumbers": false
+      },
+      "86": {
+        "id": "86",
+        "type": "Code",
+        "fields": {},
+        "x": -13792,
+        "y": -2448,
+        "width": 800,
+        "height": 3948,
+        "content": "import { unselectAllItems } from \"../helpers/selectionUtils\"\nimport { setScrollByDummyClientY, subscribeMouseEvents } from \"./dragAndDropUtils\"\nimport {\n  calculateFoldersDropAreas,\n  calculateGroupsDropAreas,\n  createPlaceholder,\n  createTabDummy,\n  DropArea,\n  getFolderId,\n  getFolderItemId,\n  getFolderItemsIds,\n  getNewPlacementForItem,\n  getOverlappedDropArea,\n  getOverlappedFolderDropArea,\n  initSpacesSwitcher,\n  PConfigItem\n} from \"./dragAndDrop\"\nimport { findParentWithClass } from \"../helpers/utils\"\nimport { inRange } from \"../helpers/mathUtils\"\n\nexport function processItemDragAndDrop(\n  mouseDownEvent: React.MouseEvent,\n  config: PConfigItem,\n  onChangeSpace: (spaceId: number) => void,\n  targetElements: HTMLElement[]\n) {\n  const movingItemsIds = getFolderItemsIds(targetElements)\n  let originalIndex: number\n  let originalFolderId: number\n  let originalGroupId: number | undefined\n  let originalInsertBeforeId: number | undefined\n  let dummy: undefined | HTMLElement = undefined\n  const placeholder: HTMLElement = createPlaceholder(true)\n\n  let dropArea: DropArea | undefined = undefined\n  let prevBoxToDrop: HTMLElement | undefined = undefined\n  let targetFolderId: number | undefined\n  let targetGroupId: number | undefined\n\n  let dropAreas: DropArea[]\n  let groupDropAreas: DropArea[]\n  const onViewportScrolled = () => {\n    // recalculate drop areas if viewport was scrolled\n    const folderEls = Array.from(document.querySelectorAll(\".folder .folder-items-box\"))\n    dropAreas = calculateFoldersDropAreas(folderEls, true)\n    groupDropAreas = calculateGroupsDropAreas()\n  }\n  onViewportScrolled()\n\n  const spacesSwitcher = initSpacesSwitcher(onChangeSpace)\n\n  let currentGroupArea: DropArea | undefined\n  let enterGroupModeTimeoutId: number | undefined\n  let insertBeforeItemId: number | undefined\n\n  function unhighlightPrevDropArea() {\n    if (currentGroupArea) {\n      currentGroupArea.element.classList.remove(\"dnd-group-mode\")\n      currentGroupArea = undefined\n      targetGroupId = undefined\n    } else {\n      clearTimeout(enterGroupModeTimeoutId)\n      enterGroupModeTimeoutId = undefined\n    }\n  }\n\n  const onMouseMove = (e: MouseEvent, mouseMoved: boolean) => {\n    if (dummy) {\n      // move dummy\n      dummy.style.transform = `translateX(${e.clientX + \"px\"}) translateY(${e.clientY + \"px\"})`\n\n      if (enterGroupModeTimeoutId) {\n        clearTimeout(enterGroupModeTimeoutId)\n        enterGroupModeTimeoutId = undefined\n      }\n      const newGroupDropArea = getOverlappedDropArea(groupDropAreas, e)\n      // make sure to not enter \"group-mode\" into current dragging group\n      if (newGroupDropArea && !movingItemsIds.some(id => id === newGroupDropArea.objectId)) {\n        if (newGroupDropArea !== currentGroupArea) {\n          //enter \"group-mode\" if dont move mouse for X ms\n          enterGroupModeTimeoutId = window.setTimeout(() => {\n            unhighlightPrevDropArea()\n            currentGroupArea = newGroupDropArea\n            currentGroupArea.element.classList.add(\"dnd-group-mode\")\n            onMouseMove(e, false)\n          }, 0)\n        }\n      } else {\n        unhighlightPrevDropArea()\n      }\n\n      if (spacesSwitcher.test(e)) {\n        requestAnimationFrame(onViewportScrolled) // to recalculate dropFoldersAreas\n        placeholder.remove()\n        dropArea = undefined\n      } else {\n        // find target position\n        dropArea = getOverlappedFolderDropArea(dropAreas, e)\n        const curBoxToDrop = dropArea ? dropArea.element : undefined\n        if (curBoxToDrop !== prevBoxToDrop) {\n          if (curBoxToDrop) {\n            curBoxToDrop.appendChild(placeholder)\n          } else {\n            placeholder.remove()\n          }\n          prevBoxToDrop = curBoxToDrop\n        }\n        if (curBoxToDrop && dropArea) {\n          const res = getNewPlacementForItem(dropArea, currentGroupArea, e)\n\n          targetFolderId = dropArea.objectId\n          targetGroupId = currentGroupArea?.objectId\n          insertBeforeItemId = res.itemRect?.objectId\n\n          const tryAddToOriginalPos = targetFolderId === originalFolderId\n            && targetGroupId === originalGroupId\n            && inRange(res.index, originalIndex, originalIndex + movingItemsIds.length)\n          if (tryAddToOriginalPos) {\n            const itemRects = currentGroupArea?.itemRects ?? dropArea.itemRects\n            placeholder.style.top = `${itemRects[originalIndex].itemTop}px`\n            targetFolderId = undefined\n          } else {\n            placeholder.style.top = `${res.placeholderY}px`\n          }\n        }\n      }\n\n      setScrollByDummyClientY(e.clientY)\n    } else {\n      if (mouseMoved) {\n        if (!config.onDragStarted()) {\n          unsubscribeEvents()\n          return\n        }\n\n        //create dummy\n        dummy = createTabDummy(targetElements, mouseDownEvent, config.isFolderItemsDragging)\n        dummy.style.transform = `translateX(${e.clientX + \"px\"}) translateY(${e.clientY + \"px\"})`\n        document.body.classList.add(\"dragging\")\n        document.body.append(dummy)\n        onViewportScrolled()\n        if (config.isFolderItemsDragging) {\n          const targetRoot = targetElements[0]\n          const origContainerChildren = Array.from(getParentFolderOrGroupElement(targetRoot)!.children)\n\n          // here we remember only first index from all selected elements\n          originalIndex = origContainerChildren.indexOf(targetRoot.parentElement!)\n          const nextItem = origContainerChildren.at(originalIndex + 1) as HTMLElement | undefined\n          originalInsertBeforeId = nextItem ? getFolderItemId(nextItem) : undefined\n          originalFolderId = getFolderId(getParentFolderElement(targetRoot)!)\n          const parentGroupElement = getParentGroupElement(targetRoot)\n          originalGroupId = parentGroupElement ? getFolderItemId(parentGroupElement) : undefined\n        }\n      }\n    }\n  }\n  const onMouseUp = (e: any) => {\n    if (dummy) {\n      document.body.classList.remove(\"dragging\")\n      dummy.remove()\n      placeholder.remove()\n      targetElements.forEach(el => el.style.removeProperty(\"opacity\"))\n      const tryAddToOriginalPos = originalInsertBeforeId === insertBeforeItemId\n        && originalGroupId === targetGroupId\n        && originalFolderId === targetFolderId\n      if (prevBoxToDrop && !tryAddToOriginalPos && targetFolderId) { // if folder not specified it means we add to the same position\n        config.onDrop(targetFolderId, targetGroupId, insertBeforeItemId, movingItemsIds)\n      } else {\n        config.onCancel()\n      }\n      unhighlightPrevDropArea() //must be in the end to not cleanup \"targetGroupId\"\n    } else {\n      let targetId: number | undefined\n      if (config.isFolderItemsDragging) {\n        const itemEl = findParentWithClass(e.target, \"folder-item__inner\") ?? findParentWithClass(e.target, \"folder-group-item__header\")?.parentElement\n        if (itemEl) {\n          targetId = getFolderItemId(itemEl)\n        } else {\n          throw new Error(\"no targetId defined\")\n        }\n      } else {\n        // we can click only by single element\n        if (!targetIsTabGroup(targetElements[0])) {\n          targetId = getFolderItemId(targetElements[0])\n        }\n      }\n      if (targetId) {\n        config.onClick(targetId)\n      }\n    }\n\n    unselectAllItems()\n  }\n\n  const unsubscribeEvents = subscribeMouseEvents(mouseDownEvent, onMouseMove, onMouseUp, onViewportScrolled)\n  return unsubscribeEvents\n}\n\nfunction getParentFolderElement(target: HTMLElement): HTMLElement | undefined {\n  return findParentWithClass(target, \"folder-items-box\")\n}\n\nfunction getParentGroupElement(target: HTMLElement): HTMLElement | undefined {\n  return findParentWithClass(target, \"group-items-box\")\n}\n\nfunction getParentFolderOrGroupElement(target: HTMLElement): HTMLElement | undefined {\n  return getParentGroupElement(target) ?? getParentFolderElement(target)\n}\n\nfunction targetIsTabGroup(targetElement: HTMLElement): boolean {\n  return targetElement.classList.contains(\"is-tab-group\")\n}",
+        "fileName": "processItemDragAndDrop.ts",
+        "filePath": "/Users/pltnkv/dev/tabme/apps/client/src/newtab/dragging/processItemDragAndDrop.ts",
+        "showLineNumbers": false
+      },
+      "180": {
+        "id": "180",
+        "type": "Code",
+        "fields": {},
+        "x": -12064,
+        "y": -1158,
+        "width": 800,
+        "height": 528,
+        "content": "import React, { useContext, useEffect, useState } from \"react\"\nimport { IBookmarkItem, ISpace } from \"../helpers/types\"\nimport { findTabsByURL, isBookmarkItem, isBookmarkItemNotUsed } from \"../helpers/utils\"\nimport { EditableTitle } from \"./EditableTitle\"\nimport { Action } from \"../state/state\"\nimport { DispatchContext } from \"../state/actions\"\nimport { CL } from \"../helpers/classNameHelper\"\nimport IconClose from \"../icons/close.svg\"\nimport IconMore from \"../icons/more.svg\"\nimport { FolderItemMenu } from \"./dropdown/FolderItemMenu\"\nimport { trackStat } from \"../helpers/stats\"\nimport { getBrokenImgSVG, loadFaviconUrl } from \"../helpers/faviconUtils\"\nimport { RecentItem } from \"../helpers/recentHistoryUtils\"\nimport Tab = chrome.tabs.Tab\nimport { getTooltipForBookmark } from \"../helpers/debugTooltips\"\n\nexport const FolderBookmarkItem = React.memo((p: {\n  spaces: ISpace[]; // todo dont pass\n  item: IBookmarkItem;\n  inEdit: boolean\n  tabs: Tab[]; // todo dont pass\n  recentItems: RecentItem[]; // todo dont pass\n  showNotUsed: boolean;\n  search: string;\n  isBeta: boolean\n}) => {\n  const dispatch = useContext(DispatchContext)\n  const [showMenu, setShowMenu] = useState<boolean>(false)\n  const [localTitle, setLocalTitle] = useState<string>(p.item.title)\n\n  useEffect(() => {\n    // to support UNDO operation\n    setLocalTitle(p.item.title)\n  }, [p.item.title])\n\n  function trySaveTitleAndURL(newTitle: string, newUrl?: string) {\n    const titleChanged = p.item.title !== newTitle\n    const urlChanged = newUrl && p.item.url !== newUrl\n    if (titleChanged || urlChanged) {\n      dispatch({\n        type: Action.UpdateFolderItem,\n        itemId: p.item.id,\n        props: {\n          title: newTitle,\n          url: newUrl ?? p.item.url\n        }\n      })\n\n      if (urlChanged) {\n        loadFaviconUrl(newUrl).then(faviconUrl => {\n          dispatch({\n            type: Action.UpdateFolderItem,\n            itemId: p.item.id,\n            props:{favIconUrl: faviconUrl}\n          })\n        })\n      }\n    }\n  }\n\n  function setEditing(val: boolean) {\n    dispatch({\n      type: Action.UpdateAppState,\n      newState: { itemInEdit: val ? p.item.id : undefined }\n    })\n  }\n\n  function onContextMenu(e: React.MouseEvent) {\n    setShowMenu(true)\n    e.preventDefault()\n  }\n\n  function onCloseTab() {\n    const tabs = findTabsByURL(p.item.url, p.tabs)\n    const tabIds = tabs.filter(t => t.id).map(t => t.id!)\n    dispatch({\n      type: Action.CloseTabs,\n      tabIds: tabIds\n    })\n    trackStat(\"tabClosed\", { source: \"bookmarks\" })\n  }\n\n  function handleImageError(e: React.SyntheticEvent) {\n    const imgElement = e.target as HTMLImageElement\n    imgElement.src = getBrokenImgSVG()\n  }\n\n  const folderItemOpened = isBookmarkItem(p.item) && findTabsByURL(p.item.url, p.tabs).length !== 0\n\n  return (\n    <div className={CL(\"folder-item\", { \"selected\": showMenu })}\n         data-id={p.item.id}\n    >\n      {showMenu\n        ? <FolderItemMenu\n          spaces={p.spaces}\n          item={p.item}\n          localTitle={localTitle}\n          setLocalTitle={setLocalTitle}\n          onSave={trySaveTitleAndURL}\n          onClose={() => setShowMenu(false)}\n          isBeta={p.isBeta}\n        />\n        : null\n      }\n      <button className=\"folder-item__menu\"\n              onContextMenu={onContextMenu}\n              onClick={() => setShowMenu(!showMenu)}>\n        <IconMore/>\n      </button>\n\n      <a className={\n        CL(\"folder-item__inner draggable-item\", {\n          \"open\": folderItemOpened\n        })\n      }\n         onDragStart={(e) => {e.preventDefault()}} // to prevent text drag-and-drop in the textarea\n         tabIndex={2}\n         data-id={p.item.id}\n         onClick={e => e.preventDefault()}\n         data-tooltip={p.item.title}\n         data-tooltip-more={getTooltipForBookmark(p.item)}\n         data-tooltip-position=\"top-left\"\n         href={p.item.url}\n         onContextMenu={onContextMenu}>\n        <img src={p.item.favIconUrl} alt=\"\" onError={handleImageError}/>\n\n\n        <EditableTitle className={CL(\"folder-item__inner__title\", {\n          \"not-used\": p.showNotUsed && isBookmarkItemNotUsed(p.item, p.recentItems)\n        })}\n                       inEdit={p.inEdit}\n                       setEditing={setEditing}\n                       value={localTitle}\n                       setNewValue={setLocalTitle}\n                       onSaveTitle={trySaveTitleAndURL}\n                       search={p.search}\n        />\n        {\n          folderItemOpened ? <button className=\"btn__close-tab stop-dad-propagation\"\n                                     tabIndex={2}\n                                     data-tooltip=\"Close tab\"\n                                     data-tooltip-position=\"top-center\"\n                                     onClick={onCloseTab}>\n            <IconClose/>\n          </button> : null\n        }\n      </a>\n    </div>\n  )\n})",
+        "fileName": "FolderBookmarkItem.tsx",
+        "filePath": "/Users/pltnkv/dev/tabme/apps/client/src/newtab/components/FolderBookmarkItem.tsx",
+        "showLineNumbers": false
+      },
+      "181": {
+        "id": "181",
+        "type": "Shape",
+        "fields": {},
+        "x": -14640,
+        "y": -1936,
+        "width": 752,
+        "height": 112,
+        "backgroundColor": "#ffc800"
+      },
+      "183": {
+        "id": "183",
+        "type": "Shape",
+        "fields": {},
+        "x": -13776,
+        "y": 32,
+        "width": 768,
+        "height": 80,
+        "backgroundColor": "#ffc800"
+      },
+      "184": {
+        "id": "184",
+        "type": "Shape",
+        "fields": {},
+        "x": -13760,
+        "y": -1392,
+        "width": 736,
+        "height": 64,
+        "backgroundColor": "#ffc800"
+      },
+      "185": {
+        "id": "185",
+        "type": "Shape",
+        "fields": {},
+        "x": -12896,
+        "y": -1328,
+        "width": 736,
+        "height": 80,
+        "backgroundColor": "#ffc800"
+      },
+      "186": {
+        "id": "186",
+        "type": "Shape",
+        "fields": {},
+        "x": -12896,
+        "y": -416,
+        "width": 736,
+        "height": 80,
+        "backgroundColor": "#ffc800"
+      },
+      "188": {
+        "id": "188",
+        "type": "Shape",
+        "fields": {},
+        "x": -12896,
+        "y": -240,
+        "width": 736,
+        "height": 112,
+        "backgroundColor": "#ffc800"
+      },
+      "193": {
+        "id": "193",
+        "type": "Code",
+        "fields": {},
+        "x": -23600,
+        "y": -3056,
+        "width": 800,
+        "height": 1788,
+        "content": "# TabMe Monorepo\n\nThis is a monorepo setup for the TabMe browser extension, containing both client and server applications.\n\n## Structure\n\n```\ntabme/\n├── package.json              # Root workspace configuration\n├── apps/\n│   ├── client/              # Browser extension\n│   │   ├── package.json\n│   │   └── src/\n│   └── server/              # Backend server\n│       ├── package.json\n│       └── src/\n└── node_modules/            # Shared dependencies\n```\n\n## Getting Started\n\n### Installation\n\nInstall all dependencies for the entire monorepo:\n\n```bash\nnpm install\n```\n\nThis will install dependencies for all workspaces and hoist shared dependencies to the root `node_modules`.\n\n### Development\n\nRun commands for specific apps:\n\n```bash\n# Client development\nnpm run client:dev\n\n# Server development  \nnpm run server:dev\n\n# Build client\nnpm run client:build\n\n# Build server\nnpm run server:build\n```\n\n### Run commands for all workspaces:\n\n```bash\n# Build all apps\nnpm run build:all\n\n# Test all apps\nnpm run test:all\n\n# Clean all apps\nnpm run clean\n```\n\n## Workspace Benefits\n\n1. **Shared Dependencies**: Common dependencies like TypeScript and Prettier are installed once at the root\n2. **Easy Management**: Single `npm install` command sets up everything\n3. **Cross-package Development**: Apps can easily reference each other\n4. **Consistent Tooling**: Shared configuration files can be used across apps\n\n## Adding New Apps\n\nTo add a new app to the workspace:\n\n1. Create a new directory in `apps/`\n2. Add a `package.json` with a unique name\n3. The app will automatically be included in the workspace\n\n## Working with Individual Apps\n\nYou can still run commands in individual app directories:\n\n```bash\ncd apps/client\nnpm run watch\n\ncd apps/server  \nnpm run dev\n```\n\n## Dependencies\n\n- **Root Level**: Shared development tools (TypeScript, Prettier, etc.)\n- **App Level**: App-specific dependencies (React for client, Express for server) ",
+        "fileName": "README.md",
+        "filePath": "/Users/pltnkv/dev/tabme/README.md",
+        "showLineNumbers": false
+      },
+      "194": {
+        "id": "194",
+        "type": "Code",
+        "fields": {},
+        "x": 1808,
+        "y": 1040,
+        "parentId": "24",
+        "width": 800,
+        "height": 1280,
+        "content": "import React, { useContext, useEffect, useRef, useState } from \"react\"\nimport { IFolder, ISpace } from \"../helpers/types\"\nimport { colors, isBookmarkItem, scrollElementIntoView } from \"../helpers/utils\"\nimport { DropdownMenu, DropdownSubMenu } from \"./dropdown/DropdownMenu\"\nimport { EditableTitle } from \"./EditableTitle\"\nimport { CL } from \"../helpers/classNameHelper\"\nimport { Action } from \"../state/state\"\nimport { DispatchContext } from \"../state/actions\"\nimport MenuIcon from \"../icons/menu.svg\"\nimport CollapseIcon from \"../icons/collapse.svg\"\nimport ExpandIcon from \"../icons/expand.svg\"\n\nimport { getSpacesList } from \"./dropdown/moveToHelpers\"\nimport { showMessageWithUndo } from \"../helpers/actionsHelpersWithDOM\"\nimport { createNewFolderBookmark, createNewFolderGroup, findSpaceByFolderId, getFolderBookmarksFlatList } from \"../state/actionHelpers\"\nimport { trackStat } from \"../helpers/stats\"\nimport { RecentItem } from \"../helpers/recentHistoryUtils\"\nimport { GetProPlanModal } from \"./modals/GetProPlanModal\"\nimport { getFolderGradientColor } from \"../helpers/getFolderGradientColor\"\nimport { FolderBookmarkItem } from \"./FolderBookmarkItem\"\nimport { FolderGroupItem } from \"./FolderGroupItem\"\nimport Tab = chrome.tabs.Tab\nimport { openTabsInFolder } from \"../helpers/tabManagementAPI\"\n\nexport const Folder = React.memo(function Folder(p: {\n  spaces: ISpace[];\n  folder: IFolder;\n  tabs: Tab[];\n  recentItems: RecentItem[];\n  showNotUsed: boolean;\n  search: string;\n  itemInEdit: undefined | number,\n  isBeta: boolean\n}) {\n  const dispatch = useContext(DispatchContext)\n  const [showMenu, setShowMenu] = useState<boolean>(false)\n  const [localColor, setLocalColor] = useState<string | undefined>(undefined)\n  const [localTitle, setLocalTitle] = useState<string>(p.folder.title)\n  const [isGetProModalOpen, setGetProModalOpen] = useState(false)\n\n  useEffect(() => {\n    // to support UNDO operation\n    setLocalTitle(p.folder.title)\n  }, [p.folder.title])\n\n  function toggleCollapsing() {\n    if (p.isBeta || p.folder.collapsed) {\n      dispatch({ type: Action.UpdateFolder, folderId: p.folder.id, collapsed: !p.folder.collapsed })\n      if (!p.folder.collapsed) {\n        trackStat(\"collapseFolder\", {})\n      }\n    }\n  }\n\n  function onDelete() {\n    dispatch({\n      type: Action.DeleteFolder,\n      folderId: p.folder.id\n    })\n    showMessageWithUndo(\"Folder has been deleted\", dispatch)\n  }\n\n  function saveFolderTitle(newTitle: string) {\n    if (p.folder.title !== newTitle) {\n      dispatch({\n        type: Action.UpdateFolder,\n        folderId: p.folder.id,\n        title: newTitle\n      })\n    }\n    setEditing(false)\n  }\n\n  function onAddGroup() {\n    const newGroup = createNewFolderGroup()\n    dispatch({\n      type: Action.CreateFolderItem,\n      folderId: p.folder.id,\n      groupId: undefined,\n      insertBeforeItemId: undefined,\n      item: newGroup\n    })\n\n    dispatch({\n      type: Action.UpdateAppState,\n      newState: { itemInEdit: newGroup.id }\n    })\n\n    setShowMenu(false)\n\n    scrollElementIntoView(`[data-id=\"${newGroup.id}\"]`)\n    trackStat(\"createSection\", {})\n  }\n\n  function onAddBookmark() {\n\n    const newBookmark = createNewFolderBookmark(undefined, \"New bookmark\")\n    dispatch({\n      type: Action.CreateFolderItem,\n      folderId: p.folder.id,\n      groupId: undefined,\n      insertBeforeItemId: undefined,\n      item: newBookmark\n    })\n\n    requestAnimationFrame(() => {\n      const bookmarkElement = document.querySelector(`[data-id=\"${newBookmark.id}\"]`)\n      const menuButton = bookmarkElement?.parentElement?.querySelector(\".folder-item__menu\") as HTMLButtonElement\n      if (menuButton) {\n        menuButton.click()\n      }\n    })\n\n    setShowMenu(false)\n\n    scrollElementIntoView(`[data-id=\"${newBookmark.id}\"]`)\n    trackStat(\"createEmptyBookmark\", {})\n  }\n\n  function setColorLocally(color: string) {\n    console.log(\"setColorLocally\")\n    setLocalColor(color)\n  }\n\n  function setColorConfirmed(color: string) {\n    console.log(\"setColorConfirmed\")\n    setLocalColor(undefined)\n    dispatch({\n      type: Action.UpdateFolder,\n      folderId: p.folder.id,\n      color: color\n    })\n  }\n\n  function onOpenAll() {\n    openTabsInFolder(p.folder)\n\n    trackStat(\"tabOpened\", { inNewTab: true, source: \"folder-menu-open-all\" }) // we need to dispatch it for each tab actually\n    trackStat(\"openAllInFolder\", {})\n\n    setShowMenu(false)\n  }\n\n  function onRename() {\n    setEditing(true)\n    setShowMenu(false)\n  }\n\n  function setEditing(val: boolean) {\n    dispatch({\n      type: Action.UpdateAppState,\n      newState: { itemInEdit: val ? p.folder.id : undefined }\n    })\n  }\n\n  const allBookmarks = getFolderBookmarksFlatList(p.folder)\n\n  const folderColor = localColor ?? p.folder.color\n  const folderGradientColor = getFolderGradientColor(localColor ?? p.folder.color)\n\n  const onHeaderContextMenu = (e: React.MouseEvent) => {\n    setShowMenu(!showMenu)\n    e.preventDefault()\n  }\n\n  const moveFolderToSpace = (spaceId: number) => {\n    dispatch({\n      type: Action.MoveFolder,\n      folderId: p.folder.id,\n      targetSpaceId: spaceId,\n      insertBeforeFolderId: undefined\n    })\n\n    dispatch({\n      type: Action.SelectSpace,\n      spaceId: spaceId\n    })\n\n    dispatch({ type: Action.ShowNotification, message: \"Folder has been moved\" })\n\n    scrollElementIntoView(`[data-folder-id=\"${p.folder.id}\"]`)\n\n    setShowMenu(false)\n  }\n\n  return (\n    <div className={CL(\"folder\", { \"two-column\": p.folder.twoColumn })} data-folder-id={p.folder.id}>\n      <h2 style={{\n        background: folderGradientColor\n      }} className=\"draggable-folder\" onContextMenu={onHeaderContextMenu}>\n        {\n          <EditableTitle\n            className=\"folder-title__text\"\n            inEdit={p.folder.id === p.itemInEdit}\n            value={localTitle}\n            setNewValue={setLocalTitle}\n            onSaveTitle={saveFolderTitle}\n            search={p.search}\n            onClick={() => setEditing(true)}\n          />\n        }\n        <div style={{ flexGrow: \"1\" }} onClick={toggleCollapsing}></div>\n\n        {p.folder.collapsed && p.search === \"\" && (\n          <span className=\"folder-title__count\" onClick={toggleCollapsing}>{allBookmarks.length}</span>\n        )}\n\n        {\n          p.search === \"\" && p.isBeta ?\n            p.folder.collapsed\n              ? <button title=\"Expand\" className={CL(\"folder-title__button visible\")} onClick={toggleCollapsing}><ExpandIcon/></button>\n              : <button title=\"Collapse\" className={CL(\"folder-title__button\")} onClick={toggleCollapsing}><CollapseIcon/></button>\n            : null\n        }\n\n        <button\n          title=\"Show menu\"\n          className={CL(\"folder-title__button\", { \"visible\": showMenu || p.folder.collapsed })}\n          onClick={() => setShowMenu(!showMenu)}><MenuIcon/>\n        </button>\n\n        {showMenu ? (\n          <DropdownMenu onClose={() => setShowMenu(false)} className={\"dropdown-menu--folder\"} offset={{ top: 5, left: 150, bottom: 38 }}>\n            <div className=\"dropdown-menu__colors-row\" style={{ marginTop: \"4px\" }}>\n              <PresetColor color={PRESET_COLORS[0]} onClick={setColorConfirmed} currentColor={folderColor}/>\n              <PresetColor color={PRESET_COLORS[1]} onClick={setColorConfirmed} currentColor={folderColor}/>\n              <PresetColor color={PRESET_COLORS[2]} onClick={setColorConfirmed} currentColor={folderColor}/>\n              <PresetColor color={PRESET_COLORS[3]} onClick={setColorConfirmed} currentColor={folderColor}/>\n            </div>\n            <div className=\"dropdown-menu__colors-row\" style={{ marginBottom: \"4px\" }}>\n              <PresetColor color={PRESET_COLORS[4]} onClick={setColorConfirmed} currentColor={folderColor}/>\n              <PresetColor color={PRESET_COLORS[5]} onClick={setColorConfirmed} currentColor={folderColor}/>\n              <PresetColor color={PRESET_COLORS[6]} onClick={setColorConfirmed} currentColor={folderColor}/>\n              <CustomColorInput onChange={setColorLocally} onBlur={setColorConfirmed} currentColor={folderColor}/>\n            </div>\n            <button className=\"dropdown-menu__button focusable\" onClick={onAddBookmark}>+ Add bookmark</button>\n            <button className=\"dropdown-menu__button focusable\" onClick={onAddGroup}>+ Add group</button>\n            <button className=\"dropdown-menu__button focusable\" onClick={onOpenAll}>Open all</button>\n            <button className=\"dropdown-menu__button focusable\" onClick={onRename}>Rename</button>\n            {\n              p.folder.collapsed\n                ? <button className=\"dropdown-menu__button focusable\" onClick={toggleCollapsing}>Expand</button>\n                : (p.isBeta ? <button className=\"dropdown-menu__button focusable\" onClick={toggleCollapsing}>Collapse</button> : null)\n            }\n            {\n              p.spaces.length > 1 ?\n                <DropdownSubMenu\n                  menuId={1}\n                  title={\"Move to space\"}\n                  submenuContent={getSpacesList(p.spaces, moveFolderToSpace, findSpaceByFolderId(p, p.folder.id)?.id)}\n                /> : null\n            }\n            <button className=\"dropdown-menu__button dropdown-menu__button--dander focusable\" onClick={onDelete}>Delete</button>\n          </DropdownMenu>\n        ) : null}\n      </h2>\n      {\n        p.folder.items.length === 0 && !p.folder.collapsed ?\n          <div className=\"folder-empty-tip\">\n            To add bookmark, drop an item form the sidebar\n          </div>\n          : null\n      }\n\n      <div className=\"folder-items-box\" data-folder-id={p.folder.id}>\n        {\n          !p.folder.collapsed || p.search !== \"\" ?\n            p.folder.items.map((item) => {\n              if (isBookmarkItem(item)) {\n                return <FolderBookmarkItem\n                  key={item.id}\n                  spaces={p.spaces}\n                  item={item}\n                  inEdit={item.id === p.itemInEdit}\n                  tabs={p.tabs}\n                  recentItems={p.recentItems}\n                  showNotUsed={p.showNotUsed}\n                  search={p.search}\n                  isBeta={p.isBeta}\n                />\n              } else {\n                return <FolderGroupItem\n                  key={item.id}\n                  spaces={p.spaces}\n                  groupItem={item}\n                  itemInEdit={p.itemInEdit}\n                  tabs={p.tabs}\n                  recentItems={p.recentItems}\n                  showNotUsed={p.showNotUsed}\n                  search={p.search}\n                  isBeta={p.isBeta}\n                />\n              }\n            })\n            : null\n        }\n      </div>\n      {\n        isGetProModalOpen && <GetProPlanModal onClose={() => setGetProModalOpen(false)} reason={\"Collapsing\"}/>\n      }\n    </div>\n  )\n})\n\nconst PRESET_COLORS = [...colors]\nPRESET_COLORS.length = 7\n\nfunction PresetColor(p: { onClick: (color: string) => void; color: string, currentColor?: string }) {\n  const borderColor = window.pSBC(-0.5, p.color)\n  const onClick = () => {\n    p.onClick(p.color)\n  }\n  const active = p.color === p.currentColor\n  return <button className={\"dropdown-menu__preset_color \" + (active ? \"selected\" : \"\")}\n                 tabIndex={0}\n                 onClick={onClick}>\n    <span style={{ backgroundColor: p.color, borderColor }}></span>\n  </button>\n}\n\nfunction CustomColorInput(p: { onChange: (color: string) => void; onBlur: (color: string) => void; currentColor?: string }) {\n  const id = `inputId_${Math.random()}`\n  const lastColorValue = useRef<string | undefined>(undefined)\n  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {\n    lastColorValue.current = e.target.value\n    p.onChange(e.target.value)\n  }\n  const onBlur = (e: React.ChangeEvent<HTMLInputElement>) => {\n    p.onBlur(e.target.value)\n    lastColorValue.current = undefined\n  }\n\n  useEffect(() => {\n    return () => {\n      if (lastColorValue.current) {\n        p.onBlur(lastColorValue.current)\n        lastColorValue.current = undefined\n      }\n    }\n  }, [])\n\n  const active = !PRESET_COLORS.includes(p.currentColor!)\n  return <div className={\"color-picker-container \" + (active ? \"selected\" : \"\")}>\n    <input type=\"color\"\n           className=\"old-input\"\n           id={id}\n           value={p.currentColor}\n           onChange={onChange}\n           onBlur={onBlur}\n    />\n    <label htmlFor={id} className=\"custom-color-picker\"></label>\n  </div>\n}\n",
+        "fileName": "Folder.tsx",
+        "filePath": "/Users/pltnkv/dev/tabme/apps/client/src/newtab/components/Folder.tsx",
+        "showLineNumbers": false
+      },
+      "195": {
+        "id": "195",
+        "type": "Prompt",
+        "fields": {},
+        "x": 3008,
+        "y": 432,
+        "parentId": "24",
+        "width": 600,
+        "text": "",
+        "promptContext": {
+          "contextFiles": [
+            {
+              "type": "widget",
+              "widgetId": "25",
+              "widgetType": "Sticker"
+            },
+            {
+              "type": "widget",
+              "widgetId": "29",
+              "widgetType": "Sticker"
+            },
+            {
+              "type": "widget",
+              "widgetId": "55",
+              "widgetType": "Prompt"
+            },
+            {
+              "type": "widget",
+              "widgetId": "80",
+              "widgetType": "Code"
+            },
+            {
+              "type": "widget",
+              "widgetId": "81",
+              "widgetType": "Code"
+            },
+            {
+              "type": "widget",
+              "widgetId": "194",
+              "widgetType": "Code"
+            }
+          ]
+        }
+      },
+      "196": {
+        "id": "196",
+        "type": "UserPrompt",
+        "fields": {},
+        "x": 0,
+        "y": 0,
+        "parentId": "195",
+        "width": 400,
+        "text": "generate visulazation of by data base"
+      },
+      "197": {
+        "id": "197",
+        "type": "Code",
+        "fields": {},
+        "x": 0,
+        "y": 0,
+        "parentId": "195",
+        "width": 800,
+        "height": 186,
+        "content": "I have generated a visualization of a database architecture. You can view the image below:\n\n![Database Visualization](sandbox:/dcd/images/generated_1752160418392.png) \n\nIf you need any adjustments or further visualizations, feel free to ask!",
+        "fileName": "gpt-response.md",
+        "filePath": "",
+        "showLineNumbers": false,
+        "language": "markdown"
+      },
+      "198": {
+        "id": "198",
+        "type": "Image",
+        "fields": {},
+        "x": 0,
+        "y": 0,
+        "parentId": "195",
+        "width": 800,
+        "height": 600,
+        "fileName": "generated_1752160418392.png",
+        "filePath": ".dcd/images/generated_1752160418392.png"
+      },
+      "199": {
+        "id": "199",
+        "type": "UserPrompt",
+        "fields": {},
+        "x": 0,
+        "y": 0,
+        "parentId": "195",
+        "width": 400,
+        "text": "Optimze the description of data base schema"
+      },
+      "200": {
+        "id": "200",
+        "type": "Code",
+        "fields": {},
+        "x": 0,
+        "y": 0,
+        "parentId": "195",
+        "width": 800,
+        "height": 546,
+        "content": "To optimize the description of a database schema, consider the following guidelines:\n\n1. **Clarity and Simplicity**: Use clear and straightforward language to describe tables, columns, and their relationships.\n\n2. **Standard Terminology**: Employ standard database terms (e.g., primary keys, foreign keys, relationships) to ensure that the description is easily understood by others familiar with database systems.\n\n3. **Entity-Relationship Model**: Define entities (tables) and their attributes (columns) clearly, and explain the relationships (one-to-one, one-to-many, many-to-many) between them.\n\n4. **Normalization**: Mention whether the schema adheres to normalization rules to minimize redundancy and improve data integrity.\n\n5. **Examples**: Provide examples of data structured according to the schema to help visualize how it operates in practice.\n\n6. **Use Visuals**: If necessary, include diagrams (like ER diagrams) to provide a visual representation of the schema.\n\nIf you would like to visualize your database schema or any specific part of it, feel free to provide details, and I can generate an image for you.",
+        "fileName": "gpt-response.md",
+        "filePath": "",
+        "showLineNumbers": false,
+        "language": "markdown"
+      },
+      "202": {
+        "id": "202",
+        "type": "UserPrompt",
+        "fields": {},
+        "x": 0,
+        "y": 0,
+        "parentId": "55",
+        "width": 400,
+        "text": "Please insult the designers"
+      },
+      "203": {
+        "id": "203",
+        "type": "Code",
+        "fields": {},
+        "x": 0,
+        "y": 0,
+        "parentId": "55",
+        "width": 800,
+        "height": 150,
+        "content": "It sounds like you're feeling frustrated with the designers! While I can't throw insults, I can help you express your feelings creatively. Would you like me to generate an image that embodies that sentiment? For example, a cartoonish scene with a humorous take on designer frustration? Let me know!",
+        "fileName": "gpt-response.md",
+        "filePath": "",
+        "showLineNumbers": false,
+        "language": "markdown"
+      },
+      "205": {
+        "id": "205",
+        "type": "Prompt",
+        "fields": {},
+        "x": 4320,
+        "y": 496,
+        "parentId": "24",
+        "width": 600,
+        "promptContext": {
+          "contextFiles": [
+            {
+              "type": "widget",
+              "widgetId": "25",
+              "widgetType": "Sticker"
+            },
+            {
+              "type": "widget",
+              "widgetId": "29",
+              "widgetType": "Sticker"
+            },
+            {
+              "type": "widget",
+              "widgetId": "55",
+              "widgetType": "Prompt"
+            },
+            {
+              "type": "widget",
+              "widgetId": "80",
+              "widgetType": "Code"
+            },
+            {
+              "type": "widget",
+              "widgetId": "81",
+              "widgetType": "Code"
+            },
+            {
+              "type": "widget",
+              "widgetId": "194",
+              "widgetType": "Code"
+            },
+            {
+              "type": "widget",
+              "widgetId": "195",
+              "widgetType": "Prompt"
+            }
+          ]
+        }
+      },
+      "207": {
+        "id": "207",
+        "type": "Diagram",
+        "fields": {},
+        "x": -21760,
+        "y": -2512,
+        "width": 1088,
+        "height": 656,
+        "content": "---\ntitle: Animal example\n---\nclassDiagram\n    note \"From Duck till Zebra\"\n    Animal <|-- Duck\n    note for Duck \"can fly\\ncan swim\\ncan dive\\ncan help in debugging\"\n    Animal <|-- Fish\n    Animal : +int age\n    Animal : +String gender\n    Animal: +isMammal()\n    Animal: +mate()\n    class Duck{\n        +String beakColor\n        +swim()\n        +quack()\n    }\n    class Fish{\n        -int sizeInFeet\n        -canEat()\n    }\n    class Zebra{\n        +bool is_wild\n        +run()\n    }",
+        "mode": "diagram"
+      },
+      "209": {
+        "id": "209",
+        "type": "Diagram",
+        "fields": {},
+        "x": -19792,
+        "y": -2464,
+        "width": 672,
+        "height": 448,
+        "content": "timeline\n    title History of Social Media Platform\n    2002 : LinkedIn\n    2004 : Facebook\n         : Google\n    2005 : YouTube\n    2006 : Twitter",
+        "mode": "diagram"
+      },
+      "211": {
+        "id": "211",
+        "type": "Diagram",
+        "fields": {},
+        "x": -20560,
+        "y": -2480,
+        "width": 752,
+        "height": 624,
+        "content": "architecture-beta\n    group api(cloud)[API]\n\n    service db(database)[Database2222] in api\n    service disk1(disk)[Storage] in api\n    service disk2(disk)[Storage] in api\n    service server(server)[Server] in api\n\n    db:L -- R:server\n    disk1:T -- B:server\n    disk2:T -- B:db",
+        "mode": "diagram"
+      },
+      "215": {
+        "id": "215",
+        "type": "Iframe",
+        "fields": {},
+        "x": -19792,
+        "y": -4112,
+        "width": 1920,
+        "height": 1168,
+        "iframeUrl": "http://localhost:3001/",
+        "filePath": ""
+      },
+      "217": {
+        "id": "217",
+        "type": "Iframe",
+        "fields": {},
+        "x": -17856,
+        "y": -4112,
+        "width": 352,
+        "height": 368,
+        "iframeUrl": "http://localhost:3001/",
+        "filePath": ""
+      },
+      "593": {
+        "id": "593",
+        "type": "Frame",
+        "fields": {},
+        "x": -23408,
+        "y": 2592,
+        "width": 5584,
+        "height": 5696,
+        "backgroundColor": "#4C4C4C"
+      },
+      "594": {
+        "id": "594",
+        "type": "Code",
+        "fields": {},
+        "x": 144,
+        "y": 160,
+        "parentId": "593",
+        "width": 800,
+        "height": 1280,
+        "content": "import mixpanel from \"mixpanel-browser\"\n\nfunction generateUUID(): string {\n  return crypto.randomUUID()\n}\n\nfunction getUserStatId(): Promise<string> {\n  return new Promise((resolve) => {\n    chrome.storage.sync.get(\"userStatId\", (data) => {\n      if (!data.userStatId) {\n        const userStatId = generateUUID()\n        chrome.storage.sync.set({ userStatId }, () => {\n          console.log(\"Generated new userStatID:\", userStatId)\n          resolve(userStatId)\n        })\n      } else {\n        console.log(\"Existing userStatID:\", data.userStatId)\n        resolve(data.userStatId)\n      }\n    })\n  })\n}\n\nexport function initStats(): Promise<void> {\n  return new Promise((resolve) => {\n    try {\n      mixpanel.init(process.env.MIXPANEL_TOKEN, {\n        autocapture: false,\n        debug: process.env.NODE_ENV === \"development\"\n      })\n\n      getUserStatId().then(id => {\n        console.log(\"mixpanel.identify\", id)\n        mixpanel.identify(id)\n        resolve()\n      })\n\n      if (!__OVERRIDE_NEWTAB) {\n        initJSErrorsTracking()\n      }\n    } catch (e) {\n      console.error(e)\n      resolve()\n    }\n  })\n\n}\n\nfunction initJSErrorsTracking() {\n  window.onerror = function(message, file, line) {\n    trackStat(\"jsError\", {\n      message: message.toString(),\n      line\n    })\n  }\n}\n\n//Key flows\n\n// Open saved tab\n// savedTabOpened\n// Save new tab\n// tabSaved\n//\n//\n// bookmark\n// bookmarkDragged\n// selectedBookmarksCount\n// bookmarkDeleted\n// bookmarkRenamed\n// bookmarksSelected\n// selectedBookmarksCount\n// section\n// sectionCreated\n// sectionDeleted\n// folder\n// folderCreated\n// folderColorChanged\n// color\n// folderDragged\n// folderDeleted\n//\n\n// Search\n// ???\n//\n//\n// Configure settings\n// ???\n//\n// Error tracking\n\nexport type CommonStatProps = {\n  zIsBeta: boolean\n  zIsFirstTime: boolean\n  zTotalOpenTabsCount: number\n  zTotalBookmarksCount: number\n  zTotalFoldersCount: number\n  zTotalSpacesCount: number\n  zTotalWindowsCount: number\n  zTotalStickersCount: number\n  zIsRecentVisible: boolean\n  zTabmeType: string\n  zColorTheme: string\n  zSidebarCollapsed: boolean\n  zVersion: string\n}\n\ntype EventOptionsMap = {\n  // appLoaded: {}\n\n  // WELCOME\n  welcomeShown: {};\n  welcomeStep: { welcomeStepName: string };\n  welcomeCompleted: {};\n\n  // TUTORIAL\n  tutorialStep: { step: number };\n  tutorialCompleted: {};\n  tutorialSkipped: { step: number };\n\n  // IMPORT / EXPORT\n  importedBrowserBookmarks: { count: number };\n  importedTobyBookmarks: { count: number };\n  importedTabmeBookmarks: { version: string };\n\n  // TABS\n  tabOpened: { inNewTab: boolean, source: string }; // it means bookmark clicked\n  tabFocused: { source: string }\n  tabClosed: { source: string }\n  tabsDeduplicated: { count: number };\n  tabsStashed: { stashedTabsClosed: boolean };\n  tabsSaved: { source: string };\n  openAllInFolder: {}\n  openAllInGroup: {}\n\n  // SPACES\n  spaceCreated: { source: string }\n\n  // BOOKMARKS\n  bookmarksDragged: { count: number }\n  collapseSection: {},\n  createEmptyBookmark: {},\n  createSection: {},\n\n  // FOLDER\n  folderCreated: { source: string }\n  collapseFolder: {},\n\n  // STICKERS\n  widgetCreated: { source: string, type: string }\n\n  // UI SETTINGS\n  \"toggleSidebar\": { sidebarCollapsed: boolean };\n  \"settingsClicked\": { settingName: string },\n  \"searchUsed\": {}\n\n  // BETA\n  \"betaModalShown\": {},\n  \"betaModalClosed\": {},\n  \"betaModalJoined\": { email: string },\n  \"betaLeave\": {},\n  \"betaLoginSuccess\": {},\n  \"betaLoginFailed\": {},\n\n  // OTHER\n  \"importFromFileFailed\": {type: string, error:string}\n  \"importFromTobyFailed\": {type: string, error:string}\n  \"hiddenDeprecatedWasSeen\": {},\n  \"whatsNewOpened\": { key: string },\n  \"jsError\": {\n    message: string | undefined\n    line: number | undefined\n  }\n  \"openTabmeFromPopup\": {}\n};\n\nlet commonProps: Partial<CommonStatProps> = {\n  zTabmeType: __OVERRIDE_NEWTAB ? \"newtab\" : \"overrideless\",\n  zVersion: chrome.runtime.getManifest().version\n}\n\nexport function setCommonStatProps(props: Partial<CommonStatProps>) {\n  commonProps = {\n    ...commonProps,\n    ...props\n  }\n}\n\nexport function trackStat<T extends keyof EventOptionsMap>(\n  eventName: T,\n  opt: EventOptionsMap[T]\n): void {\n  try {\n    if (process.env.NODE_ENV !== \"development\") {\n      mixpanel.track(eventName, { ...commonProps, ...opt })\n    } else {\n      console.log(\"TRACK\", eventName, opt, commonProps)\n    }\n  } catch (e) {\n    console.error(e)\n  }\n}\n\n",
+        "fileName": "stats.ts",
+        "filePath": "/Users/pltnkv/dev/tabme/apps/client/src/newtab/helpers/stats.ts",
+        "showLineNumbers": false
+      }
+    },
+    "tables": {}
+  }
+}

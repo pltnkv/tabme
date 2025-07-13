@@ -11,6 +11,8 @@ import IconArrowRight from "../icons/arrow-right.svg"
 import IconOpenInNew from "../icons/open_in_new.svg"
 import { FolderBookmarkItem } from "./FolderBookmarkItem"
 import { getTooltipForGroup } from "../helpers/debugTooltips"
+import { openTabsInGroup } from "../helpers/tabManagementAPI"
+import { trackStat } from "../helpers/stats"
 
 export const FolderGroupItem = React.memo((p: {
   spaces: ISpace[];
@@ -24,7 +26,6 @@ export const FolderGroupItem = React.memo((p: {
 }) => {
   const dispatch = useContext(DispatchContext)
   const [showMenu, setShowMenu] = useState<boolean>(false)
-  const [showMenuButton, setShowMenuButton] = useState<boolean>(false)
   const [localTitle, setLocalTitle] = useState<string>(p.groupItem.title)
 
   useEffect(() => {
@@ -59,85 +60,38 @@ export const FolderGroupItem = React.memo((p: {
     ? (Number(p.groupItem.groupItems.length) >= 0 ? ` (${p.groupItem.groupItems.length})` : "")
     : ""
 
-  const refTimeoutId = useRef<number | undefined>(undefined)
-
-  const onMouseMenuEnter = (e: React.MouseEvent) => {
-    if (refTimeoutId.current) {
-      window.clearTimeout(refTimeoutId.current)
-      refTimeoutId.current = undefined
-    }
-    setShowMenuButton(true)
-  }
-
-  const onMouseMenuLeave = (e: React.MouseEvent) => {
-    refTimeoutId.current = window.setTimeout(() => {
-      setShowMenuButton(false)
-    }, 50)
-  }
-
   const onOpenAsGroup = () => {
-    // Store created tab IDs
-    const createdTabIds: number[] = []
-
-    const itemsWithURL = p.groupItem.groupItems.filter(i => i.url)
-    itemsWithURL.forEach((item, index) => {
-      chrome.tabs.create({
-        url: item.url,
-        active: index === 0 // First tab should be active
-      }, (tab) => {
-        if (tab?.id) {
-          createdTabIds.push(tab.id)
-
-          // After all tabs are created, group them
-          if (createdTabIds.length === itemsWithURL.length) {
-            // @ts-ignore
-            chrome.tabs.group({ tabIds: createdTabIds }, (groupId) => {
-              // @ts-ignore
-              chrome.tabGroups.update(groupId, {
-                title: p.groupItem.title,
-              })
-            })
-          }
-        }
-      })
-    })
+    openTabsInGroup(p.groupItem.groupItems, p.groupItem.title)
+    trackStat("openAllInGroup", {})
   }
 
   return (
     <div className={CL("folder-group", { "selected": showMenu })}
          data-id={p.groupItem.id}>
 
-      {showMenu
-        ? <FolderItemMenu
-          spaces={p.spaces}
-          item={p.groupItem}
-          localTitle={localTitle}
-          setLocalTitle={setLocalTitle}
-          onSave={trySaveTitleAndURL}
-          onClose={() => setShowMenu(false)}
-          isBeta={p.isBeta}
-        />
-        : null
-      }
-      <button className="folder-item__menu"
-              style={{ visibility: showMenuButton || showMenu ? "visible" : "hidden", marginTop: "5px" }}
-              onContextMenu={onContextMenu}
-              onMouseEnter={onMouseMenuEnter}
-              onMouseLeave={onMouseMenuLeave}
-              onClick={() => setShowMenu(!showMenu)}>
-        <IconMore/>
-      </button>
-
       <div className="folder-group-item__inner draggable-item"
            onDragStart={(e) => {e.preventDefault()}} // to prevent text drag-and-drop in the textarea
-           tabIndex={2}
            data-id={p.groupItem.id}
            onClick={e => e.preventDefault()}
            onContextMenu={onContextMenu}>
-        <div className="folder-group-item__header"
-             onMouseEnter={onMouseMenuEnter}
-             onMouseLeave={onMouseMenuLeave}
-        >
+        <div className="folder-group-item__header">
+          {showMenu
+            ? <FolderItemMenu
+              spaces={p.spaces}
+              item={p.groupItem}
+              localTitle={localTitle}
+              setLocalTitle={setLocalTitle}
+              onSave={trySaveTitleAndURL}
+              onClose={() => setShowMenu(false)}
+              isBeta={p.isBeta}
+            />
+            : null
+          }
+          <button className="folder-item__menu"
+                  onContextMenu={onContextMenu}
+                  onClick={() => setShowMenu(!showMenu)}>
+            <IconMore/>
+          </button>
           <IconArrowRight className="group-icon" style={{ transform: p.groupItem.collapsed ? undefined : "rotate(90deg)" }}/>
           <EditableTitle className={CL("folder-item__inner__title")}
                          inEdit={p.itemInEdit === p.groupItem.id}
@@ -150,12 +104,12 @@ export const FolderGroupItem = React.memo((p: {
                          dataTooltipPosition="top-left"
           />
           <div className="space-filler"></div>
-          <button className="btn__icon open-in-new stop-dad-propagation"
-                  onClick={onOpenAsGroup}
-                  data-tooltip="Open as group"
-                  data-tooltip-position="top-center">
-            <IconOpenInNew/>
-          </button>
+          {/*<button className="btn__icon open-in-new stop-dad-propagation"*/}
+          {/*        onClick={onOpenAsGroup}*/}
+          {/*        data-tooltip="Open as group"*/}
+          {/*        data-tooltip-position="top-center">*/}
+          {/*  <IconOpenInNew/>*/}
+          {/*</button>*/}
         </div>
 
         <div className="group-items-box" data-id={p.groupItem.id}>

@@ -87,9 +87,9 @@ export const TabOrRecentItem = (p: {
   }
 
   let shortenedTitle = removeUselessProductName(p.data.title)
-  let domain = isTabData(p.data)
-    ? extractHostname(p.data.url)
-    : extractHostname(p.data.url) + ", " + formatDate(new Date(p.data.lastVisitTime || 0))
+  // let domain = isTabData(p.data)
+  //   ? extractHostname(p.data.url)
+  //   : extractHostname(p.data.url) + ", " + formatDate(new Date(p.data.lastVisitTime || 0))
   const savedInFolders = findFoldersTitlesWhereTabSaved(p.data, p.spaces)
 
   return (
@@ -118,8 +118,11 @@ export const TabOrRecentItem = (p: {
       </div>
       {
         p.onCloseTab && <div onClick={() => p.onCloseTab!(p.data.id!)}
-                             className="inbox-item__close stop-click-propagation2 stop-dad-propagation"
-                             title="Close tab"><IconClose/></div>
+                             className="inbox-item__close stop-dad-propagation"
+                             data-tooltip="Close tab"
+                             data-tooltip-position="top-center">
+          <IconClose/>
+        </div>
       }
 
       {

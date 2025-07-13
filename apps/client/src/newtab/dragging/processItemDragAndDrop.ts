@@ -15,8 +15,10 @@ import {
   initSpacesSwitcher,
   PConfigItem
 } from "./dragAndDrop"
-import { findParentWithClass } from "../helpers/utils"
+import { findParentWithClass, isGroupItem } from "../helpers/utils"
 import { inRange } from "../helpers/mathUtils"
+import { getGlobalAppState } from "../components/App"
+import { findFolderByItemId, findItemById } from "../state/actionHelpers"
 
 export function processItemDragAndDrop(
   mouseDownEvent: React.MouseEvent,
@@ -107,6 +109,9 @@ export function processItemDragAndDrop(
         }
         if (curBoxToDrop && dropArea) {
           const res = getNewPlacementForItem(dropArea, currentGroupArea, e)
+          const groupItem = currentGroupArea?.objectId ? findItemById(getGlobalAppState(), currentGroupArea?.objectId) : undefined
+          const isGroupCollapsed = isGroupItem(groupItem) ? groupItem.collapsed : false
+          placeholder.style.visibility = isGroupCollapsed ? 'hidden' : 'visible'
 
           targetFolderId = dropArea.objectId
           targetGroupId = currentGroupArea?.objectId
@@ -134,12 +139,12 @@ export function processItemDragAndDrop(
         }
 
         //create dummy
-        dummy = createTabDummy(targetElements, mouseDownEvent, config.isFolderItem)
+        dummy = createTabDummy(targetElements, mouseDownEvent, config.isFolderItemsDragging)
         dummy.style.transform = `translateX(${e.clientX + "px"}) translateY(${e.clientY + "px"})`
         document.body.classList.add("dragging")
         document.body.append(dummy)
         onViewportScrolled()
-        if (config.isFolderItem) {
+        if (config.isFolderItemsDragging) {
           const targetRoot = targetElements[0]
           const origContainerChildren = Array.from(getParentFolderOrGroupElement(targetRoot)!.children)
 
@@ -170,15 +175,23 @@ export function processItemDragAndDrop(
       }
       unhighlightPrevDropArea() //must be in the end to not cleanup "targetGroupId"
     } else {
-      // we can click only by single element
-      let targetId: number
-      const itemEl = findParentWithClass(e.target, "folder-item__inner") ?? findParentWithClass(e.target, "folder-group-item__header")?.parentElement
-      if (itemEl) {
-        targetId = getFolderItemId(itemEl)
+      let targetId: number | undefined
+      if (config.isFolderItemsDragging) {
+        const itemEl = findParentWithClass(e.target, "folder-item__inner") ?? findParentWithClass(e.target, "folder-group-item__header")?.parentElement
+        if (itemEl) {
+          targetId = getFolderItemId(itemEl)
+        } else {
+          throw new Error("no targetId defined")
+        }
       } else {
-        throw new Error("no targetId defined")
+        // we can click only by single element
+        if (!targetIsTabGroup(targetElements[0])) {
+          targetId = getFolderItemId(targetElements[0])
+        }
       }
-      config.onClick(targetId)
+      if (targetId) {
+        config.onClick(targetId)
+      }
     }
 
     unselectAllItems()
@@ -200,3 +213,6 @@ function getParentFolderOrGroupElement(target: HTMLElement): HTMLElement | undef
   return getParentGroupElement(target) ?? getParentFolderElement(target)
 }
 
+function targetIsTabGroup(targetElement: HTMLElement): boolean {
+  return targetElement.classList.contains("is-tab-group")
+}

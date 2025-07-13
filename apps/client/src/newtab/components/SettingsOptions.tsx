@@ -372,16 +372,17 @@ export const SettingsOptions = (p: {
     {
       onClick: e => onImportClick(e),
       title: "Import a Tabme backup file",
-      text: "Import from file",
-      isFile: true
+      text: "Import from backup file",
+      isFile: true,
+      proOnly: true
     },
     {
       onClick: () => {
         onExportJson(p.appState.spaces)
         trackStat("settingsClicked", { settingName: "ExportToJson" })
       },
-      title: "Download your Tabme backup",
-      text: "Export to file"
+      title: "Download backup file for all your Spaces",
+      text: "Export to backup file"
     },
     {
       separator: true
@@ -457,11 +458,14 @@ export const Options = (props: { optionsConfig: OptionsConfig | (() => OptionsCo
         if (option.isFile) {
           return <label key={index}
                         className={CL("dropdown-menu__button focusable")}
-                        style={{ position: "relative" }}
+                        style={{ position: "relative", justifyContent: "space-between" }}
                         title={option.title}
                         tabIndex={0}>
             <span>{option.text}</span>
             <input type="file" accept=".json" className="hidden-file-input old-input" onChange={option.onClick} tabIndex={-1}/>
+            {
+              option.proOnly ? <span className="get-pro-label">Get Pro</span> : null
+            }
           </label>
         } else {
           return <button

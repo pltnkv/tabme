@@ -59,7 +59,7 @@ export function TooltipsManager(p: {
         hideTimeout = setTimeout(() => {
           currentTooltipEl = null
           tooltip.style.display = "none"
-        }, 100)
+        }, 60)
       }
     }
 
