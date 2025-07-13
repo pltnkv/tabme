@@ -1,6 +1,17 @@
 import { IBookmarkItem, IFolder } from "./types"
 import { isBookmarkItem } from "./utils"
 
+export function openTabsWithoutGroup(groupItems: IBookmarkItem[]): void {
+  const itemsWithURL = groupItems.filter(i => i.url)
+  itemsWithURL.forEach((item, index) => {
+    chrome.tabs.create({
+      url: item.url,
+      // active: index === 0 // First tab should be active
+    }, (tab) => {})
+  })
+}
+
+
 export function openTabsInGroup(groupItems: IBookmarkItem[], groupTitle: string = '', makeFirstTabActive = false): void {
 
   // Store created tab IDs

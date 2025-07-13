@@ -183,6 +183,28 @@ export function findFolderByItemId(appState: Pick<IAppState, "spaces">, itemId: 
   return res
 }
 
+export function findGroupByChildItemId(appState: Pick<IAppState, "spaces">, itemId: number): IGroupItem | undefined {
+  let res: IGroupItem | undefined = undefined
+  appState.spaces.some(s => {
+    return s.folders.some(f => {
+      return f.items.some(item => {
+        if (isGroupItem(item)) {
+          if (item.groupItems.some(gi => gi.id === itemId)) {
+            res = item
+            return true
+          }else{
+            return false
+          }
+        } else {
+          return false
+        }
+      })
+    })
+  })
+
+  return res
+}
+
 export function findWidgetById(appState: Pick<IAppState, "spaces">, widgetId: number): IWidget | undefined {
   let res: IWidget | undefined = undefined
   appState.spaces.some(s => {

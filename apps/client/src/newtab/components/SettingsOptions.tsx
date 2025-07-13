@@ -321,6 +321,18 @@ export const SettingsOptions = (p: {
       text: "Dark mode"
     },
     {
+      title: "Enable Tabme on Chrome new tab",
+      onToggle: () => {
+        setOverrideModalOpen(true)
+        trackStat("settingsClicked", { settingName: "toggleShowTabmeOnEachNewTab" })
+      },
+      value: __OVERRIDE_NEWTAB,
+      text: "Show Tabme on Chrome new tab"
+    },
+    {
+      separator: true
+    },
+    {
       onToggle: onToggleTooltips,
       value: p.appState.tooltipsEnabled,
       title: "Tooltips with full title and URL will be visible for Saved tabs and Open tabs",
@@ -337,15 +349,6 @@ export const SettingsOptions = (p: {
       value: !p.appState.openBookmarksInNewTab,
       title: "Set default for opening bookmarks. CMD/CTRL works too.",
       text: "Open bookmarks in same tab"
-    },
-    {
-      title: "Enable Tabme on Chrome new tab",
-      onToggle: () => {
-        setOverrideModalOpen(true)
-        trackStat("settingsClicked", { settingName: "toggleShowTabmeOnEachNewTab" })
-      },
-      value: __OVERRIDE_NEWTAB,
-      text: "Show Tabme on Chrome new tab"
     },
     {
       separator: true

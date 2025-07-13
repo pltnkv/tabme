@@ -5,7 +5,7 @@ import { saveStateThrottled, savingStateKeys } from "./storage"
 import { addItemsToParent, insertBetween, sortByPosition } from "../helpers/fractionalIndexes"
 import {
   findFolderById,
-  findFolderByItemId,
+  findFolderByItemId, findGroupByChildItemId,
   findItemById,
   findSpaceByFolderId,
   findSpaceById,
@@ -595,14 +595,25 @@ function stateReducer0(state: IAppState, action: ActionPayload): IAppState {
       }))
 
       const deleteItemsFromFolders = (spaces: ISpace[], itemId: number): ISpace[] => {
-        const folder = findFolderByItemId({ spaces }, itemId)
-        if (folder) {
-          return updateFolder(spaces, folder.id, (folder) => {
-            return {
-              ...folder,
-              items: folder.items.filter((i) => i.id !== itemId)
-            }
-          })
+        const parentFolder = findFolderByItemId({ spaces }, itemId)
+        const parentGroup = findGroupByChildItemId({ spaces }, itemId)
+
+        if (parentFolder) {
+          if (parentGroup) {
+            return updateFolderGroup(spaces, parentFolder.id, parentGroup.id, (group) => {
+              return {
+                ...group,
+                groupItems: group.groupItems.filter((i) => i.id !== itemId)
+              }
+            })
+          } else {
+            return updateFolder(spaces, parentFolder.id, (folder) => {
+              return {
+                ...folder,
+                items: folder.items.filter((i) => i.id !== itemId)
+              }
+            })
+          }
         } else {
           return spaces
         }

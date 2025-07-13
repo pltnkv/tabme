@@ -73,8 +73,9 @@ export const FolderGroupItem = React.memo((p: {
            onDragStart={(e) => {e.preventDefault()}} // to prevent text drag-and-drop in the textarea
            data-id={p.groupItem.id}
            onClick={e => e.preventDefault()}
-           onContextMenu={onContextMenu}>
-        <div className="folder-group-item__header">
+      >
+        <div className="folder-group-item__header"
+             onContextMenu={onContextMenu}>
           {showMenu
             ? <FolderItemMenu
               spaces={p.spaces}
@@ -88,7 +89,6 @@ export const FolderGroupItem = React.memo((p: {
             : null
           }
           <button className="folder-item__menu"
-                  onContextMenu={onContextMenu}
                   onClick={() => setShowMenu(!showMenu)}>
             <IconMore/>
           </button>

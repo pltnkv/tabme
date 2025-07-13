@@ -2365,6 +2365,20 @@ button:hover .get-pro-label {
     display: none;
 }
 
+.app-sidebar.collapsed {
+    .tab-group-box {
+        width: 36px;
+    }
+
+    .tab-group-title {
+        display: none;
+    }
+
+    .inbox-item__close {
+        display: none;
+    }
+}
+
 .tab-group-header {
     display: flex;
     align-items: center;
@@ -2373,8 +2387,8 @@ button:hover .get-pro-label {
     user-select: none;
 
     .group-icon {
-        margin-right: 2px;
-        margin-left: 4px;
+        margin-right: 3px;
+        margin-left: 6px;
         pointer-events: none;
     }
 

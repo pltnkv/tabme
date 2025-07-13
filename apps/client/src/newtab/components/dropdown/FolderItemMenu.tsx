@@ -10,6 +10,7 @@ import { findFolderByItemId } from "../../state/actionHelpers"
 import { isBookmarkItem, isGroupItem, scrollElementIntoView } from "../../helpers/utils"
 import { trackStat } from "../../helpers/stats"
 import { GetProPlanModal } from "../modals/GetProPlanModal"
+import { openTabsInGroup, openTabsWithoutGroup } from "../../helpers/tabManagementAPI"
 
 export const FolderItemMenu = React.memo((p: {
   spaces: ISpace[],
@@ -126,6 +127,24 @@ export const FolderItemMenu = React.memo((p: {
     }
   }
 
+  const onOpenAllPlain = () => {
+    if (isGroupItem(p.item)) {
+      openTabsWithoutGroup(p.item.groupItems)
+      trackStat("openAllInGroupPlain", {})
+    } else {
+      throw new Error("Unexpected flow: expandGroup in context menu")
+    }
+  }
+
+  const onOpenAllAsGroup = () => {
+    if (isGroupItem(p.item)) {
+      openTabsInGroup(p.item.groupItems, p.item.title)
+      trackStat("openAllInGroup", {})
+    } else {
+      throw new Error("Unexpected flow: expandGroup in context menu")
+    }
+  }
+
   const LEFT = 8
 
   return <>
@@ -153,6 +172,9 @@ export const FolderItemMenu = React.memo((p: {
                   value={p.localTitle}
                   onChange={e => p.setLocalTitle(e.target.value)}/>
               </label>
+              {/*<button className="dropdown-menu__button focusable" onClick={onOpenAllPlain}>Open all</button>*/}
+              {/*<button className="dropdown-menu__button focusable" onClick={onOpenAllAsGroup}>Open all as Group</button>*/}
+              <button className="dropdown-menu__button focusable" onClick={onOpenAllAsGroup}>Open all in Group</button>
               {
                 p.item.collapsed
                   ? <button className="dropdown-menu__button focusable" onClick={expandGroup}>Expand</button>

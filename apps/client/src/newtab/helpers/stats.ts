@@ -132,6 +132,7 @@ type EventOptionsMap = {
   tabsStashed: { stashedTabsClosed: boolean };
   tabsSaved: { source: string };
   openAllInFolder: {}
+  openAllInGroupPlain: {}
   openAllInGroup: {}
 
   // SPACES
